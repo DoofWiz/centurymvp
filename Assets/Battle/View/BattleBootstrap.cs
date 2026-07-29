@@ -111,6 +111,12 @@ namespace Century.Battle.View
             labels.transform.SetParent(_spawnRoot, false);
             labels.Initialise(_state.PlayerSquads, _commandInput);
 
+            // Trampled field-earth for the bare terrain, which otherwise renders as blown-out white
+            // (worst in WebGL). Slightly browner than the overmap's moss: ground that armies churn.
+            TerrainDressing.Apply(
+                low: new Color(0.20f, 0.18f, 0.12f),
+                high: new Color(0.32f, 0.29f, 0.19f));
+
             // The field is lit for the hour the battle began, and the sun creeps as the fight runs
             // (battle seconds pass at the same exchange rate the aftermath charges the clock).
             var dayNight = new GameObject("DayNightCycle").AddComponent<DayNightCycle>();

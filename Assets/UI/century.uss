@@ -1029,6 +1029,7 @@
     background-color: var(--ink);
     border-width: var(--rule);
     border-color: var(--gold-dim);
+    flex-direction: row;
     align-items: center;
     justify-content: center;
     margin-left: 3px;
@@ -1047,6 +1048,15 @@
     font-size: var(--font-size-small);
     color: var(--gold);
 }
+
+.time-button__icon {
+    width: 13px;
+    height: 13px;
+    -unity-background-image-tint-color: var(--gold);
+}
+
+/* Second chevron of the fastest button sits tight against the first. */
+.time-button__icon--tight { margin-left: -3px; }
 
 /* =======================================================================================
  *  Alert banner
@@ -2765,6 +2775,7 @@
 .gi-donkey { background-image: url("IconsNET/ffffff/000000/1x1/skoll/donkey.svg"); }
 .gi-envelope { background-image: url("IconsNET/ffffff/000000/1x1/lorc/envelope.svg"); }
 .gi-expander { background-image: url("IconsNET/ffffff/000000/1x1/sbed/expander.svg"); }
+.gi-fast-forward-button { background-image: url("IconsNET/ffffff/000000/1x1/delapouite/fast-forward-button.svg"); }
 .gi-fish-bucket { background-image: url("IconsNET/ffffff/000000/1x1/delapouite/fish-bucket.svg"); }
 .gi-fish-cooked { background-image: url("IconsNET/ffffff/000000/1x1/darkzaitzev/fish-cooked.svg"); }
 .gi-flying-flag { background-image: url("IconsNET/ffffff/000000/1x1/lorc/flying-flag.svg"); }
@@ -2789,7 +2800,9 @@
 .gi-old-wagon { background-image: url("IconsNET/ffffff/000000/1x1/delapouite/old-wagon.svg"); }
 .gi-olive { background-image: url("IconsNET/ffffff/000000/1x1/delapouite/olive.svg"); }
 .gi-painted-pottery { background-image: url("IconsNET/ffffff/000000/1x1/delapouite/painted-pottery.svg"); }
+.gi-pause-button { background-image: url("IconsNET/ffffff/000000/1x1/guard13007/pause-button.svg"); }
 .gi-person { background-image: url("IconsNET/ffffff/000000/1x1/delapouite/person.svg"); }
+.gi-play-button { background-image: url("IconsNET/ffffff/000000/1x1/guard13007/play-button.svg"); }
 .gi-prayer-beads { background-image: url("IconsNET/ffffff/000000/1x1/delapouite/prayer-beads.svg"); }
 .gi-return-arrow { background-image: url("IconsNET/ffffff/000000/1x1/lorc/return-arrow.svg"); }
 .gi-ring { background-image: url("IconsNET/ffffff/000000/1x1/delapouite/ring.svg"); }

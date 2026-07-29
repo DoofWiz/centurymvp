@@ -16,9 +16,11 @@ namespace Century.Campaign.View
         [Range(0f, 1f)] [SerializeField] private float _maxDarkness = 0.62f;
 
         // The clear hole ends at this fraction of the quad's width, and full darkness begins at the
-        // second. The quad is scaled so the first lands exactly on the line-of-sight radius.
-        private const float ClearFraction = 0.135f;
-        private const float DarkFraction = 0.205f;
+        // second. The quad is scaled so the first lands exactly on the line-of-sight radius. The
+        // fractions are kept small so the quad stretches far past the map edge — ground beyond the
+        // quad shows at full brightness, and that seam was visible from the map's corners.
+        private const float ClearFraction = 0.06f;
+        private const float DarkFraction = 0.091f;
         private const float QuadWidthPerSightRadius = 1f / ClearFraction;
 
         private CampaignState _state;

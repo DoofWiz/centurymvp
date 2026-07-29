@@ -15,6 +15,12 @@ namespace Century.Campaign.View
 
         private void Start()
         {
+            // Germania under an overcast march: mossy dark ground instead of the terrain's bare
+            // white fallback, which blew out to sheer white under the noon sun (worst in WebGL).
+            TerrainDressing.Apply(
+                low: new Color(0.16f, 0.19f, 0.11f),
+                high: new Color(0.29f, 0.31f, 0.19f));
+
             OvermapWorld world = ServiceLocator.Get<OvermapWorld>();
 
             if (_cameraRig != null && world.PlayerView != null)

@@ -38,18 +38,21 @@
         <ui:VisualElement name="time-block" class="time-block" picking-mode="Ignore">
             <ui:VisualElement class="time-box">
                 <ui:Label name="time-readout" text="DAY 1 / 1ST WATCH" class="time-readout" />
+                <!-- Icon-pack images, not text glyphs: WebGL has no OS font fallback, so the old
+                     unicode pause/play characters simply vanished in browser builds. -->
                 <ui:VisualElement class="time-buttons">
                     <ui:Button name="time-pause" class="time-button">
-                        <ui:Label text="❚❚" class="time-button__glyph" picking-mode="Ignore" />
+                        <ui:VisualElement class="time-button__icon gi-pause-button" picking-mode="Ignore" />
                     </ui:Button>
                     <ui:Button name="time-normal" class="time-button">
-                        <ui:Label text="▶" class="time-button__glyph" picking-mode="Ignore" />
+                        <ui:VisualElement class="time-button__icon gi-play-button" picking-mode="Ignore" />
                     </ui:Button>
                     <ui:Button name="time-fast" class="time-button">
-                        <ui:Label text="▶▶" class="time-button__glyph" picking-mode="Ignore" />
+                        <ui:VisualElement class="time-button__icon gi-fast-forward-button" picking-mode="Ignore" />
                     </ui:Button>
                     <ui:Button name="time-fastest" class="time-button">
-                        <ui:Label text="▶▶▶" class="time-button__glyph" picking-mode="Ignore" />
+                        <ui:VisualElement class="time-button__icon gi-fast-forward-button" picking-mode="Ignore" />
+                        <ui:VisualElement class="time-button__icon time-button__icon--tight gi-fast-forward-button" picking-mode="Ignore" />
                     </ui:Button>
                 </ui:VisualElement>
             </ui:VisualElement>

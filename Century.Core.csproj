@@ -65,6 +65,7 @@
     <Compile Include="Assets\Core\Ui\UiInputBootstrapper.cs" />
     <Compile Include="Assets\Core\Ui\Easing.cs" />
     <Compile Include="Assets\Core\Contracts\BattleRequest.cs" />
+    <Compile Include="Assets\Core\World\TerrainDressing.cs" />
     <Compile Include="Assets\Core\Contracts\CommanderBehaviour.cs" />
     <Compile Include="Assets\Core\Ui\StageBanner.cs" />
     <Compile Include="Assets\Core\Ui\UiTween.cs" />
