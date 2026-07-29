@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0c18192f98d0aec41915b215e5d92412, type: 3}
+  m_Name: CampaignSettings
+  m_EditorClassIdentifier: Century.Campaign::Century.Campaign.Sim.CampaignSettings
+  UnitsPerKilometre: 100
+  WorldBoundsMin: {x: -450, y: -450}
+  WorldBoundsMax: {x: 450, y: 450}
+  MinutesPerRealSecond: 20
+  BaseMarchSpeedKph: 4.5
+  OvermapSpeedScale: 0.16
+  RationsPerManPerDay: 1
+  StarvationMoralePerHour: 0.012
+  StarvationHealthPerHour: 0.006
+  NightMarchStaminaMultiplier: 1.75
+  AmbushRevealRange: 48
+  SurpriseWindowMinutes: 45
+  CampedStaminaRecoveryPerHour: 0.08
+  MarchStaminaCostPerHour: 0.03
+  MarchEquipmentWearPerHour: 0.0015
+  ContactRadius: 14
+  StealthVisibilityMultiplier: 0.4
+  PlayerDetectionRadius: 100
+  WarbandDetectionRadiusMin: 15
+  WarbandDetectionRadiusMax: 90
+  WarbandSpeedModifierMin: 0.85
+  WarbandSpeedModifierMax: 1.05
+  DirectorIntervalSeconds: 0.2
+  AiDecisionIntervalMinutes: 120
+  PursuitDurationMinutes: 300
+  PostBattleCooldownMinutes: 240
+  WanderMinDistance: 80
+  WanderMaxDistance: 260

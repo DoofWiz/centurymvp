@@ -1,0 +1,345 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <Style src="century.uss" />
+
+    <!--
+      Battle HUD.
+
+      Mirrors the battle mock=up: engagement header top=left, the alert banner across the top centre,
+      the officer roster down the left, squad state on the right, and the order bar along the bottom.
+
+      The order bar is two axes rather than one row: button 1 cycles formation, 2 to 7 set
+      behaviour. That is why the first button shows the current formation as its label while the rest
+      are fixed verbs.
+    -->
+    <ui:VisualElement name="root" class="hud-root" picking-mode="Ignore">
+
+        <!-- ================================ BATTLE TIMER ============================== -->
+        <ui:VisualElement name="battle-timer-bar" class="battle-timer-bar" picking-mode="Ignore">
+            <ui:Label name="battle-timer" text="0:00" class="battle-timer" />
+        </ui:VisualElement>
+
+        <!-- ============================= LEFT COLUMN ================================== -->
+        <ui:VisualElement name="left-column" class="battle-left" picking-mode="Ignore">
+
+            <ui:VisualElement name="engagement-panel" class="panel battle-left__block">
+                <ui:Label name="engagement-title" text="ENGAGEMENT" class="heading" />
+                <ui:VisualElement class="rule rule--short" />
+                <ui:Label name="engagement-objective" text="Hold the line." class="body" />
+                <ui:VisualElement class="rule" />
+                <ui:VisualElement style="flex-direction: row; justify-content: space-between;">
+                    <ui:Label text="SURVIVORS" class="metric-label" />
+                    <ui:Label name="stat-survivors" text="—" class="metric" />
+                </ui:VisualElement>
+                <ui:VisualElement style="flex-direction: row; justify-content: space-between;">
+                    <ui:Label text="ENEMIES KILLED" class="metric-label" />
+                    <ui:Label name="stat-killed" text="—" class="metric" />
+                </ui:VisualElement>
+                <ui:VisualElement style="flex-direction: row; justify-content: space-between;">
+                    <ui:Label text="IN RESERVE" class="metric-label" />
+                    <ui:Label name="stat-reserve" text="—" class="metric" />
+                </ui:VisualElement>
+                <ui:VisualElement style="flex-direction: row; justify-content: space-between;">
+                    <ui:Label text="ENEMY STANDING" class="metric-label" />
+                    <ui:Label name="stat-enemy" text="—" class="metric" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <ui:VisualElement name="roster-panel" class="panel battle-left__block battle-left__grow">
+                <ui:Label text="OFFICERS" class="heading" />
+                <ui:VisualElement class="rule rule--short" />
+                <ui:ScrollView name="roster" class="roster-scroll" />
+            </ui:VisualElement>
+
+            <ui:VisualElement name="log-panel" class="panel battle-left__block">
+                <ui:Label text="COMBAT LOG" class="heading" />
+                <ui:VisualElement class="rule rule--short" />
+                <ui:VisualElement name="log-list" picking-mode="Ignore" />
+            </ui:VisualElement>
+
+        </ui:VisualElement>
+
+        <!-- =============================== ALERT BANNER =============================== -->
+        <ui:VisualElement name="alert" class="alert" picking-mode="Ignore" style="display: none;">
+            <ui:VisualElement name="alert-frame" class="alert__frame" picking-mode="Ignore">
+                <ui:Label name="alert-headline" text="" class="alert__headline" />
+                <ui:Label name="alert-sub" text="" class="alert__sub" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- ================================ SQUAD LIST ================================ -->
+        <ui:VisualElement name="squad-panel" class="corner corner--top-right panel"
+                          picking-mode="Ignore" style="top: 16px; max-width: 300px;">
+            <ui:Label text="THE CENTURY" class="heading" />
+            <ui:VisualElement class="rule rule--short" />
+            <ui:VisualElement name="squad-list" picking-mode="Ignore" />
+        </ui:VisualElement>
+
+        <!-- =============================== COMMANDER =============================== -->
+        <ui:VisualElement name="commander-panel" class="corner corner--bottom-right panel"
+                          picking-mode="Ignore" style="bottom: 116px; min-width: 216px;">
+            <ui:Label text="CENTURION" class="heading" />
+            <ui:VisualElement class="rule rule--short" />
+            <ui:Label name="commander-name" text="—" class="body" />
+
+            <ui:Label text="HEALTH" class="metric-label" style="margin-top: 6px;" />
+            <ui:VisualElement class="bar bar--thick">
+                <ui:VisualElement name="commander-health" class="bar__fill bar__fill--health" />
+            </ui:VisualElement>
+
+            <ui:Label text="STAMINA" class="metric-label" style="margin-top: 4px;" />
+            <ui:VisualElement class="bar">
+                <ui:VisualElement name="commander-stamina" class="bar__fill bar__fill--stamina" />
+            </ui:VisualElement>
+
+            <ui:Label name="commander-status" text="" class="body text-gold" style="margin-top: 6px;" />
+        </ui:VisualElement>
+
+        <!-- ================================ ORDER BAR ================================= -->
+        <ui:VisualElement name="command-bar" class="command-bar" style="bottom: 16px;">
+
+            <ui:Button name="cmd-formation" class="command">
+                <ui:VisualElement class="command__icon gi-backup" picking-mode="Ignore" />
+                <ui:Label name="cmd-formation-label" text="LINE" class="command__label" picking-mode="Ignore" />
+                <ui:Label text="1" class="command__key" picking-mode="Ignore" />
+            </ui:Button>
+
+            <ui:Button name="cmd-advance" class="command">
+                <ui:VisualElement class="command__icon gi-walking-boot" picking-mode="Ignore" />
+                <ui:Label text="ADVANCE" class="command__label" picking-mode="Ignore" />
+                <ui:Label text="2" class="command__key" picking-mode="Ignore" />
+            </ui:Button>
+
+            <ui:Button name="cmd-hold" class="command">
+                <ui:VisualElement class="command__icon gi-checked-shield" picking-mode="Ignore" />
+                <ui:Label text="HOLD" class="command__label" picking-mode="Ignore" />
+                <ui:Label text="3" class="command__key" picking-mode="Ignore" />
+            </ui:Button>
+
+            <ui:Button name="cmd-follow" class="command">
+                <ui:VisualElement class="command__icon gi-boot-prints" picking-mode="Ignore" />
+                <ui:Label text="FOLLOW ME" class="command__label" picking-mode="Ignore" />
+                <ui:Label text="4" class="command__key" picking-mode="Ignore" />
+            </ui:Button>
+
+            <ui:Button name="cmd-skirmish" class="command">
+                <ui:VisualElement class="command__icon gi-thrown-spear" picking-mode="Ignore" />
+                <ui:Label text="SKIRMISH" class="command__label" picking-mode="Ignore" />
+                <ui:Label text="5" class="command__key" picking-mode="Ignore" />
+            </ui:Button>
+
+            <ui:Button name="cmd-fallback" class="command">
+                <ui:VisualElement class="command__icon gi-return-arrow" picking-mode="Ignore" />
+                <ui:Label text="FALL BACK" class="command__label" picking-mode="Ignore" />
+                <ui:Label text="6" class="command__key" picking-mode="Ignore" />
+            </ui:Button>
+
+            <ui:Button name="cmd-retreat" class="command">
+                <ui:VisualElement class="command__icon gi-run" picking-mode="Ignore" />
+                <ui:Label text="RETREAT" class="command__label" picking-mode="Ignore" />
+                <ui:Label text="7" class="command__key" picking-mode="Ignore" />
+            </ui:Button>
+
+            <ui:Button name="cmd-summon" class="command command--summon" style="display: none;">
+                <ui:VisualElement class="command__icon gi-flying-flag" picking-mode="Ignore" />
+                <ui:Label text="SUMMON RESERVES" class="command__label" picking-mode="Ignore" />
+                <ui:Label text="8" class="command__key" picking-mode="Ignore" />
+            </ui:Button>
+
+        </ui:VisualElement>
+
+        <!-- ============================== FORMATION MENU ============================== -->
+        <!-- Opened by key 1 or the formation button; number keys 1 to 5 then pick a formation
+             for the selected squads. Hidden by default; visibility mirrors the command input. -->
+        <ui:VisualElement name="formation-menu" class="formation-menu" style="display: none;">
+            <ui:Label text="CHOOSE FORMATION" class="eyebrow" picking-mode="Ignore" />
+            <ui:VisualElement class="formation-menu__row">
+
+                <ui:Button name="form-line" class="command">
+                    <ui:VisualElement class="command__icon gi-roman-shield" picking-mode="Ignore" />
+                    <ui:Label text="LINE" class="command__label" picking-mode="Ignore" />
+                    <ui:Label text="1" class="command__key" picking-mode="Ignore" />
+                </ui:Button>
+
+                <ui:Button name="form-testudo" class="command">
+                    <ui:VisualElement class="command__icon gi-turtle" picking-mode="Ignore" />
+                    <ui:Label text="TESTUDO" class="command__label" picking-mode="Ignore" />
+                    <ui:Label text="2" class="command__key" picking-mode="Ignore" />
+                </ui:Button>
+
+                <ui:Button name="form-wedge" class="command">
+                    <ui:VisualElement class="command__icon gi-arrowhead" picking-mode="Ignore" />
+                    <ui:Label text="WEDGE" class="command__label" picking-mode="Ignore" />
+                    <ui:Label text="3" class="command__key" picking-mode="Ignore" />
+                </ui:Button>
+
+                <ui:Button name="form-loose" class="command">
+                    <ui:VisualElement class="command__icon gi-expander" picking-mode="Ignore" />
+                    <ui:Label text="LOOSE" class="command__label" picking-mode="Ignore" />
+                    <ui:Label text="4" class="command__key" picking-mode="Ignore" />
+                </ui:Button>
+
+                <ui:Button name="form-column" class="command">
+                    <ui:VisualElement class="command__icon gi-trail" picking-mode="Ignore" />
+                    <ui:Label text="COLUMN" class="command__label" picking-mode="Ignore" />
+                    <ui:Label text="5" class="command__key" picking-mode="Ignore" />
+                </ui:Button>
+
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- ============================== SELECTION HINT ============================== -->
+        <ui:VisualElement name="selection-hint" picking-mode="Ignore"
+                          style="position: absolute; bottom: 142px; left: 0; right: 0; align-items: center;">
+            <ui:Label name="selection-text" text="ALL SQUADS" class="eyebrow" />
+        </ui:VisualElement>
+
+
+        <!-- ============================= DEPLOYMENT (MODAL) =========================== -->
+        <ui:VisualElement name="deployment-panel" class="modal" style="display: none;">
+            <ui:VisualElement class="modal__sheet">
+
+                <ui:VisualElement class="modal__header" picking-mode="Ignore">
+                    <ui:Label text="DEPLOYMENT" class="modal__title" />
+                    <ui:Label name="deployment-subtitle" text="" class="modal__subtitle" />
+                </ui:VisualElement>
+
+                <ui:VisualElement class="modal__body">
+
+                    <!-- ============================ FORCES ============================ -->
+                    <ui:VisualElement class="modal__pane--forces">
+                        <ui:Label text="YOUR FORCES" class="heading" />
+                        <ui:VisualElement class="rule rule--short" />
+
+                        <ui:VisualElement class="tally-row" picking-mode="Ignore">
+                            <ui:VisualElement class="tally">
+                                <ui:Label text="ON THE FIELD" class="tally__label" />
+                                <ui:Label name="deployment-deployed" text="0" class="tally__value" />
+                            </ui:VisualElement>
+                            <ui:VisualElement class="tally">
+                                <ui:Label text="HELD BACK" class="tally__label" />
+                                <ui:Label name="deployment-reserved" text="0"
+                                          class="tally__value tally__value--muted" />
+                            </ui:VisualElement>
+                            <ui:VisualElement class="tally">
+                                <ui:Label text="AGAINST YOU" class="tally__label" />
+                                <ui:Label name="deployment-enemy" text="0"
+                                          class="tally__value tally__value--muted" />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+
+                        <ui:Label text="CONTUBERNIA" class="heading" />
+                        <ui:VisualElement class="rule rule--short" />
+                        <ui:VisualElement name="deployment-squads" />
+                    </ui:VisualElement>
+
+                    <!-- ============================ GROUND ============================ -->
+                    <ui:VisualElement class="modal__pane--ground">
+                        <ui:Label text="THE GROUND" class="heading" />
+                        <ui:VisualElement class="rule rule--short" />
+
+                        <ui:VisualElement name="deployment-map" class="tacmap" />
+
+                        <ui:VisualElement class="legend" picking-mode="Ignore">
+                            <ui:VisualElement class="legend__item">
+                                <ui:VisualElement class="legend__swatch"
+                                                  style="background-color: rgb(224, 192, 104);" />
+                                <ui:Label text="YOUR LINE" class="legend__label" />
+                            </ui:VisualElement>
+                            <ui:VisualElement class="legend__item">
+                                <ui:VisualElement class="legend__swatch"
+                                                  style="background-color: rgb(196, 70, 58);" />
+                                <ui:Label text="ENEMY" class="legend__label" />
+                            </ui:VisualElement>
+                            <ui:VisualElement class="legend__item">
+                                <ui:VisualElement class="legend__swatch"
+                                                  style="background-color: rgb(104, 99, 89);" />
+                                <ui:Label text="RESERVE" class="legend__label" />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+
+                        <ui:VisualElement class="step-row">
+                            <ui:Button name="deployment-step-vanguard" class="step step--active">
+                                <ui:VisualElement class="step__index" picking-mode="Ignore">
+                                    <ui:Label text="1" class="step__index-label" />
+                                </ui:VisualElement>
+                                <ui:VisualElement class="step__text" picking-mode="Ignore">
+                                    <ui:Label text="FORM THE LINE" class="step__title" />
+                                    <ui:Label text="Click the gold ground" class="step__hint" />
+                                </ui:VisualElement>
+                            </ui:Button>
+
+                            <ui:Button name="deployment-step-reinforce" class="step">
+                                <ui:VisualElement class="step__index" picking-mode="Ignore">
+                                    <ui:Label text="2" class="step__index-label" />
+                                </ui:VisualElement>
+                                <ui:VisualElement class="step__text" picking-mode="Ignore">
+                                    <ui:Label text="REINFORCEMENTS" class="step__title" />
+                                    <ui:Label text="Click a map edge" class="step__hint" />
+                                </ui:VisualElement>
+                            </ui:Button>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+
+                </ui:VisualElement>
+
+                <ui:VisualElement class="modal__footer">
+                    <ui:Label name="deployment-status" text="" class="body body--dim" />
+                    <ui:Button name="deployment-confirm" class="button-start">
+                        <ui:Label text="START BATTLE" class="button-start__label" picking-mode="Ignore" />
+                    </ui:Button>
+                </ui:VisualElement>
+
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- ============================== BATTLE SUMMARY ============================== -->
+        <ui:VisualElement name="summary-panel" class="overlay" style="display: none;">
+            <ui:VisualElement class="sheet">
+                <ui:Label name="summary-title" text="THE FIELD IS OURS" class="sheet__title" />
+                <ui:Label name="summary-subtitle" text="" class="sheet__subtitle" />
+
+                <ui:VisualElement class="sheet__columns">
+
+                    <ui:VisualElement class="sheet__column">
+                        <ui:Label text="THE FALLEN" class="heading" />
+                        <ui:VisualElement class="rule rule--short" />
+                        <ui:VisualElement name="summary-casualties" picking-mode="Ignore" />
+                    </ui:VisualElement>
+
+                    <ui:VisualElement class="sheet__column">
+                        <ui:Label text="SPOILS" class="heading" />
+                        <ui:VisualElement class="rule rule--short" />
+                        <ui:VisualElement name="summary-spoils" picking-mode="Ignore" />
+                    </ui:VisualElement>
+
+                    <ui:VisualElement class="sheet__column">
+                        <ui:Label text="EXPERIENCE" class="heading" />
+                        <ui:VisualElement class="rule rule--short" />
+                        <ui:VisualElement name="summary-experience" picking-mode="Ignore" />
+                    </ui:VisualElement>
+
+                </ui:VisualElement>
+
+                <ui:VisualElement class="rule" />
+
+                <ui:VisualElement style="flex-direction: row; align-items: center;">
+                    <ui:Label text="CENTURION" class="metric-label" style="min-width: 90px;" />
+                    <ui:VisualElement style="flex-grow: 1;">
+                        <ui:Label name="summary-commander-xp" text="+0 EXPERIENCE" class="metric text-gold" />
+                        <ui:VisualElement class="bar bar--thick">
+                            <ui:VisualElement name="summary-commander-bar" class="bar__fill bar__fill--gold" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <ui:Button name="summary-continue" class="button-primary">
+                    <ui:Label text="CONTINUE THE MARCH" class="button-primary__label" picking-mode="Ignore" />
+                </ui:Button>
+            </ui:VisualElement>
+
+            <ui:VisualElement name="summary-floaters" class="summary-floaters" picking-mode="Ignore" />
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+</ui:UXML>

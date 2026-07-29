@@ -1,0 +1,2832 @@
+/*
+ * Century — shared design system.
+ *
+ * Every colour, spacing and type decision lives here as a variable. Panels reference the variables
+ * rather than literal values, so the whole game's look can be retuned from this block.
+ *
+ * Aesthetic target: bronze and parchment on near-black. Thin gold rules, generous letter spacing on
+ * headers, translucent panels that let the map read through. Nothing pure white and nothing pure
+ * black — the mock-ups are entirely built from warm desaturated tones.
+ *
+ * NOTE: USS has no text-transform. Uppercase text is written literally in the UXML.
+ */
+
+:root {
+    /* --- Palette ------------------------------------------------------------------------ */
+    --ink:              rgba(8, 8, 7, 0.86);      /* panel fill */
+    --ink-solid:        rgb(12, 11, 10);
+    --ink-deep:         rgba(4, 4, 3, 0.92);      /* bars, wells */
+
+    --gold:             rgb(201, 162, 39);
+    --gold-bright:      rgb(224, 192, 104);
+    --gold-dim:         rgba(201, 162, 39, 0.34);
+    --gold-faint:       rgba(201, 162, 39, 0.14);
+
+    --parchment:        rgb(216, 210, 196);       /* primary text */
+    --parchment-dim:    rgb(150, 144, 130);       /* secondary text */
+    --parchment-faint:  rgb(104, 99, 89);         /* disabled / tertiary */
+
+    --blood:            rgb(196, 70, 58);         /* danger, health */
+    --blood-dim:        rgba(196, 70, 58, 0.5);
+    --olive:            rgb(133, 160, 90);        /* good, morale */
+    --brass:            rgb(190, 145, 74);        /* stamina */
+
+    /* --- Type ---------------------------------------------------------------------------
+     * Drop a serif TTF into the project, make a Font Asset, and point --font at it to shift
+     * the whole interface at once. Trajan-alikes suit the period; anything with a strong
+     * Roman capital works.
+     */
+    --font-size-micro:  9px;
+    --font-size-small:  11px;
+    --font-size-body:   13px;
+    --font-size-large:  16px;
+    --font-size-title:  20px;
+    --font-size-alert:  26px;
+
+    /* --- Metrics ------------------------------------------------------------------------ */
+    --pad:              10px;
+    --pad-tight:        6px;
+    --pad-loose:        16px;
+    --rule:             1px;
+}
+
+/* =======================================================================================
+ *  Root
+ * ======================================================================================= */
+
+.hud-root {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    color: var(--parchment);
+    font-size: var(--font-size-body);
+}
+
+/* Panels sit above the world but must never eat clicks meant for the ground. Only explicitly
+ * interactive elements re-enable picking. */
+.hud-root {
+    /* container itself is inert */
+}
+
+.no-pick {
+    /* applied to decorative containers */
+}
+
+/* =======================================================================================
+ *  Panel chrome
+ * ======================================================================================= */
+
+.panel {
+    background-color: var(--ink);
+    border-width: var(--rule);
+    border-color: var(--gold-dim);
+    padding: var(--pad);
+}
+
+.panel--flush {
+    border-left-width: 0;
+    border-right-width: 0;
+}
+
+.panel--bare {
+    background-color: var(--ink);
+    border-width: 0;
+    padding: var(--pad-tight);
+}
+
+/* Thin gold rule used under panel headings. */
+.rule {
+    height: 1px;
+    background-color: var(--gold-dim);
+    margin-top: var(--pad-tight);
+    margin-bottom: var(--pad-tight);
+}
+
+.rule--short {
+    width: 34px;
+    background-color: var(--gold);
+}
+
+/* =======================================================================================
+ *  Type styles
+ * ======================================================================================= */
+
+.eyebrow {
+    font-size: var(--font-size-micro);
+    color: var(--gold);
+    letter-spacing: 3px;
+    -unity-font-style: bold;
+}
+
+.title {
+    font-size: var(--font-size-title);
+    color: var(--parchment);
+    letter-spacing: 2px;
+}
+
+.heading {
+    font-size: var(--font-size-small);
+    color: var(--gold);
+    letter-spacing: 2px;
+    -unity-font-style: bold;
+}
+
+.body {
+    font-size: var(--font-size-body);
+    color: var(--parchment);
+    white-space: normal;
+}
+
+.body--dim {
+    color: var(--parchment-dim);
+}
+
+.metric {
+    font-size: var(--font-size-body);
+    color: var(--parchment);
+}
+
+.metric-label {
+    font-size: var(--font-size-small);
+    color: var(--parchment-dim);
+    letter-spacing: 1px;
+}
+
+.numeral {
+    font-size: var(--font-size-large);
+    color: var(--parchment);
+    letter-spacing: 1px;
+}
+
+.text-danger      { color: var(--blood); }
+.text-good        { color: var(--olive); }
+.text-gold        { color: var(--gold); }
+.text-gold-bright { color: var(--gold-bright); }
+.text-brass       { color: var(--brass); }
+.text-dim         { color: var(--parchment-dim); }
+.text-faint       { color: var(--parchment-faint); }
+
+/* =======================================================================================
+ *  Bars
+ * ======================================================================================= */
+
+.bar {
+    height: 4px;
+    background-color: var(--ink-deep);
+    border-width: 1px;
+    border-color: rgba(0, 0, 0, 0.6);
+    margin-top: 2px;
+    overflow: hidden;
+}
+
+.bar--thick { height: 7px; }
+.bar--hair  { height: 3px; }
+
+.bar__fill {
+    height: 100%;
+    width: 50%;
+    background-color: var(--gold);
+}
+
+.bar__fill--health  { background-color: var(--blood); }
+.bar__fill--stamina { background-color: var(--brass); }
+.bar__fill--morale  { background-color: var(--olive); }
+.bar__fill--gold    { background-color: var(--gold); }
+.bar__fill--danger  { background-color: var(--blood); }
+
+/* =======================================================================================
+ *  Top resource strip (overmap)
+ * ======================================================================================= */
+
+/* Full-width header strip. The Camp screen uses this; the overmap now carries its resources in
+ * the bottom bar instead. */
+.top-bar {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    flex-direction: row;
+    align-items: center;
+    background-color: var(--ink);
+    border-bottom-width: var(--rule);
+    border-color: var(--gold-dim);
+    padding-left: var(--pad-loose);
+    padding-right: var(--pad-loose);
+    padding-top: var(--pad-tight);
+    padding-bottom: var(--pad-tight);
+}
+
+.unit-identity {
+    min-width: 210px;
+    border-right-width: var(--rule);
+    border-color: var(--gold-faint);
+    padding-right: var(--pad-loose);
+}
+
+.resource-strip {
+    flex-direction: row;
+    flex-grow: 1;
+    align-items: center;
+    padding-left: var(--pad-loose);
+}
+
+.resource {
+    flex-direction: column;
+    margin-right: 26px;
+    min-width: 62px;
+}
+
+.resource__label {
+    font-size: var(--font-size-micro);
+    color: var(--parchment-dim);
+    letter-spacing: 1px;
+}
+
+.resource__value {
+    font-size: var(--font-size-body);
+    color: var(--parchment);
+    margin-top: 1px;
+}
+
+.morale-block {
+    min-width: 168px;
+    border-left-width: var(--rule);
+    border-color: var(--gold-faint);
+    padding-left: var(--pad-loose);
+}
+
+/* =======================================================================================
+ *  Corner panels
+ * ======================================================================================= */
+
+.corner {
+    position: absolute;
+    min-width: 200px;
+    max-width: 268px;
+}
+
+.corner--top-left     { left: var(--pad-loose); top: 62px; }
+.corner--top-right    { right: var(--pad-loose); top: 62px; }
+.corner--bottom-left  { left: var(--pad-loose); bottom: 92px; }
+.corner--bottom-right { right: var(--pad-loose); bottom: 92px; }
+
+/* =======================================================================================
+ *  Event log
+ * ======================================================================================= */
+
+.event {
+    flex-direction: row;
+    align-items: flex-start;
+    margin-bottom: var(--pad-tight);
+}
+
+.event__glyph {
+    width: 12px;
+    font-size: var(--font-size-body);
+    color: var(--gold);
+    margin-right: var(--pad-tight);
+}
+
+.event__text {
+    flex-grow: 1;
+    font-size: var(--font-size-small);
+    color: var(--parchment-dim);
+    white-space: normal;
+}
+
+.event--warning .event__glyph { color: var(--gold-bright); }
+.event--warning .event__text  { color: var(--parchment); }
+.event--critical .event__glyph { color: var(--blood); }
+.event--critical .event__text  { color: var(--blood); }
+.event--good .event__glyph    { color: var(--olive); }
+.event--good .event__text     { color: var(--olive); }
+
+/* =======================================================================================
+ *  Roster cards (battle)
+ * ======================================================================================= */
+
+.roster {
+    position: absolute;
+    left: var(--pad-loose);
+    top: 132px;
+    width: 216px;
+}
+
+.card {
+    flex-direction: row;
+    background-color: var(--ink);
+    border-width: var(--rule);
+    border-color: var(--gold-faint);
+    padding: var(--pad-tight);
+    margin-bottom: var(--pad-tight);
+}
+
+.card--commander { border-color: var(--gold); }
+.card--down { opacity: 0.35; }
+
+.card__portrait {
+    width: 34px;
+    height: 40px;
+    background-color: rgba(46, 42, 36, 0.9);
+    border-width: var(--rule);
+    border-color: var(--gold-faint);
+    align-items: center;
+    justify-content: center;
+    margin-right: var(--pad-tight);
+}
+
+.card__glyph {
+    font-size: var(--font-size-large);
+    color: var(--gold-dim);
+}
+
+.card__body {
+    flex-grow: 1;
+    justify-content: center;
+}
+
+.card__name {
+    font-size: var(--font-size-small);
+    color: var(--parchment);
+}
+
+.card__rank {
+    font-size: var(--font-size-micro);
+    color: var(--gold);
+    letter-spacing: 1px;
+    margin-bottom: 3px;
+}
+
+/* =======================================================================================
+ *  Squad list (battle)
+ * ======================================================================================= */
+
+.squad-row {
+    background-color: var(--ink);
+    border-width: var(--rule);
+    border-color: var(--gold-faint);
+    border-left-width: 3px;
+    padding: var(--pad-tight);
+    margin-bottom: 4px;
+}
+
+.squad-row--selected { border-color: var(--gold); }
+.squad-row--routed   { border-left-color: var(--blood); opacity: 0.7; }
+.squad-row--dead     { opacity: 0.3; }
+
+.squad-row__head {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.squad-row__name {
+    font-size: var(--font-size-small);
+    color: var(--parchment);
+    letter-spacing: 1px;
+}
+
+.squad-row__state {
+    font-size: var(--font-size-micro);
+    color: var(--parchment-dim);
+    letter-spacing: 1px;
+}
+
+.squad-row__orders {
+    flex-direction: row;
+    margin-top: 3px;
+}
+
+.chip {
+    font-size: var(--font-size-micro);
+    color: var(--gold);
+    background-color: var(--gold-faint);
+    border-width: var(--rule);
+    border-color: var(--gold-dim);
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-top: 1px;
+    padding-bottom: 1px;
+    margin-right: 4px;
+    letter-spacing: 1px;
+}
+
+.chip--pending {
+    color: var(--parchment-dim);
+    border-color: var(--parchment-faint);
+    background-color: rgba(0, 0, 0, 0.3);
+}
+
+/* =======================================================================================
+ *  Command bar
+ * ======================================================================================= */
+
+.command-bar {
+    position: absolute;
+    bottom: var(--pad-loose);
+    left: 0;
+    right: 0;
+    flex-direction: row;
+    justify-content: center;
+    align-items: flex-end;
+}
+
+.command {
+    width: 92px;
+    background-color: var(--ink);
+    border-width: var(--rule);
+    border-color: var(--gold-dim);
+    align-items: center;
+    padding-top: var(--pad-tight);
+    padding-bottom: 4px;
+    margin-left: 3px;
+    margin-right: 3px;
+    transition-property: border-color, background-color;
+    transition-duration: 0.12s;
+}
+
+.command:hover {
+    border-color: var(--gold-bright);
+    background-color: rgba(30, 26, 20, 0.92);
+}
+
+.command--active {
+    border-color: var(--gold-bright);
+    background-color: rgba(50, 42, 26, 0.94);
+}
+
+/* Brief pulse when the order goes out, keyboard or click alike. Added and removed in code;
+   the .command transition eases it back out. */
+.command--flash {
+    border-color: var(--gold-bright);
+    background-color: rgba(94, 76, 38, 0.96);
+}
+
+/* The summon button stands apart from the ordinary orders: gold-edged, one use, and gone. */
+.command--summon {
+    border-color: var(--gold);
+    background-color: rgba(60, 48, 22, 0.94);
+}
+
+/* The formation picker: a second rank of command buttons that appears above the order bar
+   while key 1 holds the floor. Visibility is driven from code. */
+.formation-menu {
+    position: absolute;
+    bottom: 122px;
+    left: 0;
+    right: 0;
+    align-items: center;
+}
+
+.formation-menu__row {
+    flex-direction: row;
+    justify-content: center;
+    align-items: flex-end;
+    margin-top: 4px;
+}
+
+.command__glyph {
+    font-size: var(--font-size-title);
+    color: var(--gold);
+    margin-bottom: 2px;
+}
+
+.command__label {
+    font-size: var(--font-size-micro);
+    color: var(--parchment);
+    letter-spacing: 1px;
+    -unity-text-align: middle-center;
+    white-space: normal;
+}
+
+.command__key {
+    font-size: var(--font-size-micro);
+    color: var(--parchment-faint);
+    margin-top: 3px;
+}
+
+/* =======================================================================================
+ *  Nav bar
+ * ======================================================================================= */
+
+/* Runs along the very top; the time box hangs centred just beneath it. */
+.nav-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 42px;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--ink-deep);
+    border-bottom-width: var(--rule);
+    border-color: var(--gold-faint);
+}
+
+.nav-item {
+    flex-direction: row;
+    align-items: center;
+    margin-left: 22px;
+    margin-right: 22px;
+}
+
+.nav-item__label {
+    font-size: var(--font-size-body);
+    color: var(--parchment);
+    letter-spacing: 2px;
+}
+
+.nav-item--inert .nav-item__label { color: var(--parchment-dim); }
+
+/* Live nav entries are Buttons; strip the default button chrome so they sit in the strip
+ * like their inert siblings, and light up on hover. */
+.nav-item--live {
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    padding: 0;
+}
+
+.nav-item--live .nav-item__label { color: var(--parchment); }
+.nav-item--live:hover .nav-item__label { color: var(--gold-bright); }
+
+/* =======================================================================================
+ *  Inventory screen
+ * ======================================================================================= */
+
+.inventory-sheet {
+    width: 860px;
+    max-height: 84%;
+}
+
+/* Fixed chrome may never shrink: only the scrolling list gives way, or a full ALL tab
+ * crushes the title, tabs and footer into each other. */
+.inventory-head {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+    flex-shrink: 0;
+}
+
+.inv-tabs {
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+    flex-shrink: 0;
+}
+
+.inv-list {
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-height: 200px;
+}
+
+.inv-footer { flex-shrink: 0; }
+
+/* --- Icon elements (game-icons.net pack; white glyphs tinted per context) ---------------- */
+
+.inv-tile__icon {
+    width: 42px;
+    height: 42px;
+    margin-bottom: 12px;
+    -unity-background-image-tint-color: var(--gold);
+}
+
+.resource__icon-img {
+    width: 20px;
+    height: 20px;
+    margin-right: 7px;
+    -unity-background-image-tint-color: var(--gold);
+}
+
+.command__icon {
+    width: 26px;
+    height: 26px;
+    margin-bottom: 3px;
+    -unity-background-image-tint-color: var(--gold);
+}
+
+.card__icon {
+    width: 20px;
+    height: 20px;
+    -unity-background-image-tint-color: var(--gold);
+}
+
+.portrait__icon {
+    width: 20px;
+    height: 20px;
+    -unity-background-image-tint-color: var(--gold);
+}
+
+.inv-section {
+    margin-top: 10px;
+    margin-bottom: 2px;
+}
+
+/* --- Tile grid --------------------------------------------------------------------------- */
+
+.inv-grid {
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin-bottom: 4px;
+}
+
+.inv-tile {
+    width: 88px;
+    height: 88px;
+    margin: 3px;
+    background-color: var(--ink-deep);
+    border-width: var(--rule);
+    border-color: var(--gold-faint);
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    transition-property: border-color, background-color;
+    transition-duration: 0.1s;
+}
+
+.inv-tile:hover {
+    border-color: var(--gold-bright);
+    background-color: rgba(30, 26, 20, 0.95);
+}
+
+.inv-tile--selected {
+    border-color: var(--gold-bright);
+    background-color: rgba(50, 42, 26, 0.95);
+}
+
+.inv-tile--ledger { border-color: var(--gold-dim); }
+
+.inv-tile--empty {
+    background-color: rgba(4, 4, 3, 0.6);
+    border-color: rgba(201, 162, 39, 0.10);
+}
+
+.inv-tile__badge {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    background-color: var(--ink);
+    border-width: var(--rule);
+    border-color: var(--gold-faint);
+    padding-left: 4px;
+    padding-right: 4px;
+    font-size: var(--font-size-small);
+    color: var(--parchment);
+}
+
+.inv-tile__glyph {
+    font-size: 30px;
+    color: var(--gold);
+    margin-bottom: 12px;
+}
+
+.inv-tile__name {
+    position: absolute;
+    bottom: 3px;
+    left: 3px;
+    right: 3px;
+    font-size: var(--font-size-micro);
+    color: var(--parchment-dim);
+    -unity-text-align: middle-center;
+    white-space: normal;
+    overflow: hidden;
+    max-height: 24px;
+}
+
+.inv-footer {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+    border-top-width: var(--rule);
+    border-color: var(--gold-faint);
+    padding-top: 8px;
+}
+
+.inv-footer__detail { flex-grow: 1; padding-right: 14px; }
+
+.inv-storage {
+    font-size: var(--font-size-body);
+    color: var(--parchment);
+    letter-spacing: 1px;
+}
+
+.inv-row {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    border-bottom-width: var(--rule);
+    border-color: var(--gold-faint);
+}
+
+.inv-row__text { flex-grow: 1; padding-right: 12px; }
+
+.inv-row__name {
+    font-size: var(--font-size-body);
+    color: var(--parchment);
+}
+
+.inv-row__flavour {
+    font-size: var(--font-size-small);
+    color: var(--parchment-dim);
+    white-space: normal;
+}
+
+.inv-row__count {
+    min-width: 64px;
+    font-size: var(--font-size-body);
+    color: var(--parchment);
+    -unity-text-align: middle-right;
+}
+
+.inv-row__meta {
+    min-width: 130px;
+    font-size: var(--font-size-small);
+    color: var(--parchment-dim);
+    -unity-text-align: middle-right;
+}
+
+/* Ledger rows: the quartermaster's aggregates (rations, firewood, coin) shown beside items. */
+.inv-row--ledger .inv-row__name { color: var(--gold-bright); }
+.inv-row--ledger .inv-row__flavour { color: var(--parchment-dim); }
+
+.inv-empty {
+    margin-top: 24px;
+    font-size: var(--font-size-body);
+    color: var(--parchment-dim);
+    -unity-text-align: middle-center;
+    white-space: normal;
+}
+
+/* =======================================================================================
+ *  Time controls
+ * ======================================================================================= */
+
+/* Time controls: boxed and centred just below the top nav strip. */
+.time-block {
+    position: absolute;
+    top: 50px;
+    left: 0;
+    right: 0;
+    flex-direction: row;
+    justify-content: center;
+}
+
+.time-box {
+    background-color: var(--ink);
+    border-width: var(--rule);
+    border-color: var(--gold-dim);
+    padding-top: var(--pad-tight);
+    padding-bottom: var(--pad-tight);
+    padding-left: var(--pad);
+    padding-right: var(--pad);
+    align-items: center;
+}
+
+.time-readout {
+    font-size: var(--font-size-body);
+    color: var(--parchment);
+    letter-spacing: 2px;
+    margin-bottom: var(--pad-tight);
+}
+
+/* Sighting tooltip: rides the cursor over warbands; positioned from code. */
+.hover-tip {
+    position: absolute;
+    background-color: var(--ink);
+    border-width: var(--rule);
+    border-color: var(--gold-dim);
+    padding-top: 6px;
+    padding-bottom: 6px;
+    padding-left: 10px;
+    padding-right: 10px;
+    max-width: 240px;
+}
+
+.hover-tip__title {
+    font-size: var(--font-size-body);
+    color: var(--parchment);
+    letter-spacing: 1px;
+}
+
+.hover-tip__detail {
+    font-size: var(--font-size-micro);
+    color: var(--parchment-faint);
+    margin-top: 2px;
+}
+
+/* =======================================================================================
+ *  Bottom bar — the one home for everything about the century
+ * ======================================================================================= */
+
+.bottom-bar {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    flex-direction: row;
+    align-items: stretch;
+    background-color: var(--ink);
+    border-top-width: var(--rule);
+    border-color: var(--gold-dim);
+    padding-top: var(--pad-tight);
+    padding-bottom: var(--pad-tight);
+    padding-left: var(--pad-loose);
+    padding-right: var(--pad-loose);
+}
+
+.bottom-bar__section {
+    justify-content: center;
+    padding-left: var(--pad);
+    padding-right: var(--pad);
+    border-right-width: var(--rule);
+    border-color: var(--gold-faint);
+}
+
+/* USS has no :first-child; the first section carries this modifier explicitly. */
+.bottom-bar__section--first {
+    padding-left: 0;
+}
+
+.bottom-bar__morale {
+    flex-direction: row;
+    align-items: center;
+    margin-top: 4px;
+}
+
+.bottom-bar__actions {
+    flex-direction: row;
+    align-items: center;
+    border-right-width: 0;
+}
+
+.metric-cols {
+    flex-direction: row;
+}
+
+.metric-col {
+    min-width: 150px;
+    margin-right: 16px;
+}
+
+/* =======================================================================================
+ *  Commander screen — the evolving identity
+ * ======================================================================================= */
+
+.commander-sheet {
+    width: 940px;
+    max-height: 86%;
+}
+
+.cmd-identity {
+    margin-top: 2px;
+    -unity-font-style: italic;
+    white-space: normal;
+    max-width: 620px;
+}
+
+.cmd-head {
+    flex-direction: row;
+    align-items: center;
+    border-bottom-width: var(--rule);
+    border-color: var(--gold-faint);
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+    flex-shrink: 0;
+}
+
+.cmd-body { flex-grow: 1; flex-shrink: 1; min-height: 220px; }
+
+/* The offer: three doctrine cards, each tinted by its philosophy. */
+.skill-cards {
+    flex-direction: row;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.skill-card {
+    width: 292px;
+    background-color: var(--ink-deep);
+    border-width: 2px;
+    padding: 12px;
+    transition-property: border-color, background-color, scale;
+    transition-duration: 0.12s;
+}
+
+.skill-card:hover {
+    background-color: rgba(30, 26, 20, 0.96);
+    scale: 1.02 1.02;
+}
+
+.skill-card--roman { border-color: rgba(224, 192, 104, 0.55); }
+.skill-card--survivor { border-color: rgba(133, 160, 90, 0.6); }
+.skill-card--barbarian { border-color: rgba(196, 70, 58, 0.6); }
+
+.skill-card--roman:hover { border-color: rgb(224, 192, 104); }
+.skill-card--survivor:hover { border-color: rgb(133, 160, 90); }
+.skill-card--barbarian:hover { border-color: rgb(196, 70, 58); }
+
+.skill-card__philosophy {
+    font-size: var(--font-size-micro);
+    letter-spacing: 2px;
+    -unity-font-style: bold;
+    margin-bottom: 6px;
+}
+
+.skill-card__philosophy--roman { color: var(--gold-bright); }
+.skill-card__philosophy--survivor { color: var(--olive); }
+.skill-card__philosophy--barbarian { color: var(--blood); }
+
+.skill-card__icon {
+    width: 34px;
+    height: 34px;
+    margin-bottom: 8px;
+    -unity-background-image-tint-color: var(--parchment);
+}
+
+.skill-card__name {
+    font-size: var(--font-size-large);
+    color: var(--parchment);
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+    white-space: normal;
+}
+
+.skill-card__flavour {
+    font-size: var(--font-size-small);
+    color: var(--parchment-dim);
+    -unity-font-style: italic;
+    white-space: normal;
+    margin-bottom: 8px;
+}
+
+.skill-card__effect {
+    font-size: var(--font-size-small);
+    color: var(--parchment);
+    white-space: normal;
+}
+
+/* Doctrines already held: three philosophy columns of compact rows. */
+.doctrine-cols { flex-direction: row; }
+
+.doctrine-col {
+    width: 33%;
+    padding-right: 14px;
+}
+
+.doctrine-row {
+    flex-direction: row;
+    align-items: center;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    border-bottom-width: var(--rule);
+    border-color: var(--gold-faint);
+}
+
+.doctrine-row__icon {
+    width: 18px;
+    height: 18px;
+    margin-right: 8px;
+    -unity-background-image-tint-color: var(--gold);
+    flex-shrink: 0;
+}
+
+.doctrine-row__text { flex-grow: 1; }
+
+.doctrine-row__name {
+    font-size: var(--font-size-small);
+    color: var(--parchment);
+}
+
+.doctrine-row__effect {
+    font-size: var(--font-size-micro);
+    color: var(--parchment-dim);
+    white-space: normal;
+}
+
+/* Inside the bottom bar the resource strip is a guest: no grow, no indent, tighter spacing. */
+.bottom-bar .resource-strip {
+    flex-grow: 0;
+    padding-left: 0;
+}
+
+.bottom-bar .resource {
+    margin-right: 18px;
+    min-width: 56px;
+}
+
+.time-buttons { flex-direction: row; }
+
+.time-button {
+    width: 34px;
+    height: 26px;
+    background-color: var(--ink);
+    border-width: var(--rule);
+    border-color: var(--gold-dim);
+    align-items: center;
+    justify-content: center;
+    margin-left: 3px;
+    transition-property: border-color;
+    transition-duration: 0.12s;
+}
+
+.time-button:hover { border-color: var(--gold-bright); }
+
+.time-button--active {
+    border-color: var(--gold-bright);
+    background-color: rgba(50, 42, 26, 0.94);
+}
+
+.time-button__glyph {
+    font-size: var(--font-size-small);
+    color: var(--gold);
+}
+
+/* =======================================================================================
+ *  Alert banner
+ * ======================================================================================= */
+
+.alert {
+    position: absolute;
+    top: 74px;
+    left: 0;
+    right: 0;
+    align-items: center;
+}
+
+.alert__frame {
+    background-color: var(--ink-deep);
+    border-width: var(--rule);
+    border-color: var(--blood-dim);
+    padding-left: 40px;
+    padding-right: 40px;
+    padding-top: var(--pad);
+    padding-bottom: var(--pad);
+    align-items: center;
+}
+
+.alert__frame--warning { border-color: var(--gold-dim); }
+
+.alert__headline {
+    font-size: var(--font-size-alert);
+    color: var(--blood);
+    letter-spacing: 3px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
+.alert__headline--warning { color: var(--gold-bright); }
+
+.alert__sub {
+    font-size: var(--font-size-body);
+    color: var(--parchment);
+    letter-spacing: 1px;
+    margin-top: 3px;
+    -unity-text-align: middle-center;
+}
+
+/* =======================================================================================
+ *  Objective panel
+ * ======================================================================================= */
+
+.objective__marker {
+    flex-direction: row;
+    align-items: center;
+    margin-top: var(--pad-tight);
+}
+
+.objective__diamond {
+    font-size: var(--font-size-small);
+    color: var(--gold);
+    margin-right: var(--pad-tight);
+}
+
+/* =======================================================================================
+ *  Party strip (overmap bottom left)
+ * ======================================================================================= */
+
+.party-portraits {
+    flex-direction: row;
+    margin-top: var(--pad-tight);
+}
+
+.portrait {
+    width: 38px;
+    height: 46px;
+    background-color: rgba(46, 42, 36, 0.9);
+    border-width: var(--rule);
+    border-color: var(--gold-faint);
+    margin-right: 4px;
+    align-items: center;
+    justify-content: flex-end;
+    padding-bottom: 3px;
+}
+
+.portrait--empty { opacity: 0.3; }
+
+/* Centre the role icon inside the portrait frame. */
+.portrait { justify-content: center; }
+
+.portrait__glyph {
+    font-size: var(--font-size-large);
+    color: var(--gold-dim);
+    flex-grow: 1;
+    -unity-text-align: middle-center;
+}
+
+/* =======================================================================================
+ *  Toggle pills (camp / stealth)
+ * ======================================================================================= */
+
+.pill-row { flex-direction: row; margin-top: var(--pad-tight); }
+
+.pill {
+    flex-direction: row;
+    align-items: center;
+    background-color: var(--ink);
+    border-width: var(--rule);
+    border-color: var(--gold-dim);
+    padding-left: var(--pad);
+    padding-right: var(--pad);
+    padding-top: 5px;
+    padding-bottom: 5px;
+    margin-right: var(--pad-tight);
+    transition-property: border-color, background-color;
+    transition-duration: 0.12s;
+}
+
+.pill:hover { border-color: var(--gold-bright); }
+
+.pill--active {
+    border-color: var(--gold-bright);
+    background-color: rgba(50, 42, 26, 0.94);
+}
+
+.pill__label {
+    font-size: var(--font-size-micro);
+    color: var(--parchment);
+    letter-spacing: 2px;
+}
+
+.pill--active .pill__label { color: var(--gold-bright); }
+
+/* =======================================================================================
+ *  Step 5 — stage banners, deployment, summary, animation
+ * ======================================================================================= */
+
+/* --- Stage banner ("BATTLE BEGINS") --------------------------------------------------- */
+
+.stage-banner {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 26%;
+    align-items: center;
+}
+
+.stage-banner__frame {
+    background-color: var(--ink-deep);
+    border-top-width: var(--rule);
+    border-bottom-width: var(--rule);
+    border-color: var(--gold);
+    padding-left: 72px;
+    padding-right: 72px;
+    padding-top: 18px;
+    padding-bottom: 18px;
+    align-items: center;
+}
+
+.stage-banner__frame--danger { border-color: var(--blood); }
+
+.stage-banner__headline {
+    font-size: 40px;
+    color: var(--gold-bright);
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
+.stage-banner__frame--danger .stage-banner__headline { color: var(--blood); }
+
+.stage-banner__sub {
+    font-size: var(--font-size-large);
+    color: var(--parchment);
+    letter-spacing: 4px;
+    margin-top: 4px;
+    -unity-text-align: middle-center;
+}
+
+/* --- Floating text -------------------------------------------------------------------- */
+
+.floater {
+    position: absolute;
+    font-size: var(--font-size-body);
+    color: var(--parchment);
+    letter-spacing: 2px;
+    -unity-font-style: bold;
+}
+
+.floater--good { color: var(--olive); }
+.floater--gold { color: var(--gold-bright); }
+.floater--bad  { color: var(--blood); }
+
+/* --- Full-screen overlay -------------------------------------------------------------- */
+
+.overlay {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(4, 4, 3, 0.72);
+    align-items: center;
+    justify-content: center;
+}
+
+.sheet {
+    background-color: var(--ink-solid);
+    border-width: var(--rule);
+    border-color: var(--gold-dim);
+    padding: 26px;
+    min-width: 660px;
+    max-width: 900px;
+}
+
+.sheet__title {
+    font-size: 30px;
+    color: var(--gold-bright);
+    letter-spacing: 5px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
+.sheet__subtitle {
+    font-size: var(--font-size-body);
+    color: var(--parchment-dim);
+    letter-spacing: 2px;
+    -unity-text-align: middle-center;
+    margin-top: 3px;
+    margin-bottom: 14px;
+}
+
+.sheet__columns {
+    flex-direction: row;
+    margin-top: 10px;
+}
+
+.sheet__column {
+    flex-grow: 1;
+    flex-basis: 0;
+    margin-left: 8px;
+    margin-right: 8px;
+}
+
+/* --- Deployment ----------------------------------------------------------------------- */
+
+.deploy-panel {
+    position: absolute;
+    left: var(--pad-loose);
+    top: 76px;
+    width: 320px;
+    background-color: var(--ink);
+    border-width: var(--rule);
+    border-color: var(--gold-dim);
+    padding: var(--pad);
+}
+
+.deploy-row {
+    background-color: rgba(0, 0, 0, 0.35);
+    border-width: var(--rule);
+    border-color: var(--gold-faint);
+    border-left-width: 3px;
+    border-left-color: var(--gold);
+    padding: var(--pad-tight);
+    margin-bottom: 4px;
+    transition-property: border-color, background-color;
+    transition-duration: 0.12s;
+}
+
+.deploy-row:hover { border-color: var(--gold-bright); }
+
+.deploy-row--reserved {
+    border-left-color: var(--parchment-faint);
+    opacity: 0.72;
+}
+
+.deploy-row__head {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.deploy-row__name {
+    font-size: var(--font-size-small);
+    color: var(--parchment);
+    letter-spacing: 1px;
+}
+
+.deploy-row__state {
+    font-size: var(--font-size-micro);
+    letter-spacing: 1px;
+}
+
+.deploy-row__detail {
+    font-size: var(--font-size-micro);
+    color: var(--parchment-faint);
+    margin-top: 2px;
+}
+
+.deploy-tally {
+    flex-direction: row;
+    justify-content: space-between;
+    margin-top: var(--pad-tight);
+    margin-bottom: var(--pad-tight);
+}
+
+.deploy-tally__block { align-items: center; flex-grow: 1; }
+
+.button-primary {
+    background-color: rgba(50, 42, 26, 0.94);
+    border-width: var(--rule);
+    border-color: var(--gold);
+    padding-top: var(--pad-tight);
+    padding-bottom: var(--pad-tight);
+    align-items: center;
+    margin-top: var(--pad-tight);
+    transition-property: background-color;
+    transition-duration: 0.12s;
+}
+
+.button-primary:hover { background-color: rgba(74, 62, 34, 0.96); }
+
+.button-primary__label {
+    font-size: var(--font-size-small);
+    color: var(--gold-bright);
+    letter-spacing: 3px;
+    -unity-font-style: bold;
+}
+
+/* --- Summary -------------------------------------------------------------------------- */
+
+.summary-line {
+    font-size: var(--font-size-body);
+    color: var(--parchment);
+    margin-bottom: 3px;
+    white-space: normal;
+}
+
+.spoil {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom-width: var(--rule);
+    border-color: var(--gold-faint);
+    padding-top: 4px;
+    padding-bottom: 4px;
+}
+
+.spoil__label {
+    font-size: var(--font-size-micro);
+    color: var(--parchment-faint);
+    letter-spacing: 2px;
+}
+
+.spoil__value {
+    font-size: var(--font-size-large);
+    color: var(--gold-bright);
+}
+
+.xp-row {
+    margin-bottom: var(--pad-tight);
+}
+
+.xp-row__head {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.xp-row__name {
+    font-size: var(--font-size-small);
+    color: var(--parchment);
+}
+
+.xp-row__gain {
+    font-size: var(--font-size-small);
+    color: var(--olive);
+}
+
+.xp-row__note {
+    font-size: var(--font-size-micro);
+    color: var(--parchment-faint);
+    margin-top: 1px;
+}
+
+.summary-floaters {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 40%;
+    align-items: center;
+}
+
+/* =======================================================================================
+ *  Step 6 — modal deployment overlay
+ * ======================================================================================= */
+
+/*
+ * Note on the backdrop: USS cannot blur what is behind it — a true blur needs a URP renderer
+ * feature or a camera-stack render texture. A heavy scrim reads almost as well, costs nothing,
+ * and works on every pipeline, so that is what this is.
+ */
+.modal {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(3, 3, 2, 0.88);
+    align-items: center;
+    justify-content: center;
+}
+
+.modal__sheet {
+    background-color: var(--ink-solid);
+    border-width: var(--rule);
+    border-color: var(--gold-dim);
+    padding: 24px;
+    width: 940px;
+}
+
+.modal__header { align-items: center; margin-bottom: 6px; }
+
+.modal__title {
+    font-size: 28px;
+    color: var(--gold-bright);
+    letter-spacing: 6px;
+    -unity-font-style: bold;
+}
+
+.modal__subtitle {
+    font-size: var(--font-size-body);
+    color: var(--parchment-dim);
+    letter-spacing: 2px;
+    margin-top: 2px;
+}
+
+.modal__body { flex-direction: row; margin-top: 12px; }
+
+.modal__pane--forces { width: 380px; margin-right: 20px; }
+.modal__pane--ground { flex-grow: 1; }
+
+/* --- Force selection ------------------------------------------------------------------ */
+
+.tally-row {
+    flex-direction: row;
+    margin-top: var(--pad-tight);
+    margin-bottom: var(--pad);
+}
+
+.tally {
+    flex-grow: 1;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.4);
+    border-width: var(--rule);
+    border-color: var(--gold-faint);
+    padding-top: var(--pad-tight);
+    padding-bottom: var(--pad-tight);
+    margin-right: var(--pad-tight);
+}
+
+.tally__label {
+    font-size: var(--font-size-micro);
+    color: var(--parchment-faint);
+    letter-spacing: 2px;
+}
+
+.tally__value {
+    font-size: 24px;
+    color: var(--gold-bright);
+}
+
+.tally__value--muted { color: var(--parchment-dim); }
+
+/* A squad row is a row of information plus an explicit switch. The switch is what was missing:
+ * a clickable region with no visible control does not read as interactive. */
+.squad-pick {
+    flex-direction: row;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.34);
+    border-width: var(--rule);
+    border-color: var(--gold-faint);
+    border-left-width: 3px;
+    border-left-color: var(--gold);
+    padding: var(--pad-tight);
+    margin-bottom: 5px;
+}
+
+.squad-pick--reserve {
+    border-left-color: var(--parchment-faint);
+    background-color: rgba(0, 0, 0, 0.22);
+}
+
+.squad-pick__info { flex-grow: 1; }
+
+.squad-pick__name {
+    font-size: var(--font-size-body);
+    color: var(--parchment);
+    letter-spacing: 1px;
+}
+
+.squad-pick__detail {
+    font-size: var(--font-size-micro);
+    color: var(--parchment-faint);
+    margin-top: 1px;
+}
+
+.switch {
+    flex-direction: row;
+    border-width: var(--rule);
+    border-color: var(--gold-dim);
+}
+
+.switch__option {
+    width: 74px;
+    align-items: center;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    background-color: rgba(0, 0, 0, 0.45);
+    transition-property: background-color;
+    transition-duration: 0.1s;
+}
+
+.switch__option:hover { background-color: rgba(40, 34, 22, 0.9); }
+
+.switch__option--on { background-color: rgba(62, 52, 28, 0.96); }
+
+.switch__label {
+    font-size: var(--font-size-micro);
+    color: var(--parchment-faint);
+    letter-spacing: 2px;
+}
+
+.switch__option--on .switch__label {
+    color: var(--gold-bright);
+    -unity-font-style: bold;
+}
+
+/* --- Tactical map --------------------------------------------------------------------- */
+
+.tacmap {
+    width: 100%;
+    height: 380px;
+    background-color: rgba(16, 15, 13, 0.95);
+    border-width: var(--rule);
+    border-color: var(--gold-dim);
+    overflow: hidden;
+}
+
+/* Marks the mid-field line so the two sides read as opposed rather than as one crowd. */
+.tacmap__midline {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background-color: var(--gold-faint);
+}
+
+.tacmap__zone {
+    position: absolute;
+    border-width: var(--rule);
+    border-color: var(--gold);
+    background-color: rgba(201, 162, 39, 0.09);
+}
+
+.tacmap__edge-band {
+    position: absolute;
+    background-color: rgba(133, 160, 90, 0.1);
+    border-width: var(--rule);
+    border-color: rgba(133, 160, 90, 0.4);
+}
+
+.tacmap__marker {
+    position: absolute;
+    width: 7px;
+    height: 7px;
+    border-radius: 4px;
+}
+
+.tacmap__marker--enemy { background-color: var(--blood); }
+.tacmap__marker--ours { background-color: var(--gold-bright); }
+.tacmap__marker--reserve { background-color: var(--parchment-faint); }
+
+.tacmap__commander {
+    position: absolute;
+    width: 13px;
+    height: 13px;
+    border-width: 2px;
+    border-color: var(--gold-bright);
+    border-radius: 8px;
+    background-color: rgba(0, 0, 0, 0.6);
+}
+
+.tacmap__entry {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border-width: 2px;
+    border-color: var(--olive);
+    border-radius: 12px;
+    background-color: rgba(133, 160, 90, 0.22);
+}
+
+.tacmap__label {
+    position: absolute;
+    font-size: var(--font-size-micro);
+    color: var(--parchment-faint);
+    letter-spacing: 2px;
+}
+
+/* --- Placement steps ------------------------------------------------------------------ */
+
+.step-row { flex-direction: row; margin-top: var(--pad); }
+
+.step {
+    flex-grow: 1;
+    flex-direction: row;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.4);
+    border-width: var(--rule);
+    border-color: var(--gold-faint);
+    padding: var(--pad-tight);
+    margin-right: var(--pad-tight);
+    transition-property: border-color, background-color;
+    transition-duration: 0.12s;
+}
+
+.step:hover { border-color: var(--gold-dim); }
+
+.step--active {
+    border-color: var(--gold-bright);
+    background-color: rgba(52, 44, 24, 0.94);
+}
+
+.step__index {
+    width: 22px;
+    height: 22px;
+    border-width: var(--rule);
+    border-color: var(--gold-dim);
+    align-items: center;
+    justify-content: center;
+    margin-right: var(--pad-tight);
+}
+
+.step__index-label {
+    font-size: var(--font-size-small);
+    color: var(--gold);
+}
+
+.step--done .step__index { border-color: var(--olive); }
+.step--done .step__index-label { color: var(--olive); }
+
+.step__text { flex-grow: 1; }
+
+.step__title {
+    font-size: var(--font-size-small);
+    color: var(--parchment);
+    letter-spacing: 1px;
+}
+
+.step__hint {
+    font-size: var(--font-size-micro);
+    color: var(--parchment-faint);
+    margin-top: 1px;
+    white-space: normal;
+}
+
+/* --- Legend and footer ---------------------------------------------------------------- */
+
+.legend { flex-direction: row; margin-top: var(--pad-tight); }
+
+.legend__item { flex-direction: row; align-items: center; margin-right: var(--pad-loose); }
+
+.legend__swatch { width: 8px; height: 8px; border-radius: 5px; margin-right: 5px; }
+
+.legend__label {
+    font-size: var(--font-size-micro);
+    color: var(--parchment-faint);
+    letter-spacing: 1px;
+}
+
+.modal__footer {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 16px;
+    border-top-width: var(--rule);
+    border-color: var(--gold-faint);
+    padding-top: var(--pad);
+}
+
+.button-start {
+    background-color: rgba(62, 52, 28, 0.96);
+    border-width: 2px;
+    border-color: var(--gold);
+    padding-left: 46px;
+    padding-right: 46px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    align-items: center;
+    transition-property: background-color, border-color;
+    transition-duration: 0.12s;
+}
+
+.button-start:hover {
+    background-color: rgba(92, 76, 38, 0.98);
+    border-color: var(--gold-bright);
+}
+
+.button-start__label {
+    font-size: var(--font-size-large);
+    color: var(--gold-bright);
+    letter-spacing: 5px;
+    -unity-font-style: bold;
+}
+
+.button-ghost {
+    background-color: rgba(0, 0, 0, 0.4);
+    border-width: var(--rule);
+    border-color: var(--gold-faint);
+    padding-left: var(--pad-loose);
+    padding-right: var(--pad-loose);
+    padding-top: 8px;
+    padding-bottom: 8px;
+    align-items: center;
+}
+
+.button-ghost:hover { border-color: var(--gold-dim); }
+
+.button-ghost__label {
+    font-size: var(--font-size-micro);
+    color: var(--parchment-dim);
+    letter-spacing: 2px;
+}
+
+/* =======================================================================================
+ *  Camp screen
+ * ======================================================================================= */
+
+/* --- Layout: three columns between the top strip and the break-camp bar ---------------- */
+
+/* Tab strip between the resource bar and the body: the camp's sub-screens. */
+.camp-tabs {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 74px;
+    flex-direction: row;
+    padding-left: var(--pad-loose);
+    flex-shrink: 0;
+}
+
+.camp-main {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 112px;
+    bottom: 56px;
+    flex-direction: row;
+    padding: var(--pad-loose);
+    padding-top: var(--pad-tight);
+}
+
+/* One page visible at a time; each fills the body. */
+.camp-page {
+    flex-grow: 1;
+    flex-direction: column;
+}
+
+.camp-page--row { flex-direction: row; }
+
+.camp-page__half {
+    width: 46%;
+    margin-right: 16px;
+}
+
+/* Full-page recipe and station lists lay their rows out as a wrapping grid of cards. */
+.stations-wide > .unity-scroll-view__content-viewport > .unity-scroll-view__content-container {
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.stations-wide .station-row {
+    width: 420px;
+    margin-right: 14px;
+}
+
+/* Station and recipe art from the icon pack, leading each card's header. */
+.station-row__icon {
+    width: 22px;
+    height: 22px;
+    margin-right: 8px;
+    -unity-background-image-tint-color: var(--gold);
+    flex-shrink: 0;
+}
+
+/* CRAFT beside CRAFT ALL on a recipe card. */
+.craft-buttons { flex-direction: row; }
+.craft-buttons__one { flex-grow: 1; margin-right: 6px; }
+.craft-buttons__all { flex-grow: 2; }
+
+.camp-col--org  { flex-grow: 1; }
+.camp-col--side { width: 360px; }
+
+.camp-col {
+    flex-direction: column;
+    margin-left: 8px;
+    margin-right: 8px;
+}
+
+.camp-col--left   { width: 320px; }
+.camp-col--center { flex-grow: 1; }
+.camp-col--right  { width: 340px; }
+
+.camp-block { margin-bottom: 12px; }
+.camp-block--grow { flex-grow: 1; }
+
+.camp-hint {
+    margin-top: 4px;
+    margin-bottom: 8px;
+    white-space: normal;
+}
+
+.camp-readout {
+    margin-top: 10px;
+    color: var(--parchment-dim);
+    white-space: normal;
+}
+
+/* --- Break-camp bar -------------------------------------------------------------------- */
+
+.camp-footer {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 56px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    background-color: var(--ink-deep);
+    border-top-width: var(--rule);
+    border-color: var(--gold-faint);
+    padding-left: var(--pad-loose);
+    padding-right: var(--pad-loose);
+}
+
+.camp-break {
+    padding-left: 34px;
+    padding-right: 34px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+}
+
+/* --- Officer role rows ----------------------------------------------------------------- */
+
+.role-row {
+    flex-direction: row;
+    align-items: center;
+    background-color: var(--ink);
+    border-width: var(--rule);
+    border-color: var(--gold-faint);
+    border-left-width: 3px;
+    border-left-color: var(--gold);
+    padding: var(--pad-tight);
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 0;
+    margin-bottom: 6px;
+    transition-property: border-color, background-color;
+    transition-duration: 0.12s;
+}
+
+.role-row:hover { border-color: var(--gold-bright); }
+.role-row--vacant { border-left-color: var(--parchment-faint); }
+
+.role-row__text { flex-grow: 1; }
+
+.role-row__post {
+    font-size: var(--font-size-micro);
+    color: var(--gold);
+    letter-spacing: 1px;
+}
+
+.role-row__holder {
+    font-size: var(--font-size-body);
+    color: var(--parchment);
+}
+
+.role-row__benefit {
+    font-size: var(--font-size-micro);
+    color: var(--parchment-faint);
+    white-space: normal;
+    margin-top: 1px;
+}
+
+.role-row__chevron {
+    font-size: var(--font-size-large);
+    color: var(--gold-dim);
+    margin-left: var(--pad-tight);
+}
+
+/* --- Rest buttons ---------------------------------------------------------------------- */
+
+.rest-row {
+    flex-direction: row;
+    margin-top: 4px;
+}
+
+.rest-button {
+    flex-grow: 1;
+    flex-basis: 0;
+    margin-left: 4px;
+    margin-right: 4px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.rest-button__sub {
+    font-size: var(--font-size-micro);
+    color: var(--parchment-dim);
+    margin-top: 2px;
+    -unity-text-align: middle-center;
+}
+
+/* --- Order rows ------------------------------------------------------------------------ */
+
+.order-row {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    background-color: var(--ink);
+    border-width: var(--rule);
+    border-color: var(--gold-faint);
+    border-left-width: 3px;
+    border-left-color: var(--gold);
+    padding: var(--pad);
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 0;
+    margin-bottom: 6px;
+    transition-property: border-color;
+    transition-duration: 0.12s;
+}
+
+.order-row:hover { border-color: var(--gold-bright); }
+.order-row:disabled {
+    opacity: 0.45;
+    border-left-color: var(--parchment-faint);
+}
+
+.order-row__text { flex-grow: 1; }
+
+.order-row__title {
+    font-size: var(--font-size-small);
+    color: var(--parchment);
+    letter-spacing: 2px;
+}
+
+.order-row__hint {
+    font-size: var(--font-size-micro);
+    color: var(--parchment-faint);
+    white-space: normal;
+    margin-top: 2px;
+}
+
+.order-row__chevron {
+    font-size: var(--font-size-title);
+    color: var(--gold);
+    margin-left: var(--pad);
+}
+
+/* --- Camp stations --------------------------------------------------------------------- */
+
+.station-row {
+    background-color: rgba(0, 0, 0, 0.3);
+    border-width: var(--rule);
+    border-color: var(--gold-faint);
+    padding: var(--pad-tight);
+    margin-bottom: 6px;
+}
+
+.station-row__head {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.station-row__name {
+    font-size: var(--font-size-small);
+    color: var(--parchment);
+    letter-spacing: 1px;
+    flex-grow: 1;
+}
+
+.station-row__effect {
+    font-size: var(--font-size-micro);
+    color: var(--parchment-dim);
+    white-space: normal;
+    margin-top: 3px;
+    margin-bottom: 6px;
+}
+
+.pips { flex-direction: row; }
+
+.pip {
+    width: 8px;
+    height: 8px;
+    border-radius: 5px;
+    margin-left: 3px;
+    background-color: var(--ink-deep);
+    border-width: 1px;
+    border-color: var(--gold-faint);
+}
+
+.pip--on {
+    background-color: var(--gold);
+    border-color: var(--gold-bright);
+}
+
+.station-build {
+    background-color: rgba(50, 42, 26, 0.7);
+    border-width: var(--rule);
+    border-color: var(--gold-dim);
+    color: var(--gold-bright);
+    font-size: var(--font-size-micro);
+    letter-spacing: 2px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    margin: 0;
+    -unity-font-style: bold;
+    transition-property: background-color, border-color;
+    transition-duration: 0.12s;
+}
+
+.station-build:hover {
+    background-color: rgba(74, 62, 34, 0.9);
+    border-color: var(--gold-bright);
+}
+
+.station-build:disabled {
+    opacity: 0.4;
+    color: var(--parchment-faint);
+}
+
+/* --- The century: tier tallies and roster ---------------------------------------------- */
+
+.tier-tallies {
+    flex-direction: row;
+    margin-top: 4px;
+    margin-bottom: 8px;
+}
+
+.tier-tally {
+    flex-grow: 1;
+    flex-basis: 0;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.35);
+    border-width: var(--rule);
+    border-color: var(--gold-faint);
+    padding-top: 5px;
+    padding-bottom: 5px;
+    margin-right: 4px;
+}
+
+.tier-tally__value {
+    font-size: var(--font-size-large);
+    color: var(--gold-bright);
+}
+
+.tier-tally__label {
+    font-size: var(--font-size-micro);
+    color: var(--parchment-faint);
+    letter-spacing: 1px;
+}
+
+.tier-wounded-row {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.roster-list { flex-grow: 1; }
+
+.roster-row {
+    flex-direction: row;
+    align-items: center;
+    border-bottom-width: var(--rule);
+    border-color: var(--gold-faint);
+    padding-top: 3px;
+    padding-bottom: 3px;
+}
+
+.roster-row__name {
+    flex-grow: 1;
+    font-size: var(--font-size-small);
+    color: var(--parchment);
+}
+
+.roster-row__rank {
+    width: 88px;
+    font-size: var(--font-size-micro);
+    color: var(--gold);
+    letter-spacing: 1px;
+}
+
+.roster-row__cond {
+    width: 66px;
+    font-size: var(--font-size-micro);
+    -unity-text-align: middle-right;
+}
+
+/* --- Soldier picker modal -------------------------------------------------------------- */
+
+.picker-sheet { width: 560px; }
+
+.picker-list {
+    max-height: 420px;
+    margin-top: 8px;
+    margin-bottom: 8px;
+}
+
+.picker-footer { justify-content: flex-end; }
+.picker-footer .button-ghost { margin-left: 8px; }
+
+.pick-row {
+    flex-direction: row;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.34);
+    border-width: var(--rule);
+    border-color: var(--gold-faint);
+    border-left-width: 3px;
+    border-left-color: var(--gold);
+    padding: var(--pad-tight);
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 0;
+    margin-bottom: 5px;
+    transition-property: border-color;
+    transition-duration: 0.1s;
+}
+
+.pick-row:hover { border-color: var(--gold-bright); }
+
+.pick-row--current {
+    border-left-color: var(--gold-bright);
+    background-color: rgba(62, 52, 28, 0.6);
+}
+
+.pick-row__name {
+    font-size: var(--font-size-body);
+    color: var(--parchment);
+    letter-spacing: 1px;
+}
+
+.pick-row__detail {
+    font-size: var(--font-size-micro);
+    color: var(--parchment-faint);
+    margin-top: 1px;
+}
+
+/* =======================================================================================
+ *  Camp screen — iteration 2
+ * ======================================================================================= */
+
+/* --- Resource icons and radial dials (top bar) ----------------------------------------- */
+
+.resource.resource--iconed {
+    flex-direction: row;
+    align-items: center;
+}
+
+.resource__icon {
+    width: 16px;
+    font-size: var(--font-size-body);
+    color: var(--gold);
+    margin-right: var(--pad-tight);
+    -unity-text-align: middle-center;
+}
+
+.resource__stack { flex-direction: column; }
+
+.meter-block {
+    flex-direction: row;
+    align-items: center;
+    border-left-width: var(--rule);
+    border-color: var(--gold-faint);
+    padding-left: var(--pad-loose);
+}
+
+.meter-item {
+    flex-direction: row;
+    align-items: center;
+    margin-left: var(--pad-loose);
+}
+
+.meter {
+    width: 42px;
+    height: 42px;
+    align-items: center;
+    justify-content: center;
+    margin-right: var(--pad-tight);
+}
+
+.meter__value {
+    font-size: var(--font-size-micro);
+    color: var(--parchment);
+    -unity-text-align: middle-center;
+}
+
+/* --- Organisation chart ---------------------------------------------------------------- */
+
+.org-head {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.org-hint {
+    font-size: var(--font-size-micro);
+    color: var(--parchment-faint);
+    white-space: normal;
+    flex-shrink: 1;
+    margin-left: var(--pad);
+    -unity-text-align: middle-right;
+}
+
+.org-list { flex-grow: 1; }
+
+.org-section {
+    flex-direction: row;
+    align-items: center;
+    margin-top: var(--pad);
+    margin-bottom: var(--pad-tight);
+}
+
+.org-section__title {
+    font-size: var(--font-size-small);
+    color: var(--gold);
+    letter-spacing: 2px;
+    -unity-font-style: bold;
+}
+
+.org-section__note {
+    font-size: var(--font-size-micro);
+    color: var(--parchment-faint);
+    letter-spacing: 1px;
+    margin-left: var(--pad-tight);
+}
+
+.org-grid {
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+/* --- Soldier card ---------------------------------------------------------------------- */
+
+.soldier-card {
+    flex-direction: row;
+    align-items: center;
+    width: 208px;
+    background-color: var(--ink);
+    border-width: var(--rule);
+    border-color: var(--gold-faint);
+    border-left-width: 3px;
+    border-left-color: var(--parchment-faint);
+    padding: var(--pad-tight);
+    margin: 4px;
+    transition-property: border-color, background-color;
+    transition-duration: 0.12s;
+}
+
+.soldier-card:hover {
+    border-color: var(--gold-bright);
+    background-color: rgba(30, 26, 20, 0.92);
+}
+
+.soldier-card--decanus { border-left-color: var(--gold); }
+
+.soldier-card--officer {
+    border-left-color: var(--gold-bright);
+    background-color: rgba(50, 42, 26, 0.55);
+}
+
+.soldier-card__avatar {
+    width: 28px;
+    font-size: var(--font-size-large);
+    -unity-text-align: middle-center;
+    margin-right: var(--pad-tight);
+}
+
+.soldier-card__body { flex-grow: 1; }
+
+.soldier-card__name {
+    font-size: var(--font-size-small);
+    color: var(--parchment);
+}
+
+.soldier-card__rank {
+    font-size: var(--font-size-micro);
+    letter-spacing: 1px;
+    margin-top: 1px;
+}
+
+.soldier-card__status { flex-direction: row; align-items: center; }
+
+.status-chip {
+    font-size: var(--font-size-body);
+    margin-left: 5px;
+}
+
+/* --- Officer slot ---------------------------------------------------------------------- */
+
+/* Officers are deliberately larger than the rank and file — a wider card, a gold crest and a
+ * bronze wash — so seniority reads by size and weight, not by reading the label. */
+.officer-slot {
+    flex-direction: row;
+    align-items: center;
+    width: 280px;
+    background-color: rgba(50, 42, 26, 0.55);
+    border-width: var(--rule);
+    border-color: var(--gold-dim);
+    border-left-width: 4px;
+    border-left-color: var(--gold-bright);
+    padding: var(--pad);
+    margin: 4px;
+    transition-property: border-color, background-color;
+    transition-duration: 0.12s;
+}
+
+.officer-slot:hover {
+    border-color: var(--gold-bright);
+    background-color: rgba(66, 55, 32, 0.7);
+}
+
+.officer-slot--vacant {
+    background-color: var(--ink);
+    border-left-color: var(--parchment-faint);
+}
+
+.officer-slot__crest {
+    width: 36px;
+    font-size: 26px;
+    color: var(--gold-bright);
+    -unity-text-align: middle-center;
+    margin-right: var(--pad-tight);
+}
+
+.officer-slot--vacant .officer-slot__crest { color: var(--parchment-faint); }
+
+.officer-slot__text { flex-grow: 1; }
+
+.officer-slot__post {
+    font-size: var(--font-size-small);
+    color: var(--gold-bright);
+    letter-spacing: 2px;
+    -unity-font-style: bold;
+}
+
+.officer-slot__holder {
+    font-size: var(--font-size-body);
+    color: var(--parchment);
+    margin-top: 2px;
+}
+
+.officer-slot__title {
+    font-size: var(--font-size-micro);
+    color: var(--parchment-faint);
+    margin-top: 1px;
+}
+
+/* --- Side column station scroll -------------------------------------------------------- */
+
+.stations-list { flex-grow: 1; }
+
+/* --- Pick row additions ---------------------------------------------------------------- */
+
+.pick-row__avatar {
+    width: 26px;
+    font-size: var(--font-size-large);
+    -unity-text-align: middle-center;
+    margin-right: var(--pad-tight);
+}
+
+.pick-row--veteran { border-left-color: var(--gold-bright); }
+
+.badge {
+    font-size: var(--font-size-micro);
+    letter-spacing: 1px;
+    padding-left: 6px;
+    padding-right: 6px;
+    padding-top: 1px;
+    padding-bottom: 1px;
+    margin-left: var(--pad-tight);
+    border-width: var(--rule);
+}
+
+.badge--posted {
+    color: var(--parchment-dim);
+    border-color: var(--parchment-faint);
+    background-color: rgba(0, 0, 0, 0.3);
+}
+
+.badge--veteran {
+    color: var(--gold-bright);
+    border-color: var(--gold-dim);
+    background-color: var(--gold-faint);
+}
+
+/* --- Soldier detail modal -------------------------------------------------------------- */
+
+.detail-sheet { width: 520px; }
+.scout-sheet  { width: 540px; }
+
+.detail-head {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: var(--pad);
+}
+
+.detail-avatar {
+    font-size: 34px;
+    color: var(--gold-bright);
+    margin-right: var(--pad);
+}
+
+.detail-name {
+    font-size: var(--font-size-title);
+    color: var(--gold-bright);
+    letter-spacing: 2px;
+    -unity-font-style: bold;
+}
+
+.detail-rank {
+    font-size: var(--font-size-small);
+    color: var(--parchment-dim);
+    letter-spacing: 1px;
+    margin-top: 2px;
+}
+
+.detail-flavour {
+    font-size: var(--font-size-body);
+    color: var(--parchment);
+    white-space: normal;
+    margin-bottom: var(--pad);
+}
+
+.detail-row {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom-width: var(--rule);
+    border-color: var(--gold-faint);
+    padding-bottom: 4px;
+    margin-bottom: var(--pad-tight);
+}
+
+.detail-label {
+    font-size: var(--font-size-micro);
+    color: var(--parchment-faint);
+    letter-spacing: 2px;
+}
+
+.detail-label--block {
+    margin-top: var(--pad);
+    margin-bottom: 3px;
+}
+
+.detail-value {
+    font-size: var(--font-size-body);
+    color: var(--parchment);
+}
+
+.detail-equipment {
+    font-size: var(--font-size-small);
+    color: var(--parchment-dim);
+    white-space: normal;
+}
+
+.detail-footer {
+    flex-direction: row;
+    justify-content: flex-end;
+    margin-top: var(--pad);
+    border-top-width: var(--rule);
+    border-color: var(--gold-faint);
+    padding-top: var(--pad);
+}
+
+/* =======================================================================================
+ *  Overmap point-of-interest event popup
+ * ======================================================================================= */
+
+.poi-sheet { width: 620px; }
+
+.poi-body {
+    font-size: var(--font-size-body);
+    color: var(--parchment);
+    white-space: normal;
+    margin-top: var(--pad);
+    margin-bottom: var(--pad);
+}
+
+.poi-officer {
+    font-size: var(--font-size-small);
+    color: var(--gold);
+    -unity-font-style: italic;
+    white-space: normal;
+    margin-bottom: var(--pad);
+}
+
+.poi-choices { margin-top: var(--pad-tight); }
+
+.poi-choice {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.35);
+    border-width: var(--rule);
+    border-color: var(--gold-faint);
+    border-left-width: 3px;
+    border-left-color: var(--gold);
+    padding: var(--pad);
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 0;
+    margin-bottom: 6px;
+    transition-property: border-color, background-color;
+    transition-duration: 0.12s;
+}
+
+.poi-choice:hover {
+    border-color: var(--gold-bright);
+    background-color: rgba(40, 34, 22, 0.9);
+}
+
+.poi-choice__label {
+    font-size: var(--font-size-body);
+    color: var(--parchment);
+    letter-spacing: 1px;
+}
+
+.poi-choice__hint {
+    font-size: var(--font-size-micro);
+    color: var(--parchment-faint);
+    margin-left: var(--pad);
+    -unity-text-align: middle-right;
+    white-space: normal;
+}
+
+/* =======================================================================================
+ *  Battle HUD — iteration 2a
+ * ======================================================================================= */
+
+/* --- Left column (engagement / officers / log stacked, no overlap) --------------------- */
+
+.battle-left {
+    position: absolute;
+    left: var(--pad-loose);
+    top: var(--pad-loose);
+    bottom: 96px;
+    width: 300px;
+    flex-direction: column;
+}
+
+/* Fixed blocks may not shrink: a long officer roster must scroll inside its own panel, never
+   crush the engagement stats above it into overlapping lines. */
+.battle-left__block { margin-bottom: 10px; flex-shrink: 0; }
+.battle-left__grow { flex-grow: 1; flex-shrink: 1; min-height: 120px; }
+.roster-scroll { flex-grow: 1; }
+
+/* --- Battle timer (top centre) --------------------------------------------------------- */
+
+.battle-timer-bar {
+    position: absolute;
+    top: 12px;
+    left: 0;
+    right: 0;
+    align-items: center;
+}
+
+.battle-timer {
+    font-size: var(--font-size-large);
+    color: var(--parchment);
+    letter-spacing: 3px;
+    background-color: var(--ink);
+    border-width: var(--rule);
+    border-color: var(--gold-dim);
+    padding-left: var(--pad-loose);
+    padding-right: var(--pad-loose);
+    padding-top: 4px;
+    padding-bottom: 4px;
+    -unity-font-style: bold;
+}
+
+/* --- Officer cards: short thick bars, injury & death states --------------------------- */
+
+.card__body .bar {
+    width: 74px;
+    height: 6px;
+    margin-top: 3px;
+}
+
+.card--wounded { border-color: rgb(214, 140, 46); }
+.card--wounded .card__glyph { color: rgb(214, 140, 46); }
+
+.card--dead {
+    border-color: var(--blood);
+    background-color: rgba(40, 12, 10, 0.85);
+}
+
+.card--dead .card__name { color: var(--blood); }
+
+.card__cross {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    -unity-text-align: middle-center;
+    font-size: 30px;
+    color: var(--blood);
+}
+
+/* --- Contubernium per-man dots --------------------------------------------------------- */
+
+.contubernium { margin-bottom: 10px; }
+
+.contubernium__head {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.contubernium__name {
+    font-size: var(--font-size-small);
+    color: var(--parchment);
+    letter-spacing: 1px;
+}
+
+.contubernium__order {
+    font-size: var(--font-size-micro);
+    color: var(--parchment-faint);
+    letter-spacing: 1px;
+}
+
+.dot-row {
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin-top: 5px;
+}
+
+.dot {
+    width: 15px;
+    height: 15px;
+    border-radius: 9px;
+    margin-right: 5px;
+    margin-bottom: 5px;
+    background-color: var(--olive);
+    border-width: 1px;
+    border-color: rgba(0, 0, 0, 0.5);
+}
+
+.dot--wounded { background-color: rgb(214, 140, 46); }
+.dot--dead { background-color: var(--blood); }
+
+.dot__cross {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: -3px;
+    -unity-text-align: middle-center;
+    font-size: var(--font-size-small);
+    color: rgb(232, 224, 208);
+}
+
+.dot__flag {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    width: 7px;
+    height: 5px;
+    background-color: rgb(236, 232, 224);
+    border-width: 1px;
+    border-color: rgba(0, 0, 0, 0.5);
+}
+
+/* === GENERATED ICON CLASSES (game-icons.net) === */
+/* One class per icon in use. Regenerate with scratchpad icon_pass.py after adding names. */
+.gi-amber-mosquito { background-image: url("IconsNET/ffffff/000000/1x1/delapouite/amber-mosquito.svg"); }
+.gi-amphora { background-image: url("IconsNET/ffffff/000000/1x1/delapouite/amphora.svg"); }
+.gi-animal-hide { background-image: url("IconsNET/ffffff/000000/1x1/delapouite/animal-hide.svg"); }
+.gi-anvil { background-image: url("IconsNET/ffffff/000000/1x1/lorc/anvil.svg"); }
+.gi-anvil-impact { background-image: url("IconsNET/ffffff/000000/1x1/lorc/anvil-impact.svg"); }
+.gi-arrowhead { background-image: url("IconsNET/ffffff/000000/1x1/lorc/arrowhead.svg"); }
+.gi-backup { background-image: url("IconsNET/ffffff/000000/1x1/lorc/backup.svg"); }
+.gi-bandage-roll { background-image: url("IconsNET/ffffff/000000/1x1/lorc/bandage-roll.svg"); }
+.gi-bandaged { background-image: url("IconsNET/ffffff/000000/1x1/lorc/bandaged.svg"); }
+.gi-barbed-spear { background-image: url("IconsNET/ffffff/000000/1x1/lorc/barbed-spear.svg"); }
+.gi-barrel { background-image: url("IconsNET/ffffff/000000/1x1/delapouite/barrel.svg"); }
+.gi-beer-horn { background-image: url("IconsNET/ffffff/000000/1x1/delapouite/beer-horn.svg"); }
+.gi-boot-prints { background-image: url("IconsNET/ffffff/000000/1x1/lorc/boot-prints.svg"); }
+.gi-bow-arrow { background-image: url("IconsNET/ffffff/000000/1x1/delapouite/bow-arrow.svg"); }
+.gi-bread { background-image: url("IconsNET/ffffff/000000/1x1/delapouite/bread.svg"); }
+.gi-broadsword { background-image: url("IconsNET/ffffff/000000/1x1/lorc/broadsword.svg"); }
+.gi-campfire { background-image: url("IconsNET/ffffff/000000/1x1/lorc/campfire.svg"); }
+.gi-cauldron { background-image: url("IconsNET/ffffff/000000/1x1/darkzaitzev/cauldron.svg"); }
+.gi-cavalry { background-image: url("IconsNET/ffffff/000000/1x1/delapouite/cavalry.svg"); }
+.gi-centurion-helmet { background-image: url("IconsNET/ffffff/000000/1x1/delapouite/centurion-helmet.svg"); }
+.gi-checked-shield { background-image: url("IconsNET/ffffff/000000/1x1/lorc/checked-shield.svg"); }
+.gi-cheese-wedge { background-image: url("IconsNET/ffffff/000000/1x1/lorc/cheese-wedge.svg"); }
+.gi-claw-hammer { background-image: url("IconsNET/ffffff/000000/1x1/lorc/claw-hammer.svg"); }
+.gi-coins { background-image: url("IconsNET/ffffff/000000/1x1/delapouite/coins.svg"); }
+.gi-compass { background-image: url("IconsNET/ffffff/000000/1x1/lorc/compass.svg"); }
+.gi-contract { background-image: url("IconsNET/ffffff/000000/1x1/delapouite/contract.svg"); }
+.gi-crested-helmet { background-image: url("IconsNET/ffffff/000000/1x1/lorc/crested-helmet.svg"); }
+.gi-crosscut-saw { background-image: url("IconsNET/ffffff/000000/1x1/delapouite/crosscut-saw.svg"); }
+.gi-crossed-swords { background-image: url("IconsNET/ffffff/000000/1x1/lorc/crossed-swords.svg"); }
+.gi-daggers { background-image: url("IconsNET/ffffff/000000/1x1/lorc/daggers.svg"); }
+.gi-deer { background-image: url("IconsNET/ffffff/000000/1x1/caro-asercion/deer.svg"); }
+.gi-donkey { background-image: url("IconsNET/ffffff/000000/1x1/skoll/donkey.svg"); }
+.gi-envelope { background-image: url("IconsNET/ffffff/000000/1x1/lorc/envelope.svg"); }
+.gi-expander { background-image: url("IconsNET/ffffff/000000/1x1/sbed/expander.svg"); }
+.gi-fish-bucket { background-image: url("IconsNET/ffffff/000000/1x1/delapouite/fish-bucket.svg"); }
+.gi-fish-cooked { background-image: url("IconsNET/ffffff/000000/1x1/darkzaitzev/fish-cooked.svg"); }
+.gi-flying-flag { background-image: url("IconsNET/ffffff/000000/1x1/lorc/flying-flag.svg"); }
+.gi-fruit-bowl { background-image: url("IconsNET/ffffff/000000/1x1/skoll/fruit-bowl.svg"); }
+.gi-fur-shirt { background-image: url("IconsNET/ffffff/000000/1x1/delapouite/fur-shirt.svg"); }
+.gi-galea { background-image: url("IconsNET/ffffff/000000/1x1/delapouite/galea.svg"); }
+.gi-gladius { background-image: url("IconsNET/ffffff/000000/1x1/skoll/gladius.svg"); }
+.gi-grain { background-image: url("IconsNET/ffffff/000000/1x1/delapouite/grain.svg"); }
+.gi-grain-bundle { background-image: url("IconsNET/ffffff/000000/1x1/delapouite/grain-bundle.svg"); }
+.gi-ham-shank { background-image: url("IconsNET/ffffff/000000/1x1/skoll/ham-shank.svg"); }
+.gi-healing { background-image: url("IconsNET/ffffff/000000/1x1/delapouite/healing.svg"); }
+.gi-health-potion { background-image: url("IconsNET/ffffff/000000/1x1/delapouite/health-potion.svg"); }
+.gi-herbs-bundle { background-image: url("IconsNET/ffffff/000000/1x1/delapouite/herbs-bundle.svg"); }
+.gi-honeycomb { background-image: url("IconsNET/ffffff/000000/1x1/lorc/honeycomb.svg"); }
+.gi-horse-head { background-image: url("IconsNET/ffffff/000000/1x1/delapouite/horse-head.svg"); }
+.gi-horseshoe { background-image: url("IconsNET/ffffff/000000/1x1/delapouite/horseshoe.svg"); }
+.gi-laurels { background-image: url("IconsNET/ffffff/000000/1x1/lorc/laurels.svg"); }
+.gi-log { background-image: url("IconsNET/ffffff/000000/1x1/delapouite/log.svg"); }
+.gi-mail-shirt { background-image: url("IconsNET/ffffff/000000/1x1/lorc/mail-shirt.svg"); }
+.gi-meat { background-image: url("IconsNET/ffffff/000000/1x1/lorc/meat.svg"); }
+.gi-metal-bar { background-image: url("IconsNET/ffffff/000000/1x1/lorc/metal-bar.svg"); }
+.gi-old-wagon { background-image: url("IconsNET/ffffff/000000/1x1/delapouite/old-wagon.svg"); }
+.gi-olive { background-image: url("IconsNET/ffffff/000000/1x1/delapouite/olive.svg"); }
+.gi-painted-pottery { background-image: url("IconsNET/ffffff/000000/1x1/delapouite/painted-pottery.svg"); }
+.gi-person { background-image: url("IconsNET/ffffff/000000/1x1/delapouite/person.svg"); }
+.gi-prayer-beads { background-image: url("IconsNET/ffffff/000000/1x1/delapouite/prayer-beads.svg"); }
+.gi-return-arrow { background-image: url("IconsNET/ffffff/000000/1x1/lorc/return-arrow.svg"); }
+.gi-ring { background-image: url("IconsNET/ffffff/000000/1x1/delapouite/ring.svg"); }
+.gi-roman-shield { background-image: url("IconsNET/ffffff/000000/1x1/delapouite/roman-shield.svg"); }
+.gi-rope-coil { background-image: url("IconsNET/ffffff/000000/1x1/delapouite/rope-coil.svg"); }
+.gi-round-shield { background-image: url("IconsNET/ffffff/000000/1x1/willdabeast/round-shield.svg"); }
+.gi-run { background-image: url("IconsNET/ffffff/000000/1x1/lorc/run.svg"); }
+.gi-safety-pin { background-image: url("IconsNET/ffffff/000000/1x1/delapouite/safety-pin.svg"); }
+.gi-scale-mail { background-image: url("IconsNET/ffffff/000000/1x1/lorc/scale-mail.svg"); }
+.gi-scroll-quill { background-image: url("IconsNET/ffffff/000000/1x1/delapouite/scroll-quill.svg"); }
+.gi-scroll-unfurled { background-image: url("IconsNET/ffffff/000000/1x1/lorc/scroll-unfurled.svg"); }
+.gi-sewing-needle { background-image: url("IconsNET/ffffff/000000/1x1/lorc/sewing-needle.svg"); }
+.gi-shiny-apple { background-image: url("IconsNET/ffffff/000000/1x1/lorc/shiny-apple.svg"); }
+.gi-sliced-bread { background-image: url("IconsNET/ffffff/000000/1x1/lorc/sliced-bread.svg"); }
+.gi-spears { background-image: url("IconsNET/ffffff/000000/1x1/lorc/spears.svg"); }
+.gi-stone-block { background-image: url("IconsNET/ffffff/000000/1x1/lorc/stone-block.svg"); }
+.gi-stone-pile { background-image: url("IconsNET/ffffff/000000/1x1/delapouite/stone-pile.svg"); }
+.gi-stone-stack { background-image: url("IconsNET/ffffff/000000/1x1/delapouite/stone-stack.svg"); }
+.gi-thrown-spear { background-image: url("IconsNET/ffffff/000000/1x1/lorc/thrown-spear.svg"); }
+.gi-tied-scroll { background-image: url("IconsNET/ffffff/000000/1x1/lorc/tied-scroll.svg"); }
+.gi-toolbox { background-image: url("IconsNET/ffffff/000000/1x1/delapouite/toolbox.svg"); }
+.gi-torc { background-image: url("IconsNET/ffffff/000000/1x1/cathelineau/torc.svg"); }
+.gi-totem { background-image: url("IconsNET/ffffff/000000/1x1/delapouite/totem.svg"); }
+.gi-trail { background-image: url("IconsNET/ffffff/000000/1x1/delapouite/trail.svg"); }
+.gi-treasure-map { background-image: url("IconsNET/ffffff/000000/1x1/lorc/treasure-map.svg"); }
+.gi-trophy { background-image: url("IconsNET/ffffff/000000/1x1/lorc/trophy.svg"); }
+.gi-turtle { background-image: url("IconsNET/ffffff/000000/1x1/lorc/turtle.svg"); }
+.gi-two-coins { background-image: url("IconsNET/ffffff/000000/1x1/delapouite/two-coins.svg"); }
+.gi-vertical-banner { background-image: url("IconsNET/ffffff/000000/1x1/delapouite/vertical-banner.svg"); }
+.gi-walking-boot { background-image: url("IconsNET/ffffff/000000/1x1/lorc/walking-boot.svg"); }
+.gi-war-axe { background-image: url("IconsNET/ffffff/000000/1x1/delapouite/war-axe.svg"); }
+.gi-war-pick { background-image: url("IconsNET/ffffff/000000/1x1/delapouite/war-pick.svg"); }
+.gi-watchtower { background-image: url("IconsNET/ffffff/000000/1x1/delapouite/watchtower.svg"); }
+.gi-water-bottle { background-image: url("IconsNET/ffffff/000000/1x1/delapouite/water-bottle.svg"); }
+.gi-water-flask { background-image: url("IconsNET/ffffff/000000/1x1/delapouite/water-flask.svg"); }
+.gi-wheelbarrow { background-image: url("IconsNET/ffffff/000000/1x1/delapouite/wheelbarrow.svg"); }
+.gi-wood-beam { background-image: url("IconsNET/ffffff/000000/1x1/delapouite/wood-beam.svg"); }
+.gi-wood-pile { background-image: url("IconsNET/ffffff/000000/1x1/delapouite/wood-pile.svg"); }
+.gi-wooden-crate { background-image: url("IconsNET/ffffff/000000/1x1/delapouite/wooden-crate.svg"); }
+.gi-wool { background-image: url("IconsNET/ffffff/000000/1x1/delapouite/wool.svg"); }

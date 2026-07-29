@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3ce3f887b67e2234693a64202bf28300, type: 3}
+  m_Name: BattleSettings
+  m_EditorClassIdentifier: Century.Battle::Century.Battle.Sim.BattleSettings
+  SquadSize: 10
+  DefaultDeploymentCount: 40
+  LineSpacing: {x: 1.4, y: 1.3}
+  TestudoSpacing: {x: 0.95, y: 0.95}
+  WedgeSpacing: {x: 1.5, y: 1.35}
+  LooseSpacing: {x: 2.6, y: 2.4}
+  ColumnSpacing: {x: 1.3, y: 1.2}
+  LineWidth: 5
+  SoldierBaseSpeed: 4.5
+  PlayerSpeed: 5.2
+  PlayerTurnSpeed: 900
+  SoldierTurnSpeed: 540
+  SlotTolerance: 0.35
+  FollowDistance: 6
+  OrderBaseDelaySeconds: 0.35
+  OrderDelayPerMetre: 0.035
+  TesserariusDelayMultiplier: 0.55
+  MaxOrderDelaySeconds: 4
+  DeploymentSeparation: 55
+  AmbushSeparation: 22
+  SquadFrontage: 9

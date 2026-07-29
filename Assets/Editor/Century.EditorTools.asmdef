@@ -1,0 +1,22 @@
+{
+    "name": "Century.EditorTools",
+    "rootNamespace": "Century.EditorTools",
+    "references": [],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.modules.vectorgraphics",
+            "expression": "0",
+            "define": "CENTURY_HAS_VECTOR_GRAPHICS"
+        }
+    ],
+    "noEngineReferences": false
+}

@@ -1,0 +1,26 @@
+fileFormatVersion: 2
+guid: 85bd8d2dede86864cb0629c0aad796a8
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - _settings: {instanceID: 0}
+  - _playerPrefab: {instanceID: 0}
+  - _romanSoldierPrefab: {instanceID: 0}
+  - _germanicSoldierPrefab: {instanceID: 0}
+  - _squadPrefab: {instanceID: 0}
+  - _pilaPrefab: {fileID: 7373401503068039184, guid: 7e3cb3d21a0a61648890da39ac1fa98e, type: 3}
+  - _missiles: {instanceID: 0}
+  - _cameraRig: {instanceID: 0}
+  - _commandInput: {instanceID: 0}
+  - _eventFeed: {instanceID: 0}
+  - _hud: {instanceID: 0}
+  - _deployment: {instanceID: 0}
+  - _summary: {instanceID: 0}
+  - _spawnRoot: {instanceID: 0}
+  - _debugHud: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

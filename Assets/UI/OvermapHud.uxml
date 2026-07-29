@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <Style src="century.uss" />
+
+    <!--
+      Overmap HUD.
+
+      Layout: one consolidated bottom bar carries everything about the century (identity, officers,
+      resources, morale, column state, camp/stealth actions) so no information repeats. The nav
+      pills run along the very top, with the boxed time controls centred just beneath them; the
+      objective sits top-left; recent events and the contact warning stack bottom-right above the bar.
+
+      Element names are the contract with OvermapHudController. Renaming one here without renaming it
+      there produces a silent null, so the controller logs any element it cannot find.
+    -->
+    <ui:VisualElement name="root" class="hud-root" picking-mode="Ignore">
+
+        <!-- ================================ NAV BAR (TOP) ============================== -->
+        <ui:VisualElement name="nav-bar" class="nav-bar" picking-mode="Ignore">
+            <ui:Button name="nav-inventory" class="nav-item nav-item--live">
+                <ui:Label text="INVENTORY" class="nav-item__label" picking-mode="Ignore" />
+            </ui:Button>
+            <ui:VisualElement class="nav-item nav-item--inert">
+                <ui:Label text="SOLDIERS" class="nav-item__label" />
+            </ui:VisualElement>
+            <ui:Button name="nav-commander" class="nav-item nav-item--live">
+                <ui:Label text="COMMANDER" class="nav-item__label" picking-mode="Ignore" />
+            </ui:Button>
+            <ui:VisualElement class="nav-item nav-item--inert">
+                <ui:Label text="JOURNAL" class="nav-item__label" />
+            </ui:VisualElement>
+            <ui:VisualElement class="nav-item nav-item--inert">
+                <ui:Label text="ENCYCLOPEDIA" class="nav-item__label" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- ======================= TIME BLOCK (TOP CENTRE, BELOW NAV) ====================== -->
+        <ui:VisualElement name="time-block" class="time-block" picking-mode="Ignore">
+            <ui:VisualElement class="time-box">
+                <ui:Label name="time-readout" text="DAY 1 / 1ST WATCH" class="time-readout" />
+                <ui:VisualElement class="time-buttons">
+                    <ui:Button name="time-pause" class="time-button">
+                        <ui:Label text="❚❚" class="time-button__glyph" picking-mode="Ignore" />
+                    </ui:Button>
+                    <ui:Button name="time-normal" class="time-button">
+                        <ui:Label text="▶" class="time-button__glyph" picking-mode="Ignore" />
+                    </ui:Button>
+                    <ui:Button name="time-fast" class="time-button">
+                        <ui:Label text="▶▶" class="time-button__glyph" picking-mode="Ignore" />
+                    </ui:Button>
+                    <ui:Button name="time-fastest" class="time-button">
+                        <ui:Label text="▶▶▶" class="time-button__glyph" picking-mode="Ignore" />
+                    </ui:Button>
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- ================================ OBJECTIVE ================================ -->
+        <ui:VisualElement name="objective-panel" class="corner corner--top-left panel"
+                          picking-mode="Ignore" style="top: 48px;">
+            <ui:Label text="OBJECTIVE" class="heading" />
+            <ui:VisualElement class="rule rule--short" />
+            <ui:Label name="objective-text"
+                      text="Make your way out of Germania and return to Italia."
+                      class="body" />
+            <ui:VisualElement class="objective__marker">
+                <ui:Label text="◆" class="objective__diamond" />
+                <ui:Label name="objective-tracked" text="Reach the Rhine crossing" class="body body--dim" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- ======================== EVENTS (BOTTOM RIGHT, ABOVE BAR) ======================== -->
+        <ui:VisualElement name="events-panel" class="corner corner--bottom-right panel"
+                          picking-mode="Ignore"
+                          style="bottom: 150px; min-width: 320px; max-width: 380px; max-height: 360px; overflow: hidden;">
+            <ui:Label text="EVENTS" class="heading" />
+            <ui:VisualElement class="rule rule--short" />
+            <ui:VisualElement name="events-list" picking-mode="Ignore" />
+        </ui:VisualElement>
+
+        <!-- ==================== CONTACT WARNING (ABOVE EVENTS, BOTTOM RIGHT) ================== -->
+        <ui:VisualElement name="contact-panel" class="corner corner--bottom-right panel"
+                          picking-mode="Ignore" style="display: none; bottom: 524px;">
+            <ui:Label text="CONTACT" class="heading" />
+            <ui:VisualElement class="rule rule--short" />
+            <ui:Label name="contact-name" text="—" class="body" />
+            <ui:Label name="contact-detail" text="—" class="body body--dim" />
+        </ui:VisualElement>
+
+        <!-- ============================ THE CENTURY (BOTTOM BAR) ============================ -->
+        <!-- Everything about the century in one strip: who they are, what they carry, how they
+             stand, and the actions. One home per fact; nothing repeated elsewhere. -->
+        <ui:VisualElement name="bottom-bar" class="bottom-bar" picking-mode="Ignore">
+
+            <ui:VisualElement class="bottom-bar__section bottom-bar__section--first" picking-mode="Ignore">
+                <ui:Label text="LEG · XVII" class="eyebrow" />
+                <ui:Label name="unit-name" text="CENTURIA VALERIA" class="title" />
+                <ui:VisualElement name="party-portraits" class="party-portraits" picking-mode="Ignore" />
+            </ui:VisualElement>
+
+            <ui:VisualElement class="bottom-bar__section" picking-mode="Ignore">
+                <ui:VisualElement name="resource-strip" class="resource-strip" picking-mode="Ignore">
+                    <ui:VisualElement class="resource">
+                        <ui:Label text="MEN" class="resource__label" />
+                        <ui:Label name="value-men" text="—" class="resource__value" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="resource">
+                        <ui:Label text="FIREWOOD" class="resource__label" />
+                        <ui:Label name="value-firewood" text="—" class="resource__value" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="resource">
+                        <ui:Label text="FOOD" class="resource__label" />
+                        <ui:Label name="value-food" text="—" class="resource__value" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="resource">
+                        <ui:Label text="EQUIPMENT" class="resource__label" />
+                        <ui:Label name="value-equipment" text="—" class="resource__value" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="resource">
+                        <ui:Label text="MEDICINE" class="resource__label" />
+                        <ui:Label name="value-medicine" text="—" class="resource__value" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="resource">
+                        <ui:Label text="COIN" class="resource__label" />
+                        <ui:Label name="value-coin" text="—" class="resource__value" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="resource">
+                        <ui:Label text="DENARII" class="resource__label" />
+                        <ui:Label name="value-denarii" text="—" class="resource__value" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <ui:VisualElement class="bottom-bar__morale" picking-mode="Ignore">
+                    <ui:Label text="MORALE" class="resource__label" />
+                    <ui:Label name="value-morale" text="—" class="resource__value" style="margin-right: 8px;" />
+                    <ui:VisualElement class="bar" style="flex-grow: 1;">
+                        <ui:VisualElement name="bar-morale" class="bar__fill bar__fill--gold" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <ui:VisualElement class="bottom-bar__section" picking-mode="Ignore">
+                <ui:VisualElement class="metric-cols" picking-mode="Ignore">
+                    <ui:VisualElement class="metric-col" picking-mode="Ignore">
+                        <ui:VisualElement style="flex-direction: row; justify-content: space-between;">
+                            <ui:Label text="PACE" class="metric-label" />
+                            <ui:Label name="column-pace" text="—" class="metric" />
+                        </ui:VisualElement>
+                        <ui:VisualElement style="flex-direction: row; justify-content: space-between;">
+                            <ui:Label text="ORDERS" class="metric-label" />
+                            <ui:Label name="column-orders" text="—" class="metric" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="metric-col" picking-mode="Ignore">
+                        <ui:VisualElement style="flex-direction: row; justify-content: space-between;">
+                            <ui:Label text="WOUNDED" class="metric-label" />
+                            <ui:Label name="column-wounded" text="—" class="metric" />
+                        </ui:VisualElement>
+                        <ui:VisualElement style="flex-direction: row; justify-content: space-between;">
+                            <ui:Label text="VETERANS" class="metric-label" />
+                            <ui:Label name="column-veterans" text="—" class="metric" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <ui:VisualElement class="bottom-bar__section bottom-bar__actions">
+                <ui:Button name="pill-camp" class="pill">
+                    <ui:Label text="CAMP" class="pill__label" picking-mode="Ignore" />
+                </ui:Button>
+                <ui:Button name="pill-stealth" class="pill">
+                    <ui:Label text="STEALTH" class="pill__label" picking-mode="Ignore" />
+                </ui:Button>
+            </ui:VisualElement>
+
+        </ui:VisualElement>
+
+        <!-- ============================ SIGHTING TOOLTIP (CURSOR) ============================ -->
+        <!-- Declared after the bottom bar: paint order is document order, and the tip must sit on
+             top of everything it annotates, the bar included. -->
+        <ui:VisualElement name="hover-tip" class="hover-tip" picking-mode="Ignore" style="display: none;">
+            <ui:Label name="hover-tip-title" text="—" class="hover-tip__title" />
+            <ui:Label name="hover-tip-detail" text="—" class="hover-tip__detail" />
+        </ui:VisualElement>
+
+        <!-- ================================ INVENTORY ================================ -->
+        <ui:VisualElement name="inventory-modal" class="modal" style="display: none;">
+            <ui:VisualElement class="modal__sheet inventory-sheet">
+
+                <ui:VisualElement class="inventory-head">
+                    <ui:Label text="INVENTORY" class="modal__title" />
+                    <ui:Button name="inv-close" class="button-ghost">
+                        <ui:Label text="CLOSE" class="button-ghost__label" picking-mode="Ignore" />
+                    </ui:Button>
+                </ui:VisualElement>
+
+                <ui:VisualElement name="inv-tabs" class="inv-tabs">
+                    <ui:Button name="inv-tab-0" class="pill">
+                        <ui:Label text="ALL" class="pill__label" picking-mode="Ignore" />
+                    </ui:Button>
+                    <ui:Button name="inv-tab-1" class="pill">
+                        <ui:Label text="RESOURCES" class="pill__label" picking-mode="Ignore" />
+                    </ui:Button>
+                    <ui:Button name="inv-tab-2" class="pill">
+                        <ui:Label text="CURRENCY &amp; VALUABLES" class="pill__label" picking-mode="Ignore" />
+                    </ui:Button>
+                    <ui:Button name="inv-tab-3" class="pill">
+                        <ui:Label text="EQUIPMENT" class="pill__label" picking-mode="Ignore" />
+                    </ui:Button>
+                    <ui:Button name="inv-tab-4" class="pill">
+                        <ui:Label text="DOCUMENTS" class="pill__label" picking-mode="Ignore" />
+                    </ui:Button>
+                    <ui:Button name="inv-tab-5" class="pill">
+                        <ui:Label text="TROPHIES" class="pill__label" picking-mode="Ignore" />
+                    </ui:Button>
+                    <ui:Button name="inv-tab-6" class="pill">
+                        <ui:Label text="TRANSPORT" class="pill__label" picking-mode="Ignore" />
+                    </ui:Button>
+                </ui:VisualElement>
+
+                <ui:ScrollView name="inv-list" class="inv-list" />
+
+                <ui:VisualElement class="inv-footer">
+                    <ui:VisualElement class="inv-footer__detail" picking-mode="Ignore">
+                        <ui:Label name="inv-detail-name" text="Select an item to inspect it."
+                                  class="inv-row__name" />
+                        <ui:Label name="inv-detail-info" text="" class="inv-row__flavour" />
+                    </ui:VisualElement>
+                    <ui:Label name="inv-storage" text="STORAGE —" class="inv-storage" />
+                </ui:VisualElement>
+
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- ================================ COMMANDER ================================ -->
+        <ui:VisualElement name="commander-modal" class="modal" style="display: none;">
+            <ui:VisualElement class="modal__sheet commander-sheet">
+
+                <ui:VisualElement class="inventory-head">
+                    <ui:VisualElement picking-mode="Ignore">
+                        <ui:Label text="COMMANDER" class="modal__title" />
+                        <ui:Label name="cmd-identity" text="—" class="body body--dim cmd-identity" />
+                    </ui:VisualElement>
+                    <ui:Button name="cmd-close" class="button-ghost">
+                        <ui:Label text="CLOSE" class="button-ghost__label" picking-mode="Ignore" />
+                    </ui:Button>
+                </ui:VisualElement>
+
+                <ui:VisualElement name="cmd-head" class="cmd-head" picking-mode="Ignore">
+                    <ui:VisualElement picking-mode="Ignore" style="flex-grow: 1;">
+                        <ui:Label name="cmd-name" text="—" class="detail-name" />
+                        <ui:Label name="cmd-record" text="—" class="body body--dim" />
+                    </ui:VisualElement>
+                    <ui:VisualElement picking-mode="Ignore" style="min-width: 300px;">
+                        <ui:Label name="cmd-level" text="—" class="metric text-gold" />
+                        <ui:VisualElement class="bar bar--thick">
+                            <ui:VisualElement name="cmd-xp-fill" class="bar__fill bar__fill--gold" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <ui:ScrollView name="cmd-body" class="cmd-body" />
+
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- ============================ POINT OF INTEREST EVENT ============================ -->
+        <ui:VisualElement name="poi-modal" class="modal" style="display: none;">
+            <ui:VisualElement class="modal__sheet poi-sheet">
+                <ui:VisualElement class="modal__header">
+                    <ui:Label name="poi-title" text="—" class="modal__title" />
+                    <ui:Label name="poi-kind" text="—" class="modal__subtitle" />
+                </ui:VisualElement>
+                <ui:Label name="poi-body" text="—" class="poi-body" />
+                <ui:Label name="poi-officer" text="—" class="poi-officer" />
+                <ui:VisualElement name="poi-choices" class="poi-choices" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+</ui:UXML>

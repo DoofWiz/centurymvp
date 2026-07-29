@@ -1,0 +1,17 @@
+{
+    "name": "Century.App",
+    "rootNamespace": "Century.App",
+    "references": [
+        "Century.Core",
+        "Century.Campaign"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

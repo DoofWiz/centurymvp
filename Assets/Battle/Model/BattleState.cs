@@ -1,0 +1,123 @@
+using System.Collections.Generic;
+using Century.Core;
+using Century.Core.Contracts;
+using UnityEngine;
+
+namespace Century.Battle.Model
+{
+    /// <summary>Which stage of the battle we are in. Drives which UI is up and whether combat ticks.</summary>
+    public enum BattlePhase
+    {
+        /// <summary>Choosing who deploys and where. Nothing fights.</summary>
+        Deployment = 0,
+        /// <summary>Announcement banner. Still nothing fights.</summary>
+        Opening = 1,
+        Fighting = 2,
+        /// <summary>Outcome decided, summary on screen.</summary>
+        Aftermath = 3
+    }
+
+    /// <summary>
+    /// Root of everything in a single battle. Built from a BattleRequest on scene load and flattened
+    /// into a BattleResult when the fight ends.
+    /// </summary>
+    public sealed class BattleState
+    {
+        public string PlayerPartyId;
+        public string EnemyPartyId;
+        public string EnemyDisplayName;
+        public string TerrainId;
+        public CampaignTime TimeOfDay;
+        public bool PlayerAmbushed;
+
+        /// <summary>The player sprang the trap: deployment gets a free hand (wider, closer zone).</summary>
+        public bool EnemyAmbushed;
+
+        /// <summary>Commander doctrines in effect this battle, by catalog id.</summary>
+        public HashSet<string> CommanderSkills = new HashSet<string>();
+
+        /// <summary>Captured war banners with the column, for the doctrines that care.</summary>
+        public int CapturedBanners;
+
+        public bool HasSkill(string id) => CommanderSkills.Contains(id);
+        public int RandomSeed;
+
+        /// <summary>The enemy commander's doctrine. Drives <see cref="Sim.EnemySquadAi"/>.</summary>
+        public CommanderBehaviour EnemyBehaviour = CommanderBehaviour.Disciplined;
+
+        public List<BattleSquad> PlayerSquads = new List<BattleSquad>();
+        public List<BattleSquad> EnemySquads = new List<BattleSquad>();
+
+        /// <summary>Men held out of the fight. They return to the roster untouched.</summary>
+        public List<BattleCombatant> Reserve = new List<BattleCombatant>();
+
+        /// <summary>The Centurion. Directly controlled, and not a member of any squad.</summary>
+        public BattleCombatant PlayerCharacter;
+
+        /// <summary>Seconds since the battle began. Drives order propagation, not campaign time.</summary>
+        public float ElapsedSeconds;
+
+        public BattlePhase Phase = BattlePhase.Deployment;
+
+        // --- Deployment ------------------------------------------------------------------------
+
+        /// <summary>Centre of the zone the vanguard may deploy into.</summary>
+        public Vector3 DeploymentZoneCentre;
+
+        /// <summary>Half-extents of the deployment zone on the ground plane.</summary>
+        public Vector2 DeploymentZoneExtents = new Vector2(26f, 10f);
+
+        /// <summary>Where the player has chosen to form his vanguard.</summary>
+        public Vector3 VanguardAnchor;
+
+        /// <summary>Map-edge point reinforcements will march in from.</summary>
+        public Vector3 ReinforcementPoint;
+
+        public bool HasChosenVanguard;
+        public bool HasChosenReinforcementPoint;
+
+        /// <summary>Squad indices the player has held back. Populated during deployment.</summary>
+        public HashSet<int> ReservedSquadIndices = new HashSet<int>();
+
+        public bool IsPointInDeploymentZone(Vector3 point)
+        {
+            Vector3 local = point - DeploymentZoneCentre;
+            return Mathf.Abs(local.x) <= DeploymentZoneExtents.x
+                   && Mathf.Abs(local.z) <= DeploymentZoneExtents.y;
+        }
+
+        public IEnumerable<BattleCombatant> AllPlayerSideCombatants()
+        {
+            if (PlayerCharacter != null) yield return PlayerCharacter;
+
+            for (int s = 0; s < PlayerSquads.Count; s++)
+            {
+                List<BattleCombatant> members = PlayerSquads[s].Members;
+                for (int i = 0; i < members.Count; i++) yield return members[i];
+            }
+
+            for (int i = 0; i < Reserve.Count; i++) yield return Reserve[i];
+        }
+
+        public int PlayerSideAliveCount
+        {
+            get
+            {
+                int count = 0;
+                if (PlayerCharacter != null && PlayerCharacter.IsAlive) count++;
+                for (int s = 0; s < PlayerSquads.Count; s++) count += PlayerSquads[s].AliveCount;
+                return count;
+            }
+        }
+
+        public int EnemyAliveCount
+        {
+            get
+            {
+                int count = 0;
+                for (int s = 0; s < EnemySquads.Count; s++) count += EnemySquads[s].AliveCount;
+                return count;
+            }
+        }
+    }
+}

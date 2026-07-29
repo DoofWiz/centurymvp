@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <Style src="century.uss" />
+
+    <!--
+      Camp screen, iteration 2.
+
+      The century's organisation is now the centrepiece: a scrollable command-and-squads chart on
+      the left, with rest, orders and stations in a slim right column. Resources gained icons and two
+      radial dials (equipment, morale). Soldier detail and scout-result overlays live at the bottom.
+
+      Element names are the contract with CampHudController; it logs any it cannot find. Never put a
+      double hyphen inside an XML comment: it makes the whole file invalid and it imports empty.
+    -->
+    <ui:VisualElement name="root" class="hud-root">
+
+        <!-- ============================ TOP RESOURCE STRIP ============================ -->
+        <ui:VisualElement name="top-bar" class="top-bar">
+
+            <ui:VisualElement class="unit-identity">
+                <ui:Label name="camp-eyebrow" text="MARCHING CAMP" class="eyebrow" />
+                <ui:Label name="camp-title" text="CENTURIA VALERIA" class="title" />
+            </ui:VisualElement>
+
+            <ui:VisualElement class="resource-strip">
+
+                <ui:VisualElement class="resource resource--iconed">
+                    <ui:VisualElement class="resource__icon-img gi-backup" />
+                    <ui:VisualElement class="resource__stack">
+                        <ui:Label text="MEN" class="resource__label" />
+                        <ui:Label name="value-men" text="—" class="resource__value" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <ui:VisualElement class="resource resource--iconed">
+                    <ui:VisualElement class="resource__icon-img gi-grain-bundle" />
+                    <ui:VisualElement class="resource__stack">
+                        <ui:Label text="FOOD" class="resource__label" />
+                        <ui:Label name="value-food" text="—" class="resource__value" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <ui:VisualElement class="resource resource--iconed">
+                    <ui:VisualElement class="resource__icon-img gi-wood-pile" />
+                    <ui:VisualElement class="resource__stack">
+                        <ui:Label text="FIREWOOD" class="resource__label" />
+                        <ui:Label name="value-firewood" text="—" class="resource__value" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <ui:VisualElement class="resource resource--iconed">
+                    <ui:VisualElement class="resource__icon-img gi-healing" />
+                    <ui:VisualElement class="resource__stack">
+                        <ui:Label text="MEDICINE" class="resource__label" />
+                        <ui:Label name="value-medicine" text="—" class="resource__value" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <ui:VisualElement class="resource resource--iconed">
+                    <ui:VisualElement class="resource__icon-img gi-coins" />
+                    <ui:VisualElement class="resource__stack">
+                        <ui:Label text="COIN" class="resource__label" />
+                        <ui:Label name="value-coin" text="—" class="resource__value" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <ui:VisualElement class="resource resource--iconed">
+                    <ui:VisualElement class="resource__icon-img gi-two-coins" />
+                    <ui:VisualElement class="resource__stack">
+                        <ui:Label text="DENARII" class="resource__label" />
+                        <ui:Label name="value-denarii" text="—" class="resource__value" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+            </ui:VisualElement>
+
+            <!-- Two radial dials for the bounded ratings, where a gauge reads faster than a number. -->
+            <ui:VisualElement class="meter-block">
+                <ui:VisualElement class="meter-item">
+                    <ui:VisualElement name="equipment-meter" class="meter" />
+                    <ui:VisualElement class="resource__stack">
+                        <ui:Label text="EQUIPMENT" class="resource__label" />
+                        <ui:Label name="value-equipment" text="—" class="resource__value" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement class="meter-item">
+                    <ui:VisualElement name="morale-meter" class="meter" />
+                    <ui:VisualElement class="resource__stack">
+                        <ui:Label text="MORALE" class="resource__label" />
+                        <ui:Label name="value-morale" text="—" class="resource__value" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+        </ui:VisualElement>
+
+        <!-- ================================ CAMP TABS ================================ -->
+        <!-- Sub-screens like the inventory: each system gets the whole body, with room to grow. -->
+        <ui:VisualElement name="camp-tabs" class="camp-tabs">
+            <ui:Button name="camp-tab-0" class="pill">
+                <ui:Label text="THE CENTURY" class="pill__label" picking-mode="Ignore" />
+            </ui:Button>
+            <ui:Button name="camp-tab-1" class="pill">
+                <ui:Label text="REST &amp; ORDERS" class="pill__label" picking-mode="Ignore" />
+            </ui:Button>
+            <ui:Button name="camp-tab-2" class="pill">
+                <ui:Label text="CRAFTING" class="pill__label" picking-mode="Ignore" />
+            </ui:Button>
+            <ui:Button name="camp-tab-3" class="pill">
+                <ui:Label text="CAMP STATIONS" class="pill__label" picking-mode="Ignore" />
+            </ui:Button>
+        </ui:VisualElement>
+
+        <!-- ================================ MAIN BODY ================================ -->
+        <ui:VisualElement name="camp-main" class="camp-main">
+
+            <!-- ============================ PAGE: THE CENTURY ============================ -->
+            <ui:VisualElement name="camp-page-0" class="camp-page">
+                <ui:VisualElement class="panel camp-block camp-block--grow">
+                    <ui:VisualElement class="org-head">
+                        <ui:Label text="THE CENTURY" class="heading" />
+                        <ui:Label name="org-hint" text="Click a man to inspect him. Click a post to appoint an officer."
+                                  class="org-hint" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="rule rule--short" />
+                    <ui:ScrollView name="org-list" class="org-list" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- ============================ PAGE: REST AND ORDERS ============================ -->
+            <ui:VisualElement name="camp-page-1" class="camp-page camp-page--row" style="display: none;">
+
+                <ui:VisualElement class="panel camp-block camp-page__half">
+                    <ui:Label text="REST THE COLUMN" class="heading" />
+                    <ui:VisualElement class="rule rule--short" />
+                    <ui:VisualElement class="rest-row">
+                        <ui:Button name="rest-watch" class="button-primary rest-button">
+                            <ui:Label text="REST A WATCH" class="button-primary__label" picking-mode="Ignore" />
+                            <ui:Label text="3 hours" class="rest-button__sub" picking-mode="Ignore" />
+                        </ui:Button>
+                        <ui:Button name="rest-dawn" class="button-primary rest-button">
+                            <ui:Label text="UNTIL DAWN" class="button-primary__label" picking-mode="Ignore" />
+                            <ui:Label text="through the night" class="rest-button__sub" picking-mode="Ignore" />
+                        </ui:Button>
+                    </ui:VisualElement>
+                    <ui:Label name="rest-readout" text="The camp is quiet." class="body camp-readout" />
+                </ui:VisualElement>
+
+                <ui:VisualElement class="panel camp-block camp-page__half">
+                    <ui:Label text="ORDERS" class="heading" />
+                    <ui:VisualElement class="rule rule--short" />
+                    <ui:Button name="order-scout" class="order-row">
+                        <ui:VisualElement class="order-row__text" picking-mode="Ignore">
+                            <ui:Label text="SEND THE SCOUT" class="order-row__title" picking-mode="Ignore" />
+                            <ui:Label name="order-scout-hint" text="—" class="order-row__hint" picking-mode="Ignore" />
+                        </ui:VisualElement>
+                        <ui:Label text="›" class="order-row__chevron" picking-mode="Ignore" />
+                    </ui:Button>
+                    <ui:Button name="order-train" class="order-row">
+                        <ui:VisualElement class="order-row__text" picking-mode="Ignore">
+                            <ui:Label text="DRILL THE RANKS" class="order-row__title" picking-mode="Ignore" />
+                            <ui:Label name="order-train-hint" text="—" class="order-row__hint" picking-mode="Ignore" />
+                        </ui:VisualElement>
+                        <ui:Label text="›" class="order-row__chevron" picking-mode="Ignore" />
+                    </ui:Button>
+                    <ui:Button name="order-hunt" class="order-row">
+                        <ui:VisualElement class="order-row__text" picking-mode="Ignore">
+                            <ui:Label text="SEND HUNTERS" class="order-row__title" picking-mode="Ignore" />
+                            <ui:Label name="order-hunt-hint" text="—" class="order-row__hint" picking-mode="Ignore" />
+                        </ui:VisualElement>
+                        <ui:Label text="›" class="order-row__chevron" picking-mode="Ignore" />
+                    </ui:Button>
+                </ui:VisualElement>
+
+            </ui:VisualElement>
+
+            <!-- ============================ PAGE: CRAFTING ============================ -->
+            <ui:VisualElement name="camp-page-2" class="camp-page" style="display: none;">
+                <ui:VisualElement class="panel camp-block camp-block--grow">
+                    <ui:Label text="CRAFTING" class="heading" />
+                    <ui:VisualElement class="rule rule--short" />
+                    <ui:ScrollView name="crafting-list" class="stations-list stations-wide" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- ============================ PAGE: CAMP STATIONS ============================ -->
+            <ui:VisualElement name="camp-page-3" class="camp-page" style="display: none;">
+                <ui:VisualElement class="panel camp-block camp-block--grow">
+                    <ui:Label text="CAMP STATIONS" class="heading" />
+                    <ui:VisualElement class="rule rule--short" />
+                    <ui:ScrollView name="stations-list" class="stations-list stations-wide" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+        </ui:VisualElement>
+
+        <!-- ================================ BOTTOM BAR ================================ -->
+        <ui:VisualElement name="camp-footer" class="camp-footer">
+            <ui:Label name="camp-site" text="A hollow off the forest track" class="body body--dim" />
+            <ui:Button name="break-camp" class="button-start camp-break">
+                <ui:Label text="BREAK CAMP" class="button-start__label" picking-mode="Ignore" />
+            </ui:Button>
+        </ui:VisualElement>
+
+        <!-- ============================ SOLDIER PICKER MODAL ============================ -->
+        <ui:VisualElement name="picker-modal" class="modal" style="display: none;">
+            <ui:VisualElement class="modal__sheet picker-sheet">
+                <ui:VisualElement class="modal__header">
+                    <ui:Label name="picker-title" text="APPOINT" class="modal__title" />
+                    <ui:Label name="picker-subtitle" text="Choose a man for the post" class="modal__subtitle" />
+                </ui:VisualElement>
+                <ui:ScrollView name="picker-list" class="picker-list" />
+                <ui:VisualElement class="modal__footer picker-footer">
+                    <ui:Button name="picker-vacate" class="button-ghost">
+                        <ui:Label text="LEAVE VACANT" class="button-ghost__label" picking-mode="Ignore" />
+                    </ui:Button>
+                    <ui:Button name="picker-close" class="button-ghost">
+                        <ui:Label text="CLOSE" class="button-ghost__label" picking-mode="Ignore" />
+                    </ui:Button>
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- ============================ SOLDIER DETAIL MODAL ============================ -->
+        <ui:VisualElement name="soldier-modal" class="modal" style="display: none;">
+            <ui:VisualElement class="modal__sheet detail-sheet">
+                <ui:VisualElement class="detail-head">
+                    <ui:Label name="soldier-avatar" text="●" class="detail-avatar" />
+                    <ui:VisualElement class="detail-head__text">
+                        <ui:Label name="soldier-name" text="—" class="detail-name" />
+                        <ui:Label name="soldier-rank" text="—" class="detail-rank" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <ui:Label name="soldier-flavour" text="—" class="detail-flavour" />
+
+                <ui:VisualElement class="detail-row">
+                    <ui:Label text="ATTITUDE TO YOU" class="detail-label" />
+                    <ui:Label name="soldier-attitude" text="—" class="detail-value" />
+                </ui:VisualElement>
+
+                <ui:Label name="soldier-rankprog-label" text="RANK" class="detail-label detail-label--block" />
+                <ui:VisualElement class="bar bar--thick">
+                    <ui:VisualElement name="soldier-rankprog-fill" class="bar__fill bar__fill--gold" />
+                </ui:VisualElement>
+
+                <ui:Label name="soldier-morale-label" text="MORALE" class="detail-label detail-label--block" />
+                <ui:VisualElement class="bar bar--thick">
+                    <ui:VisualElement name="soldier-morale-fill" class="bar__fill bar__fill--morale" />
+                </ui:VisualElement>
+
+                <ui:Label name="soldier-fitness-label" text="FITNESS" class="detail-label detail-label--block" />
+                <ui:VisualElement class="bar bar--thick">
+                    <ui:VisualElement name="soldier-fitness-fill" class="bar__fill bar__fill--health" />
+                </ui:VisualElement>
+
+                <ui:Label text="EQUIPMENT" class="detail-label detail-label--block" />
+                <ui:Label name="soldier-equipment" text="—" class="detail-equipment" />
+
+                <ui:VisualElement class="modal__footer detail-footer">
+                    <ui:Button name="soldier-decanus" class="button-ghost" style="display: none;">
+                        <ui:Label name="soldier-decanus-label" text="APPOINT DECANUS"
+                                  class="button-ghost__label" picking-mode="Ignore" />
+                    </ui:Button>
+                    <ui:Button name="soldier-close" class="button-ghost">
+                        <ui:Label text="STAND EASY" class="button-ghost__label" picking-mode="Ignore" />
+                    </ui:Button>
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- ============================ SCOUT RESULT MODAL ============================ -->
+        <ui:VisualElement name="scout-modal" class="modal" style="display: none;">
+            <ui:VisualElement class="modal__sheet scout-sheet">
+                <ui:VisualElement class="modal__header">
+                    <ui:Label text="OPPORTUNITY SIGHTED" class="modal__title" />
+                    <ui:Label name="scout-title" text="—" class="modal__subtitle" />
+                </ui:VisualElement>
+
+                <ui:Label name="scout-detail" text="—" class="detail-flavour" />
+
+                <ui:VisualElement class="detail-row">
+                    <ui:Label text="POSSIBLE REWARD" class="detail-label" />
+                    <ui:Label name="scout-reward" text="—" class="detail-value text-good" />
+                </ui:VisualElement>
+                <ui:VisualElement class="detail-row">
+                    <ui:Label text="EXPECTED RESISTANCE" class="detail-label" />
+                    <ui:Label name="scout-risk" text="—" class="detail-value" />
+                </ui:VisualElement>
+                <ui:VisualElement class="detail-row">
+                    <ui:Label text="DISTANCE" class="detail-label" />
+                    <ui:Label name="scout-distance" text="—" class="detail-value" />
+                </ui:VisualElement>
+
+                <ui:VisualElement class="modal__footer detail-footer">
+                    <ui:Button name="scout-close" class="button-start">
+                        <ui:Label text="MARK IT ON THE MAP" class="button-start__label" picking-mode="Ignore" />
+                    </ui:Button>
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+</ui:UXML>

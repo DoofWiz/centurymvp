@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1045 &1
+EditorBuildSettings:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Scenes:
+  - enabled: 0
+    path: Assets/Scenes/SampleScene.unity
+    guid: 99c9720ab356a0642a771bea13969a05
+  - enabled: 1
+    path: Assets/Scenes/Boot.unity
+    guid: e6f8d195f49075843b0fd97499124b7f
+  - enabled: 1
+    path: Assets/Scenes/Overmap.unity
+    guid: 28da0d7943f2c0b4bb490e62e5c4a5a1
+  - enabled: 1
+    path: Assets/Scenes/Battle.unity
+    guid: 2d56949b6e9b8cd4e9f52394464f2cc0
+  - enabled: 1
+    path: Assets/Scenes/Camp.unity
+    guid: 8ea9ef64538411d4cbbcfad3a868aa2b
+  m_configObjects:
+    com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  m_UseUCBPForAssetBundles: 0

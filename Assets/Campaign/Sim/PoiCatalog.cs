@@ -1,0 +1,373 @@
+using System.Collections.Generic;
+using Century.Campaign.Model;
+using UnityEngine;
+
+namespace Century.Campaign.Sim
+{
+    /// <summary>What a choice does: resource swings, morale, healing, recruits, or a fight.</summary>
+    public sealed class PoiOutcome
+    {
+        public string ResultText = string.Empty;
+
+        public float Food;
+        public int Coin, Denarii;
+        public float Morale;      // delta applied to every living man, so it sticks past the hourly re-average
+        public float Heal01;      // health restored to each wounded man
+        public int Recruits;
+
+        public bool SpawnFight;
+        public int FightStrength;
+
+        /// <summary>Items granted into the party inventory: catalog id and count per entry.</summary>
+        public ItemGrant[] Items;
+
+        public struct ItemGrant
+        {
+            public string Id;
+            public int Count;
+
+            public ItemGrant(string id, int count)
+            {
+                Id = id;
+                Count = count;
+            }
+        }
+
+        /// <summary>Applies the outcome to the player's party and returns the line to report.</summary>
+        public string Apply(CampaignState state, PartyState player, CampaignEventLog log, Vector3 position)
+        {
+            Stores s = player.Stores;
+            s.Food = Mathf.Max(0f, s.Food + Food);
+            s.Coin = Mathf.Max(0, s.Coin + Coin);
+            s.Denarii = Mathf.Max(0, s.Denarii + Denarii);
+
+            if (Morale != 0f || Heal01 > 0f)
+            {
+                List<SoldierRecord> men = player.Roster.Soldiers;
+                for (int i = 0; i < men.Count; i++)
+                {
+                    SoldierRecord man = men[i];
+                    if (!man.IsAlive) continue;
+                    if (Morale != 0f) man.Morale01 = Mathf.Clamp01(man.Morale01 + Morale);
+                    if (Heal01 > 0f && man.Health01 < 0.5f) man.Health01 = Mathf.Clamp01(man.Health01 + Heal01);
+                }
+                player.Morale.Value01 = player.Roster.AverageMorale01;
+            }
+
+            for (int i = 0; i < Recruits; i++) player.Roster.Add(MakeRecruit());
+
+            if (Items != null)
+                for (int i = 0; i < Items.Length; i++)
+                    player.Inventory.Add(Items[i].Id, Items[i].Count);
+
+            if (SpawnFight) PoiFightFactory.SpawnRaiders(state, position, FightStrength);
+
+            log?.Push(SpawnFight ? CampaignEventKind.Threat : CampaignEventKind.Gain,
+                ResultText, string.Empty, state.Clock.Now.DayNumber);
+
+            return ResultText;
+        }
+
+        private static readonly string[] Praenomina =
+            { "Gaius", "Lucius", "Marcus", "Publius", "Quintus", "Titus", "Aulus", "Decimus" };
+        private static readonly string[] Nomina =
+            { "Valerius", "Aquilius", "Vorenus", "Secundus", "Felix", "Cornelius", "Fabius", "Sergius" };
+
+        private static SoldierRecord MakeRecruit()
+        {
+            string name = $"{Praenomina[Random.Range(0, Praenomina.Length)][0]}. {Nomina[Random.Range(0, Nomina.Length)]}";
+            return new SoldierRecord
+            {
+                Id = System.Guid.NewGuid().ToString("N").Substring(0, 8),
+                DisplayName = name,
+                RankId = "legionary",
+                ArchetypeId = "legionary_heavy",
+                Health01 = Random.Range(0.7f, 1f),
+                Stamina01 = Random.Range(0.7f, 1f),
+                Morale01 = Random.Range(0.45f, 0.65f),
+                Loyalty01 = 0.5f
+            };
+        }
+    }
+
+    public sealed class PoiChoice
+    {
+        public string Label;
+        public string Hint;
+        public PoiOutcome Outcome;
+
+        public PoiChoice(string label, string hint, PoiOutcome outcome)
+        {
+            Label = label;
+            Hint = hint;
+            Outcome = outcome;
+        }
+    }
+
+    public sealed class PoiEvent
+    {
+        public string Id;
+        public string Title;
+        public string Subtitle;
+        public string Body;
+        public string OfficerRemark;
+        public PoiChoice[] Choices;
+    }
+
+    /// <summary>
+    /// The authored library of overmap events, keyed by <see cref="PointOfInterest.EventId"/>. Plain
+    /// C# so a designer needs no asset pipeline to add or tune one; it moves to ScriptableObjects when
+    /// the content outgrows a single file.
+    /// </summary>
+    public static class PoiCatalog
+    {
+        private static readonly Dictionary<string, PoiEvent> Events = Build();
+
+        public static PoiEvent Find(string eventId)
+        {
+            if (string.IsNullOrEmpty(eventId)) return null;
+            return Events.TryGetValue(eventId, out PoiEvent found) ? found : null;
+        }
+
+        /// <summary>
+        /// Seeds a fresh Opportunity POI near a position — used by the Speculator's scouting and any
+        /// event that reveals a prize. Discovered on creation so its marker shows at once.
+        /// </summary>
+        public static PointOfInterest CreateOpportunity(CampaignState state, CampaignSettings settings, Vector3 near)
+        {
+            Vector2 dir = Random.insideUnitCircle.normalized;
+            float distance = Random.Range(120f, 220f);
+            Vector3 pos = settings.ClampToWorld(near + new Vector3(dir.x, 0f, dir.y) * distance);
+
+            var poi = new PointOfInterest
+            {
+                Id = state.MintId("poi"),
+                Kind = PoiKind.Opportunity,
+                DisplayName = "A scouted prize",
+                EventId = "opportunity",
+                WorldPosition = pos,
+                Discovered = true
+            };
+            state.PointsOfInterest.Add(poi);
+            return poi;
+        }
+
+        private static Dictionary<string, PoiEvent> Build()
+        {
+            var map = new Dictionary<string, PoiEvent>();
+
+            void Add(PoiEvent e) => map[e.Id] = e;
+
+            Add(new PoiEvent
+            {
+                Id = "shrine",
+                Title = "A Roadside Shrine",
+                Subtitle = "An altar to Mercury at the crossroads",
+                Body = "A weathered altar stands where two tracks meet, its offering-bowl long empty. " +
+                       "Travellers once paid the god for safe passage. You could do the same — or take what little remains.",
+                OfficerRemark = "Optio Aquilius: \"The men could do with a blessing, sir. Gods know we've earned no luck.\"",
+                Choices = new[]
+                {
+                    new PoiChoice("Leave an offering", "-20 denarii, the men take heart",
+                        new PoiOutcome { Denarii = -20, Morale = 0.06f, ResultText = "You leave coin at the altar; the column marches easier." }),
+                    new PoiChoice("Take what coin remains", "+18 coin, some mutter of ill luck",
+                        new PoiOutcome { Coin = 18, Morale = -0.04f, ResultText = "You pocket the offerings. A few men make warding signs." }),
+                    new PoiChoice("March on", "leave the shrine untouched",
+                        new PoiOutcome { ResultText = "You leave the shrine as you found it." }),
+                }
+            });
+
+            Add(new PoiEvent
+            {
+                Id = "grove",
+                Title = "A Druid's Grove",
+                Subtitle = "Votive stones and herb-smoke in the pines",
+                Body = "Smoke curls through the trees, and an old healer tends bundles of herbs among moss-grown " +
+                       "stones. She watches your column without fear.",
+                OfficerRemark = "Medicus Secundus: \"Those herbs, sir — worth more than gold to the wounded.\"",
+                Choices = new[]
+                {
+                    new PoiChoice("Trade for medicine", "-40 coin, herbs and salves",
+                        new PoiOutcome
+                        {
+                            Coin = -40,
+                            Items = new[]
+                            {
+                                new PoiOutcome.ItemGrant("healing_herbs", 3),
+                                new PoiOutcome.ItemGrant("healing_salve", 1),
+                            },
+                            ResultText = "You barter for her herbs; the medicus is well pleased."
+                        }),
+                    new PoiChoice("Ask her to tend the wounded", "heals the wounded, +morale",
+                        new PoiOutcome { Heal01 = 0.2f, Morale = 0.04f, ResultText = "The healer works through the column; the worst hurts ease." }),
+                    new PoiChoice("Rob the grove", "+70 coin, the men are shamed",
+                        new PoiOutcome { Coin = 70, Morale = -0.09f, ResultText = "You strip the grove bare. It sits ill with the men." }),
+                }
+            });
+
+            Add(new PoiEvent
+            {
+                Id = "refugees",
+                Title = "A Column of Refugees",
+                Subtitle = "Frightened folk on the old road",
+                Body = "Roman and native both, fleeing the same war you are. Some are strong enough to carry a shield. " +
+                       "All of them are hungry.",
+                OfficerRemark = "Tesserarius Vorenus: \"Mouths to feed, sir. Or blades for the line. Your call.\"",
+                Choices = new[]
+                {
+                    new PoiChoice("Take able men into the ranks", "+2 recruits, -30 food",
+                        new PoiOutcome { Recruits = 2, Food = -30, ResultText = "Two able men fall in with the column." }),
+                    new PoiChoice("Share your rations", "-40 food, the men's spirits rise",
+                        new PoiOutcome { Food = -40, Morale = 0.07f, ResultText = "You feed the refugees. Word of Roman mercy spreads." }),
+                    new PoiChoice("Turn them away", "costs nothing, costs something",
+                        new PoiOutcome { Morale = -0.05f, ResultText = "You wave them off the road. The men march in silence." }),
+                }
+            });
+
+            Add(new PoiEvent
+            {
+                Id = "merchant",
+                Title = "A Travelling Merchant",
+                Subtitle = "A Syrian trader with a laden mule-train",
+                Body = "Even here, at the edge of the world, there is coin to be made. The trader spreads his hands " +
+                       "and smiles a merchant's smile.",
+                Choices = new[]
+                {
+                    new PoiChoice("Buy materials", "-60 denarii, timber, leather and rope",
+                        new PoiOutcome
+                        {
+                            Denarii = -60,
+                            Items = new[]
+                            {
+                                new PoiOutcome.ItemGrant("timber", 4),
+                                new PoiOutcome.ItemGrant("leather_hides", 3),
+                                new PoiOutcome.ItemGrant("rope_coils", 2),
+                            },
+                            ResultText = "You lay in materials for the road ahead."
+                        }),
+                    new PoiChoice("Buy food", "-50 denarii, +100 rations",
+                        new PoiOutcome { Denarii = -50, Food = 100, ResultText = "The wagons are heavier with grain now." }),
+                    new PoiChoice("Change coin for denarii", "-100 coin, +40 denarii",
+                        new PoiOutcome { Coin = -100, Denarii = 40, ResultText = "You trade local tokens for good Roman silver." }),
+                    new PoiChoice("Move on", "keep your purse shut",
+                        new PoiOutcome { ResultText = "You leave the trader to the road." }),
+                }
+            });
+
+            Add(new PoiEvent
+            {
+                Id = "watchtower",
+                Title = "An Abandoned Watchtower",
+                Subtitle = "A Roman tower, its garrison fled",
+                Body = "The signal-tower stands empty on the ridge, commanding the valley. Kit may still lie within — " +
+                       "but something has made a den of the lower room, and it is not sleeping quietly.",
+                OfficerRemark = "Optio Aquilius: \"Could be arms up there, sir. Could be a bear. Only one way to know.\"",
+                Choices = new[]
+                {
+                    new PoiChoice("Search it", "salvage, +30 denarii — but rouse what's inside",
+                        new PoiOutcome
+                        {
+                            Denarii = 30, SpawnFight = true, FightStrength = 8,
+                            Items = new[]
+                            {
+                                new PoiOutcome.ItemGrant("map_marsh_paths", 1),
+                                new PoiOutcome.ItemGrant("mead_jar", 2),
+                                new PoiOutcome.ItemGrant("timber", 3),
+                                new PoiOutcome.ItemGrant("rope_coils", 2),
+                            },
+                            ResultText = "You force the door. Something comes out fighting."
+                        }),
+                    new PoiChoice("Camp in the tower", "+8 firewood bundles, +morale",
+                        new PoiOutcome
+                        {
+                            Morale = 0.04f,
+                            Items = new[] { new PoiOutcome.ItemGrant("firewood_bundle", 8) },
+                            ResultText = "You take the upper floor for the night. Dry walls, for once."
+                        }),
+                    new PoiChoice("Leave it be", "walk away",
+                        new PoiOutcome { ResultText = "You leave the tower to its tenant." }),
+                }
+            });
+
+            Add(new PoiEvent
+            {
+                Id = "raiders",
+                Title = "A Raider Camp",
+                Subtitle = "Germanic warriors, drunk on plunder",
+                Body = "They sprawl around their fires, Roman spoils piled beside them — cloaks, standards, a legion's " +
+                       "shame. They have not seen you yet.",
+                OfficerRemark = "Tesserarius Vorenus: \"Catch them like this and they'll not stand long, sir.\"",
+                Choices = new[]
+                {
+                    new PoiChoice("Attack them", "a fight — but the spoils are Roman",
+                        new PoiOutcome { SpawnFight = true, FightStrength = 16, ResultText = "You form up and fall on the camp." }),
+                    new PoiChoice("Slip past", "avoid the fight, lose a little face",
+                        new PoiOutcome { Morale = -0.03f, ResultText = "You give the camp a wide berth. Some men wanted the fight." }),
+                }
+            });
+
+            Add(new PoiEvent
+            {
+                Id = "battlefield",
+                Title = "An Old Battlefield",
+                Subtitle = "Bones and broken shields in the grass",
+                Body = "A legion died here, or a warband — the crows no longer care which. Good iron rusts in the mud, " +
+                       "and the Roman dead lie unburied.",
+                OfficerRemark = "Signifer Felix: \"Our own may lie here, sir. We should not pass them by.\"",
+                Choices = new[]
+                {
+                    new PoiChoice("Scavenge the field", "salvage and iron — the work sits ill",
+                        new PoiOutcome
+                        {
+                            Morale = -0.05f,
+                            Items = new[]
+                            {
+                                new PoiOutcome.ItemGrant("scutum_spare", 2),
+                                new PoiOutcome.ItemGrant("helmet_spare", 2),
+                                new PoiOutcome.ItemGrant("iron_ingots", 3),
+                                new PoiOutcome.ItemGrant("linen_bandages", 2),
+                                new PoiOutcome.ItemGrant("orders_varus", 1),
+                            },
+                            ResultText = "You strip the field of anything useful."
+                        }),
+                    new PoiChoice("Bury the dead", "no spoils, but the men stand taller",
+                        new PoiOutcome { Morale = 0.08f, ResultText = "You give the dead the rites of Rome. The men are the prouder for it." }),
+                    new PoiChoice("March on", "leave the field to the crows",
+                        new PoiOutcome { ResultText = "You leave the dead to the grass." }),
+                }
+            });
+
+            Add(new PoiEvent
+            {
+                Id = "opportunity",
+                Title = "The Prize Your Scout Marked",
+                Subtitle = "The Speculator's report bears fruit",
+                Body = "Your scout led you here on a promise of plunder: a strongpoint, lightly held, with something " +
+                       "worth the taking behind its palisade.",
+                OfficerRemark = "Speculator: \"I counted few of them, sir. We'll not get a better chance.\"",
+                Choices = new[]
+                {
+                    new PoiChoice("Seize it", "a fight, then rich spoils",
+                        new PoiOutcome
+                        {
+                            Denarii = 90, SpawnFight = true, FightStrength = 12,
+                            Items = new[]
+                            {
+                                new PoiOutcome.ItemGrant("grain_sack", 4),
+                                new PoiOutcome.ItemGrant("salt_blocks", 2),
+                                new PoiOutcome.ItemGrant("fur_pelts", 3),
+                                new PoiOutcome.ItemGrant("amber_lumps", 1),
+                            },
+                            ResultText = "You storm the strongpoint for its prize."
+                        }),
+                    new PoiChoice("Grab what you can and go", "+35 coin, no fight",
+                        new PoiOutcome { Coin = 35, ResultText = "You lift what's loose and slip away before they muster." }),
+                    new PoiChoice("Decide it's not worth it", "leave the prize",
+                        new PoiOutcome { ResultText = "You judge the risk too great and march on." }),
+                }
+            });
+
+            return map;
+        }
+    }
+}

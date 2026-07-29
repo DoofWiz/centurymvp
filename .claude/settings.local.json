@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls -la '/c/Users/tomsc/.claude/projects/D--Unity-Century-Prototype/memory/' 2>/dev/null || echo \"DIR MISSING\")",
+      "Bash(ls -d /c/Users/tomsc/.claude/projects/*Century* 2>/dev/null)",
+      "PowerShell(try { [xml]\\(Get-Content \"D:\\\\Unity\\\\Century Prototype\\\\Assets\\\\UI\\\\BattleHud.uxml\" -Raw\\) | Out-Null; \"XML VALID\" } catch { \"XML INVALID: $\\($_.Exception.Message\\)\" })",
+      "PowerShell(try { [xml]\\(Get-Content \"D:\\\\Unity\\\\Century Prototype\\\\Assets\\\\UI\\\\OvermapHud.uxml\" -Raw\\) | Out-Null; \"XML VALID\" } catch { \"XML INVALID: $\\($_.Exception.Message\\)\" })",
+      "PowerShell(try { [xml]\\(Get-Content \"D:\\\\Unity\\\\Century Prototype\\\\Assets\\\\UI\\\\CampHud.uxml\" -Raw\\) | Out-Null; \"XML VALID\" } catch { \"XML INVALID: $\\($_.Exception.Message\\)\" })",
+      "Bash(ls -la /c/Users/tomsc/Downloads/Century_Design_Overview* 2>/dev/null; which pandoc zip soffice py python 2>/dev/null)"
+    ]
+  }
+}

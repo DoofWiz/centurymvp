@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:docs.google.com)",
+      "Read(//c/Users/tomsc/Downloads/**)",
+      "Bash(pandoc -t markdown \"Century_Design_Overview \\(1\\).docx\")",
+      "Bash(pandoc -t markdown \"C:/Users/tomsc/Downloads/Century_Design_Overview \\(1\\).docx\")",
+      "PowerShell(pandoc -t markdown \"C:\\\\Users\\\\tomsc\\\\Downloads\\\\Century_Design_Overview \\(1\\).docx\" -o \"$env:TEMP\\\\century_design.md\"; Get-Item \"$env:TEMP\\\\century_design.md\" | Select-Object Length)",
+      "Read(//c/Users/tomsc/AppData/Local/Temp/claude/D--Unity-Century-Prototype-Assets/8d7e9a08-1cde-41ea-ab2a-059a6ebc50c2/scratchpad/**)",
+      "Bash(mkdir -p doc)",
+      "Bash(unzip -oq \"C:/Users/tomsc/Downloads/Century_Design_Overview \\(1\\).docx\" -d doc)",
+      "PowerShell($py = \\(Get-Command python3 -ErrorAction SilentlyContinue\\); if\\($py\\){$py.Source}else{\"no python3\"}; $p2=\\(Get-Command py -ErrorAction SilentlyContinue\\); if\\($p2\\){$p2.Source}else{\"no py\"})",
+      "PowerShell(try { [xml]$x = Get-Content \"D:\\\\Unity\\\\Century Prototype\\\\Assets\\\\UI\\\\CampHud.uxml\" -Raw -Encoding UTF8; \"XML OK. Root: $\\($x.DocumentElement.Name\\). Child count: $\\($x.DocumentElement.ChildNodes.Count\\)\" } catch { \"XML PARSE ERROR: $\\($_.Exception.Message\\)\" })",
+      "PowerShell(try { [xml]$x = Get-Content \"D:\\\\Unity\\\\Century Prototype\\\\Assets\\\\UI\\\\CampHud.uxml\" -Raw -Encoding UTF8; \"XML OK. Root: $\\($x.DocumentElement.Name\\)\" } catch { \"XML PARSE ERROR: $\\($_.Exception.Message\\)\" })",
+      "PowerShell(& py --version 2>&1)",
+      "PowerShell(& py -c \"import sys; print\\(sys.version\\)\" 2>&1)",
+      "PowerShell(\"---\")",
+      "Bash(py C:/Users/tomsc/AppData/Roaming/Claude/local-agent-mode-sessions/skills-plugin/421feee1-bdd6-4fc6-99f6-f18c55ee6550/3c391575-9587-4d02-8c48-70be9c9cfb9f/skills/docx/scripts/merge_runs.py /c/Users/tomsc/AppData/Local/Temp/claude/D--Unity-Century-Prototype-Assets/8d7e9a08-1cde-41ea-ab2a-059a6ebc50c2/scratchpad/docedit/unpacked)",
+      "Bash(py -m pip install defusedxml --quiet)",
+      "Bash(py -c ' *)"
+    ]
+  }
+}

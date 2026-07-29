@@ -1,0 +1,16 @@
+{
+    "name": "Century.Battle",
+    "rootNamespace": "Century.Battle",
+    "references": [
+        "Century.Core"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
