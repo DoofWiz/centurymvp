@@ -61,9 +61,11 @@
     <Compile Include="Assets\Battle\Model\BattleSquad.cs" />
     <Compile Include="Assets\Battle\View\PilaProjectile.cs" />
     <Compile Include="Assets\Battle\Model\MeleeState.cs" />
+    <Compile Include="Assets\Battle\View\HitEffects.cs" />
     <Compile Include="Assets\Battle\View\SquadLabels.cs" />
     <Compile Include="Assets\Battle\View\BattleEventFeed.cs" />
     <Compile Include="Assets\Battle\View\ReinforcementsView.cs" />
+    <Compile Include="Assets\Battle\View\BattleTimeControls.cs" />
     <Compile Include="Assets\Battle\Sim\MoraleSystem.cs" />
     <Compile Include="Assets\Battle\Sim\MedicusSystem.cs" />
     <Compile Include="Assets\Battle\Model\FormationType.cs" />

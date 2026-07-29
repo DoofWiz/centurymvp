@@ -2647,17 +2647,11 @@
     -unity-font-style: bold;
 }
 
-/* --- Squad inspect (hover panel, above the order bar) ---------------------------------- */
+/* --- Squad inspect (floating tip over the hovered squad; left/top set from code) ------- */
 
 .squad-inspect {
     position: absolute;
-    bottom: 170px;
-    left: 0;
-    right: 0;
-    align-self: center;
-    width: 320px;
-    margin-left: auto;
-    margin-right: auto;
+    width: 300px;
 }
 
 .inspect-row {

@@ -157,7 +157,15 @@ namespace Century.Battle.View
                            * Mathf.Lerp(0.7f, 1f, _combatant.Health01)
                            * StaminaProfile.For(_combatant.Stamina).MoveMultiplier;
 
-            _agent.SetDestination(_squad.RoutDestination);
+            // The rout point is flung far past the field edge — usually clean off the baked NavMesh —
+            // and SetDestination to an off-mesh point FAILS SILENTLY, leaving a "fleeing" man standing
+            // exactly where he broke. Walk the flight line to the last navigable ground instead, so
+            // every routed man visibly runs for the edge of the world he can actually reach.
+            Vector3 destination = _squad.RoutDestination;
+            if (NavMesh.Raycast(transform.position, destination, out NavMeshHit edge, NavMesh.AllAreas))
+                destination = edge.position;
+
+            _agent.SetDestination(destination);
             FaceDirection(_agent.velocity);
         }
 

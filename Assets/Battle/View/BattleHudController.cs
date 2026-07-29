@@ -35,6 +35,7 @@ namespace Century.Battle.View
         private SquadCommandInput _commands;
         private BattleEventFeed _feed;
         private PlayerCharacterController _player;
+        private Camera _camera;
 
         private float _accumulator;
         private bool _bound;
@@ -446,7 +447,31 @@ namespace Century.Battle.View
                 return;
             }
 
+            if (_camera == null) _camera = Camera.main;
+            if (_camera == null)
+            {
+                _inspectPanel.style.display = DisplayStyle.None;
+                return;
+            }
+
+            // Hover the panel over the squad itself, so the eye never leaves the fight to read it.
+            Vector3 screen = _camera.WorldToScreenPoint(squad.CentreOfMass() + Vector3.up * 2f);
+            if (screen.z <= 0f)
+            {
+                _inspectPanel.style.display = DisplayStyle.None;
+                return;
+            }
+
             _inspectPanel.style.display = DisplayStyle.Flex;
+
+            Vector2 panel = RuntimePanelUtils.ScreenToPanel(
+                _inspectPanel.panel, new Vector2(screen.x, Screen.height - screen.y));
+
+            float width = _inspectPanel.resolvedStyle.width > 0f ? _inspectPanel.resolvedStyle.width : 300f;
+            float height = _inspectPanel.resolvedStyle.height > 0f ? _inspectPanel.resolvedStyle.height : 150f;
+
+            _inspectPanel.style.left = panel.x - width * 0.5f;
+            _inspectPanel.style.top = panel.y - height - 14f;
 
             float health = AverageHealth01(squad);
             float stamina = squad.AverageStamina01;
