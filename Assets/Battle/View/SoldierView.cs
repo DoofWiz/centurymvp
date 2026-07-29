@@ -138,7 +138,11 @@ namespace Century.Battle.View
 
             _gear?.Pose(_combatant, Time.deltaTime);
 
-            if (_combatant.WasHitThisTick) ApplyTint();
+            if (_combatant.WasHitThisTick)
+            {
+                ApplyTint();
+                HitEffects.Spawn(transform.position + Vector3.up * 1.15f);
+            }
         }
 
         // --- Movement modes --------------------------------------------------------------------

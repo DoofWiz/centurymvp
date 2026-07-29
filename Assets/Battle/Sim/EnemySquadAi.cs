@@ -24,6 +24,7 @@ namespace Century.Battle.Sim
 
         private int _committedAtStart = -1;
         private bool _reserveSummoned;
+        private bool _fightJoined;
 
         public EnemySquadAi(BattleState state, BattleSettings settings)
         {
@@ -39,12 +40,27 @@ namespace Century.Battle.Sim
 
             ConsiderSummoningReserve();
 
+            // Once ANY warband is trading blows the waiting game is over for the whole warhost —
+            // this is what frees a Wary commander's reinforcements to march instead of standing at
+            // the field edge waiting for a Roman to wander within commit range of each of them.
+            _fightJoined = _fightJoined || AnyEngaged();
+
             for (int i = 0; i < _state.EnemySquads.Count; i++)
             {
                 BattleSquad squad = _state.EnemySquads[i];
                 if (!squad.IsEffective || squad.IsOffField) continue;
                 Decide(squad);
             }
+        }
+
+        private bool AnyEngaged()
+        {
+            for (int i = 0; i < _state.EnemySquads.Count; i++)
+            {
+                BattleSquad squad = _state.EnemySquads[i];
+                if (!squad.IsOffField && squad.EngagedCount > 0) return true;
+            }
+            return false;
         }
 
         /// <summary>
@@ -103,6 +119,23 @@ namespace Century.Battle.Sim
                 return;
             }
 
+            // Fresh reinforcements swing at a flank while the committed line holds the front —
+            // marching them into the back of their own fight wastes the one advantage they bring.
+            if (squad.ArrivedAsReserve && distance > _settings.EnemyChargeRange * 0.6f)
+            {
+                Vector3 toTarget = target - centre;
+                toTarget.y = 0f;
+                if (toTarget.sqrMagnitude > 0.01f)
+                {
+                    Vector3 side = Vector3.Cross(Vector3.up, toTarget.normalized)
+                                   * (squad.Index % 2 == 0 ? 1f : -1f);
+                    squad.Order = SquadOrder.Advance;
+                    squad.OrderedPosition = target + side * (_settings.SquadFrontage * 2f);
+                    squad.Formation = FormationType.Line;
+                    return;
+                }
+            }
+
             switch (_state.EnemyBehaviour)
             {
                 case CommanderBehaviour.Skirmisher: DecideSkirmisher(squad, centre, target, distance); break;
@@ -146,12 +179,13 @@ namespace Century.Battle.Sim
             squad.Formation = FormationType.Line;
         }
 
-        /// <summary>Hold off until a Roman comes within committing range, then charge home.</summary>
+        /// <summary>Hold off until a Roman comes within committing range — or until the fight is
+        /// joined anywhere, after which waiting is desertion, not doctrine.</summary>
         private void DecideWary(BattleSquad squad, Vector3 target, float distance)
         {
             if (HoldWhenEngaged(squad)) return;
 
-            if (distance > _settings.WaryCommitRange)
+            if (!_fightJoined && distance > _settings.WaryCommitRange)
             {
                 squad.Order = SquadOrder.HoldPosition;
                 squad.OrderedPosition = squad.AnchorPosition;

@@ -131,6 +131,17 @@ namespace Century.Battle.View
             if (_hud != null) _hud.Bind(_state, _settings, _commandInput, _eventFeed, _player);
             if (_debugHud != null) _debugHud.Bind(_state, _commandInput, _eventFeed, _player);
 
+            // Command of the clock: HUD speed buttons plus held-Space tactical time.
+            if (_hud != null)
+            {
+                var timeControls = new GameObject("BattleTimeControls").AddComponent<BattleTimeControls>();
+                timeControls.transform.SetParent(_spawnRoot, false);
+                timeControls.Initialise(_state, _hud.Root);
+            }
+
+            // The blood-fleck read on every landed blow, for both sides and the Centurion himself.
+            HitEffects.Create(_spawnRoot);
+
             CreateBanner();
 
             Debug.Log($"[Battle] {_state.PlayerSideAliveCount} on the field against {_state.EnemyAliveCount} " +
@@ -358,6 +369,10 @@ namespace Century.Battle.View
             if (_missiles != null) _missiles.Tick(Time.deltaTime);
 
             _simulation.Tick(Time.deltaTime, rallyHeld);
+
+            // The Centurion bleeds visibly like anyone else; his combatant has no SoldierView to do it.
+            if (_player != null && _player.Combatant != null && _player.Combatant.WasHitThisTick)
+                HitEffects.Spawn(_player.transform.position + Vector3.up * 1.2f);
 
             // Manual withdrawal remains available: leaving the field with the men you still have is a
             // legitimate strategic choice, not a failure.

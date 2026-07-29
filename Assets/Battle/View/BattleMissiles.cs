@@ -69,6 +69,9 @@ namespace Century.Battle.View
             body.mass = 1.2f;
             body.useGravity = true;
             body.isKinematic = false;
+            // A thin shaft at full casting speed crosses half a metre per physics step — discrete
+            // collision happily tunnels it through a man or the ground.
+            body.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
 
             return shaft.AddComponent<PilaProjectile>();
         }
@@ -93,10 +96,11 @@ namespace Century.Battle.View
             BallisticVelocity(from, target, _settings.PilaLaunchSpeed);
 
         /// <summary>
-        /// A launch velocity that lobs a pilum onto <paramref name="target"/>. The angle is fixed at a
-        /// clear javelin arc and the *speed* is solved to the distance, so the pilum lands in the
-        /// reticle instead of sailing flat over it. Speed is capped at <paramref name="maxSpeed"/>;
-        /// beyond that range it falls short rather than launching absurdly fast.
+        /// A launch velocity that puts a pilum onto <paramref name="target"/> with real force. Full
+        /// throwing speed, and the LOW ballistic solution for the angle — a hard, flat cast whose
+        /// flight time grows with distance, not the old fixed 42° lob that took the same lazy age
+        /// to land at every range. Close throws keep a minimum arc (re-solving the speed down) so
+        /// they still read as thrown; past maximum range it launches at 45° and falls short.
         /// </summary>
         private static Vector3 BallisticVelocity(Vector3 from, Vector3 target, float maxSpeed)
         {
@@ -105,12 +109,17 @@ namespace Century.Battle.View
             float distance = flat.magnitude;
             Vector3 direction = distance > 0.001f ? flat / distance : Vector3.forward;
 
-            const float angle = 42f * Mathf.Deg2Rad; // reads clearly from the top-down camera
             float gravity = Mathf.Max(0.1f, -Physics.gravity.y);
+            const float minAngle = 9f * Mathf.Deg2Rad;
 
-            // v such that range = v^2 * sin(2θ) / g equals the target distance.
-            float speed = Mathf.Sqrt(distance * gravity / Mathf.Max(0.01f, Mathf.Sin(2f * angle)));
-            speed = Mathf.Clamp(speed, 3f, maxSpeed);
+            // range = v² sin(2θ) / g  →  the low-arc θ for full speed, floored at the minimum arc.
+            float sin2 = Mathf.Clamp01(distance * gravity / Mathf.Max(0.01f, maxSpeed * maxSpeed));
+            float angle = Mathf.Max(0.5f * Mathf.Asin(sin2), minAngle);
+
+            // At the floored angle the full speed would overshoot, so the speed is solved back down.
+            float speed = Mathf.Clamp(
+                Mathf.Sqrt(distance * gravity / Mathf.Max(0.01f, Mathf.Sin(2f * angle))),
+                3f, maxSpeed);
 
             return (direction * Mathf.Cos(angle) + Vector3.up * Mathf.Sin(angle)) * speed;
         }
@@ -128,6 +137,11 @@ namespace Century.Battle.View
             float bestSqr = _settings.PilaImpactRadius * _settings.PilaImpactRadius;
             BattleCombatant best = null;
 
+            // Positions are at a man's FEET; a pilum in flight crosses at body height, so the check
+            // is against the chest — measuring to the feet made most of the arc miss men it visibly
+            // passed through.
+            Vector3 chestOffset = Vector3.up * 1.1f;
+
             List<BattleSquad> targets = attackerIsPlayerSide ? _state.EnemySquads : _state.PlayerSquads;
             for (int s = 0; s < targets.Count; s++)
             {
@@ -137,7 +151,7 @@ namespace Century.Battle.View
                 {
                     BattleCombatant man = members[m];
                     if (!man.IsAlive || man == attacker) continue;
-                    float sqr = (man.WorldPosition - position).sqrMagnitude;
+                    float sqr = (man.WorldPosition + chestOffset - position).sqrMagnitude;
                     if (sqr > bestSqr) continue;
                     best = man;
                     bestSqr = sqr;
@@ -150,7 +164,7 @@ namespace Century.Battle.View
                 BattleCombatant player = _state.PlayerCharacter;
                 if (player != null && player.IsAlive && player != attacker)
                 {
-                    float sqr = (player.WorldPosition - position).sqrMagnitude;
+                    float sqr = (player.WorldPosition + chestOffset - position).sqrMagnitude;
                     if (sqr <= bestSqr) best = player;
                 }
             }

@@ -103,9 +103,16 @@ namespace Century.Battle.Sim
                 if (!squad.IsOffField || squad.IsDestroyed) continue;
 
                 squad.IsOffField = false;
+                squad.ArrivedAsReserve = true;
                 squad.Order = order;
                 squad.Formation = FormationType.Line;
-                squad.OrderedPosition = squad.AnchorPosition;
+
+                // March toward the middle of the field, not to the anchor it is already standing on —
+                // an Advance order to your own feet is how reinforcements got stuck at the map edge.
+                Vector3 inward = squad.AnchorPosition.sqrMagnitude > 1f
+                    ? -squad.AnchorPosition.normalized
+                    : squad.AnchorFacing;
+                squad.OrderedPosition = squad.AnchorPosition + inward * 30f;
                 summoned++;
             }
 

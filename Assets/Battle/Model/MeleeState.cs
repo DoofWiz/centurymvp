@@ -79,17 +79,19 @@ namespace Century.Battle.Model
                     // Long reach; hacks at the line often and skips back out of range between blows.
                     // German board: a wide but tiring guard — covers more angle, costs more wind, and
                     // its holder breaks sooner than a drilled legionary.
+                    // Damage is deliberately modest: a frontal fight is a grind of hacks and blocks,
+                    // and the kills come from flanks, broken guards and spent lines — not a metronome.
                     return new MeleeProfile(
-                        reach: 2.5f, slash: 0.13f, thrust: 0.3f, charge: 0.35f, strike: 0.2f,
-                        recover: 0.75f, arc: 0.4f, standoff: 3.4f, interval: 1.5f,
+                        reach: 2.5f, slash: 0.11f, thrust: 0.26f, charge: 0.35f, strike: 0.2f,
+                        recover: 0.75f, arc: 0.4f, standoff: 3.4f, interval: 1.9f,
                         blockArc: 0.25f, blockStamina: 0.11f, guardFloor: 0.28f);
                 default:
                     // Gladius behind a scutum: holds guard, stabs only now and then when a gap opens.
                     // Roman board: a narrow but iron guard — a determined foe can step around it, but
                     // head-on it holds cheaply and almost never tires out.
                     return new MeleeProfile(
-                        reach: 1.9f, slash: 0.14f, thrust: 0.3f, charge: 0.4f, strike: 0.22f,
-                        recover: 0.45f, arc: 0.25f, standoff: 0f, interval: 3.0f,
+                        reach: 1.9f, slash: 0.12f, thrust: 0.26f, charge: 0.4f, strike: 0.22f,
+                        recover: 0.45f, arc: 0.25f, standoff: 0f, interval: 3.2f,
                         blockArc: 0.45f, blockStamina: 0.05f, guardFloor: 0.10f);
             }
         }

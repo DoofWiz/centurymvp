@@ -50,6 +50,10 @@ namespace Century.Battle.Model
         /// </summary>
         public bool IsOffField;
 
+        /// <summary>True for a squad that marched on as summoned reinforcements. The enemy AI sends
+        /// these at a flank rather than piling them into the back of its own line.</summary>
+        public bool ArrivedAsReserve;
+
         /// <summary>Where a routed squad is running to.</summary>
         public Vector3 RoutDestination;
 

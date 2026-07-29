@@ -55,12 +55,27 @@ namespace Century.Battle.View
                 return;
             }
 
-            if (_flightTime >= _maxFlightSeconds) Stick();
+            // A shaft that somehow never came down (thrown off the field, resting on scenery) is
+            // cleaned up — but never frozen mid-flight, which used to leave volleys hanging in the
+            // sky whenever two shafts clipped each other on the way up.
+            if (_flightTime >= _maxFlightSeconds)
+            {
+                if (_rigidbody.linearVelocity.sqrMagnitude < 1f) Stick();
+                else Destroy(gameObject);
+            }
         }
 
         private void OnCollisionEnter(Collision collision)
         {
             if (_stuck) return;
+
+            // Shafts of a volley fly as a cloud and clip one another constantly. A pilum striking a
+            // pilum midair froze BOTH in the sky; they pass through each other instead.
+            if (collision.collider.GetComponentInParent<PilaProjectile>() != null)
+            {
+                if (_collider != null) Physics.IgnoreCollision(collision.collider, _collider);
+                return;
+            }
 
             // A pilum passes over its own side rather than planting in a friend — friendly hits are
             // never resolved anyway, so sticking in one would just eat the throw.

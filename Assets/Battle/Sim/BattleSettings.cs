@@ -88,8 +88,10 @@ namespace Century.Battle.Sim
         [Range(0.1f, 1f)] public float BaseHitChance = 0.55f;
 
         [Header("Physical melee")]
-        [Tooltip("Global multiplier on all weapon wound severity. Lower = longer fights.")]
-        [Range(0.2f, 2f)] public float MeleeDamageScale = 1f;
+        [Tooltip("Global multiplier on all weapon wound severity. Lower = longer fights. Tuned low " +
+                 "so lines grind: men hack and block while fatigue and morale decide the day, and a " +
+                 "death is an event rather than a metronome.")]
+        [Range(0.2f, 2f)] public float MeleeDamageScale = 0.55f;
 
         [Tooltip("Stamina a man spends throwing a blow.")]
         public float MeleeStaminaPerStrike = 0.06f;
@@ -138,8 +140,9 @@ namespace Century.Battle.Sim
         [Tooltip("Seconds between morale evaluations.")]
         public float MoraleTickSeconds = 0.5f;
 
-        [Tooltip("Cohesion lost per man lost from the squad.")]
-        public float CohesionLossPerCasualty = 0.11f;
+        [Tooltip("Cohesion lost per man lost from the squad. High: kills are rare in the grind, so " +
+                 "each one is a shock the line feels.")]
+        public float CohesionLossPerCasualty = 0.15f;
 
         [Tooltip("How quickly the shock of casualties fades, per second.")]
         public float CasualtyPressureDecay = 0.25f;
@@ -159,8 +162,9 @@ namespace Century.Battle.Sim
         [Tooltip("Cohesion lost per second scaled by how much of the squad has fallen. A gutted squad breaks.")]
         public float DepletionCohesionPerSecond = 0.05f;
 
-        [Tooltip("Cohesion lost per second when the squad is exhausted (scaled by how tired the men are).")]
-        public float FatigueCohesionPerSecond = 0.03f;
+        [Tooltip("Cohesion lost per second when the squad is exhausted (scaled by how tired the men " +
+                 "are). This is a primary way long fights END: a spent line wavers and breaks.")]
+        public float FatigueCohesionPerSecond = 0.05f;
 
         [Header("Morale — the standard")]
         [Tooltip("Radius within which the standard-bearer's banner steadies a squad.")]
@@ -238,13 +242,13 @@ namespace Century.Battle.Sim
         public int PilaCount = 4;
 
         [Tooltip("Launch speed of a thrown pilum, in metres per second. Higher is flatter and faster.")]
-        public float PilaLaunchSpeed = 22f;
+        public float PilaLaunchSpeed = 26f;
 
         [Tooltip("Health fraction a pilum removes on a clean hit. Pila hit hard.")]
         [Range(0.05f, 0.9f)] public float PilaDamage = 0.55f;
 
-        [Tooltip("Radius within which a flying pilum counts as striking a man.")]
-        public float PilaImpactRadius = 0.7f;
+        [Tooltip("Radius within which a flying pilum counts as striking a man (measured at chest height).")]
+        public float PilaImpactRadius = 0.85f;
 
         [Tooltip("Fraction of a pilum's damage a raised shield stops from the front. Pila largely defeat shields.")]
         [Range(0f, 0.8f)] public float PilaShieldBlock = 0.25f;

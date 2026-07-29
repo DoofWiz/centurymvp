@@ -2647,6 +2647,35 @@
     -unity-font-style: bold;
 }
 
+/* --- Squad inspect (hover panel, above the order bar) ---------------------------------- */
+
+.squad-inspect {
+    position: absolute;
+    bottom: 170px;
+    left: 0;
+    right: 0;
+    align-self: center;
+    width: 320px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.inspect-row {
+    flex-direction: row;
+    align-items: center;
+    margin-top: 4px;
+}
+
+.inspect-row__label { min-width: 62px; }
+
+.inspect-row__bar { flex-grow: 1; margin-left: 6px; margin-right: 8px; }
+
+.inspect-row__word {
+    min-width: 76px;
+    color: var(--gold);
+    -unity-text-align: middle-right;
+}
+
 /* --- Officer cards: short thick bars, injury & death states --------------------------- */
 
 .card__body .bar {

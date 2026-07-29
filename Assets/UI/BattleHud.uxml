@@ -17,6 +17,59 @@
         <!-- ================================ BATTLE TIMER ============================== -->
         <ui:VisualElement name="battle-timer-bar" class="battle-timer-bar" picking-mode="Ignore">
             <ui:Label name="battle-timer" text="0:00" class="battle-timer" />
+            <ui:VisualElement class="time-buttons" style="justify-content: center; margin-top: 2px;">
+                <ui:Button name="time-pause" class="time-button">
+                    <ui:VisualElement class="time-button__icon gi-pause-button" picking-mode="Ignore" />
+                </ui:Button>
+                <ui:Button name="time-normal" class="time-button">
+                    <ui:VisualElement class="time-button__icon gi-play-button" picking-mode="Ignore" />
+                </ui:Button>
+                <ui:Button name="time-fast" class="time-button">
+                    <ui:VisualElement class="time-button__icon gi-fast-forward-button" picking-mode="Ignore" />
+                </ui:Button>
+            </ui:VisualElement>
+            <ui:VisualElement name="tactical-hint" picking-mode="Ignore"
+                              style="align-items: center; margin-top: 3px; opacity: 0.55;">
+                <ui:Label text="HOLD SPACE - TACTICAL TIME" class="eyebrow" picking-mode="Ignore" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- ============================== SQUAD INSPECT =============================== -->
+        <!-- Fills while the cursor hovers a squad in the world: the men's aggregate condition,
+             in the same words the sim thinks in. Friendly squads and enemy squads both read. -->
+        <ui:VisualElement name="squad-inspect" class="panel squad-inspect" picking-mode="Ignore"
+                          style="display: none;">
+            <ui:VisualElement style="flex-direction: row; justify-content: space-between;">
+                <ui:Label name="inspect-name" text="—" class="heading" />
+                <ui:Label name="inspect-count" text="—" class="metric text-gold" />
+            </ui:VisualElement>
+            <ui:VisualElement class="rule rule--short" />
+
+            <ui:VisualElement class="inspect-row">
+                <ui:Label text="HEALTH" class="metric-label inspect-row__label" />
+                <ui:VisualElement class="bar inspect-row__bar">
+                    <ui:VisualElement name="inspect-health" class="bar__fill bar__fill--health" />
+                </ui:VisualElement>
+                <ui:Label name="inspect-health-word" text="" class="metric-label inspect-row__word" />
+            </ui:VisualElement>
+
+            <ui:VisualElement class="inspect-row">
+                <ui:Label text="STAMINA" class="metric-label inspect-row__label" />
+                <ui:VisualElement class="bar inspect-row__bar">
+                    <ui:VisualElement name="inspect-stamina" class="bar__fill bar__fill--stamina" />
+                </ui:VisualElement>
+                <ui:Label name="inspect-stamina-word" text="" class="metric-label inspect-row__word" />
+            </ui:VisualElement>
+
+            <ui:VisualElement class="inspect-row">
+                <ui:Label text="MORALE" class="metric-label inspect-row__label" />
+                <ui:VisualElement class="bar inspect-row__bar">
+                    <ui:VisualElement name="inspect-morale" class="bar__fill bar__fill--gold" />
+                </ui:VisualElement>
+                <ui:Label name="inspect-morale-word" text="" class="metric-label inspect-row__word" />
+            </ui:VisualElement>
+
+            <ui:Label name="inspect-order" text="" class="body body--dim" style="margin-top: 4px;" />
         </ui:VisualElement>
 
         <!-- ============================= LEFT COLUMN ================================== -->

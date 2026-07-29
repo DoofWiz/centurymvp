@@ -83,7 +83,8 @@ namespace Century.Battle.View
                 desired += Vector3.ClampMagnitude(lean, _maxLean);
             }
 
-            _pivot = Vector3.Lerp(_pivot, desired, 1f - Mathf.Exp(-_followLerp * Time.deltaTime));
+            // Unscaled time: the commander's eye keeps moving through a tactical pause.
+            _pivot = Vector3.Lerp(_pivot, desired, 1f - Mathf.Exp(-_followLerp * Time.unscaledDeltaTime));
 
             transform.position = _pivot;
             transform.rotation = Quaternion.Euler(_pitch, _yaw, 0f);
@@ -100,10 +101,10 @@ namespace Century.Battle.View
         {
             float scroll = Input.mouseScrollDelta.y;
             if (Mathf.Abs(scroll) > 0.001f)
-                _targetDistance = Mathf.Clamp(_targetDistance - scroll * _zoomSpeed * Time.deltaTime,
+                _targetDistance = Mathf.Clamp(_targetDistance - scroll * _zoomSpeed * Time.unscaledDeltaTime,
                     _minDistance, _maxDistance);
 
-            _distance = Mathf.Lerp(_distance, _targetDistance, 1f - Mathf.Exp(-_zoomLerp * Time.deltaTime));
+            _distance = Mathf.Lerp(_distance, _targetDistance, 1f - Mathf.Exp(-_zoomLerp * Time.unscaledDeltaTime));
         }
     }
 }
