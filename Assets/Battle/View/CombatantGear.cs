@@ -158,14 +158,7 @@ namespace Century.Battle.View
         {
             if (Materials.TryGetValue(colour, out Material cached) && cached != null) return cached;
 
-            Shader shader = Shader.Find("Universal Render Pipeline/Unlit")
-                            ?? Shader.Find("Unlit/Color")
-                            ?? Shader.Find("Sprites/Default");
-
-            var material = new Material(shader);
-            if (material.HasProperty("_BaseColor")) material.SetColor("_BaseColor", colour);
-            if (material.HasProperty("_Color")) material.SetColor("_Color", colour);
-
+            Material material = Century.Core.World.FxMaterials.Unlit(colour);
             Materials[colour] = material;
             return material;
         }

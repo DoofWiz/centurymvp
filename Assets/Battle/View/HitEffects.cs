@@ -101,14 +101,13 @@ namespace Century.Battle.View
 
         private static Material BurstMaterial()
         {
+            // Particles want their own shader family first; the shared helpers cover the rest.
             Shader shader = Shader.Find("Universal Render Pipeline/Particles/Unlit")
                             ?? Shader.Find("Universal Render Pipeline/Unlit")
                             ?? Shader.Find("Sprites/Default");
 
             var material = new Material(shader);
-            var colour = new Color(0.55f, 0.07f, 0.05f);
-            if (material.HasProperty("_BaseColor")) material.SetColor("_BaseColor", colour);
-            if (material.HasProperty("_Color")) material.SetColor("_Color", colour);
+            Century.Core.World.FxMaterials.SetColour(material, new Color(0.55f, 0.07f, 0.05f));
             return material;
         }
 

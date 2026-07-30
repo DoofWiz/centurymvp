@@ -168,14 +168,6 @@ namespace Century.Battle.View
             return line;
         }
 
-        private static Material MakeMaterial()
-        {
-            // Sprites/Default on purpose: always in builds, transparent, and it honours the
-            // LineRenderer's vertex colours — which is what lets one shared material carry every
-            // ring's own colour and fade.
-            Shader shader = Shader.Find("Sprites/Default")
-                            ?? Shader.Find("Universal Render Pipeline/Unlit") ?? Shader.Find("Unlit/Color");
-            return new Material(shader);
-        }
+        private static Material MakeMaterial() => Century.Core.World.FxMaterials.VertexTinted();
     }
 }

@@ -46,8 +46,8 @@ namespace Century.Campaign.View
             renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             renderer.receiveShadows = false;
 
-            // Sprites/Default: always present, transparent, unlit, and double-sided.
-            var material = new Material(Shader.Find("Sprites/Default"));
+            // Vertex-tinted (Sprites/Default): always present, transparent, unlit, double-sided.
+            Material material = Century.Core.World.FxMaterials.VertexTinted();
             material.mainTexture = BakeVeilTexture();
             renderer.material = material;
 

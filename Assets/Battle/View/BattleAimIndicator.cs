@@ -65,13 +65,7 @@ namespace Century.Battle.View
             if (_built) return;
             _built = true;
 
-            Shader shader = Shader.Find("Universal Render Pipeline/Unlit")
-                            ?? Shader.Find("Unlit/Color")
-                            ?? Shader.Find("Sprites/Default");
-            _material = new Material(shader);
-            var gold = new Color(0.88f, 0.75f, 0.35f, 0.9f);
-            if (_material.HasProperty("_BaseColor")) _material.SetColor("_BaseColor", gold);
-            if (_material.HasProperty("_Color")) _material.SetColor("_Color", gold);
+            _material = Century.Core.World.FxMaterials.Unlit(new Color(0.88f, 0.75f, 0.35f, 0.9f));
 
             _line = gameObject.AddComponent<LineRenderer>();
             _line.useWorldSpace = true;

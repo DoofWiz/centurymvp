@@ -26,9 +26,7 @@ namespace Century.Campaign.View
         {
             _state = state;
 
-            Shader shader = Shader.Find("Sprites/Default")
-                            ?? Shader.Find("Universal Render Pipeline/Unlit") ?? Shader.Find("Unlit/Color");
-            _material = new Material(shader);
+            _material = Century.Core.World.FxMaterials.VertexTinted();
         }
 
         private void LateUpdate()

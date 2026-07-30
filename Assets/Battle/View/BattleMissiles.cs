@@ -78,16 +78,8 @@ namespace Century.Battle.View
 
         private Material ShaftMaterial()
         {
-            if (_shaftMaterial != null) return _shaftMaterial;
-
-            Shader shader = Shader.Find("Universal Render Pipeline/Unlit")
-                            ?? Shader.Find("Unlit/Color")
-                            ?? Shader.Find("Sprites/Default");
-
-            _shaftMaterial = new Material(shader);
-            var colour = new Color(0.22f, 0.19f, 0.15f);
-            if (_shaftMaterial.HasProperty("_BaseColor")) _shaftMaterial.SetColor("_BaseColor", colour);
-            if (_shaftMaterial.HasProperty("_Color")) _shaftMaterial.SetColor("_Color", colour);
+            if (_shaftMaterial == null)
+                _shaftMaterial = Century.Core.World.FxMaterials.Unlit(new Color(0.22f, 0.19f, 0.15f));
             return _shaftMaterial;
         }
 

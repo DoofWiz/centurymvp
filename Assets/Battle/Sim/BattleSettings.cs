@@ -12,10 +12,6 @@ namespace Century.Battle.Sim
         [Tooltip("Maximum men in a contubernium.")]
         [Range(4, 12)] public int SquadSize = 10;
 
-        [Tooltip("UNUSED since the reinforcements rework: the player chooses per squad on the " +
-                 "deployment screen; nothing is held back by force.")]
-        public int DefaultDeploymentCount = 40;
-
         [Tooltip("Half-size of the battlefield in metres. Reinforcements enter at its edges, and the " +
                  "boundary is drawn so the field visibly ends.")]
         public float FieldHalfExtent = 70f;
@@ -71,22 +67,6 @@ namespace Century.Battle.Sim
         [Tooltip("Distance at which a man can strike. Gladius reach plus a step.")]
         public float EngagementRange = 1.75f;
 
-        [Tooltip("Range within which a man will look for someone to fight.")]
-        public float TargetSearchRange = 6f;
-
-        [Tooltip("Seconds between melee evaluations. Combat need not resolve every frame.")]
-        public float MeleeTickSeconds = 0.2f;
-
-        [Header("Melee — damage")]
-        [Tooltip("Seconds between blows for an average fighter.")]
-        public float AttackIntervalSeconds = 1.4f;
-
-        [Tooltip("Health fraction removed by a clean unmodified hit. Lower means longer, grindier fights.")]
-        [Range(0.02f, 0.5f)] public float BaseHitDamage = 0.11f;
-
-        [Tooltip("Chance a blow lands at all, before modifiers.")]
-        [Range(0.1f, 1f)] public float BaseHitChance = 0.55f;
-
         [Header("Physical melee")]
         [Tooltip("Global multiplier on all weapon wound severity. Lower = longer fights. Tuned low " +
                  "so lines grind: men hack and block while fatigue and morale decide the day, and a " +
@@ -95,9 +75,6 @@ namespace Century.Battle.Sim
 
         [Tooltip("Stamina a man spends throwing a blow.")]
         public float MeleeStaminaPerStrike = 0.06f;
-
-        [Tooltip("Stamina a shield-bearer loses turning a blow aside.")]
-        public float ShieldBlockStaminaCost = 0.09f;
 
         [Tooltip("Body radius a blow must reach to wound a man, in metres.")]
         public float BodyRadius = 0.55f;
@@ -134,15 +111,7 @@ namespace Century.Battle.Sim
         [Tooltip("Fraction of a blow's damage that gets through when it staggers past a broken guard.")]
         [Range(0f, 1f)] public float StaggerDamageFraction = 0.5f;
 
-        [Tooltip("SUPERSEDED in 2d: the shield's block cone is now per-weapon (MeleeProfile.BlockArcDot), " +
-                 "so Roman and German boards differ. This global field is no longer read.")]
-        [Range(-0.5f, 0.6f)] public float ShieldBlockArcDot = -0.1f;
-
         [Header("Shields")]
-        [Tooltip("Scales a formation's frontal block chance into how often a frontal blow is turned " +
-                 "aside. 1 uses the formation value as-is; higher makes the shield wall even stickier.")]
-        [Range(0f, 1.5f)] public float ShieldBlockChanceScale = 1f;
-
         [Tooltip("The Centurion's own scutum: chance a blow from his front is blocked, scaled by his stamina.")]
         [Range(0f, 0.9f)] public float PlayerShieldBlockChance = 0.45f;
 
@@ -151,9 +120,6 @@ namespace Century.Battle.Sim
 
         [Tooltip("Damage multiplier for a blow landing from behind. Rout is lethal for this reason.")]
         public float RearDamageMultiplier = 2.2f;
-
-        [Tooltip("Stamina spent per blow thrown.")]
-        public float StaminaPerAttack = 0.02f;
 
         [Tooltip("Stamina recovered per second while out of combat.")]
         public float StaminaRecoveryPerSecond = 0.012f;

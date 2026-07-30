@@ -66,6 +66,10 @@ namespace Century.Battle.Model
         /// <summary>True while the Centurion is close enough to steady this squad.</summary>
         public bool UnderCommandAura;
 
+        /// <summary>True while an effective enemy squad is within shields-up range. Computed once
+        /// per melee tick (see MeleeCombat) so a hundred idle men don't each rescan the field.</summary>
+        public bool HostileNearby;
+
         /// <summary>Accumulated rally effort from the Centurion, 0..1.</summary>
         public float RallyProgress01;
 
@@ -153,9 +157,18 @@ namespace Century.Battle.Model
             return false;
         }
 
-        /// <summary>Centre of mass of the living. Used for morale checks and enemy targeting.</summary>
+        private int _centreFrame = -1;
+        private Vector3 _centreCache;
+
+        /// <summary>
+        /// Centre of mass of the living. Practically every system asks for this — targeting, morale,
+        /// squad AI, anchors, labels, the hover panel — several of them for every squad every frame,
+        /// so the sum is memoised per frame rather than re-walked ten times.
+        /// </summary>
         public Vector3 CentreOfMass()
         {
+            if (Time.frameCount == _centreFrame) return _centreCache;
+
             Vector3 total = Vector3.zero;
             int alive = 0;
 
@@ -166,7 +179,9 @@ namespace Century.Battle.Model
                 alive++;
             }
 
-            return alive <= 0 ? AnchorPosition : total / alive;
+            _centreFrame = Time.frameCount;
+            _centreCache = alive <= 0 ? AnchorPosition : total / alive;
+            return _centreCache;
         }
 
         /// <summary>Applies a pending order once its propagation delay has elapsed.</summary>

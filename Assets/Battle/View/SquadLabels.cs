@@ -88,11 +88,10 @@ namespace Century.Battle.View
         /// <summary>A dark backing sliver and a coloured fill quad, scaled by cohesion each frame.</summary>
         private static void BuildCohesionBar(Tag tag)
         {
-            Shader shader = Shader.Find("Sprites/Default")
-                            ?? Shader.Find("Universal Render Pipeline/Unlit") ?? Shader.Find("Unlit/Color");
-
-            tag.BarBackMaterial = new Material(shader) { color = new Color(0.05f, 0.05f, 0.06f, 0.7f) };
-            tag.BarFillMaterial = new Material(shader) { color = BarSteady };
+            tag.BarBackMaterial = Century.Core.World.FxMaterials.VertexTinted();
+            tag.BarBackMaterial.color = new Color(0.05f, 0.05f, 0.06f, 0.7f);
+            tag.BarFillMaterial = Century.Core.World.FxMaterials.VertexTinted();
+            tag.BarFillMaterial.color = BarSteady;
 
             Transform back = MakeBarQuad(tag.Root, "BarBack", tag.BarBackMaterial);
             back.localPosition = new Vector3(0f, -0.32f, 0.01f);   // pushed slightly behind the fill

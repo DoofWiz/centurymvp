@@ -52,11 +52,7 @@ namespace Century.Battle.View
             if (GetComponent<TrailRenderer>() != null) return;
 
             if (_trailMaterial == null)
-            {
-                Shader shader = Shader.Find("Sprites/Default")
-                                ?? Shader.Find("Universal Render Pipeline/Unlit") ?? Shader.Find("Unlit/Color");
-                _trailMaterial = new Material(shader);
-            }
+                _trailMaterial = Century.Core.World.FxMaterials.VertexTinted();
 
             var trail = gameObject.AddComponent<TrailRenderer>();
             trail.time = 0.28f;

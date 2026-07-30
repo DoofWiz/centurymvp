@@ -47,9 +47,7 @@ namespace Century.Battle.View
             _ring.positionCount = Segments;
             _ring.startWidth = 0.09f;
             _ring.endWidth = 0.09f;
-            _ring.material = new Material(
-                Shader.Find("Universal Render Pipeline/Unlit")
-                ?? Shader.Find("Unlit/Color") ?? Shader.Find("Sprites/Default"));
+            _ring.material = Century.Core.World.FxMaterials.Unlit();
 
             const float radius = 0.9f;
             for (int i = 0; i < Segments; i++)

@@ -69,23 +69,6 @@ namespace Century.Battle.Model
         }
 
         /// <summary>
-        /// Damage reduction from the front. A testudo is a roof of shields — enormously protective
-        /// frontally, and barely at all once someone gets round the side.
-        /// </summary>
-        public static float FrontalProtection(this FormationType formation)
-        {
-            switch (formation)
-            {
-                case FormationType.Testudo: return 0.62f;
-                case FormationType.Line: return 0.34f;
-                case FormationType.DoubleLine: return 0.34f;
-                case FormationType.Wedge: return 0.26f;
-                case FormationType.Loose: return 0.08f;
-                default: return 0.15f;
-            }
-        }
-
-        /// <summary>
         /// Chance a frontal blow is turned aside by the shield wall, before facing and stamina scale
         /// it. This is what makes a Roman line hard to *hit*, not merely hard to hurt: a scutum stops
         /// the blow landing at all. Worthless from the flank, like the damage reduction it sits beside.
@@ -100,18 +83,6 @@ namespace Century.Battle.Model
                 case FormationType.Wedge: return 0.28f;
                 case FormationType.Loose: return 0.10f;
                 default: return 0.15f;
-            }
-        }
-
-        public static FormationType Next(this FormationType formation)
-        {
-            switch (formation)
-            {
-                case FormationType.Line: return FormationType.Testudo;
-                case FormationType.Testudo: return FormationType.DoubleLine;
-                case FormationType.DoubleLine: return FormationType.Loose;
-                case FormationType.Loose: return FormationType.Column;
-                default: return FormationType.Line;
             }
         }
 

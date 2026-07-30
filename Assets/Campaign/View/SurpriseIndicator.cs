@@ -109,9 +109,7 @@ namespace Century.Campaign.View
             marker.Wheel.positionCount = Segments;
             marker.Wheel.startWidth = 0.35f;
             marker.Wheel.endWidth = 0.35f;
-            marker.Wheel.material = new Material(
-                Shader.Find("Universal Render Pipeline/Unlit")
-                ?? Shader.Find("Unlit/Color") ?? Shader.Find("Sprites/Default"));
+            marker.Wheel.material = Century.Core.World.FxMaterials.Unlit();
 
             var markRoot = new GameObject("Mark");
             markRoot.transform.SetParent(marker.Root.transform, false);

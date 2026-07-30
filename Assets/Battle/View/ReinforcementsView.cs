@@ -61,15 +61,10 @@ namespace Century.Battle.View
             line.positionCount = 4;
             line.startWidth = 0.35f;
             line.endWidth = 0.35f;
-            line.material = new Material(
-                Shader.Find("Universal Render Pipeline/Unlit")
-                ?? Shader.Find("Unlit/Color") ?? Shader.Find("Sprites/Default"));
-
             var colour = new Color(0.72f, 0.62f, 0.42f, 0.5f);
+            line.material = Century.Core.World.FxMaterials.Unlit(colour);
             line.startColor = colour;
             line.endColor = colour;
-            if (line.material.HasProperty("_BaseColor")) line.material.SetColor("_BaseColor", colour);
-            if (line.material.HasProperty("_Color")) line.material.SetColor("_Color", colour);
 
             line.SetPosition(0, new Vector3(-halfExtent, 0.15f, -halfExtent));
             line.SetPosition(1, new Vector3(-halfExtent, 0.15f, halfExtent));

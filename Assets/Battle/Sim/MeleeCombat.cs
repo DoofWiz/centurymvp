@@ -46,9 +46,41 @@ namespace Century.Battle.Sim
                 _state.PlayerCharacter.WasGuardBreakThisTick = false;
             }
 
+            MarkHostileProximity();
+
             TickSide(_state.PlayerSquads);
             TickSide(_state.EnemySquads);
             TickPlayer();
+        }
+
+        /// <summary>
+        /// One squad-vs-squad sweep marking who has an enemy within shields-up range, so the guard
+        /// decision for every idle man is a flag read instead of a field scan.
+        /// </summary>
+        private void MarkHostileProximity()
+        {
+            // Half a frontage of slack: the squad centre lags its nearest man by roughly that much.
+            float range = _settings.ShieldsUpRange + _settings.SquadFrontage * 0.5f;
+            float rangeSqr = range * range;
+
+            for (int p = 0; p < _state.PlayerSquads.Count; p++) _state.PlayerSquads[p].HostileNearby = false;
+            for (int e = 0; e < _state.EnemySquads.Count; e++) _state.EnemySquads[e].HostileNearby = false;
+
+            for (int p = 0; p < _state.PlayerSquads.Count; p++)
+            {
+                BattleSquad player = _state.PlayerSquads[p];
+                if (player.IsOffField || !player.IsEffective) continue;
+
+                for (int e = 0; e < _state.EnemySquads.Count; e++)
+                {
+                    BattleSquad enemy = _state.EnemySquads[e];
+                    if (enemy.IsOffField || !enemy.IsEffective) continue;
+
+                    if (FlatSqr(player.CentreOfMass(), enemy.CentreOfMass()) > rangeSqr) continue;
+                    player.HostileNearby = true;
+                    enemy.HostileNearby = true;
+                }
+            }
         }
 
         private static void ClearHitFlags(List<BattleSquad> squads)
@@ -109,7 +141,7 @@ namespace Century.Battle.Sim
             }
 
             AcquireTarget(man, squad);
-            DriveNpc(man);
+            DriveNpc(man, squad);
             AdvanceStance(man, squad, isPlayer: false);
         }
 
@@ -158,7 +190,7 @@ namespace Century.Battle.Sim
 
         // --- NPC driver ------------------------------------------------------------------------
 
-        private void DriveNpc(BattleCombatant man)
+        private void DriveNpc(BattleCombatant man, BattleSquad squad)
         {
             BattleCombatant target = man.Target;
             MeleeProfile profile = MeleeProfile.For(man.Weapon);
@@ -169,7 +201,7 @@ namespace Century.Battle.Sim
                 // guard must precede the target, or a line receives its first volley bare-armed.
                 man.ShieldRaised = man.HasShield
                                    && man.Stamina01 > profile.GuardFloor
-                                   && HostileNear(man, _settings.ShieldsUpRange);
+                                   && squad.HostileNearby;
                 man.DesiredRange = 0f;
                 return;
             }
@@ -484,23 +516,6 @@ namespace Century.Battle.Sim
 
         private List<BattleSquad> OpposingSquads(BattleCombatant man) =>
             man.IsPlayerSide ? _state.EnemySquads : _state.PlayerSquads;
-
-        /// <summary>Any effective hostile squad's centre within range (a cheap squad-level check —
-        /// this runs for every unengaged man, so it must not scan every enemy body).</summary>
-        private bool HostileNear(BattleCombatant man, float range)
-        {
-            float rangeSqr = range * range;
-
-            List<BattleSquad> opponents = OpposingSquads(man);
-            for (int s = 0; s < opponents.Count; s++)
-            {
-                BattleSquad squad = opponents[s];
-                if (!squad.IsEffective || squad.IsOffField) continue;
-                if (FlatSqr(squad.CentreOfMass(), man.WorldPosition) <= rangeSqr) return true;
-            }
-
-            return false;
-        }
 
         private float FacingMultiplier(BattleCombatant attacker, BattleCombatant defender)
         {
