@@ -88,6 +88,7 @@
     <Compile Include="Assets\Battle\Sim\BattleSettings.cs" />
     <Compile Include="Assets\Battle\Sim\AutoResolveCalculator.cs" />
     <Compile Include="Assets\Battle\Model\StaminaClass.cs" />
+    <Compile Include="Assets\Battle\Sim\CasualtyFate.cs" />
     <Compile Include="Assets\Battle\Sim\SquadFormationSolver.cs" />
     <Compile Include="Assets\Battle\View\BattleMissiles.cs" />
     <Compile Include="Assets\Battle\Sim\SquadTactics.cs" />
