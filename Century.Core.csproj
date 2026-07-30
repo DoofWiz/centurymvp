@@ -50,6 +50,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Core\CampaignTime.cs" />
+    <Compile Include="Assets\Core\World\WorldTerrainForge.cs" />
     <Compile Include="Assets\Core\CampaignClock.cs" />
     <Compile Include="Assets\Core\Ui\FloatingText.cs" />
     <Compile Include="Assets\Core\TimeControl.cs" />
@@ -57,6 +58,7 @@
     <Compile Include="Assets\Core\World\FxMaterials.cs" />
     <Compile Include="Assets\Core\Items\Inventory.cs" />
     <Compile Include="Assets\Core\Ui\RadialMeter.cs" />
+    <Compile Include="Assets\Core\World\ForestBuilder.cs" />
     <Compile Include="Assets\Core\Contracts\ISceneNavigator.cs" />
     <Compile Include="Assets\Core\Contracts\DeploymentPlan.cs" />
     <Compile Include="Assets\Core\Contracts\IBattleResultSink.cs" />

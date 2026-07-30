@@ -1,7 +1,11 @@
 {
     "name": "Century.EditorTools",
     "rootNamespace": "Century.EditorTools",
-    "references": [],
+    "references": [
+        "Century.Core",
+        "Unity.AI.Navigation",
+        "Unity.AI.Navigation.Editor"
+    ],
     "includePlatforms": [
         "Editor"
     ],

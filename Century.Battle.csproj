@@ -98,6 +98,7 @@
     <Compile Include="Assets\Battle\Sim\BattleOutcomeEvaluator.cs" />
     <Compile Include="Assets\Battle\Model\OfficerRole.cs" />
     <Compile Include="Assets\Battle\View\CombatantGear.cs" />
+    <Compile Include="Assets\Battle\View\BattleTerrainBuilder.cs" />
     <Compile Include="Assets\Battle\Sim\BattleTestForge.cs" />
     <Compile Include="Assets\Battle\Sim\BattleDeployment.cs" />
   </ItemGroup>
@@ -1183,6 +1184,10 @@
     </Reference>
     <Reference Include="System.Xml.Serialization">
       <HintPath>C:\Program Files\Unity\Hub\Editor\6000.3.20f1\Editor\Data\NetStandard\compat\2.1.0\shims\netfx\System.Xml.Serialization.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Unity.AI.Navigation">
+      <HintPath>Library\ScriptAssemblies\Unity.AI.Navigation.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEditor.UI">

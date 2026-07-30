@@ -50,6 +50,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Editor\SvgIconImportSettings.cs" />
+    <Compile Include="Assets\Editor\OvermapTerrainTool.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Editor\Century.EditorTools.asmdef" />
