@@ -92,6 +92,10 @@ namespace Century.Battle.View
             Material material = FxMaterials.VertexTinted();
             material.color = new Color(0.16f, 0.22f, 0.26f, 0.82f);
             water.GetComponent<Renderer>().sharedMaterial = material;
+
+            // The runtime bake collects render meshes; without this the water sheet becomes an
+            // invisible walkable plane and men fight standing on the river.
+            water.AddComponent<NavMeshModifier>().ignoreFromBuild = true;
         }
 
         private static readonly List<Vector3> TreeScratch = new List<Vector3>(256);
@@ -111,7 +115,13 @@ namespace Century.Battle.View
                 TreeScratch[i] = new Vector3(p.x - worldCentre.x, p.y, p.z - worldCentre.y);
             }
 
-            ForestBuilder.BuildForest(_terrain.transform.parent, TreeScratch, withColliders: true);
+            Transform forest = ForestBuilder.BuildForest(_terrain.transform.parent, TreeScratch, withColliders: true);
+
+            // Crowns are colliderless render meshes: left in the bake they leave walkable navmesh
+            // islands on the treetops, which wide-reach position sampling can snap men onto.
+            foreach (Transform child in forest.GetComponentsInChildren<Transform>())
+                if (child.name == "Crown")
+                    child.gameObject.AddComponent<NavMeshModifier>().ignoreFromBuild = true;
         }
 
         /// <summary>World y of the battlefield ground under a flat position. Safe pre-build (0).</summary>

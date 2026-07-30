@@ -110,6 +110,11 @@ namespace Century.EditorTools
             Material material = FxMaterials.VertexTinted();
             material.color = new Color(0.16f, 0.22f, 0.26f, 0.82f);
             water.GetComponent<Renderer>().sharedMaterial = material;
+
+            // CRITICAL: the bake collects RENDER meshes, and this quad is a map-wide flat renderer.
+            // Without the modifier it bakes into the NavMesh as an invisible walkable plane at
+            // water level — every pawn then marches on it at constant height, under the hills.
+            water.AddComponent<NavMeshModifier>().ignoreFromBuild = true;
         }
 
         private static void PlaceForests()
@@ -124,8 +129,18 @@ namespace Century.EditorTools
                 gridStep: 12f,
                 positions);
 
-            ForestBuilder.BuildForest(null, positions, withColliders: true);
+            Transform forest = ForestBuilder.BuildForest(null, positions, withColliders: true);
+            ExcludeCrownsFromBake(forest);
             Debug.Log($"[Overmap] {positions.Count} trees planted.");
+        }
+
+        /// <summary>Crowns are colliderless render meshes: left in the bake they leave walkable
+        /// navmesh islands on top of the woods, which position sampling can snap pawns onto.</summary>
+        private static void ExcludeCrownsFromBake(Transform forest)
+        {
+            foreach (Transform child in forest.GetComponentsInChildren<Transform>())
+                if (child.name == "Crown")
+                    child.gameObject.AddComponent<NavMeshModifier>().ignoreFromBuild = true;
         }
 
         private static void BakeNavMesh(Terrain terrain)
