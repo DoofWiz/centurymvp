@@ -408,6 +408,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Century.Battle::Century.Battle.View.BattleBootstrap
   _settings: {fileID: 11400000, guid: 105008703a4afa44c8cd19337553c2da, type: 2}
+  _terrainDecor: {fileID: 11400000, guid: 91d02b66178e3404cbcd48e6b4456107, type: 2}
   _skipDeployment: 0
   _playerPrefab: {fileID: 6215103559411405869, guid: 3f8d5cb167cca864ea92297e288ab5bd, type: 3}
   _romanSoldierPrefab: {fileID: 7269509849102244235, guid: 8f4533de2ebaaec44b2352c15b1300a1, type: 3}
@@ -436,6 +437,8 @@ MonoBehaviour:
     EnemyAmbushed: 0
     SkipDeployment: 1
     HourOfDay: 10
+    WorldX: 100
+    WorldZ: -60
     Seed: 0
     CommanderSkills: []
 --- !u!4 &1048294761

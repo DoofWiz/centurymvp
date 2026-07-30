@@ -49,7 +49,6 @@ namespace Century.EditorTools
 
             PlaceWater();
             PlaceForests();
-            PlaceLandmarks();
 
             EditorUtility.SetDirty(data);
             AssetDatabase.SaveAssets();
@@ -119,61 +118,84 @@ namespace Century.EditorTools
             water.AddComponent<NavMeshModifier>().ignoreFromBuild = true;
         }
 
+        /// <summary>
+        /// The woods as GROVES: cluster anchors where the forest function runs high, each grown into
+        /// a stand with a dense heart and ragged edge, skirted by shrubs — not one tree per grid
+        /// cell sprinkled across the map. Adjacent groves merge into forest belts naturally where
+        /// the function stays high.
+        /// </summary>
         private static void PlaceForests()
         {
             GameObject existing = GameObject.Find("Forest");
             if (existing != null) Object.DestroyImmediate(existing);
-
-            var positions = new List<Vector3>(1024);
-            WorldTerrainForge.TreePositions(
-                new Vector2(-Span * 0.5f + 15f, -Span * 0.5f + 15f),
-                new Vector2(Span * 0.5f - 15f, Span * 0.5f - 15f),
-                gridStep: 12f,
-                positions);
-
-            ForestBuilder.BuildForest(null, positions, withColliders: true, LoadOrBuildDecorProfile());
-            Debug.Log($"[Overmap] {positions.Count} trees planted.");
-        }
-
-        /// <summary>Menhirs on the high ground, rock piles along the river, dead shrubs at the
-        /// forest edges: landmarks that make the static world a place rather than a heightmap.</summary>
-        private static void PlaceLandmarks()
-        {
-            GameObject existing = GameObject.Find("Landmarks");
-            if (existing != null) Object.DestroyImmediate(existing);
+            GameObject oldLandmarks = GameObject.Find("Landmarks");
+            if (oldLandmarks != null) Object.DestroyImmediate(oldLandmarks);
 
             TerrainDecorProfile decor = LoadOrBuildDecorProfile();
-            if (decor == null) return;
+            System.Func<float, float, float> ground = WorldTerrainForge.HeightAt;
 
+            var trees = new List<Vector3>(2048);
+            var shrubs = new List<Vector3>(512);
+            int groves = 0;
+
+            for (float z = -Span * 0.5f + 25f; z < Span * 0.5f - 25f; z += 30f)
+            {
+                for (float x = -Span * 0.5f + 25f; x < Span * 0.5f - 25f; x += 30f)
+                {
+                    float density = WorldTerrainForge.Forest01(x, z);
+                    if (density < 0.4f) continue;
+
+                    float seed = Mathf.Repeat(Mathf.Sin(x * 12.9898f + z * 78.233f) * 43758.5453f, 1f);
+                    if (seed > density * 1.15f) continue;
+
+                    // Anchor jitter so grove hearts don't sit on the survey grid.
+                    float ax = x + (seed - 0.5f) * 22f;
+                    float az = z + (Mathf.Repeat(seed * 7.31f, 1f) - 0.5f) * 22f;
+
+                    int stand = 7 + Mathf.RoundToInt(density * 9f);
+                    float radius = 11f + density * 9f;
+                    ForestBuilder.ClusterPositions(ax, az, stand, radius, seed, ground, trees);
+                    ForestBuilder.ClusterPositions(ax, az, 4, radius * 1.35f, seed * 3.7f, ground, shrubs);
+                    groves++;
+                }
+            }
+
+            ForestBuilder.BuildForest(null, trees, withColliders: true, decor);
+            var root = new GameObject("Landmarks").transform;
+            ForestBuilder.ScatterClutter(root, "Underbrush", shrubs, decor.Shrubs, withColliders: false);
+
+            PlaceOutcrops(root, decor, ground);
+            Debug.Log($"[Overmap] {groves} groves, {trees.Count} trees planted.");
+        }
+
+        /// <summary>Rocks in OUTCROPS of two to four along the river and on the high shoulders — a
+        /// lone rock reads as litter; a group reads as geology. Menhirs alone, deliberately: a
+        /// standing stone is the one thing on this map that SHOULD stand apart.</summary>
+        private static void PlaceOutcrops(
+            Transform root, TerrainDecorProfile decor, System.Func<float, float, float> ground)
+        {
             var rocks = new List<Vector3>(128);
             var stones = new List<Vector3>(8);
-            var shrubs = new List<Vector3>(256);
 
-            for (float z = -Span * 0.5f + 20f; z < Span * 0.5f - 20f; z += 23f)
+            for (float z = -Span * 0.5f + 20f; z < Span * 0.5f - 20f; z += 44f)
             {
-                for (float x = -Span * 0.5f + 20f; x < Span * 0.5f - 20f; x += 23f)
+                for (float x = -Span * 0.5f + 20f; x < Span * 0.5f - 20f; x += 44f)
                 {
                     float h1 = Mathf.Repeat(Mathf.Sin(x * 71.13f + z * 37.77f) * 43758.5453f, 1f);
                     float height = WorldTerrainForge.HeightAt(x, z);
                     float river = WorldTerrainForge.RiverDistance(x, z);
-                    float forest = WorldTerrainForge.Forest01(x, z);
 
-                    if (river < 22f && height > WorldTerrainForge.WaterLevel && h1 < 0.22f)
-                        rocks.Add(new Vector3(x, height, z));
-                    else if (height > 14.5f && h1 < 0.04f && stones.Count < 5)
+                    bool riverside = river < 22f && height > WorldTerrainForge.WaterLevel && h1 < 0.3f;
+                    bool shoulder = height > 10f && h1 < 0.12f;
+                    if (riverside || shoulder)
+                        ForestBuilder.ClusterPositions(x, z, 2 + (int)(h1 * 10f) % 3, 4.5f, h1, ground, rocks);
+                    else if (height > 14.5f && h1 < 0.035f && stones.Count < 5)
                         stones.Add(new Vector3(x, height, z));
-                    else if (height > 9f && h1 < 0.06f)
-                        rocks.Add(new Vector3(x, height, z));
-                    else if (forest > 0.05f && forest < 0.4f && h1 < 0.16f)
-                        shrubs.Add(new Vector3(x, height, z));
                 }
             }
 
-            var root = new GameObject("Landmarks").transform;
-            ForestBuilder.ScatterClutter(root, "Rocks", rocks, decor.Rocks, withColliders: true);
+            ForestBuilder.ScatterClutter(root, "Outcrops", rocks, decor.Rocks, withColliders: true);
             ForestBuilder.ScatterClutter(root, "Stones", stones, decor.Monuments, withColliders: true);
-            ForestBuilder.ScatterClutter(root, "Shrubs", shrubs, decor.Shrubs, withColliders: false);
-            Debug.Log($"[Overmap] Landmarks: {rocks.Count} rocks, {stones.Count} stones, {shrubs.Count} shrubs.");
         }
 
         /// <summary>

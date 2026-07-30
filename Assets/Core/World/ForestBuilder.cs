@@ -83,6 +83,27 @@ namespace Century.Core.World
             return root;
         }
 
+        /// <summary>
+        /// Deterministic golden-angle scatter around an anchor: the shape of a natural stand — dense
+        /// heart, ragged edge — rather than a survey grid. This is what turns "assets sprinkled on a
+        /// map" into copses, thickets and outcrops: callers cluster positions here, then build.
+        /// </summary>
+        public static void ClusterPositions(
+            float cx, float cz, int count, float radius, float seed,
+            System.Func<float, float, float> heightAt, List<Vector3> into)
+        {
+            for (int i = 0; i < count; i++)
+            {
+                float jitter = Mathf.Repeat(Mathf.Sin(seed * 77.7f + i * 13.13f) * 43758.5453f, 1f);
+                float angle = seed * 6.2831f + i * 2.39996f;   // the golden angle
+                float r = radius * Mathf.Sqrt((i + jitter) / count);
+
+                float px = cx + Mathf.Cos(angle) * r;
+                float pz = cz + Mathf.Sin(angle) * r;
+                into.Add(new Vector3(px, heightAt(px, pz), pz));
+            }
+        }
+
         /// <summary>The NavMesh carves around physics colliders; a prefab tree without one would be
         /// walked through. A capsule at the trunk is enough, and men never path into the canopy.</summary>
         private static void EnsureTrunkCollider(GameObject tree, bool wanted)

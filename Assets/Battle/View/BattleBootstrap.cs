@@ -276,7 +276,7 @@ namespace Century.Battle.View
 
             _player = Instantiate(
                 _playerPrefab,
-                BattleTerrainBuilder.Grounded(_state.PlayerCharacter.WorldPosition) + Vector3.up * 0.5f,
+                BattleTerrainBuilder.Grounded(_state.PlayerCharacter.WorldPosition) + Vector3.up * 1.2f,
                 Quaternion.identity, _spawnRoot);
             _player.Bind(_state.PlayerCharacter, _settings, _cameraRig);
 
@@ -338,8 +338,22 @@ namespace Century.Battle.View
         {
             for (int i = 0; i < _soldierViews.Count; i++) _soldierViews[i].SnapToSlot();
 
+            // GROUNDED, always: deployment writes flat y = 0 positions, and teleporting a
+            // CharacterController to y0 inside a sculpted hill drops the Centurion out of the world.
             if (_player != null && _state.PlayerCharacter != null)
-                _player.transform.position = _state.PlayerCharacter.WorldPosition;
+                TeleportPlayer(BattleTerrainBuilder.Grounded(_state.PlayerCharacter.WorldPosition)
+                               + Vector3.up * 1.2f);
+        }
+
+        /// <summary>A CharacterController ignores transform writes while enabled; toggle around them.</summary>
+        private void TeleportPlayer(Vector3 position)
+        {
+            CharacterController controller = _player.GetComponent<CharacterController>();
+            if (controller != null) controller.enabled = false;
+            _player.transform.position = position;
+            if (controller != null) controller.enabled = true;
+
+            _state.PlayerCharacter.WorldPosition = position;
         }
 
         /// <summary>
@@ -416,6 +430,16 @@ namespace Century.Battle.View
             }
 
             if (_missiles != null) _missiles.Tick(Time.deltaTime);
+
+            // Rescue net: physics can tunnel a CharacterController through a freshly swapped
+            // terrain collider. A commander below the ground is put back on it, not lost forever.
+            if (_player != null)
+            {
+                float ground = BattleTerrainBuilder.GroundHeight(_player.transform.position);
+                if (_player.transform.position.y < ground - 2f)
+                    TeleportPlayer(new Vector3(
+                        _player.transform.position.x, ground + 1.2f, _player.transform.position.z));
+            }
 
             _simulation.Tick(Time.deltaTime, rallyHeld);
 

@@ -158,59 +158,75 @@ namespace Century.Battle.View
         }
 
         private static readonly List<Vector3> TreeScratch = new List<Vector3>(256);
+        private static readonly List<Vector3> ShrubScratch = new List<Vector3>(128);
 
+        /// <summary>Battle woods as GROVES: stands a line can fight around and through, with shrub
+        /// skirts — the same composition rule as the overmap, at tactical size.</summary>
         private static void PlaceForest(TerrainDecorProfile decor)
         {
             TreeScratch.Clear();
+            ShrubScratch.Clear();
 
-            const float step = 7.5f;
-            for (float lz = -Span * 0.5f; lz < Span * 0.5f; lz += step)
+            System.Func<float, float, float> ground = GroundLocal;
+
+            const float step = 22f;
+            for (float lz = -Span * 0.5f + 12f; lz < Span * 0.5f - 12f; lz += step)
             {
-                for (float lx = -Span * 0.5f; lx < Span * 0.5f; lx += step)
+                for (float lx = -Span * 0.5f + 12f; lx < Span * 0.5f - 12f; lx += step)
                 {
                     float density = WorldTerrainForge.BattleForest01(_recipe, lx, lz);
                     if (density < 0.35f) continue;
 
-                    float h1 = Mathf.Repeat(Mathf.Sin(lx * 12.9898f + lz * 78.233f) * 43758.5453f, 1f);
-                    float h2 = Mathf.Repeat(Mathf.Sin(lx * 39.346f + lz * 11.135f) * 43758.5453f, 1f);
-                    if (h1 > density) continue;
+                    float seed = Mathf.Repeat(Mathf.Sin(lx * 12.9898f + lz * 78.233f) * 43758.5453f, 1f);
+                    if (seed > density * 1.2f) continue;
 
-                    float px = lx + (h2 - 0.5f) * step * 0.9f;
-                    float pz = lz + (h1 - 0.5f) * step * 0.9f;
-                    TreeScratch.Add(new Vector3(px, WorldTerrainForge.BattleHeightAt(_recipe, px, pz), pz));
+                    float ax = lx + (seed - 0.5f) * 15f;
+                    float az = lz + (Mathf.Repeat(seed * 7.31f, 1f) - 0.5f) * 15f;
+
+                    int stand = 5 + Mathf.RoundToInt(density * 6f);
+                    float radius = 8f + density * 5f;
+                    ForestBuilder.ClusterPositions(ax, az, stand, radius, seed, ground, TreeScratch);
+                    ForestBuilder.ClusterPositions(ax, az, 3, radius * 1.35f, seed * 3.7f, ground, ShrubScratch);
                 }
             }
 
             ForestBuilder.BuildForest(_terrain.transform.parent, TreeScratch, withColliders: true, decor);
+            if (decor != null)
+                ForestBuilder.ScatterClutter(
+                    _terrain.transform.parent, "Underbrush", ShrubScratch, decor.Shrubs, withColliders: false);
         }
 
-        /// <summary>Rocks gather where the ground is steep or wet — cover on exactly the ground
-        /// the splat paints grey, reinforcing the slope read.</summary>
+        private static float GroundLocal(float lx, float lz) =>
+            WorldTerrainForge.BattleHeightAt(_recipe, lx, lz);
+
+        /// <summary>Rock OUTCROPS of two to four where the ground is steep or wet — cover on
+        /// exactly the ground the splat paints grey, and never a lone pebble in a meadow.</summary>
         private static void PlaceRocks(TerrainDecorProfile decor)
         {
             if (decor == null || decor.Rocks == null || decor.Rocks.Length == 0) return;
 
             TreeScratch.Clear();
-            const float step = 21f;
+            const float step = 32f;
             for (float lz = -Span * 0.5f; lz < Span * 0.5f; lz += step)
             {
                 for (float lx = -Span * 0.5f; lx < Span * 0.5f; lx += step)
                 {
                     float h1 = Mathf.Repeat(Mathf.Sin(lx * 91.17f + lz * 53.71f) * 43758.5453f, 1f);
-                    if (h1 > 0.3f) continue;
+                    if (h1 > 0.32f) continue;
 
-                    float here = WorldTerrainForge.BattleHeightAt(_recipe, lx, lz);
-                    float ahead = WorldTerrainForge.BattleHeightAt(_recipe, lx + 6f, lz);
+                    float here = GroundLocal(lx, lz);
+                    float ahead = GroundLocal(lx + 6f, lz);
                     bool steep = Mathf.Abs(ahead - here) > 1.1f;
                     bool wet = _recipe.HasRiver && WorldTerrainForge.LocalRiverDistance(_recipe, lx, lz) < 16f;
                     if (!steep && !wet) continue;
 
-                    TreeScratch.Add(new Vector3(lx, here, lz));
+                    ForestBuilder.ClusterPositions(
+                        lx, lz, 2 + (int)(h1 * 10f) % 3, 3.5f, h1, GroundLocal, TreeScratch);
                 }
             }
 
             ForestBuilder.ScatterClutter(
-                _terrain.transform.parent, "Rocks", TreeScratch, decor.Rocks, withColliders: true);
+                _terrain.transform.parent, "Outcrops", TreeScratch, decor.Rocks, withColliders: true);
         }
 
         /// <summary>World y of the battlefield ground under a flat position. Safe pre-build (0).</summary>

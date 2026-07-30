@@ -53,6 +53,7 @@
     <Compile Include="Assets\Polytope Studio\Lowpoly_Demos\Environment_Free\Helpers\PT_PlayerMovement.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Assets\Polytope Studio\Lowpoly_Village\Sources\Shaders\PT_Buildings_Glass_PBR.shader" />
     <None Include="Assets\UI\century.uss" />
     <None Include="Assets\Polytope Studio\Lowpoly_Environments\Sources\Shaders\PT_Vegetation_Plants_Shader.shader" />
     <None Include="Assets\UI\BattleHud.uxml" />

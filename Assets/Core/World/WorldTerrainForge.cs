@@ -166,34 +166,6 @@ namespace Century.Core.World
             data.SetAlphamaps(0, 0, maps);
         }
 
-        /// <summary>
-        /// Deterministic tree positions inside a world-space rectangle: a jittered grid thinned by
-        /// forest density. Same rectangle in, same forest out — on either map.
-        /// </summary>
-        public static void TreePositions(
-            Vector2 minWorld, Vector2 maxWorld, float gridStep, System.Collections.Generic.List<Vector3> results)
-        {
-            results.Clear();
-
-            for (float z = Mathf.Ceil(minWorld.y / gridStep) * gridStep; z < maxWorld.y; z += gridStep)
-            {
-                for (float x = Mathf.Ceil(minWorld.x / gridStep) * gridStep; x < maxWorld.x; x += gridStep)
-                {
-                    float density = Forest01(x, z);
-                    if (density < 0.35f) continue;
-
-                    // Hash the cell for jitter and thinning, so the woods are ragged, not gridded.
-                    float h1 = Hash01(x * 12.9898f + z * 78.233f);
-                    float h2 = Hash01(x * 39.346f + z * 11.135f);
-                    if (h1 > density) continue;
-
-                    float px = x + (h2 - 0.5f) * gridStep * 0.9f;
-                    float pz = z + (h1 - 0.5f) * gridStep * 0.9f;
-                    results.Add(new Vector3(px, HeightAt(px, pz), pz));
-                }
-            }
-        }
-
         // --- The battlefield recipe --------------------------------------------------------------
         //
         // The overmap is a REGIONAL map: it can say "there is a river here, woods, rising ground
