@@ -88,8 +88,38 @@ namespace Century.Battle.View
             }
 
             _agent.speed = _settings.SoldierBaseSpeed;
+            InstallRig();
             _gear = new CombatantGear(_bodyRoot, combatant.Weapon, combatant.HasShield);
             ApplyTint();
+        }
+
+        private SoldierRig _rig;
+
+        /// <summary>
+        /// Swaps the placeholder capsule for the modular figure. Chest height is measured off the
+        /// placeholder's own bounds, so the rig stands on the same ground whatever the prefab's
+        /// layout; the capsule's renderer goes dark but its collider stays (pila still land).
+        /// </summary>
+        private void InstallRig()
+        {
+            float chest = 0.95f;
+            if (_bodyRenderer != null)
+            {
+                chest = _bodyRenderer.bounds.center.y - transform.position.y;
+                _bodyRenderer.enabled = false;
+            }
+
+            _rig = SoldierRig.Build(
+                _bodyRoot != null ? _bodyRoot : transform,
+                chest,
+                roman: _combatant.IsPlayerSide,
+                _combatant.Role,
+                _combatant.IsGroupLeader,
+                variant: (_combatant.SoldierId ?? string.Empty).GetHashCode());
+
+            // Wound tint now lands on the rig's tunic instead of the dead capsule.
+            _bodyRenderer = _rig.TintTarget;
+            _baseColour = _rig.TintBase;
         }
 
         /// <summary>
@@ -140,6 +170,7 @@ namespace Century.Battle.View
             _combatant.Facing = _bodyRoot.forward;
 
             _gear?.Pose(_combatant, Time.deltaTime);
+            _rig?.Animate(_agent.enabled ? _agent.velocity.magnitude : 0f, Time.deltaTime);
 
             if (_combatant.WasHitThisTick)
             {

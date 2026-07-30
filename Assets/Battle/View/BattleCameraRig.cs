@@ -47,6 +47,10 @@ namespace Century.Battle.View
             _targetDistance = _distance;
             _pivot = transform.position;
             _groundPlane = new Plane(Vector3.up, Vector3.zero);
+
+            // The concept art's framing: the player must be ABLE to come down close enough to see
+            // helmets and crests, whatever the scene's serialized floor was.
+            _minDistance = Mathf.Min(_minDistance, 7f);
         }
 
         public void SetTarget(Transform target, bool snap = true)

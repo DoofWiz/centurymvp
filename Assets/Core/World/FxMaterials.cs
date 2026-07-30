@@ -28,6 +28,21 @@ namespace Century.Core.World
             return material;
         }
 
+        /// <summary>Matte LIT material: shades with the sun and ambient, no specular glint. For
+        /// bodies and props that must sit IN the world's light rather than float over it.</summary>
+        public static Material Lit(Color colour)
+        {
+            Shader shader = Shader.Find("Universal Render Pipeline/Lit")
+                            ?? Shader.Find("Universal Render Pipeline/Unlit")
+                            ?? Shader.Find("Sprites/Default");
+
+            var material = new Material(shader);
+            SetColour(material, colour);
+            if (material.HasProperty("_Smoothness")) material.SetFloat("_Smoothness", 0f);
+            if (material.HasProperty("_Metallic")) material.SetFloat("_Metallic", 0f);
+            return material;
+        }
+
         /// <summary>Transparent material that honours vertex colour and alpha (Sprites/Default).
         /// Use for anything a LineRenderer or TrailRenderer needs to fade or recolour.</summary>
         public static Material VertexTinted()

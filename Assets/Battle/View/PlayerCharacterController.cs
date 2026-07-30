@@ -87,6 +87,7 @@ namespace Century.Battle.View
             name = $"Centurion [{combatant.DisplayName}]";
             transform.position = combatant.WorldPosition;
 
+            InstallRig();
             _gear = new CombatantGear(_bodyRoot, combatant.Weapon, combatant.HasShield, emphasise: true);
         }
 
@@ -128,6 +129,7 @@ namespace Century.Battle.View
 
             _combatant.WorldPosition = transform.position;
             _combatant.Facing = _bodyRoot.forward;
+            _rig?.Animate(_controller != null ? _controller.velocity.magnitude : 0f, Time.deltaTime);
 
             _gear?.Pose(_combatant, Time.deltaTime);
         }
@@ -169,6 +171,25 @@ namespace Century.Battle.View
                     ThrustCharge01 = Mathf.Clamp01(_lmbHeld);   // 1s hold = full charge
                 }
             }
+        }
+
+        private SoldierRig _rig;
+
+        /// <summary>The Centurion in the flesh: transverse crest, bronze, a head above the ranks.
+        /// Replaces whatever placeholder the prefab carried; its colliders stay untouched.</summary>
+        private void InstallRig()
+        {
+            float chest = 1.0f;
+            MeshRenderer[] placeholders = _bodyRoot.GetComponentsInChildren<MeshRenderer>();
+            if (placeholders.Length > 0)
+            {
+                chest = placeholders[0].bounds.center.y - transform.position.y;
+                for (int i = 0; i < placeholders.Length; i++) placeholders[i].enabled = false;
+            }
+
+            _rig = SoldierRig.Build(_bodyRoot, chest, roman: true,
+                Century.Battle.Model.OfficerRole.Centurion, leader: false, variant: 0);
+            _rig.transform.localScale = Vector3.one * 1.05f;
         }
 
         private void ApplyMovement()
