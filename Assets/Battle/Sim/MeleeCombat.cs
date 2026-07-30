@@ -155,7 +155,11 @@ namespace Century.Battle.Sim
 
             if (target == null || !target.IsAlive)
             {
-                man.ShieldRaised = false;
+                // No one to fight yet, but the boards come up when a warband is bearing down — the
+                // guard must precede the target, or a line receives its first volley bare-armed.
+                man.ShieldRaised = man.HasShield
+                                   && man.Stamina01 > profile.GuardFloor
+                                   && HostileNear(man, _settings.ShieldsUpRange);
                 man.DesiredRange = 0f;
                 return;
             }
@@ -173,13 +177,14 @@ namespace Century.Battle.Sim
             else
                 man.DesiredRange = profile.Reach * 0.85f;
 
-            // Block first: the shield stays up whenever a foe is near, and drops only for the brief
-            // stab itself (the Striking frame) — so a Roman in the line is near-untouchable head-on.
-            // A man blown below his board's guard floor cannot hold it up at all: the shield comes
-            // down and he gasps, which is what makes a tiring line visibly sag before it cracks.
+            // Block first: the shield comes up as soon as a foe is anywhere near — well before blade
+            // range, because a volley or a charge is exactly when the board matters — and drops only
+            // for the brief stab itself (the Striking frame). A man blown below his board's guard
+            // floor cannot hold it up at all: the shield comes down and he gasps, which is what makes
+            // a tiring line visibly sag before it cracks.
             man.ShieldRaised = man.HasShield && man.Stance != MeleeStance.Striking
                                && man.Stamina01 > profile.GuardFloor
-                               && distance <= profile.Reach + 1.5f;
+                               && distance <= _settings.ShieldsUpRange;
 
             // A spearman commits from his standoff and closes during the wind-up; a swordsman only
             // when already at reach. Either way the strike resolves once he has stepped in.
@@ -464,6 +469,23 @@ namespace Century.Battle.Sim
 
         private List<BattleSquad> OpposingSquads(BattleCombatant man) =>
             man.IsPlayerSide ? _state.EnemySquads : _state.PlayerSquads;
+
+        /// <summary>Any effective hostile squad's centre within range (a cheap squad-level check —
+        /// this runs for every unengaged man, so it must not scan every enemy body).</summary>
+        private bool HostileNear(BattleCombatant man, float range)
+        {
+            float rangeSqr = range * range;
+
+            List<BattleSquad> opponents = OpposingSquads(man);
+            for (int s = 0; s < opponents.Count; s++)
+            {
+                BattleSquad squad = opponents[s];
+                if (!squad.IsEffective || squad.IsOffField) continue;
+                if (FlatSqr(squad.CentreOfMass(), man.WorldPosition) <= rangeSqr) return true;
+            }
+
+            return false;
+        }
 
         private float FacingMultiplier(BattleCombatant attacker, BattleCombatant defender)
         {

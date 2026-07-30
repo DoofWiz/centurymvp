@@ -2823,6 +2823,7 @@
 .gi-old-wagon { background-image: url("IconsNET/ffffff/000000/1x1/delapouite/old-wagon.svg"); }
 .gi-olive { background-image: url("IconsNET/ffffff/000000/1x1/delapouite/olive.svg"); }
 .gi-painted-pottery { background-image: url("IconsNET/ffffff/000000/1x1/delapouite/painted-pottery.svg"); }
+.gi-shield-echoes { background-image: url("IconsNET/ffffff/000000/1x1/lorc/shield-echoes.svg"); }
 .gi-pause-button { background-image: url("IconsNET/ffffff/000000/1x1/guard13007/pause-button.svg"); }
 .gi-person { background-image: url("IconsNET/ffffff/000000/1x1/delapouite/person.svg"); }
 .gi-play-button { background-image: url("IconsNET/ffffff/000000/1x1/guard13007/play-button.svg"); }

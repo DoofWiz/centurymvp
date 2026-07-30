@@ -102,6 +102,10 @@ namespace Century.Battle.Sim
         [Tooltip("Body radius a blow must reach to wound a man, in metres.")]
         public float BodyRadius = 0.55f;
 
+        [Tooltip("A shield-bearer brings his board up once a foe is within this range — walking " +
+                 "toward a warband with the shield still slung reads as suicidal, whatever the maths says.")]
+        public float ShieldsUpRange = 10f;
+
         [Tooltip("Player LMB held below this (seconds) is a quick slash; above it charges a thrust.")]
         public float PlayerSlashHoldThreshold = 0.16f;
 

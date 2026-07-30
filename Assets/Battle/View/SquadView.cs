@@ -95,9 +95,10 @@ namespace Century.Battle.View
                 {
                     if (_player == null || !_squad.IsPlayerSide) return _squad.AnchorPosition;
 
-                    // Form on the Centurion's flanks with him in the middle. Each squad takes the flank
-                    // NEAREST it (so it doesn't run the length of the line), and holds that world spot
-                    // when he turns rather than swapping sides with its neighbour.
+                    // Form a screen IN FRONT of the Centurion — he commands from just behind the
+                    // line, where a commander belongs. Each squad takes the position nearest it (so
+                    // it doesn't run the length of the line), and holds that spot when he turns
+                    // rather than swapping sides with its neighbour.
                     Vector3 playerFacing = SquadFormationSolver.FlatFacing(_player.Facing);
                     Vector3 right = Vector3.Cross(Vector3.up, playerFacing);
 
@@ -106,7 +107,7 @@ namespace Century.Battle.View
 
                     Vector3 abreast = _player.transform.position
                                       + right * lateral
-                                      - playerFacing * (_settings.FollowDistance * 0.2f);
+                                      + playerFacing * (_settings.FollowDistance * 0.9f);
 
                     // Turn to meet a nearby enemy, but stay in position; otherwise march with the Centurion.
                     facing = playerFacing;

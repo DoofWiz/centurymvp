@@ -182,9 +182,9 @@
                     <ui:Label text="2" class="command__key" picking-mode="Ignore" />
                 </ui:Button>
 
-                <ui:Button name="form-wedge" class="command">
-                    <ui:VisualElement class="command__icon gi-arrowhead" picking-mode="Ignore" />
-                    <ui:Label text="WEDGE" class="command__label" picking-mode="Ignore" />
+                <ui:Button name="form-double" class="command">
+                    <ui:VisualElement class="command__icon gi-shield-echoes" picking-mode="Ignore" />
+                    <ui:Label text="DOUBLE LINE" class="command__label" picking-mode="Ignore" />
                     <ui:Label text="3" class="command__key" picking-mode="Ignore" />
                 </ui:Button>
 

@@ -251,16 +251,40 @@ namespace Century.Battle.View
 
             if (Input.GetKeyDown(KeyCode.Alpha1)) SetFormation(FormationType.Line);
             else if (Input.GetKeyDown(KeyCode.Alpha2)) SetFormation(FormationType.Testudo);
-            else if (Input.GetKeyDown(KeyCode.Alpha3)) SetFormation(FormationType.Wedge);
+            else if (Input.GetKeyDown(KeyCode.Alpha3)) SetFormation(FormationType.DoubleLine);
             else if (Input.GetKeyDown(KeyCode.Alpha4)) SetFormation(FormationType.Loose);
             else if (Input.GetKeyDown(KeyCode.Alpha5)) SetFormation(FormationType.Column);
         }
 
+        private readonly List<BattleSquad> _formationGroup = new List<BattleSquad>();
+        private readonly List<Vector3> _formationTargets = new List<Vector3>();
+
+        /// <summary>
+        /// A formation given to SEVERAL squads is a group order: they dress into that formation
+        /// together — one continuous front for a Line, the two covering ranks of a Double Line —
+        /// marching to their place in it and holding there. One squad alone just changes its own
+        /// shape where it stands, as before.
+        /// </summary>
         private void SetFormation(FormationType formation)
         {
-            foreach (BattleSquad squad in SelectedSquads())
+            _formationGroup.Clear();
+            foreach (BattleSquad squad in SelectedSquads()) _formationGroup.Add(squad);
+
+            GroupFormation.Arrange(_formationGroup, formation, _state, _settings, _formationTargets);
+
+            for (int i = 0; i < _formationGroup.Count; i++)
             {
+                BattleSquad squad = _formationGroup[i];
                 squad.PendingFormation = formation;
+
+                // Dressing as a group means taking your place in it. A lone squad's target is its
+                // own anchor, so this leaves its current order and ground untouched.
+                if (_formationGroup.Count > 1)
+                {
+                    squad.PendingOrder = SquadOrder.HoldPosition;
+                    squad.PendingOrderedPosition = _formationTargets[i];
+                }
+
                 squad.PendingReadyAt = _state.ElapsedSeconds + DelayFor(squad);
             }
 

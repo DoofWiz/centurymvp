@@ -41,12 +41,12 @@ namespace Century.Battle.Sim
 
             Vector3 flat = SquadFormationSolver.FlatFacing(playerFacing);
             Vector3 right = Vector3.Cross(Vector3.up, flat);
-            Vector3 back = flat * (settings.FollowDistance * 0.2f);
+            Vector3 ahead = flat * (settings.FollowDistance * 0.9f);
 
             for (int j = 0; j < n; j++)
             {
-                Offset[j] = FlankOffset(j, settings.SquadFrontage);
-                World[j] = playerPos + right * Offset[j] - back;
+                Offset[j] = FlankOffset(j, ScreenSpacing(settings));
+                World[j] = playerPos + right * Offset[j] + ahead;
                 SlotTaken[j] = false;
                 SquadDone[j] = false;
             }
@@ -84,11 +84,20 @@ namespace Century.Battle.Sim
             return selfLateral;
         }
 
-        /// <summary>-F, +F, -2F, +2F ... so no squad sits on the Centurion; he is always in a gap.</summary>
+        /// <summary>
+        /// The following line stands a squad's actual fighting width apart, not the looser deployment
+        /// frontage — a screen, not a parade — and it now INCLUDES the centre slot: the line forms in
+        /// front of the Centurion, who commands from behind it rather than standing in a gap in it.
+        /// </summary>
+        private static float ScreenSpacing(BattleSettings settings) =>
+            settings.LineWidth * settings.LineSpacing.x + 1.4f;
+
+        /// <summary>0, -F, +F, -2F, +2F ... centre first, then flanks outward.</summary>
         private static float FlankOffset(int index, float frontage)
         {
-            int step = index / 2 + 1;
-            float sign = index % 2 == 0 ? -1f : 1f;
+            if (index == 0) return 0f;
+            int step = (index + 1) / 2;
+            float sign = index % 2 == 1 ? -1f : 1f;
             return step * frontage * sign;
         }
     }

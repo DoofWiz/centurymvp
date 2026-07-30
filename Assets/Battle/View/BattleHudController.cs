@@ -157,7 +157,7 @@ namespace Century.Battle.View
             _formationMenu = root.Q<VisualElement>("formation-menu");
             Hook(root, "form-line", () => _commands?.RequestFormation(FormationType.Line));
             Hook(root, "form-testudo", () => _commands?.RequestFormation(FormationType.Testudo));
-            Hook(root, "form-wedge", () => _commands?.RequestFormation(FormationType.Wedge));
+            Hook(root, "form-double", () => _commands?.RequestFormation(FormationType.DoubleLine));
             Hook(root, "form-loose", () => _commands?.RequestFormation(FormationType.Loose));
             Hook(root, "form-column", () => _commands?.RequestFormation(FormationType.Column));
             _orderButtons[SquadOrder.Advance] = Hook(root, "cmd-advance", () => _commands?.RequestOrder(SquadOrder.Advance));
@@ -491,7 +491,7 @@ namespace Century.Battle.View
             string engaged = squad.EngagedCount > 0 ? $"  ·  {squad.EngagedCount} fighting" : string.Empty;
             SetText(_inspectOrder, squad.IsRouted
                 ? "Routed — running for the field edge"
-                : $"{OrderWord(squad.Order)}  ·  {squad.Formation.ToString().ToUpperInvariant()}{engaged}");
+                : $"{OrderWord(squad.Order)}  ·  {squad.Formation.Word()}{engaged}");
         }
 
         private static float AverageHealth01(BattleSquad squad)
@@ -647,7 +647,7 @@ namespace Century.Battle.View
                             ? "WITHDRAWN"
                             : squad.IsOffField
                                 ? "AWAITING SUMMONS"
-                                : $"{squad.Order.ToString().ToUpperInvariant()} · {squad.Formation.ToString().ToUpperInvariant()}";
+                                : $"{squad.Order.ToString().ToUpperInvariant()} · {squad.Formation.Word()}";
 
                 SetText(block.Order, order);
                 block.Order.EnableInClassList("text-danger", squad.IsRouted || squad.IsDestroyed || squad.IsWithdrawn);
@@ -797,7 +797,7 @@ namespace Century.Battle.View
                 _selectionText.text = names.ToString();
             }
 
-            if (_cmdFormationLabel != null) _cmdFormationLabel.text = current.ToString().ToUpperInvariant();
+            if (_cmdFormationLabel != null) _cmdFormationLabel.text = current.Word();
         }
 
         private static string ShortName(BattleSquad squad)

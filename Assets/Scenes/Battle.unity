@@ -425,8 +425,8 @@ MonoBehaviour:
   _debugHud: {fileID: 1048294758}
   _testBattleWhenNoRequest: 1
   _testConfig:
-    RomanCount: 40
-    GermanCount: 48
+    RomanCount: 71
+    GermanCount: 105
     EnemyBehaviour: 0
     RomanStamina01: 0.9
     GermanStamina01: 0.9
