@@ -14,6 +14,47 @@ namespace Century.Battle.Sim
     {
         private const int MaxFollowers = 16;
 
+        private static int _headingFrame = -1;
+        private static Vector3 _heading;
+
+        /// <summary>
+        /// The direction the follow screen forms toward — the nearest ENEMY concentration, not the
+        /// Centurion's cursor facing. His facing tracks the mouse every frame, and a screen keyed
+        /// to it orbits him with every glance: squads endlessly marching to hold station on a
+        /// compass needle instead of standing to fight. Smoothed, so the line wheels deliberately
+        /// when the threat moves rather than snapping.
+        /// </summary>
+        public static Vector3 StableHeading(BattleState state, Vector3 playerPos, Vector3 playerFacing)
+        {
+            if (Time.frameCount == _headingFrame) return _heading;
+            _headingFrame = Time.frameCount;
+
+            Vector3 desired = SquadFormationSolver.FlatFacing(playerFacing);
+
+            BattleSquad nearest = null;
+            float bestSqr = 120f * 120f;
+            for (int i = 0; i < state.EnemySquads.Count; i++)
+            {
+                BattleSquad squad = state.EnemySquads[i];
+                if (!squad.IsEffective || squad.IsOffField) continue;
+                float sqr = (squad.CentreOfMass() - playerPos).sqrMagnitude;
+                if (sqr >= bestSqr) continue;
+                bestSqr = sqr;
+                nearest = squad;
+            }
+
+            if (nearest != null)
+            {
+                Vector3 to = nearest.CentreOfMass() - playerPos;
+                to.y = 0f;
+                if (to.sqrMagnitude > 1f) desired = to.normalized;
+            }
+
+            if (_heading == Vector3.zero) _heading = desired;
+            _heading = Vector3.RotateTowards(_heading, desired, 1.5f * Time.deltaTime, 0f).normalized;
+            return _heading;
+        }
+
         // A squad keeps its current flank unless another is clearly closer, so a turn doesn't churn.
         private const float Hysteresis = 1.5f;
 

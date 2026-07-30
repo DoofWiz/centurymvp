@@ -96,14 +96,15 @@ namespace Century.Battle.View
                     if (_player == null || !_squad.IsPlayerSide) return _squad.AnchorPosition;
 
                     // Form a screen IN FRONT of the Centurion — he commands from just behind the
-                    // line, where a commander belongs. Each squad takes the position nearest it (so
-                    // it doesn't run the length of the line), and holds that spot when he turns
-                    // rather than swapping sides with its neighbour.
-                    Vector3 playerFacing = SquadFormationSolver.FlatFacing(_player.Facing);
+                    // line, where a commander belongs. The screen's heading is STABILISED toward
+                    // the nearest threat (never his mouse-driven facing, which would orbit the
+                    // whole line around him with every glance).
+                    Vector3 playerFacing = FollowFormation.StableHeading(
+                        _state, _player.transform.position, _player.Facing);
                     Vector3 right = Vector3.Cross(Vector3.up, playerFacing);
 
                     float lateral = FollowFormation.LateralFor(
-                        _squad, _state.PlayerSquads, _player.transform.position, _player.Facing, _settings);
+                        _squad, _state.PlayerSquads, _player.transform.position, playerFacing, _settings);
 
                     Vector3 abreast = _player.transform.position
                                       + right * lateral

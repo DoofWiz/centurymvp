@@ -51,6 +51,7 @@
   <ItemGroup>
     <Compile Include="Assets\Core\CampaignTime.cs" />
     <Compile Include="Assets\Core\World\WorldTerrainForge.cs" />
+    <Compile Include="Assets\Core\Ui\UiFont.cs" />
     <Compile Include="Assets\Core\Contracts\BattleTestForge.cs" />
     <Compile Include="Assets\Core\CampaignClock.cs" />
     <Compile Include="Assets\Core\Ui\FloatingText.cs" />
