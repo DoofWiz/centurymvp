@@ -54,6 +54,7 @@
     <Compile Include="Assets\Core\Ui\FloatingText.cs" />
     <Compile Include="Assets\Core\TimeControl.cs" />
     <Compile Include="Assets\Core\Contracts\BattleResult.cs" />
+    <Compile Include="Assets\Core\World\FxMaterials.cs" />
     <Compile Include="Assets\Core\Items\Inventory.cs" />
     <Compile Include="Assets\Core\Ui\RadialMeter.cs" />
     <Compile Include="Assets\Core\Contracts\ISceneNavigator.cs" />
