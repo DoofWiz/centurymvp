@@ -28,9 +28,10 @@
                     <ui:VisualElement class="time-button__icon gi-fast-forward-button" picking-mode="Ignore" />
                 </ui:Button>
             </ui:VisualElement>
-            <ui:VisualElement name="tactical-hint" picking-mode="Ignore"
-                              style="align-items: center; margin-top: 3px; opacity: 0.55;">
-                <ui:Label text="HOLD SPACE - TACTICAL TIME" class="eyebrow" picking-mode="Ignore" />
+            <ui:VisualElement name="tactical-hint" class="hint-row" picking-mode="Ignore"
+                              style="margin-top: 3px; opacity: 0.55;">
+                <ui:VisualElement class="keycap keycap--space" picking-mode="Ignore" />
+                <ui:Label text="TACTICAL TIME" class="eyebrow" picking-mode="Ignore" />
             </ui:VisualElement>
         </ui:VisualElement>
 
@@ -116,49 +117,49 @@
             <ui:Button name="cmd-formation" class="command">
                 <ui:VisualElement class="command__icon gi-backup" picking-mode="Ignore" />
                 <ui:Label name="cmd-formation-label" text="LINE" class="command__label" picking-mode="Ignore" />
-                <ui:Label text="1" class="command__key" picking-mode="Ignore" />
+                <ui:VisualElement class="command__key keycap--1" picking-mode="Ignore" />
             </ui:Button>
 
             <ui:Button name="cmd-advance" class="command">
                 <ui:VisualElement class="command__icon gi-walking-boot" picking-mode="Ignore" />
                 <ui:Label text="ADVANCE" class="command__label" picking-mode="Ignore" />
-                <ui:Label text="2" class="command__key" picking-mode="Ignore" />
+                <ui:VisualElement class="command__key keycap--2" picking-mode="Ignore" />
             </ui:Button>
 
             <ui:Button name="cmd-hold" class="command">
                 <ui:VisualElement class="command__icon gi-checked-shield" picking-mode="Ignore" />
                 <ui:Label text="HOLD" class="command__label" picking-mode="Ignore" />
-                <ui:Label text="3" class="command__key" picking-mode="Ignore" />
+                <ui:VisualElement class="command__key keycap--3" picking-mode="Ignore" />
             </ui:Button>
 
             <ui:Button name="cmd-follow" class="command">
                 <ui:VisualElement class="command__icon gi-boot-prints" picking-mode="Ignore" />
                 <ui:Label text="FOLLOW ME" class="command__label" picking-mode="Ignore" />
-                <ui:Label text="4" class="command__key" picking-mode="Ignore" />
+                <ui:VisualElement class="command__key keycap--4" picking-mode="Ignore" />
             </ui:Button>
 
             <ui:Button name="cmd-skirmish" class="command">
                 <ui:VisualElement class="command__icon gi-thrown-spear" picking-mode="Ignore" />
                 <ui:Label text="SKIRMISH" class="command__label" picking-mode="Ignore" />
-                <ui:Label text="5" class="command__key" picking-mode="Ignore" />
+                <ui:VisualElement class="command__key keycap--5" picking-mode="Ignore" />
             </ui:Button>
 
             <ui:Button name="cmd-fallback" class="command">
                 <ui:VisualElement class="command__icon gi-return-arrow" picking-mode="Ignore" />
                 <ui:Label text="FALL BACK" class="command__label" picking-mode="Ignore" />
-                <ui:Label text="6" class="command__key" picking-mode="Ignore" />
+                <ui:VisualElement class="command__key keycap--6" picking-mode="Ignore" />
             </ui:Button>
 
             <ui:Button name="cmd-retreat" class="command">
                 <ui:VisualElement class="command__icon gi-run" picking-mode="Ignore" />
                 <ui:Label text="RETREAT" class="command__label" picking-mode="Ignore" />
-                <ui:Label text="7" class="command__key" picking-mode="Ignore" />
+                <ui:VisualElement class="command__key keycap--7" picking-mode="Ignore" />
             </ui:Button>
 
             <ui:Button name="cmd-summon" class="command command--summon" style="display: none;">
                 <ui:VisualElement class="command__icon gi-flying-flag" picking-mode="Ignore" />
                 <ui:Label text="SUMMON RESERVES" class="command__label" picking-mode="Ignore" />
-                <ui:Label text="8" class="command__key" picking-mode="Ignore" />
+                <ui:VisualElement class="command__key keycap--8" picking-mode="Ignore" />
             </ui:Button>
 
         </ui:VisualElement>
@@ -173,31 +174,31 @@
                 <ui:Button name="form-line" class="command">
                     <ui:VisualElement class="command__icon gi-roman-shield" picking-mode="Ignore" />
                     <ui:Label text="LINE" class="command__label" picking-mode="Ignore" />
-                    <ui:Label text="1" class="command__key" picking-mode="Ignore" />
+                    <ui:VisualElement class="command__key keycap--1" picking-mode="Ignore" />
                 </ui:Button>
 
                 <ui:Button name="form-testudo" class="command">
                     <ui:VisualElement class="command__icon gi-turtle" picking-mode="Ignore" />
                     <ui:Label text="TESTUDO" class="command__label" picking-mode="Ignore" />
-                    <ui:Label text="2" class="command__key" picking-mode="Ignore" />
+                    <ui:VisualElement class="command__key keycap--2" picking-mode="Ignore" />
                 </ui:Button>
 
                 <ui:Button name="form-double" class="command">
                     <ui:VisualElement class="command__icon gi-shield-echoes" picking-mode="Ignore" />
                     <ui:Label text="DOUBLE LINE" class="command__label" picking-mode="Ignore" />
-                    <ui:Label text="3" class="command__key" picking-mode="Ignore" />
+                    <ui:VisualElement class="command__key keycap--3" picking-mode="Ignore" />
                 </ui:Button>
 
                 <ui:Button name="form-loose" class="command">
                     <ui:VisualElement class="command__icon gi-expander" picking-mode="Ignore" />
                     <ui:Label text="LOOSE" class="command__label" picking-mode="Ignore" />
-                    <ui:Label text="4" class="command__key" picking-mode="Ignore" />
+                    <ui:VisualElement class="command__key keycap--4" picking-mode="Ignore" />
                 </ui:Button>
 
                 <ui:Button name="form-column" class="command">
                     <ui:VisualElement class="command__icon gi-trail" picking-mode="Ignore" />
                     <ui:Label text="COLUMN" class="command__label" picking-mode="Ignore" />
-                    <ui:Label text="5" class="command__key" picking-mode="Ignore" />
+                    <ui:VisualElement class="command__key keycap--5" picking-mode="Ignore" />
                 </ui:Button>
 
             </ui:VisualElement>

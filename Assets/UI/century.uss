@@ -2844,3 +2844,154 @@
 .gi-wood-pile { background-image: url("IconsNET/ffffff/000000/1x1/delapouite/wood-pile.svg"); }
 .gi-wooden-crate { background-image: url("IconsNET/ffffff/000000/1x1/delapouite/wooden-crate.svg"); }
 .gi-wool { background-image: url("IconsNET/ffffff/000000/1x1/delapouite/wool.svg"); }
+
+/* =======================================================================================
+ *  KENNEY THEME LAYER (branch new-ui)
+ *  Ornate fantasy frames over the existing dark fills, and real key-cap icons for every
+ *  keyboard hint. Appended last so it overrides the flat hairline look wholesale.
+ *  THE KNOB: the frame artwork index (…-0XX.png). Browse
+ *  KennyFantasyUIBorders/PNG/Double/Transparent center/ and change the numbers to retheme.
+ * ======================================================================================= */
+
+/* --- Panels: every HUD window, both maps and the camp ---------------------------------- */
+
+.panel {
+    background-image: url("KennyFantasyUIBorders/PNG/Double/Transparent center/panel-transparent-center-020.png");
+    -unity-slice-left: 32;
+    -unity-slice-top: 32;
+    -unity-slice-right: 32;
+    -unity-slice-bottom: 32;
+    -unity-slice-scale: 0.5;
+    -unity-background-image-tint-color: rgb(200, 182, 140);
+    border-width: 0;
+    padding: 12px 14px;
+}
+
+/* --- Modal sheets and the summary: the heavy frame ------------------------------------- */
+
+.modal__sheet,
+.sheet {
+    background-image: url("KennyFantasyUIBorders/PNG/Double/Transparent center/panel-transparent-center-016.png");
+    -unity-slice-left: 32;
+    -unity-slice-top: 32;
+    -unity-slice-right: 32;
+    -unity-slice-bottom: 32;
+    -unity-slice-scale: 0.6;
+    -unity-background-image-tint-color: rgb(208, 188, 142);
+    border-width: 0;
+    padding: 18px 20px;
+}
+
+/* --- Command bar, formation picker, time controls --------------------------------------- */
+
+.command,
+.time-button {
+    background-image: url("KennyFantasyUIBorders/PNG/Double/Transparent center/panel-transparent-center-008.png");
+    -unity-slice-left: 32;
+    -unity-slice-top: 32;
+    -unity-slice-right: 32;
+    -unity-slice-bottom: 32;
+    -unity-slice-scale: 0.35;
+    -unity-background-image-tint-color: rgb(168, 152, 118);
+    border-width: 0;
+}
+
+.command:hover,
+.time-button:hover {
+    -unity-background-image-tint-color: rgb(224, 200, 140);
+}
+
+.command--active,
+.time-button--active {
+    -unity-background-image-tint-color: rgb(240, 208, 130);
+}
+
+/* --- Primary buttons -------------------------------------------------------------------- */
+
+.button-primary,
+.button-start,
+.step,
+.tally {
+    background-image: url("KennyFantasyUIBorders/PNG/Double/Transparent center/panel-transparent-center-008.png");
+    -unity-slice-left: 32;
+    -unity-slice-top: 32;
+    -unity-slice-right: 32;
+    -unity-slice-bottom: 32;
+    -unity-slice-scale: 0.45;
+    -unity-background-image-tint-color: rgb(196, 176, 128);
+    border-width: 0;
+}
+
+.button-primary:hover,
+.button-start:hover,
+.step:hover {
+    -unity-background-image-tint-color: rgb(236, 208, 138);
+}
+
+/* --- Officer cards, contubernium blocks, the time box, the alert ------------------------ */
+
+.card,
+.contubernium,
+.time-box,
+.formation-menu,
+.alert__frame,
+.hover-tip {
+    background-image: url("KennyFantasyUIBorders/PNG/Double/Transparent center/panel-transparent-center-004.png");
+    -unity-slice-left: 32;
+    -unity-slice-top: 32;
+    -unity-slice-right: 32;
+    -unity-slice-bottom: 32;
+    -unity-slice-scale: 0.4;
+    -unity-background-image-tint-color: rgb(178, 160, 122);
+    border-width: 0;
+}
+
+.alert__frame {
+    -unity-background-image-tint-color: rgb(214, 110, 84);
+}
+
+/* The overmap's single bottom bar wears the panel frame too. */
+.bottom-bar {
+    background-image: url("KennyFantasyUIBorders/PNG/Double/Transparent center/panel-transparent-center-020.png");
+    -unity-slice-left: 32;
+    -unity-slice-top: 32;
+    -unity-slice-right: 32;
+    -unity-slice-bottom: 32;
+    -unity-slice-scale: 0.5;
+    -unity-background-image-tint-color: rgb(190, 172, 132);
+    border-width: 0;
+}
+
+/* --- Key caps: real keyboard icons where the UI names a key ----------------------------- */
+
+.command__key {
+    width: 22px;
+    height: 22px;
+    font-size: 0;
+    opacity: 0.9;
+    -unity-background-image-tint-color: rgb(224, 206, 160);
+}
+
+.keycap--1 { background-image: url("KenneyInputIcons/Keyboard & Mouse/Double/keyboard_1_outline.png"); }
+.keycap--2 { background-image: url("KenneyInputIcons/Keyboard & Mouse/Double/keyboard_2_outline.png"); }
+.keycap--3 { background-image: url("KenneyInputIcons/Keyboard & Mouse/Double/keyboard_3_outline.png"); }
+.keycap--4 { background-image: url("KenneyInputIcons/Keyboard & Mouse/Double/keyboard_4_outline.png"); }
+.keycap--5 { background-image: url("KenneyInputIcons/Keyboard & Mouse/Double/keyboard_5_outline.png"); }
+.keycap--6 { background-image: url("KenneyInputIcons/Keyboard & Mouse/Double/keyboard_6_outline.png"); }
+.keycap--7 { background-image: url("KenneyInputIcons/Keyboard & Mouse/Double/keyboard_7_outline.png"); }
+.keycap--8 { background-image: url("KenneyInputIcons/Keyboard & Mouse/Double/keyboard_8_outline.png"); }
+.keycap--space { background-image: url("KenneyInputIcons/Keyboard & Mouse/Double/keyboard_space_outline.png"); }
+
+.hint-row {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+.hint-row .keycap {
+    width: 26px;
+    height: 26px;
+    margin-right: 5px;
+    opacity: 0.8;
+    -unity-background-image-tint-color: rgb(224, 206, 160);
+}
