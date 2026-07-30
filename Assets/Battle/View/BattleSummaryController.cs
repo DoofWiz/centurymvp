@@ -167,7 +167,10 @@ namespace Century.Battle.View
                     ? $"  ({man.Role.ToString().ToUpperInvariant()})"
                     : string.Empty;
 
-                VisualElement line = MakeLine($"✖  {label}{rank}", "text-danger");
+                // The clearing of the field: some of the fallen are found still breathing.
+                VisualElement line = fallen[i].Wounded
+                    ? MakeLine($"{label}{rank} — wounded, carried off", "text-gold")
+                    : MakeLine($"✖  {label}{rank}", "text-danger");
                 _casualtyList.Add(line);
 
                 yield return UiTween.AppearFromBelow(line, 0.2f, 8f);

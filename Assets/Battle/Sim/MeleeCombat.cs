@@ -351,6 +351,9 @@ namespace Century.Battle.Sim
                 man.Kills++;
                 victim.Target = null;
 
+                // Cut down is not always killed: the field decides now, the burial detail later.
+                victim.IsWoundedOut = CasualtyFate.RollWoundedOut(_state, _settings, victim, _random);
+
                 // Blooded: for the commander's own men, a kill answers something.
                 if (man.IsPlayerSide && _state.HasSkill("blooded"))
                     man.Morale01 = Mathf.Clamp01(man.Morale01 + 0.05f);

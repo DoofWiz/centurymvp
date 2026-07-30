@@ -47,6 +47,7 @@ namespace Century.Battle.Sim
             {
                 if (attacker != null) attacker.Kills++;
                 defender.Target = null;
+                defender.IsWoundedOut = CasualtyFate.RollWoundedOut(_state, _settings, defender, _random);
             }
         }
 

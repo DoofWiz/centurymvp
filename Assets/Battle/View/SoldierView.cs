@@ -153,7 +153,10 @@ namespace Century.Battle.View
             IsInStation = false;
 
             _agent.obstacleAvoidanceType = ObstacleAvoidanceType.LowQualityObstacleAvoidance;
+
+            // A rout IS a sprint — fear pays the stamina bill until there is nothing left to spend.
             _agent.speed = _settings.SoldierBaseSpeed * _settings.RoutSpeedMultiplier
+                           * SprintPace(wantSprint: true)
                            * Mathf.Lerp(0.7f, 1f, _combatant.Health01)
                            * StaminaProfile.For(_combatant.Stamina).MoveMultiplier;
 
@@ -196,7 +199,10 @@ namespace Century.Battle.View
 
             if (distance > desired + 0.2f)
             {
-                _agent.speed = _settings.SoldierBaseSpeed * condition;
+                // Closing a real gap is a charge — a sprint; the last step to reach is footwork.
+                _agent.speed = _settings.SoldierBaseSpeed
+                               * SprintPace(wantSprint: distance > desired + 3f)
+                               * condition;
                 _agent.SetDestination(TetheredDestination(targetPos));
             }
             else if (distance < desired - 0.5f && !_combatant.IsAttacking)
@@ -204,7 +210,7 @@ namespace Century.Battle.View
                 Vector3 away = transform.position - targetPos;
                 away.y = 0f;
                 Vector3 dir = away.sqrMagnitude > 0.001f ? away.normalized : -_bodyRoot.forward;
-                _agent.speed = _settings.SoldierBaseSpeed * 0.9f;
+                _agent.speed = _settings.SoldierBaseSpeed * _settings.NormalMoveFraction * 0.9f;
                 _agent.SetDestination(TetheredDestination(targetPos + dir * desired));
             }
             else
@@ -275,15 +281,31 @@ namespace Century.Battle.View
         {
             float formationSpeed = _settings.SoldierBaseSpeed * _squad.Formation.SpeedMultiplier();
 
-            // Men who have fallen behind hurry to catch up, otherwise a moving line never re-dresses
-            // and trails stragglers forever.
-            float catchUp = Mathf.Clamp(distanceToSlot / 4f, 1f, 1.7f);
+            // A man well out of his slot SPRINTS back to it; in station he moves at the ordinary
+            // marching pace. This replaces the old flat catch-up stretch: hurrying now has a cost.
+            float pace = SprintPace(wantSprint: distanceToSlot > 3.5f);
 
             float condition = Mathf.Lerp(0.6f, 1f, _combatant.Health01)
                               * Mathf.Lerp(0.7f, 1f, _combatant.Stamina01)
                               * StaminaProfile.For(_combatant.Stamina).MoveMultiplier;
 
-            _agent.speed = formationSpeed * catchUp * condition;
+            _agent.speed = formationSpeed * pace * condition;
+        }
+
+        /// <summary>
+        /// The two paces of the field: ordinary movement at <see cref="BattleSettings.NormalMoveFraction"/>
+        /// of full speed, and the sprint — full speed, burning stamina while it lasts. A man too
+        /// spent to sprint drops to the ordinary pace whatever he wants.
+        /// </summary>
+        private float SprintPace(bool wantSprint)
+        {
+            bool sprinting = wantSprint && _combatant.Stamina01 > 0.12f;
+
+            if (sprinting)
+                _combatant.Stamina01 = Mathf.Max(
+                    0f, _combatant.Stamina01 - _settings.SprintStaminaPerSecond * Time.deltaTime);
+
+            return sprinting ? 1f : _settings.NormalMoveFraction;
         }
 
         private void FaceDirection(Vector3 desired)

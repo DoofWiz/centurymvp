@@ -80,6 +80,7 @@
     <Compile Include="Assets\Battle\View\PlayerCharacterController.cs" />
     <Compile Include="Assets\Battle\Model\BattleState.cs" />
     <Compile Include="Assets\Battle\Sim\MissileResolver.cs" />
+    <Compile Include="Assets\Battle\Sim\GroupFormation.cs" />
     <Compile Include="Assets\Battle\Model\SquadOrder.cs" />
     <Compile Include="Assets\Battle\View\BattleSummaryController.cs" />
     <Compile Include="Assets\Battle\Sim\BattleFactory.cs" />

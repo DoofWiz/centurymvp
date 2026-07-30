@@ -104,7 +104,25 @@ namespace Century.Battle.Sim
 
         [Tooltip("A shield-bearer brings his board up once a foe is within this range — walking " +
                  "toward a warband with the shield still slung reads as suicidal, whatever the maths says.")]
-        public float ShieldsUpRange = 10f;
+        public float ShieldsUpRange = 16f;
+
+        [Header("Casualties")]
+        [Tooltip("Chance a player-side man cut down in battle is WOUNDED rather than killed: found " +
+                 "alive among the dead afterwards, out of every fight until he heals. Officer, " +
+                 "doctrine and camp bonuses stack on top of this base.")]
+        [Range(0f, 0.9f)] public float WoundedOutChance = 0.35f;
+
+        [Tooltip("Added to the wounded chance while a medicus is alive on the field. His work is " +
+                 "why men survive their wounds.")]
+        [Range(0f, 0.5f)] public float MedicusWoundedOutBonus = 0.2f;
+
+        [Header("Sprint")]
+        [Tooltip("Fraction of full speed used for ordinary movement. Full speed is a SPRINT now — " +
+                 "Shift for the Centurion, automatic for men charging, catching up, or fleeing.")]
+        [Range(0.4f, 1f)] public float NormalMoveFraction = 0.7f;
+
+        [Tooltip("Stamina burned per second of sprinting. Sprinting into a fight arrives winded.")]
+        public float SprintStaminaPerSecond = 0.04f;
 
         [Tooltip("Player LMB held below this (seconds) is a quick slash; above it charges a thrust.")]
         public float PlayerSlashHoldThreshold = 0.16f;

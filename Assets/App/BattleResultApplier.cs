@@ -60,18 +60,29 @@ namespace Century.App
 
         private void ApplyToPlayer(PartyState player, BattleResult result)
         {
+            int wounded = 0;
+
             for (int i = 0; i < result.Combatants.Count; i++)
             {
                 CombatantOutcome outcome = result.Combatants[i];
                 SoldierRecord soldier = player.Roster.Find(outcome.SoldierId);
                 if (soldier == null) continue;
 
-                soldier.Health01 = outcome.Survived ? Mathf.Max(0.01f, outcome.Health01) : 0f;
+                // A wounded man was cut down but found alive when the field was cleared: he comes
+                // home at a sliver of health — not combat-ready, slowing the column, a job for the
+                // medicine chest — instead of into the ground.
+                soldier.Health01 = outcome.Survived ? Mathf.Max(0.01f, outcome.Health01)
+                    : outcome.Wounded ? 0.06f
+                    : 0f;
                 soldier.Stamina01 = outcome.Stamina01;
                 soldier.Morale01 = outcome.Morale01;
                 soldier.Kills += outcome.Kills;
 
-                if (!outcome.Survived) continue;
+                if (!outcome.Survived)
+                {
+                    if (outcome.Wounded) wounded++;
+                    continue;   // no experience for the part of the battle spent face-down
+                }
 
                 soldier.Experience += outcome.ExperienceGained;
                 soldier.BattlesSurvived++;
@@ -79,6 +90,13 @@ namespace Century.App
                 // Breaking leaves a mark beyond the battle it happened in.
                 if (outcome.Routed) soldier.Morale01 = Mathf.Max(0f, soldier.Morale01 - 0.08f);
             }
+
+            if (wounded > 0)
+                _log?.Push(
+                    CampaignEventKind.Loss,
+                    $"{wounded} men wounded",
+                    "Found alive among the fallen. They march as baggage until they heal",
+                    _state.Clock.Now.DayNumber);
 
             var fallen = player.Roster.RemoveFallen();
             if (fallen.Count > 0)

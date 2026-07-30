@@ -52,6 +52,7 @@ namespace Century.Battle.Sim
                 {
                     SoldierId = man.SoldierId,
                     Survived = man.IsAlive,
+                    Wounded = !man.IsAlive && man.IsWoundedOut,
                     Health01 = man.Health01,
                     Stamina01 = man.Stamina01,
                     Morale01 = man.Morale01,

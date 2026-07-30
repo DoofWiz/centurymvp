@@ -252,7 +252,10 @@ namespace Century.Battle.View
 
         private void MoveAnchorToward(Vector3 target)
         {
-            float speed = _settings.SoldierBaseSpeed * _squad.Formation.SpeedMultiplier();
+            // Formations march at the ordinary pace — the sprint belongs to individual men
+            // (charging, catching up, fleeing), never to a dressed line keeping step.
+            float speed = _settings.SoldierBaseSpeed * _settings.NormalMoveFraction
+                          * _squad.Formation.SpeedMultiplier();
 
             // Once the lines meet, the anchor STOPS and the men fight where they stand — even a 15%
             // creep, held for a whole melee, walked formations through each other into one brawl.

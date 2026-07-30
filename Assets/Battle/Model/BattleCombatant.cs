@@ -103,6 +103,10 @@ namespace Century.Battle.Model
         /// <summary>Set for one tick after taking a wound, so the view can react.</summary>
         public bool WasHitThisTick;
 
+        /// <summary>Cut down but not killed: he is out of this battle exactly like a dead man, and
+        /// found alive among the fallen when the field is cleared afterwards.</summary>
+        public bool IsWoundedOut;
+
         /// <summary>Seconds since this man last struck or was struck. Drives "in combat" checks.</summary>
         public float TimeSinceCombat = 999f;
 

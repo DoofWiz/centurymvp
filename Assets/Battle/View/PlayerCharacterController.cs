@@ -189,8 +189,19 @@ namespace Century.Battle.View
 
             _verticalVelocity = _controller.isGrounded ? -1f : _verticalVelocity + _gravity * Time.deltaTime;
 
+            // Shift is a SPRINT: full speed, paid for in wind. Ordinary movement is the walk-jog
+            // of a man saving himself for the fight; a spent man cannot sprint at all.
+            bool sprinting = Input.GetKey(KeyCode.LeftShift)
+                             && move.sqrMagnitude > 0.01f
+                             && _combatant.Stamina01 > 0.1f
+                             && !IsAiming;
+            float pace = sprinting ? 1f : _settings.NormalMoveFraction;
+            if (sprinting)
+                _combatant.Stamina01 =
+                    Mathf.Max(0f, _combatant.Stamina01 - _settings.SprintStaminaPerSecond * Time.deltaTime);
+
             float aimSlow = IsAiming ? _aimMoveMultiplier : 1f;
-            Vector3 velocity = move * (_settings.PlayerSpeed * condition * aimSlow);
+            Vector3 velocity = move * (_settings.PlayerSpeed * pace * condition * aimSlow);
             velocity.y = _verticalVelocity;
 
             _controller.Move(velocity * Time.deltaTime);

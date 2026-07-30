@@ -42,6 +42,11 @@ namespace Century.Core.Contracts
     {
         public string SoldierId;
         public bool Survived = true;
+
+        /// <summary>Cut down but found alive when the field was cleared: he comes home, barely,
+        /// and fights in nothing until he has healed. Only meaningful when Survived is false.</summary>
+        public bool Wounded;
+
         public float Health01 = 1f;
         public float Stamina01 = 1f;
         public float Morale01 = 0.6f;
