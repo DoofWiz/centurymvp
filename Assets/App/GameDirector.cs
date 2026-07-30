@@ -98,6 +98,35 @@ namespace Century.App
             if (_loadOvermapOnStart) SceneFlow.LoadOvermap();
         }
 
+        private void Update()
+        {
+            // Designer tool: F5 on the overmap spins up a TEST battle exactly where the column
+            // stands, against a comparable synthetic warband — the fastest way to see what ground
+            // the world function births at any spot. The forged party ids match nothing in the
+            // campaign, so the result applier ignores the outcome (only the clock pays the visit).
+            if (!Input.GetKeyDown(KeyCode.F5)) return;
+            if (_ticker == null || !_ticker.IsRunning) return;   // overmap only
+            if (Campaign?.PlayerParty == null || Encounters.Pending.HasValue) return;
+
+            Vector3 here = Campaign.PlayerParty.WorldPosition;
+            int romans = Mathf.Clamp(Campaign.PlayerParty.Roster.CombatReadyCount, 9, 96);
+
+            var config = new BattleTestConfig
+            {
+                RomanCount = romans,
+                GermanCount = Mathf.Clamp(Mathf.RoundToInt(romans * 1.1f), 8, 120),
+                SkipDeployment = true,
+                WorldX = here.x,
+                WorldZ = here.z,
+                HourOfDay = (float)(Campaign.Clock.Now.TotalHours % 24d)
+            };
+
+            EventLog.Push(CampaignEventKind.Discovery, "Test battle",
+                $"On this ground ({here.x:0}, {here.z:0})", Campaign.Clock.Now.DayNumber);
+
+            SceneFlow.LoadBattle(BattleTestForge.Build(config));
+        }
+
         /// <summary>Return leg of the battle contract. Called by the battle scene, whatever it is.</summary>
         void IBattleResultSink.Submit(BattleResult result)
         {

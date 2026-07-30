@@ -1,9 +1,8 @@
 using System.Collections.Generic;
 using Century.Core;
-using Century.Core.Contracts;
 using UnityEngine;
 
-namespace Century.Battle.Sim
+namespace Century.Core.Contracts
 {
     /// <summary>
     /// The knobs of the battle test environment, edited on BattleBootstrap in the Inspector of the
