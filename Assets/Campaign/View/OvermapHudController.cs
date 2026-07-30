@@ -382,11 +382,17 @@ namespace Century.Campaign.View
             if (_camera == null) _camera = Camera.main;
             if (_camera == null || _state.PlayerParty == null) return false;
 
-            // Cursor to ground plane, then nearest living non-player party within the hover radius.
+            // Cursor to the GROUND — physics against the sculpted terrain first, flat plane as a
+            // fallback — then nearest living non-player party within the hover radius.
             Ray ray = _camera.ScreenPointToRay(Input.mousePosition);
-            var ground = new Plane(Vector3.up, Vector3.zero);
-            if (!ground.Raycast(ray, out float enter)) return false;
-            Vector3 point = ray.GetPoint(enter);
+            Vector3 point;
+            if (Physics.Raycast(ray, out RaycastHit hit, 900f)) point = hit.point;
+            else
+            {
+                var ground = new Plane(Vector3.up, Vector3.zero);
+                if (!ground.Raycast(ray, out float enter)) return false;
+                point = ray.GetPoint(enter);
+            }
 
             float best = _hoverRadius;
             List<PartyState> parties = _state.Parties;

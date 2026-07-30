@@ -83,6 +83,14 @@ namespace Century.Battle.Sim
                  "toward a warband with the shield still slung reads as suicidal, whatever the maths says.")]
         public float ShieldsUpRange = 16f;
 
+        [Header("Terrain")]
+        [Tooltip("Damage bonus per metre of height advantage over the victim (and penalty per metre " +
+                 "of disadvantage). Holding the ridge is supposed to matter.")]
+        public float HighGroundDamagePerMetre = 0.05f;
+
+        [Tooltip("Cap on the total high-ground bonus/penalty, either way.")]
+        [Range(0f, 0.5f)] public float HighGroundDamageCap = 0.2f;
+
         [Header("Casualties")]
         [Tooltip("Chance a player-side man cut down in battle is WOUNDED rather than killed: found " +
                  "alive among the dead afterwards, out of every fight until he heals. Officer, " +

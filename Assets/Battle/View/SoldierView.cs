@@ -74,7 +74,8 @@ namespace Century.Battle.View
 
             name = $"{combatant.DisplayName} [{squad.DisplayName}]";
 
-            if (NavMesh.SamplePosition(combatant.WorldPosition, out NavMeshHit hit, 8f, NavMesh.AllAreas))
+            // Wide vertical reach: positions are authored flat (y = 0) but the ground is sculpted.
+            if (NavMesh.SamplePosition(combatant.WorldPosition, out NavMeshHit hit, 30f, NavMesh.AllAreas))
             {
                 transform.position = hit.position;
                 _agent.enabled = true;
@@ -101,7 +102,7 @@ namespace Century.Battle.View
 
             Vector3 slot = SquadFormationSolver.GetWorldSlot(_squad, _combatant.SlotIndex, _settings);
 
-            if (NavMesh.SamplePosition(slot, out NavMeshHit hit, 6f, NavMesh.AllAreas)) slot = hit.position;
+            if (NavMesh.SamplePosition(slot, out NavMeshHit hit, 30f, NavMesh.AllAreas)) slot = hit.position;
 
             if (_agent.enabled && _agent.isOnNavMesh) _agent.Warp(slot);
             else transform.position = slot;

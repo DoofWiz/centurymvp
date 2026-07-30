@@ -55,15 +55,24 @@ namespace Century.Battle.View
             if (snap && target != null) _pivot = target.position;
         }
 
-        /// <summary>World point under the cursor on the ground plane. The command system needs this too.</summary>
+        /// <summary>
+        /// World point under the cursor ON THE GROUND. Physics first (the sculpted terrain), the
+        /// flat plane as fallback — a plane-only answer lands orders metres off on any hillside.
+        /// </summary>
         public bool TryGetCursorGroundPoint(out Vector3 point)
         {
             point = Vector3.zero;
             if (_camera == null) return false;
 
             Ray ray = _camera.ScreenPointToRay(Input.mousePosition);
-            if (!_groundPlane.Raycast(ray, out float enter)) return false;
 
+            if (Physics.Raycast(ray, out RaycastHit hit, 600f))
+            {
+                point = hit.point;
+                return true;
+            }
+
+            if (!_groundPlane.Raycast(ray, out float enter)) return false;
             point = ray.GetPoint(enter);
             return true;
         }

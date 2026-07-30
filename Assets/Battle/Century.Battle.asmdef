@@ -2,7 +2,8 @@
     "name": "Century.Battle",
     "rootNamespace": "Century.Battle",
     "references": [
-        "Century.Core"
+        "Century.Core",
+        "Unity.AI.Navigation"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

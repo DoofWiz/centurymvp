@@ -20,7 +20,9 @@ namespace Century.Campaign.View
 
         [Header("Placement")]
         [Tooltip("How far from the stored position to search for a valid NavMesh point on spawn.")]
-        [SerializeField] private float _navMeshSampleRadius = 25f;
+        [Tooltip("Positions are authored flat (y = 0) but the world is sculpted up to ~24m; the " +
+                 "sample reach must cover the tallest ground plus horizontal slack.")]
+        [SerializeField] private float _navMeshSampleRadius = 45f;
 
         private NavMeshAgent _agent;
         private CampaignSettings _settings;

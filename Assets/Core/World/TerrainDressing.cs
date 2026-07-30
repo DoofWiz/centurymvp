@@ -54,9 +54,22 @@ namespace Century.Core.World
             }
         }
 
+        /// <summary>A ready TerrainLayer over a baked two-tone ground texture. Shared by the sculpted
+        /// overmap/battlefield builders, which paint several of these by splat weight.</summary>
+        public static TerrainLayer MakeLayer(Color low, Color high, float tileSizeWorldUnits, bool keepReadable = false)
+        {
+            return new TerrainLayer
+            {
+                diffuseTexture = BakeGroundTexture(low, high, keepReadable: keepReadable),
+                tileSize = new Vector2(tileSizeWorldUnits, tileSizeWorldUnits),
+                tileOffset = Vector2.zero
+            };
+        }
+
         /// <summary>Two octaves of Perlin between the tones, plus a whisper of per-pixel grain so
-        /// large flat stretches read as ground rather than a colour swatch.</summary>
-        private static Texture2D BakeGroundTexture(Color low, Color high, int size = 128)
+        /// large flat stretches read as ground rather than a colour swatch. Keep it readable when
+        /// it is destined for an asset (the editor tool saves these).</summary>
+        public static Texture2D BakeGroundTexture(Color low, Color high, int size = 128, bool keepReadable = false)
         {
             var texture = new Texture2D(size, size, TextureFormat.RGBA32, mipChain: true)
             {
@@ -90,7 +103,7 @@ namespace Century.Core.World
             }
 
             texture.SetPixels32(pixels);
-            texture.Apply(updateMipmaps: true, makeNoLongerReadable: true);
+            texture.Apply(updateMipmaps: true, makeNoLongerReadable: !keepReadable);
             return texture;
         }
 

@@ -70,7 +70,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Century.Campaign::Century.Campaign.View.PartyView
   _bannerRoot: {fileID: 758918859841490564}
   _facingTurnSpeed: 540
-  _navMeshSampleRadius: 25
+  _navMeshSampleRadius: 45
 --- !u!1 &7583857350404683624
 GameObject:
   m_ObjectHideFlags: 0

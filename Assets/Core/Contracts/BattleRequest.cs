@@ -19,6 +19,11 @@ namespace Century.Core.Contracts
         /// <summary>Id of the terrain the encounter occurred on, e.g. "dense_forest".</summary>
         public string TerrainId = "open";
 
+        /// <summary>Overmap world position of the encounter. The battlefield is sculpted from the
+        /// shared world function around this point, so the fight happens on the ground it happened on.</summary>
+        public float WorldX;
+        public float WorldZ;
+
         public CampaignTime TimeOfDay;
 
         /// <summary>The COLUMN was caught by surprise: no deployment screen, tight starting ground,

@@ -23,26 +23,61 @@ namespace Century.Campaign.View
         private const float DarkFraction = 0.091f;
         private const float QuadWidthPerSightRadius = 1f / ClearFraction;
 
+        private const int GridCells = 48;
+        private const float DrapeClearance = 2.2f;
+
         private CampaignState _state;
-        private Transform _quad;
+        private Transform _veil;
+        private Mesh _mesh;
+        private Vector3[] _vertices;
+        private Vector3 _lastDrapeCentre = new Vector3(float.MaxValue, 0f, 0f);
+        private float _lastDrapeWidth;
 
         public void Bind(CampaignState state)
         {
             _state = state;
-            BuildQuad();
+            BuildVeil();
         }
 
-        private void BuildQuad()
+        /// <summary>
+        /// A grid mesh rather than a flat quad: the veil DRAPES the sculpted terrain a couple of
+        /// metres up, so hills neither pierce the darkness nor slide out from under it. Vertex
+        /// heights come straight from <see cref="Century.Core.World.WorldTerrainForge"/> — the same
+        /// function the ground itself was sculpted from, so the drape can never disagree with it.
+        /// </summary>
+        private void BuildVeil()
         {
-            GameObject quad = GameObject.CreatePrimitive(PrimitiveType.Quad);
-            quad.name = "SightVeil";
-            quad.transform.SetParent(transform, false);
-            quad.transform.rotation = Quaternion.Euler(90f, 0f, 0f);   // flat on the ground
+            var go = new GameObject("SightVeil");
+            go.transform.SetParent(transform, false);
 
-            Collider collider = quad.GetComponent<Collider>();
-            if (collider != null) Destroy(collider);   // must never eat the click-to-move ray
+            int side = GridCells + 1;
+            _vertices = new Vector3[side * side];
+            var uv = new Vector2[side * side];
+            var triangles = new int[GridCells * GridCells * 6];
 
-            var renderer = quad.GetComponent<Renderer>();
+            for (int z = 0; z < side; z++)
+                for (int x = 0; x < side; x++)
+                    uv[z * side + x] = new Vector2(x / (float)GridCells, z / (float)GridCells);
+
+            int t = 0;
+            for (int z = 0; z < GridCells; z++)
+            {
+                for (int x = 0; x < GridCells; x++)
+                {
+                    int i = z * side + x;
+                    triangles[t++] = i; triangles[t++] = i + side; triangles[t++] = i + 1;
+                    triangles[t++] = i + 1; triangles[t++] = i + side; triangles[t++] = i + side + 1;
+                }
+            }
+
+            _mesh = new Mesh { name = "SightVeil" };
+            _mesh.MarkDynamic();
+            _mesh.vertices = _vertices;
+            _mesh.uv = uv;
+            _mesh.triangles = triangles;
+
+            go.AddComponent<MeshFilter>().sharedMesh = _mesh;
+            var renderer = go.AddComponent<MeshRenderer>();
             renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             renderer.receiveShadows = false;
 
@@ -51,7 +86,7 @@ namespace Century.Campaign.View
             material.mainTexture = BakeVeilTexture();
             renderer.material = material;
 
-            _quad = quad.transform;
+            _veil = go.transform;
         }
 
         /// <summary>Radial gradient: clear centre, smooth ramp to darkness, dark to the corners.</summary>
@@ -87,15 +122,42 @@ namespace Century.Campaign.View
 
         private void LateUpdate()
         {
-            if (_state?.PlayerParty == null || _quad == null) return;
+            if (_state?.PlayerParty == null || _veil == null) return;
 
             Vector3 centre = _state.PlayerParty.WorldPosition;
-            _quad.position = new Vector3(centre.x, centre.y + 0.55f, centre.z);
 
             // Scaled so the clear hole's edge sits exactly on the line of sight — future sight bonuses
             // widen the hole with no further work here.
             float width = LineOfSight.Radius(_state) * QuadWidthPerSightRadius;
-            _quad.localScale = new Vector3(width, width, 1f);
+
+            // Re-draping samples ~2.4k heights, so it happens only when the column has actually
+            // moved (or sight changed), not every frame.
+            if ((centre - _lastDrapeCentre).sqrMagnitude < 4f && Mathf.Approximately(width, _lastDrapeWidth))
+                return;
+
+            _lastDrapeCentre = centre;
+            _lastDrapeWidth = width;
+            Drape(centre, width);
+        }
+
+        private void Drape(Vector3 centre, float width)
+        {
+            _veil.position = new Vector3(centre.x, 0f, centre.z);
+
+            int side = GridCells + 1;
+            for (int z = 0; z < side; z++)
+            {
+                float lz = (z / (float)GridCells - 0.5f) * width;
+                for (int x = 0; x < side; x++)
+                {
+                    float lx = (x / (float)GridCells - 0.5f) * width;
+                    float height = Century.Core.World.WorldTerrainForge.HeightAt(centre.x + lx, centre.z + lz);
+                    _vertices[z * side + x] = new Vector3(lx, height + DrapeClearance, lz);
+                }
+            }
+
+            _mesh.vertices = _vertices;
+            _mesh.RecalculateBounds();
         }
     }
 }

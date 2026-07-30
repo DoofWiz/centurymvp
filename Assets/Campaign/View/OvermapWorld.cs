@@ -165,7 +165,11 @@ namespace Century.Campaign.View
             {
                 root = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
                 root.transform.SetParent(_partyRoot, false);
-                root.transform.position = poi.WorldPosition + Vector3.up * 3f;
+
+                // Stand on the sculpted ground: POI positions are authored flat, the world is not.
+                Vector3 grounded = poi.WorldPosition;
+                grounded.y = Century.Core.World.WorldTerrainForge.HeightAt(grounded.x, grounded.z);
+                root.transform.position = grounded + Vector3.up * 3f;
                 root.transform.localScale = new Vector3(3.5f, 3f, 3.5f);
 
                 // A marker must never eat the click-to-move raycast, so it carries no collider.

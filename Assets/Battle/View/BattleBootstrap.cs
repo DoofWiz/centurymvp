@@ -106,6 +106,10 @@ namespace Century.Battle.View
                           $"seed {request.RandomSeed}. F5 restarts at any moment.");
             }
 
+            // The ground first: sculpted from the campaign world around the encounter point, with
+            // the NavMesh rebaked over it, before a single man is placed on it.
+            BattleTerrainBuilder.Build(new Vector2(request.WorldX, request.WorldZ));
+
             _state = BattleFactory.Create(request, _settings);
             ServiceLocator.Register(_state);
 
@@ -267,7 +271,9 @@ namespace Century.Battle.View
             }
 
             _player = Instantiate(
-                _playerPrefab, _state.PlayerCharacter.WorldPosition, Quaternion.identity, _spawnRoot);
+                _playerPrefab,
+                BattleTerrainBuilder.Grounded(_state.PlayerCharacter.WorldPosition) + Vector3.up * 0.5f,
+                Quaternion.identity, _spawnRoot);
             _player.Bind(_state.PlayerCharacter, _settings, _cameraRig);
 
             if (_cameraRig != null) _cameraRig.SetTarget(_player.transform);
@@ -289,6 +295,8 @@ namespace Century.Battle.View
                     BattleCombatant man = squad.Members[m];
 
                     // Parented to the flat spawn root, not to squadView. See the class remarks.
+                    // Grounded first: placement maths runs flat, the sculpted world does not.
+                    man.WorldPosition = BattleTerrainBuilder.Grounded(man.WorldPosition);
                     SoldierView soldier = Instantiate(
                         soldierPrefab, man.WorldPosition, Quaternion.identity, _spawnRoot);
                     soldier.Bind(man, squad, _settings, _corpseRoot);

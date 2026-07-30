@@ -35,6 +35,12 @@ namespace Century.Battle.Sim
 
         [Range(0f, 24f)] public float HourOfDay = 10f;
 
+        [Header("Ground (overmap world position of the fight)")]
+        [Tooltip("Where in the world the battle happens; the field is sculpted from that ground. " +
+                 "Try the river valley (~165, 0), the north-east ridge (~180, 220), open moor (-200, -150).")]
+        public float WorldX = 100f;
+        public float WorldZ = -60f;
+
         [Tooltip("0 = a fresh random battle every restart; any other value replays the same fight.")]
         public int Seed;
 
@@ -75,7 +81,9 @@ namespace Century.Battle.Sim
                 PlayerAmbushed = config.PlayerAmbushed,
                 EnemyAmbushed = config.EnemyAmbushed && !config.PlayerAmbushed,
                 TimeOfDay = CampaignTime.FromHours(config.HourOfDay),
-                RandomSeed = seed
+                RandomSeed = seed,
+                WorldX = config.WorldX,
+                WorldZ = config.WorldZ
             };
 
             request.CommanderSkills.AddRange(config.CommanderSkills);

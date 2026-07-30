@@ -268,8 +268,9 @@ namespace Century.Battle.View
 
             Vector3 next = Vector3.MoveTowards(_squad.AnchorPosition, target, speed * Time.deltaTime);
 
-            // Keep the anchor on walkable ground so slots never resolve into scenery.
-            if (NavMesh.SamplePosition(next, out NavMeshHit hit, 4f, NavMesh.AllAreas)) next = hit.position;
+            // Keep the anchor on walkable ground so slots never resolve into scenery. The wide
+            // vertical reach matters on sculpted terrain: anchor maths runs flat, the ground does not.
+            if (NavMesh.SamplePosition(next, out NavMeshHit hit, 30f, NavMesh.AllAreas)) next = hit.position;
 
             _squad.AnchorPosition = next;
         }

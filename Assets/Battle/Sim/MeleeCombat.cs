@@ -383,7 +383,14 @@ namespace Century.Battle.Sim
             float band = squad != null ? squad.Band.CombatMultiplier() : 1f;
             float condition = Mathf.Lerp(0.6f, 1f, man.Health01) * Mathf.Lerp(0.7f, 1f, man.Stamina01);
             float facing = FacingMultiplier(man, victim);
-            float damage = baseDamage * band * condition * facing * man.DamageMultiplier
+
+            // High ground: blows fall harder downhill and land weaker climbing. This is the first
+            // way the sculpted field reaches into the melee itself.
+            float ground = 1f + Mathf.Clamp(
+                (man.WorldPosition.y - victim.WorldPosition.y) * _settings.HighGroundDamagePerMetre,
+                -_settings.HighGroundDamageCap, _settings.HighGroundDamageCap);
+
+            float damage = baseDamage * band * condition * facing * ground * man.DamageMultiplier
                            * _settings.MeleeDamageScale * damageScale * Range(0.85f, 1.15f);
 
             victim.Health01 = Mathf.Max(0f, victim.Health01 - damage);

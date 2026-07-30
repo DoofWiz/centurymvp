@@ -77,6 +77,10 @@ namespace Century.App
                 EnemyAmbushed = enemyAmbushed,
                 EnemyBehaviour = contact.Enemy.Behaviour,
 
+                // The battlefield is sculpted from the world where the armies actually met.
+                WorldX = contact.Player.WorldPosition.x,
+                WorldZ = contact.Player.WorldPosition.z,
+
                 // Derived rather than random so the same encounter always plays out the same way.
                 RandomSeed = _state.RandomSeed
                              ^ contact.Enemy.Id.GetHashCode()
