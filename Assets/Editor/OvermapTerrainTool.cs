@@ -131,7 +131,7 @@ namespace Century.EditorTools
         private static void BakeNavMesh(Terrain terrain)
         {
             NavMeshSurface surface = terrain.GetComponent<NavMeshSurface>()
-                                     ?? Object.FindObjectOfType<NavMeshSurface>();
+                                     ?? Object.FindFirstObjectByType<NavMeshSurface>();
             if (surface == null)
             {
                 Debug.LogWarning("[Overmap] No NavMeshSurface found; parties will need one baked.");
