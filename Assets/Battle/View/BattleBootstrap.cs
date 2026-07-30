@@ -477,13 +477,20 @@ namespace Century.Battle.View
 
             if (_banner != null)
             {
+                // The evaluator says WHY it ended ("The Centurion has fallen" reads very
+                // differently from "The century is broken") — a battle that ends without a reason
+                // reads as a bug even when the rules worked.
+                string reason = string.IsNullOrEmpty(_simulation?.OutcomeReason)
+                    ? null
+                    : _simulation.OutcomeReason;
+
                 switch (outcome)
                 {
                     case BattleOutcome.Victory:
-                        yield return _banner.Show("Victory", "The field is ours", 1.5f);
+                        yield return _banner.Show("Victory", reason ?? "The field is ours", 1.5f);
                         break;
                     case BattleOutcome.Defeat:
-                        yield return _banner.Show("Defeat", "The century is broken", 1.5f,
+                        yield return _banner.Show("Defeat", reason ?? "The century is broken", 1.5f,
                             "stage-banner__frame--danger");
                         break;
                     default:

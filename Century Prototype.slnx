@@ -4,6 +4,5 @@
   <Project Path="Century.Campaign.csproj" />
   <Project Path="Century.App.csproj" />
   <Project Path="Assembly-CSharp-Editor.csproj" />
-  <Project Path="Assembly-CSharp.csproj" />
   <Project Path="Century.EditorTools.csproj" />
 </Solution>

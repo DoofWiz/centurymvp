@@ -25,6 +25,10 @@ namespace Century.Battle.Sim
         private BattleOutcome _candidate = BattleOutcome.Aborted;
         private float _candidateHeldFor;
 
+        /// <summary>Why the concluded outcome happened, in words the banner can show. A battle that
+        /// ends without saying why reads as a bug even when it is working exactly as designed.</summary>
+        public string Reason { get; private set; } = string.Empty;
+
         public BattleOutcomeEvaluator(BattleState state, BattleSettings settings)
         {
             _state = state;
@@ -91,6 +95,10 @@ namespace Century.Battle.Sim
             // A commander's death ends things immediately; there is nobody left to give orders.
             float required = commanderDown ? 0f : _settings.OutcomeConfirmSeconds;
             if (_candidateHeldFor < required) return false;
+
+            Reason = commanderDown ? "The Centurion has fallen"
+                : candidate == BattleOutcome.Defeat ? "The century is broken"
+                : "The enemy is broken";
 
             outcome = candidate;
             return true;

@@ -250,6 +250,11 @@ namespace Century.Battle.Sim
         [Tooltip("Fraction of a pilum's damage a raised shield stops from the front. Pila largely defeat shields.")]
         [Range(0f, 0.8f)] public float PilaShieldBlock = 0.25f;
 
+        [Tooltip("Multiplier on missile damage against the Centurion himself. His death ends the " +
+                 "battle outright, so being quietly deleted by a stray volley at range is a story " +
+                 "nobody chose — he stays mortal, but killing him should take intent.")]
+        [Range(0.1f, 1f)] public float CommanderMissileDamageFactor = 0.4f;
+
         [Tooltip("Seconds between javelin throws for a Skirmisher squad.")]
         public float MissileCooldownSeconds = 2.2f;
 

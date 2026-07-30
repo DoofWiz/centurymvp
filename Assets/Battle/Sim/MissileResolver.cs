@@ -38,6 +38,9 @@ namespace Century.Battle.Sim
             float variance = (float)(_random.NextDouble() * 0.4d + 0.8d);
             float damage = _settings.PilaDamage * facing * (1f - Mathf.Clamp01(block)) * variance;
 
+            // The Centurion's death ends the battle; stray volley fire must not decide that alone.
+            if (defender.IsPlayerControlled) damage *= _settings.CommanderMissileDamageFactor;
+
             defender.Health01 = Mathf.Max(0f, defender.Health01 - damage);
             defender.WasHitThisTick = true;
             defender.Morale01 = Mathf.Clamp01(defender.Morale01 - damage * 0.5f);

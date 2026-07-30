@@ -35,6 +35,9 @@ namespace Century.Battle.Sim
         public bool IsConcluded { get; private set; }
         public BattleOutcome Outcome { get; private set; } = BattleOutcome.Aborted;
 
+        /// <summary>Why the battle ended, for the outcome banner.</summary>
+        public string OutcomeReason => _outcome.Reason;
+
         /// <summary>Physical melee. The bootstrap feeds the Centurion's slash/thrust/shield into it.</summary>
         public MeleeCombat Combat => _combat;
 
