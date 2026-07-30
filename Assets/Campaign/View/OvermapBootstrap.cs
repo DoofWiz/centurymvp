@@ -39,6 +39,22 @@ namespace Century.Campaign.View
                     "NavMeshSurface and click BAKE, then save the scene.");
         }
 
+        /// <summary>
+        /// POIs are authored flat (y = 0); the world is not. Grounding the MODEL positions once per
+        /// overmap load keeps every consumer honest — sight fading, distance checks, and anything an
+        /// event outcome spawns at the POI. Idempotent, and it also catches POIs created off-map
+        /// (camp scouting) since the overmap is re-entered afterwards.
+        /// </summary>
+        private static void GroundPointsOfInterest(CampaignState state)
+        {
+            for (int i = 0; i < state.PointsOfInterest.Count; i++)
+            {
+                Vector3 p = state.PointsOfInterest[i].WorldPosition;
+                p.y = Century.Core.World.WorldTerrainForge.HeightAt(p.x, p.z);
+                state.PointsOfInterest[i].WorldPosition = p;
+            }
+        }
+
         private void Start()
         {
             WarnIfNavMeshIsStale();
@@ -58,6 +74,7 @@ namespace Century.Campaign.View
             // dark instead of the time being just a number on the HUD. Created in code; no scene setup.
             if (ServiceLocator.TryGet(out CampaignState state))
             {
+                GroundPointsOfInterest(state);
                 var dayNight = new GameObject("DayNightCycle").AddComponent<DayNightCycle>();
                 dayNight.HourSource = () => state.Clock.Now.TotalHours;
 

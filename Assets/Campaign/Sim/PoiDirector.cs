@@ -41,7 +41,12 @@ namespace Century.Campaign.Sim
                 PointOfInterest poi = pois[i];
                 if (poi.Resolved) continue;
 
-                float sqr = (poi.WorldPosition - player.WorldPosition).sqrMagnitude;
+                // FLAT distance: the player stands at terrain height, and a POI authored at y = 0
+                // under a 15m hill would otherwise be unreachable — the vertical gap alone can
+                // exceed the trigger radius. Proximity on a map is a ground-plan question.
+                Vector3 delta = poi.WorldPosition - player.WorldPosition;
+                delta.y = 0f;
+                float sqr = delta.sqrMagnitude;
 
                 if (!poi.Discovered)
                 {
