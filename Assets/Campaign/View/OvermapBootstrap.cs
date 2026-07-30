@@ -13,8 +13,36 @@ namespace Century.Campaign.View
     {
         [SerializeField] private OvermapCameraRig _cameraRig;
 
+        /// <summary>
+        /// The single failure that hides every pawn: a NavMesh baked when the ground was flat.
+        /// Agents then walk at y = 0 UNDERNEATH the sculpted terrain — moving normally, rendered
+        /// buried. Probing a hill catches it and says so, loudly, instead of leaving an invisible
+        /// army to be debugged by eye.
+        /// </summary>
+        private static void WarnIfNavMeshIsStale()
+        {
+            // A spot that is reliably high ground on the sculpted world.
+            var probe = new Vector3(180f, 0f, 220f);
+            float groundHeight = Century.Core.World.WorldTerrainForge.HeightAt(probe.x, probe.z);
+            if (groundHeight < 4f) return;   // world not sculpted at all; nothing to compare
+
+            probe.y = groundHeight;
+            if (!UnityEngine.AI.NavMesh.SamplePosition(
+                    probe, out UnityEngine.AI.NavMeshHit hit, 60f, UnityEngine.AI.NavMesh.AllAreas))
+                return;
+
+            if (Mathf.Abs(hit.position.y - groundHeight) > 3f)
+                Debug.LogError(
+                    $"[Overmap] The NavMesh is STALE: ground at probe ({probe.x:0},{probe.z:0}) is " +
+                    $"{groundHeight:0.0}m high but the NavMesh sits at {hit.position.y:0.0}m. Parties are " +
+                    "walking under the terrain. Open the Overmap scene, select the terrain's " +
+                    "NavMeshSurface and click BAKE, then save the scene.");
+        }
+
         private void Start()
         {
+            WarnIfNavMeshIsStale();
+
             // Germania under an overcast march: mossy dark ground instead of the terrain's bare
             // white fallback, which blew out to sheer white under the noon sun (worst in WebGL).
             TerrainDressing.Apply(

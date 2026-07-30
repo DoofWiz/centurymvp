@@ -23,8 +23,10 @@ namespace Century.Campaign.View
         private const float DarkFraction = 0.091f;
         private const float QuadWidthPerSightRadius = 1f / ClearFraction;
 
-        private const int GridCells = 48;
-        private const float DrapeClearance = 2.2f;
+        // Cell size decides how faithfully the veil hugs steep ground: at 48 cells the river banks
+        // poked THROUGH the drape between vertices, reading as shifting patches of false vision.
+        private const int GridCells = 96;
+        private const float DrapeClearance = 3.5f;
 
         private CampaignState _state;
         private Transform _veil;
@@ -130,9 +132,9 @@ namespace Century.Campaign.View
             // widen the hole with no further work here.
             float width = LineOfSight.Radius(_state) * QuadWidthPerSightRadius;
 
-            // Re-draping samples ~2.4k heights, so it happens only when the column has actually
+            // Re-draping samples ~9.4k heights, so it happens only when the column has actually
             // moved (or sight changed), not every frame.
-            if ((centre - _lastDrapeCentre).sqrMagnitude < 4f && Mathf.Approximately(width, _lastDrapeWidth))
+            if ((centre - _lastDrapeCentre).sqrMagnitude < 9f && Mathf.Approximately(width, _lastDrapeWidth))
                 return;
 
             _lastDrapeCentre = centre;
