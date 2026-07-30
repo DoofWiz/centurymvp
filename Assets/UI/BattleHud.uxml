@@ -209,46 +209,6 @@
             <ui:Label name="selection-text" text="ALL SQUADS" class="eyebrow" />
         </ui:VisualElement>
 
-        <!-- ============================== SQUAD INSPECT =============================== -->
-        <!-- Floats above whatever squad the cursor rests on: the men's aggregate condition, in the
-             same words the sim thinks in. Positioned from code; declared LATE in the document so it
-             paints over the fixed panels (UI Toolkit paints in document order). -->
-        <ui:VisualElement name="squad-inspect" class="panel squad-inspect" picking-mode="Ignore"
-                          style="display: none;">
-            <ui:VisualElement style="flex-direction: row; justify-content: space-between;" picking-mode="Ignore">
-                <ui:Label name="inspect-name" text="—" class="heading" picking-mode="Ignore" />
-                <ui:Label name="inspect-count" text="—" class="metric text-gold" picking-mode="Ignore" />
-            </ui:VisualElement>
-            <ui:VisualElement class="rule rule--short" picking-mode="Ignore" />
-
-            <ui:VisualElement class="inspect-row" picking-mode="Ignore">
-                <ui:Label text="HEALTH" class="metric-label inspect-row__label" picking-mode="Ignore" />
-                <ui:VisualElement class="bar inspect-row__bar" picking-mode="Ignore">
-                    <ui:VisualElement name="inspect-health" class="bar__fill bar__fill--health" picking-mode="Ignore" />
-                </ui:VisualElement>
-                <ui:Label name="inspect-health-word" text="" class="metric-label inspect-row__word" picking-mode="Ignore" />
-            </ui:VisualElement>
-
-            <ui:VisualElement class="inspect-row" picking-mode="Ignore">
-                <ui:Label text="STAMINA" class="metric-label inspect-row__label" picking-mode="Ignore" />
-                <ui:VisualElement class="bar inspect-row__bar" picking-mode="Ignore">
-                    <ui:VisualElement name="inspect-stamina" class="bar__fill bar__fill--stamina" picking-mode="Ignore" />
-                </ui:VisualElement>
-                <ui:Label name="inspect-stamina-word" text="" class="metric-label inspect-row__word" picking-mode="Ignore" />
-            </ui:VisualElement>
-
-            <ui:VisualElement class="inspect-row" picking-mode="Ignore">
-                <ui:Label text="MORALE" class="metric-label inspect-row__label" picking-mode="Ignore" />
-                <ui:VisualElement class="bar inspect-row__bar" picking-mode="Ignore">
-                    <ui:VisualElement name="inspect-morale" class="bar__fill bar__fill--gold" picking-mode="Ignore" />
-                </ui:VisualElement>
-                <ui:Label name="inspect-morale-word" text="" class="metric-label inspect-row__word" picking-mode="Ignore" />
-            </ui:VisualElement>
-
-            <ui:Label name="inspect-order" text="" class="body body--dim" style="margin-top: 4px;" picking-mode="Ignore" />
-        </ui:VisualElement>
-
-
         <!-- ============================= DEPLOYMENT (MODAL) =========================== -->
         <ui:VisualElement name="deployment-panel" class="modal" style="display: none;">
             <ui:VisualElement class="modal__sheet">

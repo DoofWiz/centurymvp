@@ -131,6 +131,7 @@ namespace Century.Campaign.View
             BindToggles(root);
             BindTimeButtons(root);
             BuildPortraits();
+            Century.Core.Ui.UiFont.Apply(root);
 
             _hoverTip = Find<VisualElement>(root, "hover-tip");
             _hoverTipTitle = Find<Label>(root, "hover-tip-title");

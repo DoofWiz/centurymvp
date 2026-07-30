@@ -412,8 +412,11 @@ namespace Century.Battle.View
             transform.SetParent(_corpseRoot, worldPositionStays: true);
             transform.position = restingPlace;
 
+            // Tuned for the rig, whose pivot sits at the FEET: after the 90° fall the figure's
+            // thickness centres on the ground, so it needs a small LIFT to rest on it — the old
+            // capsule-era 0.35 drop buried every corpse and the dead simply vanished.
             _bodyRoot.rotation = Quaternion.Euler(90f, facingYaw, 0f);
-            _bodyRoot.localPosition += Vector3.down * 0.35f;
+            _bodyRoot.localPosition += Vector3.up * 0.12f;
 
             // Colliders on a corpse serve no purpose and confuse the living.
             Collider[] colliders = GetComponentsInChildren<Collider>();

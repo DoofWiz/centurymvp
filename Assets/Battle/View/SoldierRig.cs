@@ -41,7 +41,11 @@ namespace Century.Battle.View
         };
         private static readonly Color GermanFur = new Color(0.33f, 0.27f, 0.20f);
 
+        /// <summary>Whole-figure scale: the first build stood noticeably small against the gear.</summary>
+        private const float FigureScale = 1.24f;
+
         private Transform _legLeft, _legRight, _figure;
+        private float _figureBaseY;
         private float _phase;
         private float _swing;
 
@@ -65,7 +69,12 @@ namespace Century.Battle.View
 
             rig._figure = new GameObject("Figure").transform;
             rig._figure.SetParent(rig.transform, false);
-            if (!roman) rig._figure.localScale = Vector3.one * 1.06f;   // the Germans stood taller
+
+            // Scale up around the chest anchor, then lift so the feet stay on the same ground.
+            float scale = FigureScale * (roman ? 1f : 1.06f);   // the Germans stood taller
+            rig._figure.localScale = Vector3.one * scale;
+            rig._figureBaseY = (scale - 1f) * 0.95f;
+            rig._figure.localPosition = new Vector3(0f, rig._figureBaseY, 0f);
 
             rig.Assemble(roman, role, leader, variant);
             return rig;
@@ -175,7 +184,8 @@ namespace Century.Battle.View
             if (_legLeft != null) _legLeft.localRotation = Quaternion.Euler(angle, 0f, 0f);
             if (_legRight != null) _legRight.localRotation = Quaternion.Euler(-angle, 0f, 0f);
             if (_figure != null)
-                _figure.localPosition = new Vector3(0f, Mathf.Abs(Mathf.Sin(_phase)) * 0.035f * _swing, 0f);
+                _figure.localPosition = new Vector3(
+                    0f, _figureBaseY + Mathf.Abs(Mathf.Sin(_phase)) * 0.035f * _swing, 0f);
         }
 
         // --- Parts -------------------------------------------------------------------------------

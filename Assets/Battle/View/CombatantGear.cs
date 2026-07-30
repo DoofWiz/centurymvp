@@ -29,9 +29,14 @@ namespace Century.Battle.View
             Pose(new BattleCombatant { Weapon = weaponClass }, 1f); // snap to the rest pose
         }
 
+        /// <summary>Poses are authored around the HANDS, but the body root's pivot is at the FEET —
+        /// without this lift every resting blade and spear ploughed the ground.</summary>
+        private const float HandHeight = 0.9f;
+
         public void Pose(BattleCombatant man, float dt)
         {
             GetWeaponPose(man, out Vector3 wPos, out Quaternion wRot);
+            wPos.y += HandHeight;
             float speed = man.Stance == MeleeStance.Striking ? 20f : 11f;
             float k = 1f - Mathf.Exp(-speed * dt);
 
@@ -41,6 +46,7 @@ namespace Century.Battle.View
             if (_shield == null) return;
 
             GetShieldPose(man, out Vector3 sPos, out Quaternion sRot);
+            sPos.y += HandHeight;
             _shield.localPosition = Vector3.Lerp(_shield.localPosition, sPos, k);
             _shield.localRotation = Quaternion.Slerp(_shield.localRotation, sRot, k);
         }

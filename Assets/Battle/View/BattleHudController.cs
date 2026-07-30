@@ -35,7 +35,6 @@ namespace Century.Battle.View
         private SquadCommandInput _commands;
         private BattleEventFeed _feed;
         private PlayerCharacterController _player;
-        private Camera _camera;
 
         private float _accumulator;
         private bool _bound;
@@ -49,11 +48,6 @@ namespace Century.Battle.View
         private Label _commanderName, _commanderStatus;
         private VisualElement _commanderHealth, _commanderStamina;
         private Label _cmdFormationLabel, _selectionText, _battleTimer;
-
-        // Squad inspect (hover) panel.
-        private VisualElement _inspectPanel, _inspectHealth, _inspectStamina, _inspectMorale;
-        private Label _inspectName, _inspectCount, _inspectHealthWord, _inspectStaminaWord,
-            _inspectMoraleWord, _inspectOrder;
 
         private readonly List<OfficerCard> _officerCards = new List<OfficerCard>();
         private readonly List<Contubernium> _contubernia = new List<Contubernium>();
@@ -86,6 +80,7 @@ namespace Century.Battle.View
                 return;
             }
 
+            Century.Core.Ui.UiFont.Apply(root);
             CacheElements(root);
             BindOrderBar(root);
             BuildOfficerCards();
@@ -121,17 +116,6 @@ namespace Century.Battle.View
             _cmdFormationLabel = Find<Label>(root, "cmd-formation-label");
             _selectionText = Find<Label>(root, "selection-text");
             _battleTimer = Find<Label>(root, "battle-timer");
-
-            _inspectPanel = Find<VisualElement>(root, "squad-inspect");
-            _inspectName = Find<Label>(root, "inspect-name");
-            _inspectCount = Find<Label>(root, "inspect-count");
-            _inspectHealth = Find<VisualElement>(root, "inspect-health");
-            _inspectStamina = Find<VisualElement>(root, "inspect-stamina");
-            _inspectMorale = Find<VisualElement>(root, "inspect-morale");
-            _inspectHealthWord = Find<Label>(root, "inspect-health-word");
-            _inspectStaminaWord = Find<Label>(root, "inspect-stamina-word");
-            _inspectMoraleWord = Find<Label>(root, "inspect-morale-word");
-            _inspectOrder = Find<Label>(root, "inspect-order");
         }
 
         private static T Find<T>(VisualElement root, string name) where T : VisualElement
@@ -422,7 +406,6 @@ namespace Century.Battle.View
             UpdateAlert();
             PulseWoundedDots();
             UpdateFormationMenu();
-            RefreshSquadInspect();
             TickBlockAlarms();
 
             // Unscaled: the HUD must keep reporting through a tactical pause, or the pause is
@@ -434,107 +417,8 @@ namespace Century.Battle.View
             Refresh();
         }
 
-        /// <summary>
-        /// The hover readout: aggregate condition of whatever squad the cursor rests on, in the same
-        /// words the sim thinks in — wind on the stamina ladder, will on the cohesion ladder.
-        /// </summary>
-        private void RefreshSquadInspect()
-        {
-            if (_inspectPanel == null || _commands == null) return;
-
-            BattleSquad squad = null;
-            int hovered = _commands.HoveredSquadIndex;
-            if (hovered >= 0 && hovered < _commands.SquadViews.Count)
-                squad = _commands.SquadViews[hovered].Squad;
-            squad = squad ?? _commands.HoveredEnemySquad;
-
-            if (squad == null || squad.IsOffField)
-            {
-                _inspectPanel.style.display = DisplayStyle.None;
-                return;
-            }
-
-            if (_camera == null) _camera = Camera.main;
-            if (_camera == null)
-            {
-                _inspectPanel.style.display = DisplayStyle.None;
-                return;
-            }
-
-            // Hover the panel over the squad itself, so the eye never leaves the fight to read it.
-            Vector3 screen = _camera.WorldToScreenPoint(squad.CentreOfMass() + Vector3.up * 2f);
-            if (screen.z <= 0f)
-            {
-                _inspectPanel.style.display = DisplayStyle.None;
-                return;
-            }
-
-            _inspectPanel.style.display = DisplayStyle.Flex;
-
-            Vector2 panel = RuntimePanelUtils.ScreenToPanel(
-                _inspectPanel.panel, new Vector2(screen.x, Screen.height - screen.y));
-
-            float width = _inspectPanel.resolvedStyle.width > 0f ? _inspectPanel.resolvedStyle.width : 300f;
-            float height = _inspectPanel.resolvedStyle.height > 0f ? _inspectPanel.resolvedStyle.height : 150f;
-
-            _inspectPanel.style.left = panel.x - width * 0.5f;
-            _inspectPanel.style.top = panel.y - height - 14f;
-
-            float health = AverageHealth01(squad);
-            float stamina = squad.AverageStamina01;
-            float morale = squad.Cohesion01;
-
-            SetText(_inspectName, squad.DisplayName.ToUpperInvariant());
-            SetText(_inspectCount, $"{squad.AliveCount} / {squad.Members.Count}");
-
-            SetFill(_inspectHealth, health);
-            SetFill(_inspectStamina, stamina);
-            SetFill(_inspectMorale, morale);
-
-            SetText(_inspectHealthWord, HealthWord(health));
-            SetText(_inspectStaminaWord, StaminaProfile.FromStamina(stamina).ToString().ToUpperInvariant());
-            SetText(_inspectMoraleWord, squad.Band.ToString().ToUpperInvariant());
-
-            string engaged = squad.EngagedCount > 0 ? $"  ·  {squad.EngagedCount} fighting" : string.Empty;
-            SetText(_inspectOrder, squad.IsRouted
-                ? "Routed — running for the field edge"
-                : $"{OrderWord(squad.Order)}  ·  {squad.Formation.Word()}{engaged}");
-        }
-
-        private static float AverageHealth01(BattleSquad squad)
-        {
-            float total = 0f;
-            int alive = 0;
-            for (int i = 0; i < squad.Members.Count; i++)
-            {
-                if (!squad.Members[i].IsAlive) continue;
-                total += squad.Members[i].Health01;
-                alive++;
-            }
-            return alive <= 0 ? 0f : total / alive;
-        }
-
-        private static string HealthWord(float health01)
-        {
-            if (health01 >= 0.85f) return "FIGHTING FIT";
-            if (health01 >= 0.55f) return "BLOODIED";
-            if (health01 >= 0.3f) return "MAULED";
-            return "DYING";
-        }
-
-        private static string OrderWord(SquadOrder order)
-        {
-            switch (order)
-            {
-                case SquadOrder.HoldPosition: return "HOLDING";
-                case SquadOrder.Advance: return "ADVANCING";
-                case SquadOrder.FollowMe: return "FOLLOWING";
-                case SquadOrder.Skirmish: return "SKIRMISHING";
-                case SquadOrder.Fallback: return "FALLING BACK";
-                case SquadOrder.Retreat: return "RETREATING";
-                default: return order.ToString().ToUpperInvariant();
-            }
-        }
+        // The hover inspect panel is gone: squad condition now lives on the world-space tags
+        // (SquadLabels), which never sit on top of the fight the player is trying to read.
 
         /// <summary>
         /// The roster panel's alarm: a block flares red for a moment when its squad's cohesion band
@@ -903,10 +787,6 @@ namespace Century.Battle.View
             if (label != null) label.text = text;
         }
 
-        private static void SetFill(VisualElement fill, float value01)
-        {
-            if (fill != null) fill.style.width = Length.Percent(Mathf.Clamp01(value01) * 100f);
-        }
 
         private static void SetWidth(VisualElement fill, float fraction01)
         {

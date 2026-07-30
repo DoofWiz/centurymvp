@@ -100,6 +100,7 @@ namespace Century.Campaign.View
             if (root == null) return;
 
             UiInputBootstrapper.EnsureEventSystem();
+            Century.Core.Ui.UiFont.Apply(root);
 
             if (!ServiceLocator.TryGet(out _state)) return;
             if (!ServiceLocator.TryGet(out _settings))

@@ -84,6 +84,7 @@
     <Compile Include="Assets\Battle\Sim\GroupFormation.cs" />
     <Compile Include="Assets\Battle\Model\SquadOrder.cs" />
     <Compile Include="Assets\Battle\View\BattleSummaryController.cs" />
+    <Compile Include="Assets\Battle\View\SoldierRig.cs" />
     <Compile Include="Assets\Battle\Sim\BattleFactory.cs" />
     <Compile Include="Assets\Battle\View\DebugBattleHud.cs" />
     <Compile Include="Assets\Battle\Sim\BattleSettings.cs" />

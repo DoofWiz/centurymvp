@@ -141,7 +141,7 @@ namespace Century.Battle.View
 
             var labels = new GameObject("SquadLabels").AddComponent<SquadLabels>();
             labels.transform.SetParent(_spawnRoot, false);
-            labels.Initialise(_state.PlayerSquads, _commandInput);
+            labels.Initialise(_state.PlayerSquads, _state.EnemySquads, _commandInput);
 
             // Trampled field-earth for the bare terrain, which otherwise renders as blown-out white
             // (worst in WebGL). Slightly browner than the overmap's moss: ground that armies churn.
