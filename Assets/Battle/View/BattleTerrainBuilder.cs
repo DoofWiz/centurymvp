@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Century.Core.World;
 using Unity.AI.Navigation;
 using UnityEngine;
+using UnityEngine.AI;
 
 namespace Century.Battle.View
 {
@@ -19,9 +20,17 @@ namespace Century.Battle.View
 
         private static Terrain _terrain;
 
-        /// <summary>Sculpts the battle terrain around <paramref name="worldCentre"/> (overmap XZ)
-        /// and rebakes the scene NavMesh over the result. Call before anything is spawned.</summary>
-        public static void Build(Vector2 worldCentre)
+        private static WorldTerrainForge.BattleRecipe _recipe;
+
+        /// <summary>
+        /// Sculpts the battlefield around <paramref name="worldCentre"/> (overmap XZ) and rebakes
+        /// the scene NavMesh over the result. Call before anything is spawned.
+        ///
+        /// NOT a literal window of the overmap: the overmap is regional, so a recipe reads its
+        /// facts at the encounter point — river, woods, which way the land rises — and IMAGINES a
+        /// battlefield at tactical scale, with hillsides steep enough to fight over.
+        /// </summary>
+        public static void Build(Vector2 worldCentre, TerrainDecorProfile decor)
         {
             _terrain = Terrain.activeTerrain;
             if (_terrain == null || _terrain.terrainData == null)
@@ -30,8 +39,9 @@ namespace Century.Battle.View
                 return;
             }
 
-            // Clone the TerrainData so Editor play mode never dirties the shared asset, then shape
-            // it: battle-local (0,0) is the encounter's world position.
+            _recipe = WorldTerrainForge.ComposeBattle(worldCentre);
+
+            // Clone the TerrainData so Editor play mode never dirties the shared asset.
             TerrainData data = Object.Instantiate(_terrain.terrainData);
             data.name = "Battlefield (sculpted)";
             data.heightmapResolution = 257;
@@ -39,25 +49,80 @@ namespace Century.Battle.View
             data.alphamapResolution = 256;
 
             _terrain.transform.position = new Vector3(-Span * 0.5f, 0f, -Span * 0.5f);
-            var originWorld = new Vector3(worldCentre.x - Span * 0.5f, 0f, worldCentre.y - Span * 0.5f);
 
-            WorldTerrainForge.SculptHeights(data, originWorld);
-
+            SculptFromRecipe(data);
             data.terrainLayers = MakeLayers();
-            WorldTerrainForge.PaintSplats(data, originWorld);
+            PaintFromRecipe(data);
 
             _terrain.terrainData = data;
             TerrainCollider collider = _terrain.GetComponent<TerrainCollider>();
             if (collider != null) collider.terrainData = data;
 
-            PlaceWater(originWorld);
-            PlaceForest(worldCentre);
+            PlaceWater();
+            PlaceForest(decor);
+            PlaceRocks(decor);
 
-            // The baked flat NavMesh no longer matches the ground; rebake over the sculpt (and
-            // around the tree trunks, which is what makes woods tactical).
+            // Rebake over the sculpt from PHYSICS colliders: terrain, trunks and rocks carve the
+            // mesh; colliderless dressing (water, canopies, shrubs) never pollutes it.
             NavMeshSurface surface = _terrain.GetComponent<NavMeshSurface>();
-            if (surface != null) surface.BuildNavMesh();
+            if (surface != null)
+            {
+                surface.useGeometry = NavMeshCollectGeometry.PhysicsColliders;
+                surface.BuildNavMesh();
+            }
             else Debug.LogWarning("[BattleTerrain] Terrain has no NavMeshSurface; agents will misbehave.");
+
+            // A grim haze closes the distance without touching the fight: clarity near, dread far.
+            RenderSettings.fog = true;
+            RenderSettings.fogMode = FogMode.Linear;
+            RenderSettings.fogStartDistance = 150f;
+            RenderSettings.fogEndDistance = 420f;
+        }
+
+        private static void SculptFromRecipe(TerrainData data)
+        {
+            int res = data.heightmapResolution;
+            var heights = new float[res, res];
+
+            for (int zi = 0; zi < res; zi++)
+            {
+                float lz = zi / (float)(res - 1) * Span - Span * 0.5f;
+                for (int xi = 0; xi < res; xi++)
+                {
+                    float lx = xi / (float)(res - 1) * Span - Span * 0.5f;
+                    heights[zi, xi] = WorldTerrainForge.BattleHeightAt(_recipe, lx, lz)
+                                      / WorldTerrainForge.MaxHeight;
+                }
+            }
+
+            data.SetHeights(0, 0, heights);
+        }
+
+        private static void PaintFromRecipe(TerrainData data)
+        {
+            int res = data.alphamapResolution;
+            var maps = new float[res, res, 4];
+
+            for (int zi = 0; zi < res; zi++)
+            {
+                float nz = zi / (float)(res - 1);
+                float lz = nz * Span - Span * 0.5f;
+                for (int xi = 0; xi < res; xi++)
+                {
+                    float nx = xi / (float)(res - 1);
+                    float lx = nx * Span - Span * 0.5f;
+
+                    float slope = data.GetSteepness(nx, nz) / 90f;
+                    Vector4 w = WorldTerrainForge.BattleSplatWeights(_recipe, lx, lz, slope);
+
+                    maps[zi, xi, 0] = w.x;
+                    maps[zi, xi, 1] = w.y;
+                    maps[zi, xi, 2] = w.z;
+                    maps[zi, xi, 3] = w.w;
+                }
+            }
+
+            data.SetAlphamaps(0, 0, maps);
         }
 
         private static TerrainLayer[] MakeLayers()
@@ -71,16 +136,10 @@ namespace Century.Battle.View
             return layers;
         }
 
-        /// <summary>A still water sheet at world level, if the river crosses this field at all.</summary>
-        private static void PlaceWater(Vector3 originWorld)
+        /// <summary>A still water sheet at world level, if the recipe put the river on this field.</summary>
+        private static void PlaceWater()
         {
-            bool wet = false;
-            for (float z = 0f; z <= Span && !wet; z += 24f)
-                for (float x = 0f; x <= Span && !wet; x += 24f)
-                    wet = WorldTerrainForge.HeightAt(originWorld.x + x, originWorld.z + z)
-                          < WorldTerrainForge.WaterLevel;
-
-            if (!wet) return;
+            if (!_recipe.HasRiver) return;
 
             GameObject water = GameObject.CreatePrimitive(PrimitiveType.Quad);
             water.name = "River";
@@ -100,28 +159,58 @@ namespace Century.Battle.View
 
         private static readonly List<Vector3> TreeScratch = new List<Vector3>(256);
 
-        private static void PlaceForest(Vector2 worldCentre)
+        private static void PlaceForest(TerrainDecorProfile decor)
         {
-            WorldTerrainForge.TreePositions(
-                worldCentre - new Vector2(Span * 0.5f, Span * 0.5f),
-                worldCentre + new Vector2(Span * 0.5f, Span * 0.5f),
-                gridStep: 7.5f,
-                TreeScratch);
+            TreeScratch.Clear();
 
-            // Into battle-local space (terrain origin already shifted).
-            for (int i = 0; i < TreeScratch.Count; i++)
+            const float step = 7.5f;
+            for (float lz = -Span * 0.5f; lz < Span * 0.5f; lz += step)
             {
-                Vector3 p = TreeScratch[i];
-                TreeScratch[i] = new Vector3(p.x - worldCentre.x, p.y, p.z - worldCentre.y);
+                for (float lx = -Span * 0.5f; lx < Span * 0.5f; lx += step)
+                {
+                    float density = WorldTerrainForge.BattleForest01(_recipe, lx, lz);
+                    if (density < 0.35f) continue;
+
+                    float h1 = Mathf.Repeat(Mathf.Sin(lx * 12.9898f + lz * 78.233f) * 43758.5453f, 1f);
+                    float h2 = Mathf.Repeat(Mathf.Sin(lx * 39.346f + lz * 11.135f) * 43758.5453f, 1f);
+                    if (h1 > density) continue;
+
+                    float px = lx + (h2 - 0.5f) * step * 0.9f;
+                    float pz = lz + (h1 - 0.5f) * step * 0.9f;
+                    TreeScratch.Add(new Vector3(px, WorldTerrainForge.BattleHeightAt(_recipe, px, pz), pz));
+                }
             }
 
-            Transform forest = ForestBuilder.BuildForest(_terrain.transform.parent, TreeScratch, withColliders: true);
+            ForestBuilder.BuildForest(_terrain.transform.parent, TreeScratch, withColliders: true, decor);
+        }
 
-            // Crowns are colliderless render meshes: left in the bake they leave walkable navmesh
-            // islands on the treetops, which wide-reach position sampling can snap men onto.
-            foreach (Transform child in forest.GetComponentsInChildren<Transform>())
-                if (child.name == "Crown")
-                    child.gameObject.AddComponent<NavMeshModifier>().ignoreFromBuild = true;
+        /// <summary>Rocks gather where the ground is steep or wet — cover on exactly the ground
+        /// the splat paints grey, reinforcing the slope read.</summary>
+        private static void PlaceRocks(TerrainDecorProfile decor)
+        {
+            if (decor == null || decor.Rocks == null || decor.Rocks.Length == 0) return;
+
+            TreeScratch.Clear();
+            const float step = 21f;
+            for (float lz = -Span * 0.5f; lz < Span * 0.5f; lz += step)
+            {
+                for (float lx = -Span * 0.5f; lx < Span * 0.5f; lx += step)
+                {
+                    float h1 = Mathf.Repeat(Mathf.Sin(lx * 91.17f + lz * 53.71f) * 43758.5453f, 1f);
+                    if (h1 > 0.3f) continue;
+
+                    float here = WorldTerrainForge.BattleHeightAt(_recipe, lx, lz);
+                    float ahead = WorldTerrainForge.BattleHeightAt(_recipe, lx + 6f, lz);
+                    bool steep = Mathf.Abs(ahead - here) > 1.1f;
+                    bool wet = _recipe.HasRiver && WorldTerrainForge.LocalRiverDistance(_recipe, lx, lz) < 16f;
+                    if (!steep && !wet) continue;
+
+                    TreeScratch.Add(new Vector3(lx, here, lz));
+                }
+            }
+
+            ForestBuilder.ScatterClutter(
+                _terrain.transform.parent, "Rocks", TreeScratch, decor.Rocks, withColliders: true);
         }
 
         /// <summary>World y of the battlefield ground under a flat position. Safe pre-build (0).</summary>

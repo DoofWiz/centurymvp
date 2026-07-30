@@ -49,7 +49,7 @@
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.3.20f1\Editor\Data\Tools\BuildPipeline\Unity.SourceGenerators\Unity.UIToolkit.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\TutorialInfo\Scripts\Editor\ReadmeEditor.cs" />
+    <Compile Include="Assets\Polytope Studio\Welcome_Screen\Editor\PT_Welcome_Screen.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">

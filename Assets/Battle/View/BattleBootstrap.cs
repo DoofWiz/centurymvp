@@ -29,6 +29,10 @@ namespace Century.Battle.View
         [Header("Configuration")]
         [SerializeField] private BattleSettings _settings;
 
+        [Tooltip("Prefab wardrobe (trees, rocks) the sculpted battlefield is dressed from. " +
+                 "Optional; primitive stand-ins are used when empty.")]
+        [SerializeField] private Century.Core.World.TerrainDecorProfile _terrainDecor;
+
         [Tooltip("Skip the deployment screen. Useful while iterating on combat.")]
         [SerializeField] private bool _skipDeployment;
 
@@ -108,7 +112,7 @@ namespace Century.Battle.View
 
             // The ground first: sculpted from the campaign world around the encounter point, with
             // the NavMesh rebaked over it, before a single man is placed on it.
-            BattleTerrainBuilder.Build(new Vector2(request.WorldX, request.WorldZ));
+            BattleTerrainBuilder.Build(new Vector2(request.WorldX, request.WorldZ), _terrainDecor);
 
             _state = BattleFactory.Create(request, _settings);
             ServiceLocator.Register(_state);

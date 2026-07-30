@@ -58,11 +58,15 @@ namespace Century.Core.World
         /// overmap/battlefield builders, which paint several of these by splat weight.</summary>
         public static TerrainLayer MakeLayer(Color low, Color high, float tileSizeWorldUnits, bool keepReadable = false)
         {
+            // Dead matte: wet earth and moss do not glint like metal under the noon sun.
             return new TerrainLayer
             {
                 diffuseTexture = BakeGroundTexture(low, high, keepReadable: keepReadable),
                 tileSize = new Vector2(tileSizeWorldUnits, tileSizeWorldUnits),
-                tileOffset = Vector2.zero
+                tileOffset = Vector2.zero,
+                smoothness = 0f,
+                metallic = 0f,
+                specular = Color.black
             };
         }
 

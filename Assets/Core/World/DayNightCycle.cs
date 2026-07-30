@@ -19,8 +19,9 @@ namespace Century.Core.World
     public sealed class DayNightCycle : MonoBehaviour
     {
         [Header("Sun")]
-        [Tooltip("Peak intensity of the sun at noon.")]
-        [SerializeField] private float _dayIntensity = 1.15f;
+        [Tooltip("Peak intensity of the sun at noon. Kept below full: Germania's sun is a witness, " +
+                 "not a participant.")]
+        [SerializeField] private float _dayIntensity = 0.95f;
 
         [Tooltip("Yaw of the sun's arc, so shadows fall at a pleasing angle rather than due south.")]
         [SerializeField] private float _arcYaw = -35f;
@@ -120,25 +121,26 @@ namespace Century.Core.World
 
         private void BuildGradients()
         {
-            // Sun colour by how high it stands: ember red on the horizon, gold through the morning,
-            // near-white at noon. This single ramp is what makes dawn and dusk look like themselves.
+            // Sun colour by how high it stands: dull ember on the horizon, brief muted amber, then a
+            // pewter near-white — an overcast northern light, never golden. Grim without murk: the
+            // VALUE range stays wide so the field still reads; only the warmth is denied.
             _sunColourByElevation = Ramp(
-                (0.00f, new Color(1.00f, 0.40f, 0.16f)),
-                (0.12f, new Color(1.00f, 0.62f, 0.34f)),
-                (0.30f, new Color(1.00f, 0.87f, 0.67f)),
-                (0.55f, new Color(1.00f, 0.96f, 0.89f)));
+                (0.00f, new Color(0.82f, 0.36f, 0.20f)),
+                (0.12f, new Color(0.87f, 0.58f, 0.38f)),
+                (0.30f, new Color(0.90f, 0.85f, 0.74f)),
+                (0.55f, new Color(0.92f, 0.93f, 0.92f)));
 
-            // Ambient over the day (0 = midnight): deep blue night, a warm blush at dawn and dusk,
-            // pale sky through the working day.
+            // Ambient over the day (0 = midnight): cold blue-grey night, an ashen blush at dawn and
+            // dusk, a low iron-grey sky through the working day.
             _ambientSky = Ramp(
-                (0.00f, new Color(0.09f, 0.11f, 0.19f)),
-                (0.20f, new Color(0.10f, 0.12f, 0.21f)),
-                (0.26f, new Color(0.58f, 0.40f, 0.33f)),
-                (0.35f, new Color(0.62f, 0.72f, 0.86f)),
-                (0.68f, new Color(0.62f, 0.71f, 0.84f)),
-                (0.76f, new Color(0.62f, 0.38f, 0.28f)),
-                (0.83f, new Color(0.10f, 0.12f, 0.21f)),
-                (1.00f, new Color(0.09f, 0.11f, 0.19f)));
+                (0.00f, new Color(0.09f, 0.11f, 0.17f)),
+                (0.20f, new Color(0.10f, 0.12f, 0.19f)),
+                (0.26f, new Color(0.46f, 0.35f, 0.30f)),
+                (0.35f, new Color(0.52f, 0.58f, 0.66f)),
+                (0.68f, new Color(0.52f, 0.57f, 0.64f)),
+                (0.76f, new Color(0.50f, 0.34f, 0.26f)),
+                (0.83f, new Color(0.10f, 0.12f, 0.19f)),
+                (1.00f, new Color(0.09f, 0.11f, 0.17f)));
 
             _ambientEquator = Ramp(
                 (0.00f, new Color(0.07f, 0.08f, 0.13f)),

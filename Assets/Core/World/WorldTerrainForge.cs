@@ -194,6 +194,139 @@ namespace Century.Core.World
             }
         }
 
+        // --- The battlefield recipe --------------------------------------------------------------
+        //
+        // The overmap is a REGIONAL map: it can say "there is a river here, woods, rising ground
+        // to the north-east" but it has no idea what a hundred metres of Germania actually looks
+        // like. The recipe reads those regional facts at the encounter point and then IMAGINES a
+        // battlefield at tactical scale — real hillsides, a proper riverbank, ground worth
+        // choosing — deterministically, so the same place always births the same field.
+
+        /// <summary>Regional facts + a locale seed, from which battle-scale ground is invented.</summary>
+        public struct BattleRecipe
+        {
+            public Vector2 WorldCentre;
+            /// <summary>Regional lie of the land: which way it rises, amplified to tactical grade.</summary>
+            public Vector2 GradePerMetre;
+            public bool HasRiver;
+            /// <summary>Local-space signed offset of the river channel from field centre, and its axis.</summary>
+            public float RiverOffset;
+            public Vector2 RiverAxis;
+            /// <summary>Regional woodland character, 0..1 — scales the battle map's own woods.</summary>
+            public float Woodland;
+            public float LocaleSeed;
+        }
+
+        public static BattleRecipe ComposeBattle(Vector2 centre)
+        {
+            // Regional gradient by sampling the overmap function coarsely either side.
+            float step = 60f;
+            var grade = new Vector2(
+                (HeightAt(centre.x + step, centre.y) - HeightAt(centre.x - step, centre.y)) / (2f * step),
+                (HeightAt(centre.x, centre.y + step) - HeightAt(centre.x, centre.y - step)) / (2f * step));
+
+            float riverDistance = RiverDistance(centre.x, centre.y);
+
+            // The river's local course: signed offset from field centre, axis from the centreline's drift.
+            float xHere = centre.x - SignedRiverOffset(centre.x, centre.y);
+            float xAhead = xHere + (SignedRiverOffset(centre.x, centre.y + 40f) - SignedRiverOffset(centre.x, centre.y));
+            Vector2 axis = new Vector2(xAhead - xHere, 40f).normalized;
+
+            float woodland = 0f;
+            for (int dz = -1; dz <= 1; dz++)
+                for (int dx = -1; dx <= 1; dx++)
+                    woodland += Forest01(centre.x + dx * 45f, centre.y + dz * 45f);
+
+            return new BattleRecipe
+            {
+                WorldCentre = centre,
+                GradePerMetre = grade * 1.7f,   // the tactical map FEELS the regional rise
+                HasRiver = riverDistance < 70f,
+                RiverOffset = Mathf.Clamp(SignedRiverOffset(centre.x, centre.y), -80f, 80f),
+                RiverAxis = axis,
+                Woodland = Mathf.Clamp01(woodland / 9f * 1.4f),
+                LocaleSeed = Mathf.Round(centre.x / 12f) * 131.7f + Mathf.Round(centre.y / 12f) * 517.3f
+            };
+        }
+
+        private static float SignedRiverOffset(float x, float z)
+        {
+            float centreX = 130f * Mathf.Sin(z * 0.0052f + 1.35f)
+                            + 45f * Mathf.Sin(z * 0.013f + 0.4f)
+                            + 40f;
+            return x - centreX;
+        }
+
+        /// <summary>Battlefield ground height at battle-LOCAL coordinates (field centre = 0,0).</summary>
+        public static float BattleHeightAt(in BattleRecipe recipe, float lx, float lz)
+        {
+            // Base plateau + the regional tilt.
+            float height = 4.5f + lx * recipe.GradePerMetre.x + lz * recipe.GradePerMetre.y;
+
+            // Battle-frequency relief the overmap could never carry: real hillsides at ~90m and
+            // ~40m wavelengths, sharpened so shoulders are steep enough to matter and to READ.
+            float s = recipe.LocaleSeed;
+            float broad = Mathf.PerlinNoise(lx * 0.011f + s, lz * 0.011f + s) - 0.5f;
+            float fine = Mathf.PerlinNoise(lx * 0.026f + s * 1.7f, lz * 0.026f + s * 1.7f) - 0.5f;
+            float relief = broad * 2f;
+            relief = Mathf.Sign(relief) * Mathf.Pow(Mathf.Abs(relief), 1.35f);
+            height += relief * 7.5f + fine * 3f;
+
+            // The river, at battle width: a decisive channel with real banks, not a regional smear.
+            if (recipe.HasRiver)
+            {
+                float d = LocalRiverDistance(recipe, lx, lz);
+                float carve = Mathf.Exp(-(d * d) / (2f * 9f * 9f));
+                height = Mathf.Lerp(height, 0.3f, Mathf.Clamp01(carve * 1.35f));
+            }
+
+            return Mathf.Clamp(height, 0f, MaxHeight);
+        }
+
+        /// <summary>Distance from the battle map's own river course (local space).</summary>
+        public static float LocalRiverDistance(in BattleRecipe recipe, float lx, float lz)
+        {
+            // A line through (RiverOffset, 0) along RiverAxis, with a gentle battle-scale wobble.
+            Vector2 toPoint = new Vector2(lx - recipe.RiverOffset, lz);
+            float along = Vector2.Dot(toPoint, recipe.RiverAxis);
+            float across = Mathf.Abs(toPoint.x * recipe.RiverAxis.y - toPoint.y * recipe.RiverAxis.x);
+            return Mathf.Abs(across + Mathf.Sin(along * 0.05f + recipe.LocaleSeed) * 6f);
+        }
+
+        /// <summary>Battle woodland density at local coords: regional character, tactical clumps.</summary>
+        public static float BattleForest01(in BattleRecipe recipe, float lx, float lz)
+        {
+            if (recipe.Woodland < 0.08f) return 0f;
+
+            float s = recipe.LocaleSeed;
+            float clumps = Mathf.PerlinNoise(lx * 0.02f + s * 2.3f, lz * 0.02f + s * 2.3f);
+            float band = Mathf.InverseLerp(0.62f - recipe.Woodland * 0.35f, 0.78f, clumps);
+
+            if (recipe.HasRiver)
+                band *= Mathf.Clamp01((LocalRiverDistance(recipe, lx, lz) - 12f) / 8f);
+
+            return Mathf.Clamp01(band);
+        }
+
+        /// <summary>
+        /// Battle splat weights: same four layers, but slope shows EARLIER and harder — grey rock is
+        /// the player's contour map, the visual grammar for "this is a slope, that is flat".
+        /// </summary>
+        public static Vector4 BattleSplatWeights(in BattleRecipe recipe, float lx, float lz, float slope01)
+        {
+            float bank = 0f;
+            if (recipe.HasRiver)
+                bank = Mathf.Clamp01(1f - (LocalRiverDistance(recipe, lx, lz) - 6f) / 8f);
+
+            float rock = Mathf.InverseLerp(0.14f, 0.34f, slope01);
+            float forest = BattleForest01(recipe, lx, lz) * 0.9f;
+            float meadow = Mathf.Clamp01(1f - bank - rock - forest);
+
+            var weights = new Vector4(meadow, forest, Mathf.Clamp01(rock), bank);
+            float total = weights.x + weights.y + weights.z + weights.w;
+            return total > 0.001f ? weights / total : new Vector4(1f, 0f, 0f, 0f);
+        }
+
         // --- Noise -----------------------------------------------------------------------------
 
         private static float Fbm(float x, float z, float seed)
