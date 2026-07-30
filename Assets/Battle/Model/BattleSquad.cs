@@ -116,6 +116,23 @@ namespace Century.Battle.Model
             }
         }
 
+        /// <summary>
+        /// Men in actual MELEE — holding a live target — as opposed to merely being under fire.
+        /// The distinction matters: taking javelin hits refreshes IsInCombat, and an advance that
+        /// freezes because it is being SHOT AT stands in the kill zone forever (the river-bank
+        /// paralysis). Blades stop an advance; missiles must not.
+        /// </summary>
+        public int MeleeEngagedCount
+        {
+            get
+            {
+                int count = 0;
+                for (int i = 0; i < Members.Count; i++)
+                    if (Members[i].IsAlive && Members[i].IsEngaged) count++;
+                return count;
+            }
+        }
+
         public float AverageMorale01
         {
             get

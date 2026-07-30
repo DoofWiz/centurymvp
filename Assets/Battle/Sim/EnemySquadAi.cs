@@ -227,10 +227,12 @@ namespace Century.Battle.Sim
             }
         }
 
-        /// <summary>Once the lines meet, stand and fight rather than shuffling into the enemy.</summary>
+        /// <summary>Once the lines meet IN MELEE, stand and fight rather than shuffling into the
+        /// enemy. Melee only — a warband merely being SHOT AT must keep coming, or javelin fire
+        /// pins it in the open (the river-bank paralysis).</summary>
         private static bool HoldWhenEngaged(BattleSquad squad)
         {
-            if (squad.EngagedCount <= 0) return false;
+            if (squad.MeleeEngagedCount <= 0) return false;
             squad.Order = SquadOrder.HoldPosition;
             squad.OrderedPosition = squad.AnchorPosition;
             return true;

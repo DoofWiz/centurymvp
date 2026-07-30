@@ -257,10 +257,11 @@ namespace Century.Battle.View
             float speed = _settings.SoldierBaseSpeed * _settings.NormalMoveFraction
                           * _squad.Formation.SpeedMultiplier();
 
-            // Once the lines meet, the anchor STOPS and the men fight where they stand — even a 15%
-            // creep, held for a whole melee, walked formations through each other into one brawl.
-            // Only a withdrawal keeps moving under contact: that is what a fighting withdrawal is.
-            if (_squad.EngagedCount > 0)
+            // Once the lines meet IN MELEE, the anchor STOPS and the men fight where they stand —
+            // even a 15% creep, held for a whole melee, walked formations through each other.
+            // Melee only: freezing under MISSILE fire pinned advances on the riverbank, standing
+            // in the kill zone taking volleys forever. Only a withdrawal keeps moving in contact.
+            if (_squad.MeleeEngagedCount > 0)
             {
                 bool withdrawing = _squad.Order == SquadOrder.Fallback || _squad.Order == SquadOrder.Retreat;
                 speed *= withdrawing ? 0.35f : 0f;
