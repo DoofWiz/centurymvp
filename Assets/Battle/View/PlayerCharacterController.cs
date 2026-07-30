@@ -200,6 +200,16 @@ namespace Century.Battle.View
                 _combatant.Stamina01 =
                     Mathf.Max(0f, _combatant.Stamina01 - _settings.SprintStaminaPerSecond * Time.deltaTime);
 
+            // The ground resists the commander like anyone else: wading slows and drains, slopes tax.
+            if (BattleTerrainBuilder.IsInWater(transform.position))
+            {
+                pace *= _settings.WaterMoveFactor;
+                if (move.sqrMagnitude > 0.01f)
+                    _combatant.Stamina01 = Mathf.Max(
+                        0f, _combatant.Stamina01 - _settings.WaterStaminaPerSecond * Time.deltaTime);
+            }
+            pace *= 1f - BattleTerrainBuilder.Steepness01(transform.position) * _settings.SteepSlopeMovePenalty;
+
             float aimSlow = IsAiming ? _aimMoveMultiplier : 1f;
             Vector3 velocity = move * (_settings.PlayerSpeed * pace * condition * aimSlow);
             velocity.y = _verticalVelocity;

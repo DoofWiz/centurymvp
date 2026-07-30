@@ -134,6 +134,8 @@ namespace Century.Battle.View
             else if (_combatant.IsEngaged) UpdateEngaged();
             else UpdateFormation();
 
+            ApplyGroundDrag();
+
             _combatant.WorldPosition = transform.position;
             _combatant.Facing = _bodyRoot.forward;
 
@@ -250,6 +252,30 @@ namespace Century.Battle.View
             FaceDirection(IsInStation || threatNear
                 ? SquadFormationSolver.FlatFacing(_squad.AnchorFacing)
                 : _agent.velocity);
+        }
+
+        /// <summary>
+        /// The ground itself resists: wading the river slows a man to a costly trudge and drains his
+        /// wind, and steep slopes tax every step — which is what makes a ford a decision and a hill
+        /// a defence, without a single new rule in the sim.
+        /// </summary>
+        private void ApplyGroundDrag()
+        {
+            if (!_agent.enabled || !_agent.isOnNavMesh) return;
+
+            float factor = 1f;
+
+            if (BattleTerrainBuilder.IsInWater(transform.position))
+            {
+                factor *= _settings.WaterMoveFactor;
+                if (_agent.velocity.sqrMagnitude > 0.1f)
+                    _combatant.Stamina01 = Mathf.Max(
+                        0f, _combatant.Stamina01 - _settings.WaterStaminaPerSecond * Time.deltaTime);
+            }
+
+            factor *= 1f - BattleTerrainBuilder.Steepness01(transform.position) * _settings.SteepSlopeMovePenalty;
+
+            _agent.speed *= Mathf.Clamp(factor, 0.2f, 1f);
         }
 
         /// <summary>

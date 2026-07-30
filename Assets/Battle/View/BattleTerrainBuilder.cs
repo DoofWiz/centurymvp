@@ -242,5 +242,26 @@ namespace Century.Battle.View
             position.y = GroundHeight(position);
             return position;
         }
+
+        /// <summary>Standing in the river? (Feet below the waterline on a field that has one.)</summary>
+        public static bool IsInWater(Vector3 position) =>
+            _recipe.HasRiver && _terrain != null
+            && position.y < WorldTerrainForge.WaterLevel - 0.05f;
+
+        /// <summary>Local ground steepness, 0 flat to 1 at a 45-degree slope. Two-sample gradient —
+        /// cheap enough for every moving man every frame.</summary>
+        public static float Steepness01(Vector3 position)
+        {
+            if (_terrain == null) return 0f;
+
+            const float probe = 1.6f;
+            float gx = GroundHeight(position + Vector3.right * probe)
+                       - GroundHeight(position - Vector3.right * probe);
+            float gz = GroundHeight(position + Vector3.forward * probe)
+                       - GroundHeight(position - Vector3.forward * probe);
+
+            float grade = Mathf.Sqrt(gx * gx + gz * gz) / (2f * probe);
+            return Mathf.Clamp01(grade);
+        }
     }
 }

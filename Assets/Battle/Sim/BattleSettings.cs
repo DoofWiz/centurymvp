@@ -84,6 +84,16 @@ namespace Century.Battle.Sim
         public float ShieldsUpRange = 16f;
 
         [Header("Terrain")]
+        [Tooltip("Movement speed multiplier while wading the river. Water is a wall you walk through.")]
+        [Range(0.2f, 1f)] public float WaterMoveFactor = 0.55f;
+
+        [Tooltip("Stamina burned per second of wading. Crossing under javelins is a real decision.")]
+        public float WaterStaminaPerSecond = 0.03f;
+
+        [Tooltip("Movement penalty at a 45-degree slope (scales down to zero on the flat). " +
+                 "Climbing costs speed; the hill defends its holder.")]
+        [Range(0f, 0.8f)] public float SteepSlopeMovePenalty = 0.45f;
+
         [Tooltip("Damage bonus per metre of height advantage over the victim (and penalty per metre " +
                  "of disadvantage). Holding the ridge is supposed to matter.")]
         public float HighGroundDamagePerMetre = 0.05f;

@@ -103,12 +103,14 @@ namespace Century.Core.World
         }
 
         /// <summary>The four layer palettes (low tone, high tone, tile size) shared by both scenes.</summary>
+        // Lifted from the first pass: with the pewter sun and soft shadows, the darker originals
+        // read as mud at dusk whatever the hour. Grim lives in the hue; value carries the clarity.
         public static readonly (Color low, Color high, float tile)[] LayerPalettes =
         {
-            (new Color(0.16f, 0.19f, 0.11f), new Color(0.30f, 0.32f, 0.19f), 42f),   // meadow
-            (new Color(0.13f, 0.12f, 0.08f), new Color(0.24f, 0.20f, 0.12f), 34f),   // forest floor
-            (new Color(0.28f, 0.27f, 0.26f), new Color(0.42f, 0.40f, 0.37f), 26f),   // rock
-            (new Color(0.30f, 0.27f, 0.19f), new Color(0.45f, 0.40f, 0.28f), 22f)    // riverbank
+            (new Color(0.21f, 0.25f, 0.14f), new Color(0.38f, 0.41f, 0.24f), 42f),   // meadow
+            (new Color(0.17f, 0.15f, 0.10f), new Color(0.30f, 0.26f, 0.16f), 34f),   // forest floor
+            (new Color(0.34f, 0.33f, 0.32f), new Color(0.52f, 0.50f, 0.46f), 26f),   // rock
+            (new Color(0.36f, 0.32f, 0.23f), new Color(0.53f, 0.47f, 0.33f), 22f)    // riverbank
         };
 
         // --- Sculpting (shared by the editor tool and the battle builder) -----------------------
@@ -233,7 +235,7 @@ namespace Century.Core.World
         public static float BattleHeightAt(in BattleRecipe recipe, float lx, float lz)
         {
             // Base plateau + the regional tilt.
-            float height = 4.5f + lx * recipe.GradePerMetre.x + lz * recipe.GradePerMetre.y;
+            float height = 5.2f + lx * recipe.GradePerMetre.x + lz * recipe.GradePerMetre.y;
 
             // Battle-frequency relief the overmap could never carry: real hillsides at ~90m and
             // ~40m wavelengths, sharpened so shoulders are steep enough to matter and to READ.
@@ -244,12 +246,17 @@ namespace Century.Core.World
             relief = Mathf.Sign(relief) * Mathf.Pow(Mathf.Abs(relief), 1.35f);
             height += relief * 7.5f + fine * 3f;
 
-            // The river, at battle width: a decisive channel with real banks, not a regional smear.
+            // THE LAND STAYS ABOVE THE WATER. Tilt plus relief can sum well below the waterline,
+            // which turned whole quarters of the field into a lake with armies wading to the chin.
+            // Dry ground floors comfortably above it, and ONLY the river carve may dig below —
+            // giving a true battle-scale channel a dozen metres wide, not a regional flood.
+            height = Mathf.Max(height, WaterLevel + 1.4f);
+
             if (recipe.HasRiver)
             {
                 float d = LocalRiverDistance(recipe, lx, lz);
-                float carve = Mathf.Exp(-(d * d) / (2f * 9f * 9f));
-                height = Mathf.Lerp(height, 0.3f, Mathf.Clamp01(carve * 1.35f));
+                float carve = Mathf.Exp(-(d * d) / (2f * 6.5f * 6.5f));
+                height = Mathf.Lerp(height, 0.25f, Mathf.Clamp01(carve * 1.5f));
             }
 
             return Mathf.Clamp(height, 0f, MaxHeight);
