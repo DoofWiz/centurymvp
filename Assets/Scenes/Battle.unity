@@ -162,21 +162,6 @@ MonoBehaviour:
   m_PivotReferenceSize: 0
   m_Pivot: 0
   m_WorldSpaceCollider: {fileID: 0}
---- !u!114 &311055720
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 311055715}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 58cb5133867b4f14c8fc0bed79c5fa9c, type: 3}
-  m_Name:
-  m_EditorClassIdentifier:
-  _refreshInterval: 0.1
-  _visibleLogCount: 5
-  _alertPulseHz: 1.4
 --- !u!4 &311055717
 Transform:
   m_ObjectHideFlags: 0
@@ -221,6 +206,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: Century.Battle::Century.Battle.View.BattleDeploymentController
   _fieldHalfWidth: 70
   _fieldHalfDepth: 70
+  _edgeBandWidth: 18
+--- !u!114 &311055720
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 311055715}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 58cb5133867b4f14c8fc0bed79c5fa9c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _refreshInterval: 0.1
+  _visibleLogCount: 5
+  _alertPulseHz: 1.4
 --- !u!1 &657997659
 GameObject:
   m_ObjectHideFlags: 0
@@ -393,6 +394,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 012de7b42df6e9148abf0ae078c8ad70, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Century.Battle::Century.Battle.View.SquadCommandInput
+  _hoverRadius: 4.5
 --- !u!114 &1048294760
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -406,12 +408,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Century.Battle::Century.Battle.View.BattleBootstrap
   _settings: {fileID: 11400000, guid: 105008703a4afa44c8cd19337553c2da, type: 2}
-  _deploymentCount: 40
   _skipDeployment: 0
   _playerPrefab: {fileID: 6215103559411405869, guid: 3f8d5cb167cca864ea92297e288ab5bd, type: 3}
   _romanSoldierPrefab: {fileID: 7269509849102244235, guid: 8f4533de2ebaaec44b2352c15b1300a1, type: 3}
   _germanicSoldierPrefab: {fileID: 2359017737235142098, guid: c16824a7e917546499f9035e1e6c2923, type: 3}
   _squadPrefab: {fileID: 1593188341807935101, guid: db52eacb9a2e1dd42b2d8c10bd5da990, type: 3}
+  _pilaPrefab: {fileID: 0}
+  _missiles: {fileID: 0}
   _cameraRig: {fileID: 1657036621}
   _commandInput: {fileID: 1048294759}
   _eventFeed: {fileID: 1048294762}
@@ -420,6 +423,21 @@ MonoBehaviour:
   _summary: {fileID: 311055718}
   _spawnRoot: {fileID: 1433777059}
   _debugHud: {fileID: 1048294758}
+  _testBattleWhenNoRequest: 1
+  _testConfig:
+    RomanCount: 40
+    GermanCount: 48
+    EnemyBehaviour: 0
+    RomanStamina01: 0.9
+    GermanStamina01: 0.9
+    RomanMorale01: 1
+    GermanMorale01: 1
+    PlayerAmbushed: 0
+    EnemyAmbushed: 0
+    SkipDeployment: 1
+    HourOfDay: 10
+    Seed: 0
+    CommanderSkills: []
 --- !u!4 &1048294761
 Transform:
   m_ObjectHideFlags: 0

@@ -91,7 +91,7 @@ namespace Century.Battle.Sim
         [Tooltip("Global multiplier on all weapon wound severity. Lower = longer fights. Tuned low " +
                  "so lines grind: men hack and block while fatigue and morale decide the day, and a " +
                  "death is an event rather than a metronome.")]
-        [Range(0.2f, 2f)] public float MeleeDamageScale = 0.55f;
+        [Range(0.2f, 2f)] public float MeleeDamageScale = 0.45f;
 
         [Tooltip("Stamina a man spends throwing a blow.")]
         public float MeleeStaminaPerStrike = 0.06f;

@@ -19,8 +19,11 @@ namespace Century.Battle.View
         [SerializeField] private float _anchorTurnSpeed = 180f;
 
         [Header("Order behaviour")]
-        [Tooltip("How close an advancing formation stops to the enemy, so the lines meet front to front.")]
-        [SerializeField] private float _advanceContactStandoff = 3f;
+        [Tooltip("How close an advancing formation's ANCHOR stops to the enemy squad's centre. This " +
+                 "must clear both formations' half-depths: at 3 the halt point sat INSIDE the enemy " +
+                 "line, so the two slot grids interleaved and every clash dissolved into a blob. At " +
+                 "6.5 the line halts a spear-length short and receives the charge front to front.")]
+        [SerializeField] private float _advanceContactStandoff = 6.5f;
 
         [Tooltip("A falling-back squad keeps backing away until this gap to the enemy is opened.")]
         [SerializeField] private float _fallbackHoldGap = 26f;
@@ -250,9 +253,15 @@ namespace Century.Battle.View
         {
             float speed = _settings.SoldierBaseSpeed * _squad.Formation.SpeedMultiplier();
 
-            // An engaged squad does not shuffle. Once the lines meet, the anchor holds and the men
-            // fight where they stand, otherwise formations slide through each other.
-            if (_squad.EngagedCount > 0) speed *= 0.15f;
+            // Once the lines meet, the anchor STOPS and the men fight where they stand — even a 15%
+            // creep, held for a whole melee, walked formations through each other into one brawl.
+            // Only a withdrawal keeps moving under contact: that is what a fighting withdrawal is.
+            if (_squad.EngagedCount > 0)
+            {
+                bool withdrawing = _squad.Order == SquadOrder.Fallback || _squad.Order == SquadOrder.Retreat;
+                speed *= withdrawing ? 0.35f : 0f;
+            }
+
             Vector3 next = Vector3.MoveTowards(_squad.AnchorPosition, target, speed * Time.deltaTime);
 
             // Keep the anchor on walkable ground so slots never resolve into scenery.
