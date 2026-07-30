@@ -48,6 +48,18 @@ namespace Century.Battle.View
         private float _figureBaseY;
         private float _phase;
         private float _swing;
+        private float _twist, _lean, _flinch;
+
+        /// <summary>Body english from the melee animator: yaw wind-up/follow-through and forward
+        /// lean, degrees. Set every frame by <see cref="CombatantGear.Pose"/>.</summary>
+        public void SetCombatPose(float twistDegrees, float leanDegrees)
+        {
+            _twist = twistDegrees;
+            _lean = leanDegrees;
+        }
+
+        /// <summary>A blow landed: the figure snaps aside for a beat.</summary>
+        public void NotifyHit() => _flinch = 1f;
 
         /// <summary>The renderer wound tint targets (the tunic — blood shows on cloth).</summary>
         public Renderer TintTarget { get; private set; }
@@ -165,27 +177,28 @@ namespace Century.Battle.View
 
         // --- Motion ------------------------------------------------------------------------------
 
-        /// <summary>Strides the legs and bobs the figure to match how fast the man is moving.</summary>
+        /// <summary>Strides the legs, bobs the figure with movement, and composes the combat body
+        /// english (twist/lean from the melee animator, plus the flinch of a taken blow).</summary>
         public void Animate(float speed, float dt)
         {
             float targetSwing = Mathf.Clamp01(speed / 3.5f);
             _swing = Mathf.MoveTowards(_swing, targetSwing, dt * 4f);
+            _flinch = Mathf.MoveTowards(_flinch, 0f, dt * 4.5f);
 
-            if (_swing < 0.02f)
-            {
-                if (_legLeft != null) _legLeft.localRotation = Quaternion.identity;
-                if (_legRight != null) _legRight.localRotation = Quaternion.identity;
-                return;
-            }
+            if (_swing >= 0.02f) _phase += speed * dt * 3.4f;
+            float stride = _swing < 0.02f ? 0f : Mathf.Sin(_phase) * 28f * _swing;
 
-            _phase += speed * dt * 3.4f;
-            float angle = Mathf.Sin(_phase) * 28f * _swing;
+            if (_legLeft != null) _legLeft.localRotation = Quaternion.Euler(stride, 0f, 0f);
+            if (_legRight != null) _legRight.localRotation = Quaternion.Euler(-stride, 0f, 0f);
 
-            if (_legLeft != null) _legLeft.localRotation = Quaternion.Euler(angle, 0f, 0f);
-            if (_legRight != null) _legRight.localRotation = Quaternion.Euler(-angle, 0f, 0f);
-            if (_figure != null)
-                _figure.localPosition = new Vector3(
-                    0f, _figureBaseY + Mathf.Abs(Mathf.Sin(_phase)) * 0.035f * _swing, 0f);
+            if (_figure == null) return;
+
+            float bob = _swing < 0.02f ? 0f : Mathf.Abs(Mathf.Sin(_phase)) * 0.035f * _swing;
+            _figure.localPosition = new Vector3(0f, _figureBaseY + bob, 0f);
+
+            // Flinch is a sharp jolt that rings down: strongest the instant the blow lands.
+            float jolt = Mathf.Sin(_flinch * Mathf.PI) * -13f;
+            _figure.localRotation = Quaternion.Euler(_lean, _twist + jolt, jolt * 0.4f);
         }
 
         // --- Parts -------------------------------------------------------------------------------

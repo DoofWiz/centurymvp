@@ -272,6 +272,13 @@ namespace Century.Battle.Sim
 
                 case MeleeStance.Striking:
                     man.StanceTimer -= _dt;
+
+                    // The blow lands MID-SWING, when the blade is actually travelling through the
+                    // space — not at the instant the arm starts moving. This is what lets the view
+                    // draw a real arc whose impact happens where the eye says it should.
+                    if (!man.StrikeResolved && man.StanceTimer <= profile.StrikeSeconds * 0.45f)
+                        ResolveStrike(man, profile, squad);
+
                     if (man.StanceTimer <= 0f)
                     {
                         man.Stance = MeleeStance.Recovering;
@@ -299,7 +306,7 @@ namespace Century.Battle.Sim
             man.StrikeDir = StrikeDirection(man);
             man.Stamina01 = Mathf.Max(0f, man.Stamina01 - _settings.MeleeStaminaPerStrike);
 
-            ResolveStrike(man, profile, squad);
+            // Resolution happens mid-swing, in AdvanceStance — the blade must travel first.
         }
 
         private Vector3 StrikeDirection(BattleCombatant man)

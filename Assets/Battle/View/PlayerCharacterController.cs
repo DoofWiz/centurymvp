@@ -129,9 +129,11 @@ namespace Century.Battle.View
 
             _combatant.WorldPosition = transform.position;
             _combatant.Facing = _bodyRoot.forward;
+
+            if (_combatant.WasHitThisTick) _rig?.NotifyHit();
             _rig?.Animate(_controller != null ? _controller.velocity.magnitude : 0f, Time.deltaTime);
 
-            _gear?.Pose(_combatant, Time.deltaTime);
+            _gear?.Pose(_combatant, Time.deltaTime, _rig);
         }
 
         /// <summary>

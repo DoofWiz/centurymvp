@@ -169,13 +169,14 @@ namespace Century.Battle.View
             _combatant.WorldPosition = transform.position;
             _combatant.Facing = _bodyRoot.forward;
 
-            _gear?.Pose(_combatant, Time.deltaTime);
+            _gear?.Pose(_combatant, Time.deltaTime, _rig);
             _rig?.Animate(_agent.enabled ? _agent.velocity.magnitude : 0f, Time.deltaTime);
 
             if (_combatant.WasHitThisTick)
             {
                 ApplyTint();
                 HitEffects.Spawn(transform.position + Vector3.up * 1.15f);
+                _rig?.NotifyHit();
             }
 
             // The other two beats of the shield fight, spoken in the world instead of implied:
