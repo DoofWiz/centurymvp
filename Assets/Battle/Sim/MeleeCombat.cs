@@ -39,7 +39,12 @@ namespace Century.Battle.Sim
 
             ClearHitFlags(_state.PlayerSquads);
             ClearHitFlags(_state.EnemySquads);
-            if (_state.PlayerCharacter != null) _state.PlayerCharacter.WasHitThisTick = false;
+            if (_state.PlayerCharacter != null)
+            {
+                _state.PlayerCharacter.WasHitThisTick = false;
+                _state.PlayerCharacter.WasBlockThisTick = false;
+                _state.PlayerCharacter.WasGuardBreakThisTick = false;
+            }
 
             TickSide(_state.PlayerSquads);
             TickSide(_state.EnemySquads);
@@ -51,7 +56,12 @@ namespace Century.Battle.Sim
             for (int s = 0; s < squads.Count; s++)
             {
                 List<BattleCombatant> members = squads[s].Members;
-                for (int m = 0; m < members.Count; m++) members[m].WasHitThisTick = false;
+                for (int m = 0; m < members.Count; m++)
+                {
+                    members[m].WasHitThisTick = false;
+                    members[m].WasBlockThisTick = false;
+                    members[m].WasGuardBreakThisTick = false;
+                }
             }
         }
 
@@ -307,6 +317,7 @@ namespace Century.Battle.Sim
                         // The board holds, at a cost in wind.
                         float cost = board.BlockStaminaCost * (man.Form == AttackForm.Thrust ? 1.5f : 1f);
                         victim.Stamina01 = Mathf.Max(0f, victim.Stamina01 - cost);
+                        victim.WasBlockThisTick = true;
                         return;
                     }
 
@@ -314,6 +325,7 @@ namespace Century.Battle.Sim
                     // empties his wind, and drops his guard for a beat — the wall cracking. A worn
                     // man reels longer; a man of the "No Shield but Courage" doctrine, less.
                     victim.Stamina01 = 0f;
+                    victim.WasGuardBreakThisTick = true;
                     float staggerScale = victim.IsPlayerSide && _state.HasSkill("no_shield_but_courage") ? 0.6f : 1f;
                     victim.StaggerTimer = _settings.StaggerSeconds * staggerScale
                                           * StaminaProfile.For(victim.Stamina).ActionMultiplier;

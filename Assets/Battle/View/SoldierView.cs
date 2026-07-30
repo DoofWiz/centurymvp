@@ -143,6 +143,13 @@ namespace Century.Battle.View
                 ApplyTint();
                 HitEffects.Spawn(transform.position + Vector3.up * 1.15f);
             }
+
+            // The other two beats of the shield fight, spoken in the world instead of implied:
+            // dust off a holding board, an amber flash where a tired guard is smashed open.
+            if (_combatant.WasBlockThisTick)
+                HitEffects.SpawnBlock(transform.position + _bodyRoot.forward * 0.45f + Vector3.up * 1.2f);
+            if (_combatant.WasGuardBreakThisTick)
+                HitEffects.SpawnGuardBreak(transform.position + Vector3.up * 1.25f);
         }
 
         // --- Movement modes --------------------------------------------------------------------
@@ -333,6 +340,10 @@ namespace Century.Battle.View
         {
             if (_isDown) return;
             _isDown = true;
+
+            // The fall itself gets a heavier burst than any wound: at strategy-camera height,
+            // "hurt" and "down" must read as different events.
+            HitEffects.SpawnDeath(transform.position + Vector3.up * 0.9f);
 
             if (_agent.enabled && _agent.isOnNavMesh) _agent.ResetPath();
             _agent.enabled = false;

@@ -36,6 +36,9 @@ namespace Century.Campaign.View
                 // The sight veil darkens everything beyond the column's line of sight.
                 new GameObject("OvermapFog").AddComponent<OvermapFog>().Bind(state);
 
+                // Pulsing red rings under visible hunters: a predator reads as a predator at a glance.
+                new GameObject("PursuitMarkers").AddComponent<OvermapPursuitMarkers>().Bind(state);
+
                 // The "caught flat" wheel: visible whenever a sudden reveal has the column surprised.
                 if (ServiceLocator.TryGet(out Sim.CampaignSettings settings))
                     new GameObject("SurpriseIndicator").AddComponent<SurpriseIndicator>().Bind(state, settings);

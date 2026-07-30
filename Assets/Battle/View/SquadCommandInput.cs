@@ -32,6 +32,10 @@ namespace Century.Battle.View
         /// <summary>Fired when an order goes out, for UI feedback. Null means a formation was set.</summary>
         public event System.Action<SquadOrder?> OrderIssued;
 
+        /// <summary>A destination was just aimed at the ground (an Advance click, or each squad's
+        /// place in a group formation). The world answers with a ping there — see BattleGroundFx.</summary>
+        public event System.Action<Vector3> DestinationPinged;
+
         /// <summary>Fired when the reinforcements are summoned, for UI feedback.</summary>
         public event System.Action ReinforcementsSummoned;
 
@@ -283,6 +287,11 @@ namespace Century.Battle.View
                 {
                     squad.PendingOrder = SquadOrder.HoldPosition;
                     squad.PendingOrderedPosition = _formationTargets[i];
+
+                    // Ping every slot of the group shape: the formation is drawn on the ground the
+                    // instant it is ordered, so the player sees WHAT they asked for, not just that
+                    // they asked.
+                    DestinationPinged?.Invoke(_formationTargets[i]);
                 }
 
                 squad.PendingReadyAt = _state.ElapsedSeconds + DelayFor(squad);
@@ -315,6 +324,7 @@ namespace Century.Battle.View
                 squad.PendingReadyAt = _state.ElapsedSeconds + DelayFor(squad);
             }
 
+            if (hasCursor) DestinationPinged?.Invoke(cursor);
             OrderIssued?.Invoke(order);
         }
 

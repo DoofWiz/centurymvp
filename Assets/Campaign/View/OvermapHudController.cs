@@ -597,7 +597,22 @@ namespace Century.Campaign.View
 
         // --- Events ---------------------------------------------------------------------------
 
-        private void OnEventAdded(CampaignEvent _) => RebuildEvents();
+        private void OnEventAdded(CampaignEvent _)
+        {
+            RebuildEvents();
+
+            // The newest report slides in rather than teleporting into the list — a moving thing in
+            // the corner of the eye is the whole point of a feed.
+            if (_eventsList == null || _eventsList.childCount == 0) return;
+
+            VisualElement row = _eventsList[0];
+            row.style.opacity = 0f;
+            row.experimental.animation.Start(0f, 1f, 380, (element, t) =>
+            {
+                element.style.opacity = t;
+                element.style.translate = new Translate(0f, 8f * (1f - t));
+            });
+        }
 
         private void RebuildEvents()
         {

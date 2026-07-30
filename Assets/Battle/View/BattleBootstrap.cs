@@ -166,6 +166,11 @@ namespace Century.Battle.View
             // The blood-fleck read on every landed blow, for both sides and the Centurion himself.
             HitEffects.Create(_spawnRoot);
 
+            // Ground answers: order pings where commands land, rally arcs around squads being saved.
+            var groundFx = new GameObject("BattleGroundFx").AddComponent<BattleGroundFx>();
+            groundFx.transform.SetParent(_spawnRoot, false);
+            groundFx.Initialise(_state, _commandInput);
+
             CreateBanner();
 
             Debug.Log($"[Battle] {_state.PlayerSideAliveCount} on the field against {_state.EnemyAliveCount} " +
@@ -402,9 +407,15 @@ namespace Century.Battle.View
 
             _simulation.Tick(Time.deltaTime, rallyHeld);
 
-            // The Centurion bleeds visibly like anyone else; his combatant has no SoldierView to do it.
-            if (_player != null && _player.Combatant != null && _player.Combatant.WasHitThisTick)
-                HitEffects.Spawn(_player.transform.position + Vector3.up * 1.2f);
+            // The Centurion bleeds, blocks and staggers visibly like anyone else; his combatant has
+            // no SoldierView to speak for him.
+            if (_player != null && _player.Combatant != null)
+            {
+                Vector3 chest = _player.transform.position + Vector3.up * 1.2f;
+                if (_player.Combatant.WasHitThisTick) HitEffects.Spawn(chest);
+                if (_player.Combatant.WasBlockThisTick) HitEffects.SpawnBlock(chest + _player.Facing * 0.45f);
+                if (_player.Combatant.WasGuardBreakThisTick) HitEffects.SpawnGuardBreak(chest);
+            }
 
             // Manual withdrawal remains available: leaving the field with the men you still have is a
             // legitimate strategic choice, not a failure.

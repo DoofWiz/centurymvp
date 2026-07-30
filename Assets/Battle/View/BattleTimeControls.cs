@@ -27,6 +27,7 @@ namespace Century.Battle.View
         private BattleState _state;
         private Button _pause, _normal, _fast;
         private VisualElement _tacticalHint;
+        private Label _timer;
 
         private enum Mode { Paused, Normal, Fast }
         private Mode _mode = Mode.Normal;
@@ -43,6 +44,7 @@ namespace Century.Battle.View
             _normal = root.Q<Button>("time-normal");
             _fast = root.Q<Button>("time-fast");
             _tacticalHint = root.Q<VisualElement>("tactical-hint");
+            _timer = root.Q<Label>("battle-timer");
 
             if (_pause != null) _pause.clicked += () => SetMode(Mode.Paused);
             if (_normal != null) _normal.clicked += () => SetMode(Mode.Normal);
@@ -80,6 +82,15 @@ namespace Century.Battle.View
 
             if (_tacticalHint != null)
                 _tacticalHint.style.opacity = TacticalHeld ? 1f : 0.55f;
+
+            // The clock itself wears the state of time: gold under tactical time, blood-red while
+            // the world stands still — no glancing at buttons to know what the battle is doing.
+            if (_timer != null)
+            {
+                _timer.style.color = _mode == Mode.Paused ? (StyleColor)new Color(0.77f, 0.27f, 0.23f)
+                    : TacticalHeld ? (StyleColor)new Color(0.94f, 0.79f, 0.41f)
+                    : new StyleColor(StyleKeyword.Null);
+            }
         }
 
         private void RefreshButtons()

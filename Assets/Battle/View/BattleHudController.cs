@@ -336,6 +336,12 @@ namespace Century.Battle.View
             public Label Order;
             public readonly List<DotView> Dots = new List<DotView>();
             public BattleSquad Squad;
+
+            // Alarm flash: the block flares red the moment its squad's nerve worsens or it routs,
+            // so the roster panel drags the eye exactly when it should.
+            public CohesionBand LastBand = CohesionBand.Fearless;
+            public bool WasRouted;
+            public float FlashUntil;
         }
 
         /// <summary>
@@ -417,6 +423,7 @@ namespace Century.Battle.View
             PulseWoundedDots();
             UpdateFormationMenu();
             RefreshSquadInspect();
+            TickBlockAlarms();
 
             // Unscaled: the HUD must keep reporting through a tactical pause, or the pause is
             // useless for exactly the decision-making it exists for.
@@ -526,6 +533,38 @@ namespace Century.Battle.View
                 case SquadOrder.Fallback: return "FALLING BACK";
                 case SquadOrder.Retreat: return "RETREATING";
                 default: return order.ToString().ToUpperInvariant();
+            }
+        }
+
+        /// <summary>
+        /// The roster panel's alarm: a block flares red for a moment when its squad's cohesion band
+        /// worsens into danger or it routs. Runs unscaled so alarms land during a tactical pause.
+        /// </summary>
+        private void TickBlockAlarms()
+        {
+            float now = Time.unscaledTime;
+
+            for (int i = 0; i < _contubernia.Count; i++)
+            {
+                Contubernium block = _contubernia[i];
+                BattleSquad squad = block.Squad;
+                if (squad == null || block.Root == null) continue;
+
+                CohesionBand band = squad.Band;
+
+                if (squad.IsRouted && !block.WasRouted) block.FlashUntil = now + 1.4f;
+                else if (band < block.LastBand && band <= CohesionBand.Wavering)
+                    block.FlashUntil = now + 1.1f;
+
+                block.WasRouted = squad.IsRouted;
+                block.LastBand = band;
+
+                if (now < block.FlashUntil)
+                {
+                    float strength = (block.FlashUntil - now) / 1.4f;
+                    block.Root.style.backgroundColor =
+                        new Color(0.62f, 0.12f, 0.09f, 0.55f * strength);
+                }
             }
         }
 

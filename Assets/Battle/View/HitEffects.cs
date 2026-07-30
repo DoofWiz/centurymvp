@@ -29,13 +29,35 @@ namespace Century.Battle.View
             return effects;
         }
 
+        private static readonly Color BloodColour = new Color(0.55f, 0.07f, 0.05f);
+        private static readonly Color BlockColour = new Color(0.75f, 0.72f, 0.62f);
+        private static readonly Color GuardBreakColour = new Color(0.95f, 0.72f, 0.25f);
+
         /// <summary>A blow has landed at <paramref name="position"/>. Safe to call from any view.</summary>
-        public static void Spawn(Vector3 position)
+        public static void Spawn(Vector3 position) => Emit(position, BloodColour, 7);
+
+        /// <summary>A shield turned the blow: a small dry puff off the board. The read that the
+        /// wall is HOLDING — the counterpart to blood.</summary>
+        public static void SpawnBlock(Vector3 position) => Emit(position, BlockColour, 4);
+
+        /// <summary>A tired guard smashed open: an amber flash. THE tactical read of the melee —
+        /// where this sparks along a line is where it is about to crack.</summary>
+        public static void SpawnGuardBreak(Vector3 position) => Emit(position, GuardBreakColour, 12);
+
+        /// <summary>A man goes down: a heavier burst than a wound, so a death reads differently
+        /// from a hit even at full camera height.</summary>
+        public static void SpawnDeath(Vector3 position) => Emit(position, BloodColour, 18);
+
+        private static void Emit(Vector3 position, Color colour, int count)
         {
             if (_instance == null || _instance._system == null) return;
 
-            var emit = new ParticleSystem.EmitParams { position = position };
-            _instance._system.Emit(emit, 7);
+            var emit = new ParticleSystem.EmitParams
+            {
+                position = position,
+                startColor = colour
+            };
+            _instance._system.Emit(emit, count);
         }
 
         private void Build()

@@ -36,6 +36,38 @@ namespace Century.Battle.View
             _missiles = missiles;
             _attacker = attacker;
             _attackerIsPlayerSide = attackerIsPlayerSide;
+
+            EnsureTrail();
+        }
+
+        /// <summary>
+        /// A thin fading trail: a lone shaft is a few pixels at strategy height and simply was not
+        /// being SEEN — the trail is what makes a volley read as a volley. Added here so a designer
+        /// prefab gets it too.
+        /// </summary>
+        private static Material _trailMaterial;
+
+        private void EnsureTrail()
+        {
+            if (GetComponent<TrailRenderer>() != null) return;
+
+            if (_trailMaterial == null)
+            {
+                Shader shader = Shader.Find("Sprites/Default")
+                                ?? Shader.Find("Universal Render Pipeline/Unlit") ?? Shader.Find("Unlit/Color");
+                _trailMaterial = new Material(shader);
+            }
+
+            var trail = gameObject.AddComponent<TrailRenderer>();
+            trail.time = 0.28f;
+            trail.startWidth = 0.09f;
+            trail.endWidth = 0f;
+            trail.minVertexDistance = 0.15f;
+            trail.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            trail.receiveShadows = false;
+            trail.sharedMaterial = _trailMaterial;
+            trail.startColor = new Color(0.92f, 0.88f, 0.75f, 0.55f);
+            trail.endColor = new Color(0.92f, 0.88f, 0.75f, 0f);
         }
 
         private void FixedUpdate()

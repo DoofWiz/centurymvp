@@ -103,6 +103,13 @@ namespace Century.Battle.Model
         /// <summary>Set for one tick after taking a wound, so the view can react.</summary>
         public bool WasHitThisTick;
 
+        /// <summary>Set for one tick when his shield turned a blow aside — the view puffs dust off
+        /// the board, which is how a holding wall reads at a glance.</summary>
+        public bool WasBlockThisTick;
+
+        /// <summary>Set for one tick when a blow smashed his tired guard open (the stagger).</summary>
+        public bool WasGuardBreakThisTick;
+
         /// <summary>Cut down but not killed: he is out of this battle exactly like a dead man, and
         /// found alive among the fallen when the field is cleared afterwards.</summary>
         public bool IsWoundedOut;

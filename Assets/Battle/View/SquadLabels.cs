@@ -29,12 +29,25 @@ namespace Century.Battle.View
             public TextMesh Numeral;
             public TextMesh Order;
 
+            // The cohesion pip: a sliver of bar under the numeral. THE glance answer to the only
+            // question that decides battles — who is about to break.
+            public Transform BarFill;
+            public Material BarFillMaterial;
+            public Material BarBackMaterial;
+
             // Last seen order state, to notice changes and time the popup.
             public SquadOrder SeenOrder;
             public FormationType SeenFormation;
             public bool SeenPending;
             public float PopupUntil;
         }
+
+        private const float BarWidth = 1.7f;
+        private const float BarHeight = 0.14f;
+
+        private static readonly Color BarSteady = new Color(0.88f, 0.76f, 0.42f);
+        private static readonly Color BarWavering = new Color(0.92f, 0.58f, 0.22f);
+        private static readonly Color BarBreaking = new Color(0.85f, 0.28f, 0.2f);
 
         private readonly List<Tag> _tags = new List<Tag>();
         private SquadCommandInput _commands;
@@ -65,10 +78,45 @@ namespace Century.Battle.View
 
                 tag.Numeral = MakeText(tag.Root, font, 60, 0.07f, Vector3.zero);
                 tag.Order = MakeText(tag.Root, font, 38, 0.05f, new Vector3(0f, -0.55f, 0f));
+                BuildCohesionBar(tag);
 
                 tag.Numeral.text = ShortName(squad);
                 _tags.Add(tag);
             }
+        }
+
+        /// <summary>A dark backing sliver and a coloured fill quad, scaled by cohesion each frame.</summary>
+        private static void BuildCohesionBar(Tag tag)
+        {
+            Shader shader = Shader.Find("Sprites/Default")
+                            ?? Shader.Find("Universal Render Pipeline/Unlit") ?? Shader.Find("Unlit/Color");
+
+            tag.BarBackMaterial = new Material(shader) { color = new Color(0.05f, 0.05f, 0.06f, 0.7f) };
+            tag.BarFillMaterial = new Material(shader) { color = BarSteady };
+
+            Transform back = MakeBarQuad(tag.Root, "BarBack", tag.BarBackMaterial);
+            back.localPosition = new Vector3(0f, -0.32f, 0.01f);   // pushed slightly behind the fill
+            back.localScale = new Vector3(BarWidth, BarHeight, 1f);
+
+            tag.BarFill = MakeBarQuad(tag.Root, "BarFill", tag.BarFillMaterial);
+            tag.BarFill.localPosition = new Vector3(0f, -0.32f, 0f);
+            tag.BarFill.localScale = new Vector3(BarWidth, BarHeight, 1f);
+        }
+
+        private static Transform MakeBarQuad(Transform parent, string name, Material material)
+        {
+            GameObject quad = GameObject.CreatePrimitive(PrimitiveType.Quad);
+            quad.name = name;
+            quad.transform.SetParent(parent, false);
+
+            Collider collider = quad.GetComponent<Collider>();
+            if (collider != null) Destroy(collider);
+
+            var renderer = quad.GetComponent<Renderer>();
+            renderer.sharedMaterial = material;
+            renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            renderer.receiveShadows = false;
+            return quad.transform;
         }
 
         private static TextMesh MakeText(Transform parent, Font font, int size, float charSize, Vector3 offset)
@@ -109,7 +157,31 @@ namespace Century.Battle.View
 
                 NoticeOrderChanges(tag, squad);
                 Style(tag, squad);
+                StyleCohesionBar(tag, squad);
             }
+        }
+
+        /// <summary>Fill and colour track cohesion; the bar itself pulses once a squad is on the
+        /// edge, because that is the moment the eye must be dragged to it.</summary>
+        private void StyleCohesionBar(Tag tag, BattleSquad squad)
+        {
+            if (tag.BarFill == null) return;
+
+            float cohesion = Mathf.Clamp01(squad.Cohesion01);
+            float width = BarWidth * Mathf.Max(0.02f, cohesion);
+            tag.BarFill.localScale = new Vector3(width, BarHeight, 1f);
+            tag.BarFill.localPosition = new Vector3(-(BarWidth - width) * 0.5f, -0.32f, 0f);
+
+            CohesionBand band = squad.Band;
+            Color colour = band >= CohesionBand.Confident ? BarSteady
+                : band == CohesionBand.Wavering ? BarWavering
+                : BarBreaking;
+
+            // Breaking (or already broken): the pulse. A steady line asks nothing of the player.
+            if (band <= CohesionBand.Breaking)
+                colour.a = 0.45f + 0.55f * Mathf.Abs(Mathf.Sin(_now * 6f));
+
+            tag.BarFillMaterial.color = colour;
         }
 
         /// <summary>A new pending or resolved order restarts the popup clock.</summary>
@@ -135,8 +207,13 @@ namespace Century.Battle.View
 
             if (squad.IsRouted || squad.IsWithdrawn)
             {
-                tag.Numeral.color = BrokenColour;
-                tag.Order.color = BrokenColour;
+                // A rout PULSES. Amid a hundred moving men, a steady red word is invisible;
+                // a blinking one is a hand on the player's shoulder.
+                Color broken = BrokenColour;
+                if (squad.IsRouted) broken.a = 0.5f + 0.5f * Mathf.Abs(Mathf.Sin(_now * 5f));
+
+                tag.Numeral.color = broken;
+                tag.Order.color = broken;
                 tag.Order.text = squad.IsRouted ? "ROUTED" : "WITHDRAWN";
                 return;
             }
