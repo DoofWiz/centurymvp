@@ -54,6 +54,16 @@ namespace Century.Battle.View
         [Header("Debug")]
         [SerializeField] private DebugBattleHud _debugHud;
 
+        [Header("Test environment")]
+        [Tooltip("Open Battle.unity directly and press Play (no campaign running): instead of " +
+                 "aborting, a battle is forged from the config below. F5 restarts it instantly; " +
+                 "the summary's CONTINUE also restarts. Never triggers when a real campaign battle " +
+                 "arrives, because that registers a BattleRequest.")]
+        [SerializeField] private bool _testBattleWhenNoRequest = true;
+        [SerializeField] private BattleTestConfig _testConfig = new BattleTestConfig();
+
+        private bool _testMode;
+
         private BattleState _state;
         private BattleSimulation _simulation;
         private PlayerCharacterController _player;
@@ -77,9 +87,23 @@ namespace Century.Battle.View
 
             if (!ServiceLocator.TryGet(out BattleRequest request))
             {
-                Debug.LogError("[Battle] No BattleRequest registered. Returning to the campaign.", this);
-                Submit(new BattleResult { Outcome = BattleOutcome.Aborted });
-                return;
+                if (!_testBattleWhenNoRequest)
+                {
+                    Debug.LogError("[Battle] No BattleRequest registered. Returning to the campaign.", this);
+                    Submit(new BattleResult { Outcome = BattleOutcome.Aborted });
+                    return;
+                }
+
+                // The battle test environment: the scene was played directly, so a fight is forged
+                // from the Inspector config instead. The designer's iteration loop is Play, fight,
+                // F5, fight again — no campaign required.
+                _testMode = true;
+                request = BattleTestForge.Build(_testConfig);
+                if (_testConfig.SkipDeployment) _skipDeployment = true;
+
+                Debug.Log($"[Battle] TEST BATTLE — {request.PlayerCombatants.Count} Romans vs " +
+                          $"{request.EnemyCombatants.Count} Germans ({request.EnemyBehaviour}), " +
+                          $"seed {request.RandomSeed}. F5 restarts at any moment.");
             }
 
             _state = BattleFactory.Create(request, _settings);
@@ -334,6 +358,14 @@ namespace Century.Battle.View
 
         private void Update()
         {
+            // Test environment: F5 tears the battle down and forges a fresh one, from any phase —
+            // mid-fight, mid-deployment, or while staring at the summary.
+            if (_testMode && Input.GetKeyDown(KeyCode.F5))
+            {
+                RestartTestBattle();
+                return;
+            }
+
             if (_state == null || _simulation == null || _submitted) return;
             if (_state.Phase != BattlePhase.Fighting) return;
 
@@ -439,8 +471,25 @@ namespace Century.Battle.View
             ServiceLocator.Unregister<BattleRequest>();
             ServiceLocator.Unregister<BattleState>();
 
+            // A test battle has no campaign waiting for the result: report it and go again.
+            if (_testMode)
+            {
+                Debug.Log($"[Battle] TEST BATTLE over — {result.Outcome}, " +
+                          $"{result.EnemiesKilled} enemy dead. Restarting.");
+                RestartTestBattle();
+                return;
+            }
+
             if (ServiceLocator.TryGet(out IBattleResultSink sink)) sink.Submit(result);
             else Debug.LogError("[Battle] No IBattleResultSink registered; the result is lost.", this);
+        }
+
+        /// <summary>A clean slate: reload the scene, which re-runs Start and forges a new fight.</summary>
+        private void RestartTestBattle()
+        {
+            Time.timeScale = 1f;
+            ServiceLocator.Unregister<BattleState>();
+            UnityEngine.SceneManagement.SceneManager.LoadScene(gameObject.scene.name);
         }
     }
 }
