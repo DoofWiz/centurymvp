@@ -95,6 +95,7 @@
     <Compile Include="Assets\Battle\Sim\BattleOutcomeEvaluator.cs" />
     <Compile Include="Assets\Battle\Model\OfficerRole.cs" />
     <Compile Include="Assets\Battle\View\CombatantGear.cs" />
+    <Compile Include="Assets\Battle\Sim\BattleTestForge.cs" />
     <Compile Include="Assets\Battle\Sim\BattleDeployment.cs" />
   </ItemGroup>
   <ItemGroup>

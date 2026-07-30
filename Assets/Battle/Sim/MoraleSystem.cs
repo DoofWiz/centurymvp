@@ -75,11 +75,11 @@ namespace Century.Battle.Sim
                 // Reinforcements wait beyond the field: no fear reaches them, none leaves them.
                 if (squad.IsOffField) continue;
 
-                AccumulateCasualtyPressure(squad);
+                int lostThisTick = AccumulateCasualtyPressure(squad, deltaSeconds);
                 UpdateCommandAura(squad, isPlayerSide);
 
                 float delta = 0f;
-                float shock = CasualtyShock(squad, deltaSeconds);
+                float shock = CasualtyShock(squad, lostThisTick);
 
                 // "No Man Breaks Rank": the commander's own squads grieve later.
                 if (isPlayerSide && _state.HasSkill("no_man_breaks_rank")) shock *= 0.75f;
@@ -108,7 +108,9 @@ namespace Century.Battle.Sim
             }
         }
 
-        private void AccumulateCasualtyPressure(BattleSquad squad)
+        /// <summary>Tracks fresh losses. The pressure value itself only marks "men just died here"
+        /// (it gates recovery); the cohesion COST of a death is charged once, in CasualtyShock.</summary>
+        private int AccumulateCasualtyPressure(BattleSquad squad, float deltaSeconds)
         {
             int alive = squad.AliveCount;
             if (!_lastAliveCount.TryGetValue(squad, out int previous)) previous = alive;
@@ -116,24 +118,24 @@ namespace Century.Battle.Sim
             int lost = previous - alive;
             if (lost > 0) squad.RecentCasualtyPressure += lost;
 
-            _lastAliveCount[squad] = alive;
-        }
-
-        private float CasualtyShock(BattleSquad squad, float deltaSeconds)
-        {
-            if (squad.RecentCasualtyPressure <= 0f) return 0f;
-
-            // Loss hurts proportionally more in a small squad: two men from four is a catastrophe,
-            // two from ten is a bad afternoon.
-            int strength = Mathf.Max(1, squad.Members.Count);
-            float scaled = squad.RecentCasualtyPressure / strength * squad.Members.Count;
-
-            float shock = scaled * _settings.CohesionLossPerCasualty * deltaSeconds;
-
             squad.RecentCasualtyPressure = Mathf.Max(
                 0f, squad.RecentCasualtyPressure - _settings.CasualtyPressureDecay * deltaSeconds);
 
-            return shock;
+            _lastAliveCount[squad] = alive;
+            return Mathf.Max(0, lost);
+        }
+
+        /// <summary>
+        /// A ONE-TIME cohesion cost per man lost — exactly what the tuning field promises. The old
+        /// form charged the field's value per second for as long as the fear of a death lingered,
+        /// which integrated to several times the stated cost and grew superlinearly when deaths
+        /// clustered: a single pila volley could erase a squad's entire cohesion bar twice over,
+        /// which is why lines routed on contact.
+        /// </summary>
+        private float CasualtyShock(BattleSquad squad, int lostThisTick)
+        {
+            if (lostThisTick <= 0) return 0f;
+            return lostThisTick * _settings.CohesionLossPerCasualty;
         }
 
         /// <summary>Being locally outnumbered is what actually frightens men, not overall army size.</summary>

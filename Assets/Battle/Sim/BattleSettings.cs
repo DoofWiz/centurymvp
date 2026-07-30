@@ -140,9 +140,9 @@ namespace Century.Battle.Sim
         [Tooltip("Seconds between morale evaluations.")]
         public float MoraleTickSeconds = 0.5f;
 
-        [Tooltip("Cohesion lost per man lost from the squad. High: kills are rare in the grind, so " +
-                 "each one is a shock the line feels.")]
-        public float CohesionLossPerCasualty = 0.15f;
+        [Tooltip("Cohesion lost per man lost from the squad — charged once per death. Ten deaths " +
+                 "in a squad of ten costs a full bar; a bad volley shakes a line without breaking it.")]
+        public float CohesionLossPerCasualty = 0.10f;
 
         [Tooltip("How quickly the shock of casualties fades, per second.")]
         public float CasualtyPressureDecay = 0.25f;
@@ -244,8 +244,9 @@ namespace Century.Battle.Sim
         [Tooltip("Launch speed of a thrown pilum, in metres per second. Higher is flatter and faster.")]
         public float PilaLaunchSpeed = 26f;
 
-        [Tooltip("Health fraction a pilum removes on a clean hit. Pila hit hard.")]
-        [Range(0.05f, 0.9f)] public float PilaDamage = 0.55f;
+        [Tooltip("Health fraction a pilum removes on a clean hit. Wounds more than it kills: the " +
+                 "volley softens and shakes a line for the charge, it does not delete it.")]
+        [Range(0.05f, 0.9f)] public float PilaDamage = 0.38f;
 
         [Tooltip("Radius within which a flying pilum counts as striking a man (measured at chest height).")]
         public float PilaImpactRadius = 0.85f;

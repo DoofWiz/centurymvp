@@ -41,6 +41,12 @@ namespace Century.Battle.Sim
             BuildSquads(state.PlayerSquads, playerMen, settings, isPlayerSide: true, namePrefix: "Contubernium");
             BuildSquads(state.EnemySquads, enemyMen, settings, isPlayerSide: false, namePrefix: "Warband");
 
+            // A squad arrives with the heart its men brought from the campaign: a Fearless column
+            // starts with a full cohesion bar, a Broken one is a push from shattering. Squads used
+            // to open at a flat 0.6 no matter what the roster said.
+            SeedCohesion(state.PlayerSquads);
+            SeedCohesion(state.EnemySquads);
+
             Deploy(state, settings);
             HoldBackEnemyReserve(state, settings);
             ApplyCommanderDoctrines(state);
@@ -299,6 +305,14 @@ namespace Century.Battle.Sim
             man.SquadIndex = squad.Index;
             man.SlotIndex = squad.Members.Count;
             squad.Members.Add(man);
+        }
+
+        /// <summary>Squad cohesion opens at the men's average personal morale (floored so no squad
+        /// starts already broken — a shaken century still forms a line before it cracks).</summary>
+        private static void SeedCohesion(List<BattleSquad> squads)
+        {
+            for (int i = 0; i < squads.Count; i++)
+                squads[i].Cohesion01 = Mathf.Clamp(squads[i].AverageMorale01, 0.35f, 1f);
         }
 
         /// <summary>
