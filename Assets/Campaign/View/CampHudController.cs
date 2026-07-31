@@ -79,7 +79,9 @@ namespace Century.Campaign.View
         private Button _soldierDecanus;
         private Label _soldierDecanusLabel;
         private SoldierRecord _openSoldier;
-        private Label _soldierAvatar, _soldierName, _soldierRank, _soldierFlavour, _soldierAttitude;
+        private VisualElement _soldierAvatar;
+        private Label _soldierName, _soldierRank, _soldierFlavour, _soldierAttitude;
+        private VisualElement _soldierTies;
         private Label _soldierRankLabel, _soldierMoraleLabel, _soldierFitnessLabel, _soldierEquipment;
         private VisualElement _soldierRankFill, _soldierMoraleFill, _soldierFitnessFill;
         private Button _soldierClose;
@@ -231,7 +233,7 @@ namespace Century.Campaign.View
             _pickerClose = Find<Button>(root, "picker-close");
 
             _soldierModal = Find<VisualElement>(root, "soldier-modal");
-            _soldierAvatar = Find<Label>(root, "soldier-avatar");
+            _soldierAvatar = Find<VisualElement>(root, "soldier-avatar");
             _soldierName = Find<Label>(root, "soldier-name");
             _soldierRank = Find<Label>(root, "soldier-rank");
             _soldierFlavour = Find<Label>(root, "soldier-flavour");
@@ -240,6 +242,7 @@ namespace Century.Campaign.View
             _soldierMoraleLabel = Find<Label>(root, "soldier-morale-label");
             _soldierFitnessLabel = Find<Label>(root, "soldier-fitness-label");
             _soldierEquipment = Find<Label>(root, "soldier-equipment");
+            _soldierTies = Find<VisualElement>(root, "soldier-ties");
             _soldierRankFill = Find<VisualElement>(root, "soldier-rankprog-fill");
             _soldierMoraleFill = Find<VisualElement>(root, "soldier-morale-fill");
             _soldierFitnessFill = Find<VisualElement>(root, "soldier-fitness-fill");
@@ -546,10 +549,9 @@ namespace Century.Campaign.View
             card.EnableInClassList("soldier-card--officer", officer);
             card.EnableInClassList("soldier-card--decanus", decanus);
 
-            var avatar = new Label(TierGlyph(soldier)) { pickingMode = PickingMode.Ignore };
-            avatar.AddToClassList("soldier-card__avatar");
-            avatar.AddToClassList(TierColorClass(soldier));
-            card.Add(avatar);
+            // A geometry disc, not a unicode glyph: the thematic font carves ●◆○ badly, and a
+            // border-radius circle renders identically at every scale (and in WebGL).
+            card.Add(MakeTierDisc(soldier, "tier-disc--card"));
 
             var body = new VisualElement { pickingMode = PickingMode.Ignore };
             body.AddToClassList("soldier-card__body");
@@ -600,8 +602,10 @@ namespace Century.Campaign.View
             slot.AddToClassList("officer-slot");
             slot.EnableInClassList("officer-slot--vacant", holder == null);
 
-            var crest = new Label(holder == null ? "○" : "✦") { pickingMode = PickingMode.Ignore };
-            crest.AddToClassList("officer-slot__crest");
+            var crest = new VisualElement { pickingMode = PickingMode.Ignore };
+            crest.AddToClassList("tier-disc");
+            crest.AddToClassList(holder == null ? "tier-disc--vacant" : "tier-disc--officer");
+            crest.AddToClassList("officer-slot__crest-disc");
             slot.Add(crest);
 
             var text = new VisualElement { pickingMode = PickingMode.Ignore };
@@ -641,8 +645,7 @@ namespace Century.Campaign.View
             _openSoldier = soldier;
             RefreshDecanusButton(soldier);
 
-            SetText(_soldierAvatar, TierGlyph(soldier));
-            Recolour(_soldierAvatar, TierColorClass(soldier));
+            SetTierDisc(_soldierAvatar, soldier);
 
             SetText(_soldierName, soldier.DisplayName);
             SetText(_soldierRank, RankTitle(soldier));
@@ -677,9 +680,73 @@ namespace Century.Campaign.View
             RecolourFill(_soldierFitnessFill, HealthFillClass(soldier.Health01));
 
             SetText(_soldierEquipment, EquipmentFor(soldier));
+            RebuildTies(soldier);
 
             Show(_soldierModal);
         }
+
+        /// <summary>The man's social circle, strongest feelings first, each with its reason. This
+        /// is where the century stops being a roster and starts being seventy opinions.</summary>
+        private void RebuildTies(SoldierRecord soldier)
+        {
+            if (_soldierTies == null) return;
+            _soldierTies.Clear();
+
+            var ties = new List<RelationTie>(soldier.Ties);
+            ties.Sort((a, b) => Mathf.Abs(b.Value).CompareTo(Mathf.Abs(a.Value)));
+
+            Roster roster = _state.PlayerParty.Roster;
+            int shown = 0;
+
+            for (int i = 0; i < ties.Count && shown < 4; i++)
+            {
+                RelationTie tie = ties[i];
+                if (Mathf.Abs(tie.Value) < 0.1f) continue;
+
+                SoldierRecord other = roster.Find(tie.OtherId);
+                if (other == null) continue;
+
+                var row = new VisualElement { pickingMode = PickingMode.Ignore };
+                row.AddToClassList("tie-row");
+
+                var head = new VisualElement { pickingMode = PickingMode.Ignore };
+                head.AddToClassList("tie-row__head");
+
+                var name = new Label(other.IsAlive ? other.DisplayName : $"{other.DisplayName} (fallen)")
+                    { pickingMode = PickingMode.Ignore };
+                name.AddToClassList("tie-row__name");
+                head.Add(name);
+
+                var band = new Label(RelationshipLedger.Band(tie.Value)) { pickingMode = PickingMode.Ignore };
+                band.AddToClassList("tie-row__band");
+                string colour = RelationshipLedger.BandColorClass(tie.Value);
+                if (colour != null) band.AddToClassList(colour);
+                head.Add(band);
+
+                row.Add(head);
+
+                if (!string.IsNullOrEmpty(tie.Why))
+                {
+                    var why = new Label(Capitalise(tie.Why)) { pickingMode = PickingMode.Ignore };
+                    why.AddToClassList("tie-row__why");
+                    row.Add(why);
+                }
+
+                _soldierTies.Add(row);
+                shown++;
+            }
+
+            if (shown == 0)
+            {
+                var none = new Label("No strong ties yet. Marches and battles will forge them.")
+                    { pickingMode = PickingMode.Ignore };
+                none.AddToClassList("tie-empty");
+                _soldierTies.Add(none);
+            }
+        }
+
+        private static string Capitalise(string text) =>
+            string.IsNullOrEmpty(text) ? text : char.ToUpperInvariant(text[0]) + text.Substring(1);
 
         /// <summary>
         /// The Decanus is an appointment, not seniority: any rank-and-file man of a contubernium can
@@ -1014,10 +1081,7 @@ namespace Century.Campaign.View
             // A distinguished man is flagged so an accomplished choice stands out from a warm body.
             row.EnableInClassList("pick-row--veteran", soldier.Tier >= VeterancyTier.Veteranus);
 
-            var avatar = new Label(TierGlyph(soldier)) { pickingMode = PickingMode.Ignore };
-            avatar.AddToClassList("pick-row__avatar");
-            avatar.AddToClassList(TierColorClass(soldier));
-            row.Add(avatar);
+            row.Add(MakeTierDisc(soldier, "tier-disc--pick"));
 
             var text = new VisualElement { pickingMode = PickingMode.Ignore };
             text.style.flexGrow = 1f;
@@ -1157,16 +1221,37 @@ namespace Century.Campaign.View
 
         // --- Glyphs, words and colours ---------------------------------------------------------
 
-        private string TierGlyph(SoldierRecord soldier)
+        private VisualElement MakeTierDisc(SoldierRecord soldier, string extraClass = null)
         {
-            if (soldier.RankId == "centurion") return "✦";
-            if (_state.PlayerParty.Appointments.HoldsAnyRole(soldier.Id, out _)) return "✦";
+            var disc = new VisualElement { pickingMode = PickingMode.Ignore };
+            disc.AddToClassList("tier-disc");
+            disc.AddToClassList(TierDiscClass(soldier));
+            if (extraClass != null) disc.AddToClassList(extraClass);
+            return disc;
+        }
+
+        private void SetTierDisc(VisualElement disc, SoldierRecord soldier)
+        {
+            if (disc == null) return;
+            disc.RemoveFromClassList("tier-disc--officer");
+            disc.RemoveFromClassList("tier-disc--evocatus");
+            disc.RemoveFromClassList("tier-disc--veteranus");
+            disc.RemoveFromClassList("tier-disc--miles");
+            disc.RemoveFromClassList("tier-disc--tiro");
+            disc.AddToClassList(TierDiscClass(soldier));
+        }
+
+        private string TierDiscClass(SoldierRecord soldier)
+        {
+            if (soldier.RankId == "centurion") return "tier-disc--officer";
+            if (_state.PlayerParty.Appointments.HoldsAnyRole(soldier.Id, out _)) return "tier-disc--officer";
+
             switch (soldier.Tier)
             {
-                case VeterancyTier.Evocatus: return "★";
-                case VeterancyTier.Veteranus: return "◆";
-                case VeterancyTier.Miles: return "●";
-                default: return "○";
+                case VeterancyTier.Evocatus: return "tier-disc--evocatus";
+                case VeterancyTier.Veteranus: return "tier-disc--veteranus";
+                case VeterancyTier.Miles: return "tier-disc--miles";
+                default: return "tier-disc--tiro";
             }
         }
 

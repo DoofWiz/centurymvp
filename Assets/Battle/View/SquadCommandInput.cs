@@ -287,6 +287,7 @@ namespace Century.Battle.View
                 if (_formationGroup.Count > 1)
                 {
                     squad.PendingOrder = SquadOrder.HoldPosition;
+                    squad.OrdersReceived++;
                     squad.PendingOrderedPosition = _formationTargets[i];
 
                     // Ping every slot of the group shape: the formation is drawn on the ground the
@@ -321,6 +322,7 @@ namespace Century.Battle.View
             foreach (BattleSquad squad in SelectedSquads())
             {
                 squad.PendingOrder = order;
+                squad.OrdersReceived++;
 
                 squad.PendingOrderedPosition = order == SquadOrder.HoldPosition
                     ? squad.AnchorPosition

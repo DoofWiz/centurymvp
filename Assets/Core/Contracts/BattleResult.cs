@@ -42,6 +42,10 @@ namespace Century.Core.Contracts
 
         /// <summary>The standard did not come home: taken from the field, or left on it.</summary>
         public bool SignumLost;
+
+        /// <summary>Contubernium indices that fought the whole battle without one direct order
+        /// from the Centurion. Their men look to their Decanus a little more afterwards.</summary>
+        public List<int> NeglectedGroups = new List<int>();
     }
 
     public sealed class CombatantOutcome

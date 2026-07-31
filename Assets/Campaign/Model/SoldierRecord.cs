@@ -38,6 +38,12 @@ namespace Century.Campaign.Model
         /// Distinct from morale: a man can be in good spirits yet resent your command, or the reverse.</summary>
         public float Loyalty01 = 0.6f;
 
+        /// <summary>His standing with other men of the century, written by everything the campaign
+        /// does — battles stood together, promotions, displacements, choices at the crossroads.
+        /// Managed through RelationshipLedger; capped so it never grows unbounded.</summary>
+        public System.Collections.Generic.List<RelationTie> Ties =
+            new System.Collections.Generic.List<RelationTie>();
+
         /// <summary>Which contubernium this man belongs to (0-based), or -1 if not yet assigned.
         /// The SAME grouping is shown at camp and fought in battle — one structure, one truth.
         /// Assigned by ContuberniumLedger; do not hand-set.</summary>

@@ -13,6 +13,10 @@ namespace Century.Battle.Model
         public string DisplayName;
         public bool IsPlayerSide;
 
+        /// <summary>Direct orders the player gave this squad this battle. A contubernium that
+        /// fights a whole battle without one turns to its Decanus instead (relationship layer).</summary>
+        public int OrdersReceived;
+
         public List<BattleCombatant> Members = new List<BattleCombatant>();
 
         public SquadOrder Order = SquadOrder.FollowMe;

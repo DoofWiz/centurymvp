@@ -22,6 +22,23 @@ namespace Century.Campaign.Sim
         /// standard back (army phase 3.5 — the speculator's lead closes phase 3's wound).</summary>
         public bool FightCarriesSignum;
 
+        /// <summary>Officers judge the Centurion's choices (relationship layer): robbing a healer's
+        /// grove sits ill with the medicus; burying the Roman dead sits well with the signifer.
+        /// Post id (optio/signifer/tesserarius/medicus/speculator) → loyalty delta for its holder.</summary>
+        public OfficerReaction[] Reactions;
+
+        public struct OfficerReaction
+        {
+            public string Post;
+            public float Loyalty;
+
+            public OfficerReaction(string post, float loyalty)
+            {
+                Post = post;
+                Loyalty = loyalty;
+            }
+        }
+
         /// <summary>Items granted into the party inventory: catalog id and count per entry.</summary>
         public ItemGrant[] Items;
 
@@ -71,6 +88,27 @@ namespace Century.Campaign.Sim
                 {
                     raiders.CarriesPlayerSignum = true;
                     raiders.DisplayName = "The Signum's Captors";
+                }
+            }
+
+            // The officers mark what kind of commander makes this kind of choice.
+            if (Reactions != null)
+            {
+                for (int i = 0; i < Reactions.Length; i++)
+                {
+                    SoldierRecord officer = state.Posts.HolderOf(Reactions[i].Post, player.Roster);
+                    if (officer == null) continue;
+
+                    RelationshipLedger.AdjustLoyalty(officer, Reactions[i].Loyalty);
+
+                    if (Mathf.Abs(Reactions[i].Loyalty) >= 0.05f)
+                        log?.Push(
+                            Reactions[i].Loyalty > 0 ? CampaignEventKind.Gain : CampaignEventKind.Loss,
+                            Reactions[i].Loyalty > 0
+                                ? $"{officer.DisplayName} approves"
+                                : $"{officer.DisplayName} is displeased",
+                            $"The {PostRoster.DisplayName(Reactions[i].Post)} marks the Centurion's choice",
+                            state.Clock.Now.DayNumber);
                 }
             }
 
@@ -200,9 +238,19 @@ namespace Century.Campaign.Sim
                 Choices = new[]
                 {
                     new PoiChoice("Leave an offering", "-20 denarii, the men take heart",
-                        new PoiOutcome { Denarii = -20, Morale = 0.06f, ResultText = "You leave coin at the altar; the column marches easier." }),
+                        new PoiOutcome
+                        {
+                            Denarii = -20, Morale = 0.06f,
+                            Reactions = new[] { new PoiOutcome.OfficerReaction(PostId.Optio, 0.04f) },
+                            ResultText = "You leave coin at the altar; the column marches easier."
+                        }),
                     new PoiChoice("Take what coin remains", "+18 coin, some mutter of ill luck",
-                        new PoiOutcome { Coin = 18, Morale = -0.04f, ResultText = "You pocket the offerings. A few men make warding signs." }),
+                        new PoiOutcome
+                        {
+                            Coin = 18, Morale = -0.04f,
+                            Reactions = new[] { new PoiOutcome.OfficerReaction(PostId.Optio, -0.05f) },
+                            ResultText = "You pocket the offerings. A few men make warding signs."
+                        }),
                     new PoiChoice("March on", "leave the shrine untouched",
                         new PoiOutcome { ResultText = "You leave the shrine as you found it." }),
                 }
@@ -227,12 +275,18 @@ namespace Century.Campaign.Sim
                                 new PoiOutcome.ItemGrant("healing_herbs", 3),
                                 new PoiOutcome.ItemGrant("healing_salve", 1),
                             },
+                            Reactions = new[] { new PoiOutcome.OfficerReaction(PostId.Medicus, 0.06f) },
                             ResultText = "You barter for her herbs; the medicus is well pleased."
                         }),
                     new PoiChoice("Ask her to tend the wounded", "heals the wounded, +morale",
                         new PoiOutcome { Heal01 = 0.2f, Morale = 0.04f, ResultText = "The healer works through the column; the worst hurts ease." }),
                     new PoiChoice("Rob the grove", "+70 coin, the men are shamed",
-                        new PoiOutcome { Coin = 70, Morale = -0.09f, ResultText = "You strip the grove bare. It sits ill with the men." }),
+                        new PoiOutcome
+                        {
+                            Coin = 70, Morale = -0.09f,
+                            Reactions = new[] { new PoiOutcome.OfficerReaction(PostId.Medicus, -0.08f) },
+                            ResultText = "You strip the grove bare. It sits ill with the men."
+                        }),
                 }
             });
 
@@ -247,11 +301,21 @@ namespace Century.Campaign.Sim
                 Choices = new[]
                 {
                     new PoiChoice("Take able men into the ranks", "+2 recruits, -30 food",
-                        new PoiOutcome { Recruits = 2, Food = -30, ResultText = "Two able men fall in with the column." }),
+                        new PoiOutcome
+                        {
+                            Recruits = 2, Food = -30,
+                            Reactions = new[] { new PoiOutcome.OfficerReaction(PostId.Optio, 0.04f) },
+                            ResultText = "Two able men fall in with the column."
+                        }),
                     new PoiChoice("Share your rations", "-40 food, the men's spirits rise",
                         new PoiOutcome { Food = -40, Morale = 0.07f, ResultText = "You feed the refugees. Word of Roman mercy spreads." }),
                     new PoiChoice("Turn them away", "costs nothing, costs something",
-                        new PoiOutcome { Morale = -0.05f, ResultText = "You wave them off the road. The men march in silence." }),
+                        new PoiOutcome
+                        {
+                            Morale = -0.05f,
+                            Reactions = new[] { new PoiOutcome.OfficerReaction(PostId.Medicus, -0.05f) },
+                            ResultText = "You wave them off the road. The men march in silence."
+                        }),
                 }
             });
 
@@ -359,10 +423,16 @@ namespace Century.Campaign.Sim
                                 new PoiOutcome.ItemGrant("linen_bandages", 2),
                                 new PoiOutcome.ItemGrant("orders_varus", 1),
                             },
+                            Reactions = new[] { new PoiOutcome.OfficerReaction(PostId.Signifer, -0.06f) },
                             ResultText = "You strip the field of anything useful."
                         }),
                     new PoiChoice("Bury the dead", "no spoils, but the men stand taller",
-                        new PoiOutcome { Morale = 0.08f, ResultText = "You give the dead the rites of Rome. The men are the prouder for it." }),
+                        new PoiOutcome
+                        {
+                            Morale = 0.08f,
+                            Reactions = new[] { new PoiOutcome.OfficerReaction(PostId.Signifer, 0.08f) },
+                            ResultText = "You give the dead the rites of Rome. The men are the prouder for it."
+                        }),
                     new PoiChoice("March on", "leave the field to the crows",
                         new PoiOutcome { ResultText = "You leave the dead to the grass." }),
                 }
@@ -486,7 +556,12 @@ namespace Century.Campaign.Sim
                             ResultText = "The century goes forward without a word needing to be said."
                         }),
                     new PoiChoice("Not with the strength we have", "mark it and withdraw",
-                        new PoiOutcome { Morale = -0.06f, ResultText = "You withdraw from your own standard. No man speaks on the march back." }),
+                        new PoiOutcome
+                        {
+                            Morale = -0.06f,
+                            Reactions = new[] { new PoiOutcome.OfficerReaction(PostId.Signifer, -0.10f) },
+                            ResultText = "You withdraw from your own standard. No man speaks on the march back."
+                        }),
                 }
             });
 

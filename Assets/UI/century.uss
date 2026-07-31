@@ -3186,3 +3186,112 @@ Button.trad-node:hover { background-color: var(--gold-faint); }
     color: var(--parchment-dim);
     white-space: normal;
 }
+
+/* =======================================================================================
+ *  Tier discs + the relationship layer
+ *  Discs are geometry, not unicode glyphs: the thematic font carves circle/diamond
+ *  characters badly and WebGL has no OS fallback. A border-radius disc renders the same
+ *  at every scale on every platform.
+ * ======================================================================================= */
+
+.tier-disc {
+    width: 12px;
+    height: 12px;
+    border-radius: 6px;
+    border-width: 1px;
+    flex-shrink: 0;
+    align-self: center;
+    background-color: var(--parchment-dim);
+    border-color: rgba(104, 99, 89, 0.6);
+}
+
+.tier-disc--tiro {
+    background-color: rgba(0, 0, 0, 0.25);
+    border-color: var(--parchment-faint);
+}
+
+.tier-disc--miles {
+    background-color: var(--parchment-dim);
+    border-color: var(--parchment-dim);
+}
+
+.tier-disc--veteranus {
+    background-color: var(--brass);
+    border-color: var(--brass);
+}
+
+.tier-disc--evocatus {
+    background-color: var(--gold);
+    border-color: var(--gold-bright);
+}
+
+.tier-disc--officer {
+    background-color: var(--gold-bright);
+    border-color: var(--gold-bright);
+}
+
+.tier-disc--vacant {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-color: var(--parchment-faint);
+}
+
+.tier-disc--card {
+    margin-right: 8px;
+    margin-top: 3px;
+    align-self: flex-start;
+}
+
+.tier-disc--pick { margin-right: var(--pad-tight); }
+
+.tier-disc--large {
+    width: 22px;
+    height: 22px;
+    border-radius: 11px;
+    border-width: 2px;
+    margin-right: 10px;
+}
+
+.officer-slot__crest-disc {
+    margin-right: 8px;
+    width: 14px;
+    height: 14px;
+    border-radius: 7px;
+}
+
+/* --- Bonds and grudges (soldier detail) ------------------------------------------------- */
+
+.soldier-ties { margin-top: 2px; }
+
+.tie-row { margin-top: 4px; }
+
+.tie-row__head {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.tie-row__name {
+    font-size: var(--font-size-small);
+    color: var(--parchment);
+}
+
+.tie-row__band {
+    font-size: var(--font-size-small);
+    color: var(--parchment-dim);
+    margin-left: 8px;
+    flex-shrink: 0;
+}
+
+.tie-row__why {
+    font-size: var(--font-size-micro);
+    color: var(--parchment-faint);
+    white-space: normal;
+    margin-top: 1px;
+}
+
+.tie-empty {
+    font-size: var(--font-size-small);
+    color: var(--parchment-faint);
+    margin-top: 3px;
+    white-space: normal;
+}

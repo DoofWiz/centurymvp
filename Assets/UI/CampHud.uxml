@@ -247,7 +247,7 @@
         <ui:VisualElement name="soldier-modal" class="modal" style="display: none;">
             <ui:VisualElement class="modal__sheet detail-sheet">
                 <ui:VisualElement class="detail-head">
-                    <ui:Label name="soldier-avatar" text="●" class="detail-avatar" />
+                    <ui:VisualElement name="soldier-avatar" class="tier-disc tier-disc--large" />
                     <ui:VisualElement class="detail-head__text">
                         <ui:Label name="soldier-name" text="—" class="detail-name" />
                         <ui:Label name="soldier-rank" text="—" class="detail-rank" />
@@ -278,6 +278,11 @@
 
                 <ui:Label text="EQUIPMENT" class="detail-label detail-label--block" />
                 <ui:Label name="soldier-equipment" text="—" class="detail-equipment" />
+
+                <!-- The web of the century: who this man trusts, and who he has not forgiven.
+                     Written by battles, promotions, displacements and the Centurion's choices. -->
+                <ui:Label text="BONDS AND GRUDGES" class="detail-label detail-label--block" />
+                <ui:VisualElement name="soldier-ties" class="soldier-ties" />
 
                 <ui:VisualElement class="modal__footer detail-footer">
                     <ui:Button name="soldier-decanus" class="button-ghost" style="display: none;">

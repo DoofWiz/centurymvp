@@ -105,11 +105,27 @@ namespace Century.Campaign.Sim
             SoldierRecord appointee = roster.Find(soldierId);
             if (appointee == null || appointee.Contubernium < 0) return;
 
+            SoldierRecord previous = null;
             List<SoldierRecord> soldiers = roster.Soldiers;
             for (int i = 0; i < soldiers.Count; i++)
-                if (soldiers[i].Contubernium == appointee.Contubernium) soldiers[i].IsDecanus = false;
+            {
+                if (soldiers[i].Contubernium != appointee.Contubernium) continue;
+                if (soldiers[i].IsDecanus && !ReferenceEquals(soldiers[i], appointee)) previous = soldiers[i];
+                soldiers[i].IsDecanus = false;
+            }
 
             appointee.IsDecanus = true;
+
+            // Tent politics: being replaced as Decanus of your OWN tent, in front of your own
+            // men, is a small public humiliation — and the new man wears it.
+            if (previous != null && previous.IsAlive)
+            {
+                RelationshipLedger.Adjust(previous, appointee, -0.2f,
+                    "replaced as Decanus of his own tent");
+                RelationshipLedger.AdjustLoyalty(previous, -0.05f);
+            }
+
+            RelationshipLedger.AdjustLoyalty(appointee, 0.06f);
         }
 
         private static bool IsCenturion(SoldierRecord soldier) => soldier.RankId == "centurion";

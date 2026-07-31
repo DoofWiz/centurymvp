@@ -219,6 +219,7 @@ namespace Century.Campaign.Sim
 
         public void AssignRole(CampRole role, string soldierId)
         {
+            string previousId = _party.Appointments.GetHolderId(role);
             _party.Appointments.Assign(role, soldierId);
 
             SoldierRecord holder = soldierId == null ? null : _party.Roster.Find(soldierId);
@@ -228,6 +229,27 @@ namespace Century.Campaign.Sim
                 holder == null ? $"{info.Latin} left vacant" : $"{holder.DisplayName} named {info.Latin}",
                 info.Benefit,
                 _clock.Now.DayNumber);
+
+            // Appointment politics: an office given is a favour; an office taken away is a wound,
+            // and the man it was taken FROM knows exactly who it was given to.
+            if (holder != null) RelationshipLedger.AdjustLoyalty(holder, 0.08f);
+
+            SoldierRecord displaced = previousId != null && previousId != soldierId
+                ? _party.Roster.Find(previousId) : null;
+            if (displaced != null && displaced.IsAlive)
+            {
+                RelationshipLedger.AdjustLoyalty(displaced, -0.05f);
+                if (holder != null)
+                {
+                    RelationshipLedger.Adjust(displaced, holder, -0.2f,
+                        $"stood down from the {info.Latin}'s post to make way for him");
+
+                    _log?.Push(CampaignEventKind.Loss,
+                        $"{displaced.DisplayName} takes it ill",
+                        $"Stood down from {info.Latin} to make way",
+                        _clock.Now.DayNumber);
+                }
+            }
         }
 
         // --- Stations --------------------------------------------------------------------------

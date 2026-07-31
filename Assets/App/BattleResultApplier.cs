@@ -101,6 +101,9 @@ namespace Century.App
                     "Found alive among the fallen. They march as baggage until they heal",
                     _state.Clock.Now.DayNumber);
 
+            // Before the fallen leave the roster: what this battle did BETWEEN the men.
+            ApplyRelationshipEffects(player, result);
+
             var fallen = player.Roster.RemoveFallen();
             if (fallen.Count > 0)
             {
@@ -220,6 +223,124 @@ namespace Century.App
         }
 
         /// <summary>
+        /// The battle's mark on the web of the century (relationship layer). Century is a personal
+        /// story: a contubernium that bled while the rest watched doubts your leadership; men who
+        /// stood the line together grow closer; a squad that never heard your voice all battle
+        /// turns a little more to its own Decanus. Runs BEFORE the fallen leave the roster so
+        /// grief and blame can still see who died.
+        /// </summary>
+        private void ApplyRelationshipEffects(PartyState player, BattleResult result)
+        {
+            Roster roster = player.Roster;
+
+            // Per-contubernium: who was fielded, who was lost.
+            var fielded = new int[16];
+            var lost = new int[16];
+            int totalFielded = 0, totalLost = 0;
+
+            for (int i = 0; i < result.Combatants.Count; i++)
+            {
+                CombatantOutcome outcome = result.Combatants[i];
+                SoldierRecord man = roster.Find(outcome.SoldierId);
+                if (man == null || man.Contubernium < 0 || man.Contubernium >= 16) continue;
+
+                fielded[man.Contubernium]++;
+                totalFielded++;
+                if (!outcome.Survived)
+                {
+                    lost[man.Contubernium]++;
+                    totalLost++;
+                }
+            }
+
+            var survivors = new System.Collections.Generic.List<SoldierRecord>();
+
+            for (int group = 0; group < 16; group++)
+            {
+                if (fielded[group] < 3) continue;
+
+                survivors.Clear();
+                for (int i = 0; i < roster.Soldiers.Count; i++)
+                {
+                    SoldierRecord man = roster.Soldiers[i];
+                    if (man.IsAlive && man.Contubernium == group) survivors.Add(man);
+                }
+                if (survivors.Count == 0) continue;
+
+                float rate = lost[group] / (float)fielded[group];
+                float restRate = (totalLost - lost[group]) / (float)Mathf.Max(1, totalFielded - fielded[group]);
+
+                // They bled while the rest of the century watched. They wonder whose fault that is.
+                if (rate >= 0.4f && restRate <= 0.15f)
+                {
+                    for (int i = 0; i < survivors.Count; i++)
+                        RelationshipLedger.AdjustLoyalty(survivors[i], -0.08f);
+
+                    _log?.Push(
+                        CampaignEventKind.Loss,
+                        $"Contubernium {Numeral(group + 1)} mutters",
+                        "They bled while the rest of the century watched, and they wonder whose fault that is",
+                        _state.Clock.Now.DayNumber);
+                }
+                // Brought through untouched: quiet credit to the man who led them there.
+                else if (result.Outcome == BattleOutcome.Victory && lost[group] == 0 && fielded[group] >= 4)
+                {
+                    for (int i = 0; i < survivors.Count; i++)
+                        RelationshipLedger.AdjustLoyalty(survivors[i], 0.02f);
+                }
+
+                // Shared survival: the men who stood the line together grow together, slowly.
+                for (int a = 0; a < survivors.Count; a++)
+                    for (int b = a + 1; b < survivors.Count; b++)
+                        RelationshipLedger.Bond(survivors[a], survivors[b], 0.015f,
+                            "stood the line together");
+
+                // Grief: losing a friend under your command is not forgotten.
+                for (int i = 0; i < roster.Soldiers.Count; i++)
+                {
+                    SoldierRecord dead = roster.Soldiers[i];
+                    if (dead.IsAlive || dead.Contubernium != group) continue;
+
+                    for (int s = 0; s < survivors.Count; s++)
+                        if (RelationshipLedger.TieValue(survivors[s], dead.Id) >= 0.3f)
+                            RelationshipLedger.AdjustLoyalty(survivors[s], -0.03f);
+                }
+            }
+
+            // Neglect: a squad that fought a whole battle without one direct order looks to its own.
+            for (int g = 0; g < result.NeglectedGroups.Count; g++)
+            {
+                int group = result.NeglectedGroups[g];
+                SoldierRecord decanus = ContuberniumLedger.DecanusOf(roster, group);
+
+                for (int i = 0; i < roster.Soldiers.Count; i++)
+                {
+                    SoldierRecord man = roster.Soldiers[i];
+                    if (!man.IsAlive || man.Contubernium != group) continue;
+
+                    RelationshipLedger.AdjustLoyalty(man, -0.02f);
+                    if (decanus != null && !ReferenceEquals(man, decanus))
+                        RelationshipLedger.Adjust(man, decanus, 0.05f,
+                            "the Centurion's eye passed over us; the Decanus did not");
+                }
+            }
+
+            if (result.NeglectedGroups.Count >= 2)
+                _log?.Push(
+                    CampaignEventKind.Loss,
+                    "The men look to their own",
+                    "Squads that fought unordered lean on their Decani, not on you",
+                    _state.Clock.Now.DayNumber);
+        }
+
+        private static string Numeral(int value)
+        {
+            string[] numerals = { "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X",
+                                  "XI", "XII", "XIII", "XIV", "XV", "XVI" };
+            return value >= 1 && value <= numerals.Length ? numerals[value - 1] : value.ToString();
+        }
+
+        /// <summary>
         /// Fills any command post left vacant by the fighting. Losing the optio is a real event with a
         /// visible consequence, and this is where the century closes the gap.
         /// </summary>
@@ -238,6 +359,34 @@ namespace Century.App
                     _state.Clock.Now.DayNumber);
 
                 Debug.Log($"[Campaign] {promotion.DisplayName}: {promotion.FromRankId} → {promotion.ToRankId}");
+
+                // Promotion politics: the promoted man warms to the command that raised him;
+                // the best man NOT chosen takes it as a judgement, because it was one.
+                SoldierRecord promoted = player.Roster.Find(promotion.SoldierId);
+                if (promoted == null) continue;
+
+                RelationshipLedger.AdjustLoyalty(promoted, 0.08f);
+
+                SoldierRecord runnerUp = null;
+                for (int s = 0; s < player.Roster.Soldiers.Count; s++)
+                {
+                    SoldierRecord man = player.Roster.Soldiers[s];
+                    if (!man.IsAlive || man.RankId != "legionary" || ReferenceEquals(man, promoted)) continue;
+                    if (runnerUp == null || man.Experience > runnerUp.Experience) runnerUp = man;
+                }
+
+                if (runnerUp != null && runnerUp.Experience >= promoted.Experience * 0.7f)
+                {
+                    RelationshipLedger.Adjust(runnerUp, promoted, -0.15f,
+                        $"passed over when the {promotion.ToRankId}'s post was given");
+                    RelationshipLedger.AdjustLoyalty(runnerUp, -0.04f);
+
+                    _log?.Push(
+                        CampaignEventKind.Loss,
+                        $"{runnerUp.DisplayName} feels passed over",
+                        $"He had hoped for the {promotion.ToRankId}'s post himself",
+                        _state.Clock.Now.DayNumber);
+                }
             }
         }
 

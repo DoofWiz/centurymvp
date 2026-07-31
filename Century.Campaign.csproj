@@ -60,6 +60,7 @@
     <Compile Include="Assets\Campaign\Model\CampaignState.cs" />
     <Compile Include="Assets\Campaign\View\OvermapPursuitMarkers.cs" />
     <Compile Include="Assets\Campaign\Model\PartyFaction.cs" />
+    <Compile Include="Assets\Campaign\Sim\SpeculatorInfluence.cs" />
     <Compile Include="Assets\Campaign\View\CampHudController.cs" />
     <Compile Include="Assets\Campaign\Sim\CampService.cs" />
     <Compile Include="Assets\Campaign\View\SurpriseIndicator.cs" />

@@ -64,13 +64,17 @@ namespace Century.Core.Ui
 
             if (_value01 <= 0f) return;
 
-            // Fill: clockwise from twelve o'clock (-90°).
+            // Fill: clockwise from twelve o'clock (-90°). Butt caps — round caps at this radius
+            // read as blobs, not a dial. A full meter draws a plain circle: an arc whose start
+            // and end coincide (mod 360) is degenerate and renders wrong.
             painter.strokeColor = _fillColor;
-            painter.lineCap = LineCap.Round;
             painter.BeginPath();
-            painter.Arc(centre, radius,
-                new Angle(-90f, AngleUnit.Degree),
-                new Angle(-90f + 360f * _value01, AngleUnit.Degree));
+            if (_value01 >= 0.999f)
+                painter.Arc(centre, radius, new Angle(0f, AngleUnit.Degree), new Angle(360f, AngleUnit.Degree));
+            else
+                painter.Arc(centre, radius,
+                    new Angle(-90f, AngleUnit.Degree),
+                    new Angle(-90f + 360f * _value01, AngleUnit.Degree));
             painter.Stroke();
         }
     }

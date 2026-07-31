@@ -90,6 +90,20 @@ namespace Century.Battle.Sim
                 ? CommanderExperienceBase + state.PlayerCharacter.Kills * CommanderExperiencePerKill
                 : 0;
 
+            // Squads that stood a real battle without one direct order. Short scraps don't count:
+            // nobody resents a fight that was over before orders mattered.
+            if (state.ElapsedSeconds >= 75f)
+            {
+                for (int i = 0; i < state.PlayerSquads.Count; i++)
+                {
+                    BattleSquad squad = state.PlayerSquads[i];
+                    if (squad.IsOffField || squad.OrdersReceived > 0 || squad.AliveCount <= 0) continue;
+
+                    int group = squad.Members.Count > 0 ? squad.Members[0].GroupIndex : -1;
+                    if (group >= 0) result.NeglectedGroups.Add(group);
+                }
+            }
+
             ApplyLoot(result, outcome, enemyRoutedAlive);
             return result;
         }
