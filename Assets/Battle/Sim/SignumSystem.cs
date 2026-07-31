@@ -98,7 +98,7 @@ namespace Century.Battle.Sim
             BattleSquad squad = SquadOf(carrier);
             _state.SignumPlanted = squad != null
                 && !squad.IsRouted
-                && squad.Order == SquadOrder.Hold
+                && squad.Order == SquadOrder.HoldPosition
                 && !carrier.IsInCombat;
         }
 
