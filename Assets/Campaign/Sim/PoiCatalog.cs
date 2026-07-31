@@ -18,6 +18,10 @@ namespace Century.Campaign.Sim
         public bool SpawnFight;
         public int FightStrength;
 
+        /// <summary>The spawned warband carries the century's lost signum: beating it wins the
+        /// standard back (army phase 3.5 — the speculator's lead closes phase 3's wound).</summary>
+        public bool FightCarriesSignum;
+
         /// <summary>Items granted into the party inventory: catalog id and count per entry.</summary>
         public ItemGrant[] Items;
 
@@ -60,7 +64,15 @@ namespace Century.Campaign.Sim
                 for (int i = 0; i < Items.Length; i++)
                     player.Inventory.Add(Items[i].Id, Items[i].Count);
 
-            if (SpawnFight) PoiFightFactory.SpawnRaiders(state, position, FightStrength);
+            if (SpawnFight)
+            {
+                PartyState raiders = PoiFightFactory.SpawnRaiders(state, position, FightStrength);
+                if (FightCarriesSignum)
+                {
+                    raiders.CarriesPlayerSignum = true;
+                    raiders.DisplayName = "The Signum's Captors";
+                }
+            }
 
             log?.Push(SpawnFight ? CampaignEventKind.Threat : CampaignEventKind.Gain,
                 ResultText, string.Empty, state.Clock.Now.DayNumber);
@@ -131,10 +143,29 @@ namespace Century.Campaign.Sim
 
         /// <summary>
         /// Seeds a fresh Opportunity POI near a position — used by the Speculator's scouting and any
-        /// event that reveals a prize. Discovered on creation so its marker shows at once.
+        /// event that reveals a prize. Discovered on creation so its marker shows at once. WHAT he
+        /// found is rolled through the <see cref="SpeculatorInfluence"/> seam: the office's quality
+        /// decides how often the report is wrong and how rich the real finds run. A false lead
+        /// wears the same name as a real prize — the map must not spoil what the scout cannot know.
         /// </summary>
         public static PointOfInterest CreateOpportunity(CampaignState state, CampaignSettings settings, Vector3 near)
         {
+            OpportunityTier tier = SpeculatorInfluence.Current.RollFind(state);
+
+            string eventId;
+            string displayName = "A scouted prize";
+            switch (tier)
+            {
+                case OpportunityTier.FalseLead: eventId = "false_lead"; break;
+                case OpportunityTier.Meagre: eventId = "opportunity_meagre"; break;
+                case OpportunityTier.Rich: eventId = "opportunity_rich"; break;
+                case OpportunityTier.Signum:
+                    eventId = "signum_held";
+                    displayName = "Word of the signum";
+                    break;
+                default: eventId = "opportunity"; break;
+            }
+
             Vector2 dir = Random.insideUnitCircle.normalized;
             float distance = Random.Range(120f, 220f);
             Vector3 pos = settings.ClampToWorld(near + new Vector3(dir.x, 0f, dir.y) * distance);
@@ -143,8 +174,8 @@ namespace Century.Campaign.Sim
             {
                 Id = state.MintId("poi"),
                 Kind = PoiKind.Opportunity,
-                DisplayName = "A scouted prize",
-                EventId = "opportunity",
+                DisplayName = displayName,
+                EventId = eventId,
                 WorldPosition = pos,
                 Discovered = true
             };
@@ -364,6 +395,98 @@ namespace Century.Campaign.Sim
                         new PoiOutcome { Coin = 35, ResultText = "You lift what's loose and slip away before they muster." }),
                     new PoiChoice("Decide it's not worth it", "leave the prize",
                         new PoiOutcome { ResultText = "You judge the risk too great and march on." }),
+                }
+            });
+
+            Add(new PoiEvent
+            {
+                Id = "false_lead",
+                Title = "An Empty Steading",
+                Subtitle = "The prize your scout marked",
+                Body = "The palisade is real enough. Behind it: cold fires, bare stores, and cart-tracks " +
+                       "three days old. Whatever was here left before the report was done being spoken.",
+                OfficerRemark = "Speculator: \"They were here, sir. I'd stake my name on it. They were here.\"",
+                Choices = new[]
+                {
+                    new PoiChoice("Search it anyway", "a thorough waste of an hour",
+                        new PoiOutcome { Morale = -0.03f, ResultText = "You turn over empty sheds. The men mutter about the scout's eyes." }),
+                    new PoiChoice("March on", "say nothing of it",
+                        new PoiOutcome { Morale = -0.02f, ResultText = "A march for nothing. The column turns back to the road." }),
+                }
+            });
+
+            Add(new PoiEvent
+            {
+                Id = "opportunity_meagre",
+                Title = "A Poor Prize",
+                Subtitle = "The prize your scout marked",
+                Body = "The strongpoint is held, as promised — but the promise flattered it. A poor steading " +
+                       "behind a hurdle fence, and thin pickings behind that.",
+                OfficerRemark = "Speculator: \"Smaller than it looked from the ridge, sir. But it's yours for the taking.\"",
+                Choices = new[]
+                {
+                    new PoiChoice("Take it anyway", "a small fight, small spoils",
+                        new PoiOutcome
+                        {
+                            Denarii = 25, SpawnFight = true, FightStrength = 6,
+                            Items = new[] { new PoiOutcome.ItemGrant("grain_sack", 2) },
+                            ResultText = "You take the steading for what little it holds."
+                        }),
+                    new PoiChoice("Not worth Roman blood", "leave it",
+                        new PoiOutcome { ResultText = "You leave the hovel to its farmers." }),
+                }
+            });
+
+            Add(new PoiEvent
+            {
+                Id = "opportunity_rich",
+                Title = "A Rich Prize",
+                Subtitle = "The prize your scout marked",
+                Body = "The scout undersold it. A chieftain's holding: full granaries, penned cattle, amber " +
+                       "and silver behind a stout palisade — and spears enough to keep it, if you let them muster.",
+                OfficerRemark = "Speculator: \"Told you it was worth the ride, sir. Now pay me the compliment of taking it.\"",
+                Choices = new[]
+                {
+                    new PoiChoice("Storm it", "a hard fight, then a chieftain's hoard",
+                        new PoiOutcome
+                        {
+                            Denarii = 180, SpawnFight = true, FightStrength = 20,
+                            Items = new[]
+                            {
+                                new PoiOutcome.ItemGrant("grain_sack", 6),
+                                new PoiOutcome.ItemGrant("salt_blocks", 3),
+                                new PoiOutcome.ItemGrant("fur_pelts", 4),
+                                new PoiOutcome.ItemGrant("amber_lumps", 3),
+                                new PoiOutcome.ItemGrant("mead_jar", 2),
+                            },
+                            ResultText = "You storm the holding for everything it has."
+                        }),
+                    new PoiChoice("Raid the pens and run", "+70 coin, no proper fight",
+                        new PoiOutcome { Coin = 70, ResultText = "You cut out what can walk and are gone before the horn sounds." }),
+                    new PoiChoice("Too well held", "leave the hoard",
+                        new PoiOutcome { Morale = -0.03f, ResultText = "You march away from a chieftain's hoard. The men feel the weight of it." }),
+                }
+            });
+
+            Add(new PoiEvent
+            {
+                Id = "signum_held",
+                Title = "The Signum, Found",
+                Subtitle = "The speculator has run it to ground",
+                Body = "There, past the fires: the century's own standard, planted in barbarian earth like a " +
+                       "trophy. The warband that took it has not stopped celebrating. Every man in the column " +
+                       "can see it from the treeline.",
+                OfficerRemark = "Speculator: \"I told them I'd find it, sir. The rest is soldiers' work.\"",
+                Choices = new[]
+                {
+                    new PoiChoice("Take it back", "a hard fight — and the century's honour",
+                        new PoiOutcome
+                        {
+                            SpawnFight = true, FightStrength = 22, FightCarriesSignum = true,
+                            ResultText = "The century goes forward without a word needing to be said."
+                        }),
+                    new PoiChoice("Not with the strength we have", "mark it and withdraw",
+                        new PoiOutcome { Morale = -0.06f, ResultText = "You withdraw from your own standard. No man speaks on the march back." }),
                 }
             });
 

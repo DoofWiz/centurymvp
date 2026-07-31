@@ -337,8 +337,8 @@ namespace Century.Campaign.View
         private void DoScout()
         {
             if (_camp == null || !_camp.CanScout) return;
-            _camp.SendScouting();
-            ShowScoutResult();
+            CampService.ScoutReport report = _camp.SendScouting();
+            if (report.Sent) ShowScoutResult(report);
             Refresh();
         }
 
@@ -758,41 +758,18 @@ namespace Century.Campaign.View
 
         // --- Scout result ----------------------------------------------------------------------
 
-        private struct Opportunity
-        {
-            public string Title, Detail, Reward, Risk;
-        }
-
-        private static readonly Opportunity[] Opportunities =
-        {
-            new Opportunity { Title = "A druid's grove, half-hidden in the pines",
-                Detail = "Smoke curls above the trees, and the scout marks old votive stones among them. Someone tends this place.",
-                Reward = "A rare relic; healing herbs", Risk = "Lightly held — a few zealots" },
-            new Opportunity { Title = "An abandoned watchtower on the ridge",
-                Detail = "A Roman tower, its garrison long fled. It commands the valley — and could shelter the column for a night.",
-                Reward = "A vantage point; a claimable base", Risk = "Beasts have denned inside" },
-            new Opportunity { Title = "A baggage train, mired and abandoned",
-                Detail = "Wagons sunk to the axle in a bog, their oxen long butchered. Roman kit still lies scattered in the mud.",
-                Reward = "Salvaged arms and coin", Risk = "Scavengers already picking it over" },
-            new Opportunity { Title = "A column of refugees on the old road",
-                Detail = "Frightened folk, Roman and native both, fleeing the same war you are. Some carry blades. Some could carry them for you.",
-                Reward = "Recruits and goodwill", Risk = "None, but they are desperate" },
-        };
-
-        private void ShowScoutResult()
+        /// <summary>The report now describes the ACTUAL find the ride seeded — composed by
+        /// CampService through the speculator seam — instead of a random flavour table that had
+        /// no connection to the POI. The office's intel quality decides how much it can say.</summary>
+        private void ShowScoutResult(CampService.ScoutReport report)
         {
             if (_scoutModal == null) return;
 
-            int scoutFire = _state.PlayerParty.Facilities.LevelOf(CampStationId.ScoutFire);
-            Opportunity opportunity = Opportunities[Random.Range(0, Opportunities.Length)];
-
-            SetText(_scoutTitle, opportunity.Title);
-            SetText(_scoutDetail, opportunity.Detail);
-            SetText(_scoutReward, scoutFire > 0 ? opportunity.Reward + " (richer, for the scout's fire)" : opportunity.Reward);
-            SetText(_scoutRisk, opportunity.Risk);
-
-            float miles = Random.Range(3f, 9f) - scoutFire;
-            SetText(_scoutDistance, $"{Mathf.Max(1f, miles):0} miles out");
+            SetText(_scoutTitle, report.Title);
+            SetText(_scoutDetail, report.Detail);
+            SetText(_scoutReward, report.Reward);
+            SetText(_scoutRisk, report.Risk);
+            SetText(_scoutDistance, report.Distance);
 
             Show(_scoutModal);
         }

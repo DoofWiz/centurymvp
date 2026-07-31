@@ -83,6 +83,7 @@
     <Compile Include="Assets\Battle\View\BattleGroundFx.cs" />
     <Compile Include="Assets\Battle\Sim\GroupFormation.cs" />
     <Compile Include="Assets\Battle\Model\SquadOrder.cs" />
+    <Compile Include="Assets\Battle\View\SignumView.cs" />
     <Compile Include="Assets\Battle\View\BattleSummaryController.cs" />
     <Compile Include="Assets\Battle\View\SoldierRig.cs" />
     <Compile Include="Assets\Battle\Sim\BattleFactory.cs" />
@@ -91,6 +92,7 @@
     <Compile Include="Assets\Battle\Sim\AutoResolveCalculator.cs" />
     <Compile Include="Assets\Battle\Model\StaminaClass.cs" />
     <Compile Include="Assets\Battle\Sim\CasualtyFate.cs" />
+    <Compile Include="Assets\Battle\Sim\SignumSystem.cs" />
     <Compile Include="Assets\Battle\Sim\SquadFormationSolver.cs" />
     <Compile Include="Assets\Battle\View\BattleMissiles.cs" />
     <Compile Include="Assets\Battle\Sim\SquadTactics.cs" />

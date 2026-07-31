@@ -337,30 +337,93 @@ namespace Century.Campaign.Sim
 
         public bool CanScout => _party.Appointments.IsFilled(CampRole.Speculator);
 
-        /// <summary>
-        /// Sends the Speculator ranging. In the full game this seeds an Opportunity POI on the
-        /// overmap; for now it costs a watch and posts the sighting to the event log.
-        /// </summary>
-        public bool SendScouting()
+        /// <summary>What the speculator reports back, for the scout-result modal. HONEST about
+        /// what was rolled — vague or exact by the office's intel quality — except that a false
+        /// lead reads exactly like a solid find, because he cannot know his report was wrong.</summary>
+        public readonly struct ScoutReport
         {
-            if (!CanScout) return false;
+            public readonly bool Sent;
+            public readonly string Title, Detail, Reward, Risk, Distance;
+
+            public ScoutReport(string title, string detail, string reward, string risk, string distance)
+            {
+                Sent = true;
+                Title = title;
+                Detail = detail;
+                Reward = reward;
+                Risk = risk;
+                Distance = distance;
+            }
+        }
+
+        /// <summary>
+        /// Sends the Speculator ranging. What he finds is rolled through the
+        /// <see cref="SpeculatorInfluence"/> seam and seeded as a real POI; the report the player
+        /// reads describes THAT find, at whatever precision the office has earned.
+        /// </summary>
+        public ScoutReport SendScouting()
+        {
+            if (!CanScout) return default;
 
             _clock.Advance(CampaignTime.MinutesPerWatch);
 
             // The scout's report becomes a real prize on the overmap: an Opportunity POI to pursue.
-            PoiCatalog.CreateOpportunity(_state, _settings, _party.WorldPosition);
+            PointOfInterest poi = PoiCatalog.CreateOpportunity(_state, _settings, _party.WorldPosition);
             _state.Commander.Note(CommanderPhilosophy.Survivor, 0.4f);
 
             // The speculator's office learns by ranging — his points come from rides, not battles.
             PostTreeCatalog.AwardScoutPoint(_state, _party.Roster);
 
-            int scoutFire = _party.Facilities.LevelOf(CampStationId.ScoutFire);
-            string detail = scoutFire > 0
-                ? "The scout's fire lets them range farther — a richer prospect."
-                : "Something worth a look, a few miles out.";
+            ScoutReport report = ComposeReport(poi);
+            _log?.Push(
+                CampaignEventKind.Discovery,
+                poi.EventId == "signum_held" ? "Word of the signum" : "Opportunity sighted",
+                report.Detail,
+                _clock.Now.DayNumber);
+            return report;
+        }
 
-            _log?.Push(CampaignEventKind.Discovery, "Opportunity sighted", detail, _clock.Now.DayNumber);
-            return true;
+        private ScoutReport ComposeReport(PointOfInterest poi)
+        {
+            bool exact = SpeculatorInfluence.Current.ExactIntel(_state);
+            float miles = Mathf.Max(1f, Vector3.Distance(poi.WorldPosition, _party.WorldPosition) / 25f);
+            string distance = $"{miles:0} miles out";
+
+            switch (poi.EventId)
+            {
+                case "signum_held":
+                    return new ScoutReport(
+                        "The signum, run to ground",
+                        "He has found it: the warband that took the century's standard, camped and celebrating.",
+                        "The signum — the century's honour",
+                        "They know what they hold. It will be defended hard",
+                        distance);
+
+                case "opportunity_rich" when exact:
+                    return new ScoutReport(
+                        "A chieftain's holding, heavy with plunder",
+                        "Full granaries, penned cattle, amber and silver. His count was careful and his eye is good.",
+                        "Rich — a chieftain's hoard",
+                        "Two dozen spears at least, and stout walls",
+                        distance);
+
+                case "opportunity_meagre" when exact:
+                    return new ScoutReport(
+                        "A poor steading behind a hurdle fence",
+                        "Held, but barely, and holding little. He reports it because it is there, not because it is worth much.",
+                        "Meagre — grain and small coin",
+                        "A handful of farmers with spears",
+                        distance);
+
+                default:
+                    // Vague intel — and every false lead, at any intel level: a promise, no more.
+                    return new ScoutReport(
+                        "A strongpoint, lightly held",
+                        "Something worth the taking behind a palisade, by his account. He could not linger to count.",
+                        exact ? "Worth the march, by his count" : "Plunder, if his word is good",
+                        exact ? "About a dozen spears" : "He could not count them all",
+                        distance);
+            }
         }
 
         /// <summary>What a hunt brought back, for the UI to report.</summary>

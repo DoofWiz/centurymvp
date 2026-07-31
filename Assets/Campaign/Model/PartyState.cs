@@ -59,6 +59,10 @@ namespace Century.Campaign.Model
         /// <summary>Set once destroyed or absorbed; the overmap skips these without reallocating the list.</summary>
         public bool IsDisbanded;
 
+        /// <summary>This warband holds the century's lost signum: destroy it and the standard
+        /// comes home (the speculator's "signum_held" lead spawns exactly one such party).</summary>
+        public bool CarriesPlayerSignum;
+
         // --- Overmap AI ---------------------------------------------------------------------
 
         /// <summary>Ignored for the player's party, which is driven by input.</summary>

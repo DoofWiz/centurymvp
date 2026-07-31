@@ -286,6 +286,30 @@ namespace Century.App
         {
             if (result.Outcome == BattleOutcome.Victory)
             {
+                // The signum comes home: the warband that held it is destroyed, and the shame
+                // that has ridden the column since it was lost lifts all at once.
+                if (enemy.CarriesPlayerSignum && _state.SignumLost)
+                {
+                    _state.SignumLost = false;
+
+                    PartyState player = _state.PlayerParty;
+                    if (player != null)
+                    {
+                        for (int i = 0; i < player.Roster.Soldiers.Count; i++)
+                        {
+                            SoldierRecord man = player.Roster.Soldiers[i];
+                            if (man.IsAlive) man.Morale01 = Mathf.Clamp01(man.Morale01 + 0.10f);
+                        }
+                        player.Morale.Value01 = player.Roster.AverageMorale01;
+                    }
+
+                    _log?.Push(
+                        CampaignEventKind.Gain,
+                        "The signum comes home",
+                        "Torn back out of their hands. The century stands taller",
+                        _state.Clock.Now.DayNumber);
+                }
+
                 enemy.IsDisbanded = true;
                 enemy.Destination = null;
                 Debug.Log($"[Campaign] {enemy.DisplayName} destroyed.");
