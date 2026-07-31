@@ -504,6 +504,16 @@ namespace Century.Battle.View
             double minutes = 12d + _state.ElapsedSeconds / 6d;
             BattleResult result = BattleConclusion.Build(_state, outcome, minutes);
 
+            // The banner moment: taking a warband's standard is a story beat, not a loot line.
+            if (_banner != null && outcome == BattleOutcome.Victory)
+                for (int i = 0; i < result.Loot.Items.Count; i++)
+                    if (result.Loot.Items[i].ItemId == "banner_cherusci")
+                    {
+                        yield return _banner.Show(
+                            "The banner is taken", $"{_state.EnemyDisplayName} will not forget this", 1.6f);
+                        break;
+                    }
+
             if (_summary == null)
             {
                 Submit(result);

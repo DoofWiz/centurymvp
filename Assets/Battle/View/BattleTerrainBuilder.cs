@@ -243,6 +243,10 @@ namespace Century.Battle.View
             return position;
         }
 
+        /// <summary>Woodland density at a battle position, for map painting.</summary>
+        public static float ForestDensity(Vector3 position) =>
+            _terrain == null ? 0f : WorldTerrainForge.BattleForest01(_recipe, position.x, position.z);
+
         /// <summary>Standing in the river? (Feet below the waterline on a field that has one.)</summary>
         public static bool IsInWater(Vector3 position) =>
             _recipe.HasRiver && _terrain != null

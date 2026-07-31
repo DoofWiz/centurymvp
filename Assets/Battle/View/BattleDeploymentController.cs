@@ -125,6 +125,57 @@ namespace Century.Battle.View
 
         // --- Map ------------------------------------------------------------------------------
 
+        /// <summary>
+        /// Paints the actual battlefield under the tacmap: green by height, grey where it steepens,
+        /// dark woodland, the river in slate — so the deployment choice is made about REAL ground,
+        /// not an abstract rectangle. Sampled from the same sculpted terrain the fight uses.
+        /// </summary>
+        private void BakeTerrainMap()
+        {
+            const int res = 128;
+            var texture = new Texture2D(res, res, TextureFormat.RGBA32, mipChain: false)
+            {
+                wrapMode = TextureWrapMode.Clamp,
+                filterMode = FilterMode.Bilinear
+            };
+
+            var pixels = new Color32[res * res];
+            for (int ty = 0; ty < res; ty++)
+            {
+                // Texture v = 0 is the element's bottom, which is the field's -Z edge.
+                float z = Mathf.Lerp(-_fieldHalfDepth, _fieldHalfDepth, ty / (float)(res - 1));
+                for (int tx = 0; tx < res; tx++)
+                {
+                    float x = Mathf.Lerp(-_fieldHalfWidth, _fieldHalfWidth, tx / (float)(res - 1));
+                    var pos = new Vector3(x, 0f, z);
+
+                    float height = BattleTerrainBuilder.GroundHeight(pos);
+                    Color colour;
+                    if (height < Century.Core.World.WorldTerrainForge.WaterLevel)
+                        colour = new Color(0.17f, 0.24f, 0.30f);
+                    else
+                    {
+                        float shade = Mathf.InverseLerp(1f, 15f, height);
+                        colour = Color.Lerp(
+                            new Color(0.16f, 0.22f, 0.12f), new Color(0.45f, 0.47f, 0.30f), shade);
+
+                        float slope = BattleTerrainBuilder.Steepness01(pos);
+                        colour = Color.Lerp(colour, new Color(0.42f, 0.41f, 0.39f),
+                            Mathf.InverseLerp(0.14f, 0.4f, slope));
+
+                        colour = Color.Lerp(colour, new Color(0.08f, 0.13f, 0.07f),
+                            BattleTerrainBuilder.ForestDensity(pos) * 0.8f);
+                    }
+
+                    pixels[ty * res + tx] = colour;
+                }
+            }
+
+            texture.SetPixels32(pixels);
+            texture.Apply(false, true);
+            _map.style.backgroundImage = new StyleBackground(texture);
+        }
+
         /// <summary>Builds the static furniture of the map: midline, deployment zone, edge bands.</summary>
         private void BuildMapChrome()
         {
@@ -132,6 +183,7 @@ namespace Century.Battle.View
 
             _map.Clear();
             _unitMarkers.Clear();
+            BakeTerrainMap();
 
             var midline = new VisualElement { pickingMode = PickingMode.Ignore };
             midline.AddToClassList("tacmap__midline");

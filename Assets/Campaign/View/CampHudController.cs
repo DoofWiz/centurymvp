@@ -132,15 +132,31 @@ namespace Century.Campaign.View
 
         private void OnDisable() => _bound = false;
 
-        /// <summary>Shows one camp sub-screen and marks its tab, exactly as the inventory does.</summary>
+        private int _shownCampTab = -1;
+
+        /// <summary>Shows one camp sub-screen and marks its tab. The incoming page slides in with a
+        /// short fade so a tab change reads as movement, not as content teleporting.</summary>
         private void SelectCampTab(int index)
         {
+            bool changed = index != _shownCampTab;
+            _shownCampTab = index;
+
             for (int i = 0; i < _campPages.Length; i++)
             {
                 _campTabs[i]?.EnableInClassList("pill--active", i == index);
                 if (_campPages[i] != null)
                     _campPages[i].style.display = i == index ? DisplayStyle.Flex : DisplayStyle.None;
             }
+
+            VisualElement page = index >= 0 && index < _campPages.Length ? _campPages[index] : null;
+            if (!changed || page == null) return;
+
+            page.style.opacity = 0f;
+            page.experimental.animation.Start(0f, 1f, 260, (element, t) =>
+            {
+                element.style.opacity = t;
+                element.style.translate = new Translate(10f * (1f - t), 0f);
+            });
         }
 
         private void CacheElements(VisualElement root)

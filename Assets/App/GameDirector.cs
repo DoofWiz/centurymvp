@@ -78,6 +78,8 @@ namespace Century.App
             SceneFlow.GameplaySceneLoaded += OnGameplaySceneLoaded;
             SceneFlow.GameplaySceneUnloading += OnGameplaySceneUnloading;
 
+            _fader = ScreenFader.Create(transform);
+
             Simulation.Notified += OnSimulationNotified;
 
             EventLog.Push(
@@ -137,16 +139,20 @@ namespace Century.App
             SceneFlow.LoadOvermap();
         }
 
+        private ScreenFader _fader;
+
         private void OnGameplaySceneLoaded(string sceneName)
         {
             // The campaign clock only runs on the overmap. Battle uses its own real-time clock and
             // reports elapsed time back through BattleResult.
             _ticker.IsRunning = sceneName == SceneNames.Overmap;
+            _fader?.FadeIn();
         }
 
         private void OnGameplaySceneUnloading(string sceneName)
         {
             _ticker.IsRunning = false;
+            _fader?.SnapToBlack();
         }
 
         private void OnDestroy()
