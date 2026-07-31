@@ -25,6 +25,9 @@ namespace Century.Campaign.Model
         /// they have led, which weights every future offer.</summary>
         public CommanderProgress Commander { get; } = new CommanderProgress();
 
+        /// <summary>The century's establishment of offices (the army layer, phase 1).</summary>
+        public PostRoster Posts { get; } = new PostRoster();
+
         /// <summary>Master seed. Derived seeds are produced per encounter so fights are reproducible.</summary>
         public int RandomSeed;
 

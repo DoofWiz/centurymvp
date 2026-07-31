@@ -20,9 +20,9 @@
             <ui:Button name="nav-inventory" class="nav-item nav-item--live">
                 <ui:Label text="INVENTORY" class="nav-item__label" picking-mode="Ignore" />
             </ui:Button>
-            <ui:VisualElement class="nav-item nav-item--inert">
-                <ui:Label text="SOLDIERS" class="nav-item__label" />
-            </ui:VisualElement>
+            <ui:Button name="nav-army" class="nav-item nav-item--live">
+                <ui:Label text="ARMY" class="nav-item__label" picking-mode="Ignore" />
+            </ui:Button>
             <ui:Button name="nav-commander" class="nav-item nav-item--live">
                 <ui:Label text="COMMANDER" class="nav-item__label" picking-mode="Ignore" />
             </ui:Button>
@@ -236,6 +236,25 @@
         </ui:VisualElement>
 
         <!-- ================================ COMMANDER ================================ -->
+        <!-- ================================ ARMY ==================================== -->
+        <!-- The army at a glance, readable ANYWHERE on the march: the establishment of offices
+             (holders and vacancies), then every contubernium and its men. Read-only by design —
+             appointments and orders belong to the camp, where the century actually acts. -->
+        <ui:VisualElement name="army-modal" class="modal" style="display: none;">
+            <ui:VisualElement class="modal__sheet commander-sheet">
+                <ui:VisualElement class="inventory-head">
+                    <ui:VisualElement picking-mode="Ignore">
+                        <ui:Label text="ARMY" class="modal__title" />
+                        <ui:Label name="army-summary" text="—" class="body body--dim" />
+                    </ui:VisualElement>
+                    <ui:Button name="army-close" class="button-ghost">
+                        <ui:Label text="CLOSE" class="button-ghost__label" picking-mode="Ignore" />
+                    </ui:Button>
+                </ui:VisualElement>
+                <ui:ScrollView name="army-body" class="cmd-body" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
         <ui:VisualElement name="commander-modal" class="modal" style="display: none;">
             <ui:VisualElement class="modal__sheet commander-sheet">
 

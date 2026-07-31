@@ -58,6 +58,10 @@ namespace Century.Campaign.View
         private CommanderScreen _commander;
         private TimeControl _controlBeforeCommander = TimeControl.Normal;
 
+        // Army screen, same pattern.
+        private ArmyScreen _army;
+        private TimeControl _controlBeforeArmy = TimeControl.Normal;
+
         // Point-of-interest event popup.
         private VisualElement _poiModal, _poiChoices;
         private Label _poiTitle, _poiKind, _poiBody, _poiOfficer;
@@ -149,6 +153,12 @@ namespace Century.Campaign.View
             if (navCommander != null) navCommander.clicked += OpenCommander;
             Button cmdClose = Find<Button>(root, "cmd-close");
             if (cmdClose != null) cmdClose.clicked += CloseCommander;
+
+            _army = new ArmyScreen(root, _state);
+            Button navArmy = Find<Button>(root, "nav-army");
+            if (navArmy != null) navArmy.clicked += OpenArmy;
+            Button armyClose = Find<Button>(root, "army-close");
+            if (armyClose != null) armyClose.clicked += CloseArmy;
 
             _poiModal = Find<VisualElement>(root, "poi-modal");
             _poiTitle = Find<Label>(root, "poi-title");
@@ -263,6 +273,9 @@ namespace Century.Campaign.View
             if (_commander != null && _commander.IsOpen && Input.GetKeyDown(KeyCode.Escape))
                 CloseCommander();
 
+            if (_army != null && _army.IsOpen && Input.GetKeyDown(KeyCode.Escape))
+                CloseArmy();
+
             // The tooltip tracks the cursor, so it runs every frame; the panels poll at the interval.
             RefreshHoverTip();
 
@@ -318,6 +331,30 @@ namespace Century.Campaign.View
             if (_ticker != null) _ticker.SetTimeControl(_controlBeforeCommander);
         }
 
+        /// <summary>The army is readable anywhere; the campaign holds its breath while it is.</summary>
+        private void OpenArmy()
+        {
+            if (_army == null || _army.IsOpen || _activePoi != null) return;
+            if (_inventory != null && _inventory.IsOpen) return;
+            if (_commander != null && _commander.IsOpen) return;
+
+            if (_ticker != null)
+            {
+                _controlBeforeArmy = _ticker.Current;
+                _ticker.SetTimeControl(TimeControl.Paused);
+            }
+
+            _army.Open();
+        }
+
+        private void CloseArmy()
+        {
+            if (_army == null || !_army.IsOpen) return;
+
+            _army.Close();
+            if (_ticker != null) _ticker.SetTimeControl(_controlBeforeArmy);
+        }
+
         /// <summary>
         /// What the cursor has sighted. Distance decides how much is known: a half-seen shape at the
         /// edge of the line of sight is only "a warband on the move"; one well inside it gives up its
@@ -328,7 +365,8 @@ namespace Century.Campaign.View
             if (_hoverTip == null) return;
 
             // A modal owns the screen; the world tooltip stays out of it.
-            if ((_inventory != null && _inventory.IsOpen) || (_commander != null && _commander.IsOpen))
+            if ((_inventory != null && _inventory.IsOpen) || (_commander != null && _commander.IsOpen)
+                || (_army != null && _army.IsOpen))
             {
                 _hoverTip.style.display = DisplayStyle.None;
                 return;
