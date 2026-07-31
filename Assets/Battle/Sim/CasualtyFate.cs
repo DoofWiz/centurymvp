@@ -27,6 +27,17 @@ namespace Century.Battle.Sim
 
             if (AnyLivingMedicus(state)) chance += settings.MedicusWoundedOutBonus;
 
+            // The medicus's OFFICE: invested nodes raise the chance; a vacant office lowers it.
+            chance += state.Effects.WoundedOutBonus;
+
+            // "He Lives": the medicus refuses a death outright, a limited number of times.
+            if (state.DeathsNegated < state.Effects.DeathNegations)
+            {
+                state.DeathsNegated++;
+                victim.Health01 = 0.12f;   // back from the brink, barely standing
+                return false;
+            }
+
             // "One More Day": men of a survivor's column refuse to die on this particular field.
             if (state.HasSkill("one_more_day")) chance += 0.10f;
 

@@ -45,6 +45,9 @@ namespace Century.Core.Contracts
         /// <summary>Commander doctrine ids in effect, for the battle systems that honour them.</summary>
         public List<string> CommanderSkills = new List<string>();
 
+        /// <summary>The establishment's resolved effects (army layer). Never null.</summary>
+        public PostEffectSet PostEffects = new PostEffectSet();
+
         /// <summary>Captured war banners travelling with the column (relevant to certain doctrines).</summary>
         public int CapturedBanners;
     }

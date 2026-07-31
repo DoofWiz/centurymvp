@@ -28,8 +28,15 @@ namespace Century.Campaign.Model
         public string HolderSoldierId;
         public int DayAppointed;
 
-        /// <summary>Points the office has accrued (phase 2 spends these on its tree).</summary>
+        /// <summary>Lifetime points the office has accrued — the office's standing, never spent down.</summary>
         public float PostExperience;
+
+        /// <summary>Points still available to invest in the office's tree.</summary>
+        public float UnspentPoints;
+
+        /// <summary>Tree nodes the office holds. They belong to the OFFICE, not the man — the
+        /// holder dying keeps the tradition, subject to Consuetudo retention at chapter turns.</summary>
+        public List<string> InvestedNodeIds = new List<string>();
 
         /// <summary>Chapters the post has been continuously filled — feeds Consuetudo retention.</summary>
         public int ChaptersContinuouslyFilled;

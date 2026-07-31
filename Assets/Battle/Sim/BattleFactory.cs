@@ -47,6 +47,8 @@ namespace Century.Battle.Sim
             SeedCohesion(state.PlayerSquads);
             SeedCohesion(state.EnemySquads);
 
+            state.Effects = request.PostEffects ?? new Century.Core.Contracts.PostEffectSet();
+
             Deploy(state, settings);
             HoldBackEnemyReserve(state, settings);
             ApplyCommanderDoctrines(state);

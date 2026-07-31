@@ -97,6 +97,32 @@ namespace Century.Campaign.View
                 if (holder == null) detail.AddToClassList("text-danger");
                 text.Add(detail);
 
+                // The office's traditions travel with the standard; the ARMY screen shows them
+                // anywhere, the camp is where points are spent (brief §4.2).
+                PostRecord record = _state.Posts.Find(post);
+                if (record != null && (record.InvestedNodeIds.Count > 0 || record.UnspentPoints >= 1f))
+                {
+                    var names = new System.Text.StringBuilder("Traditions: ");
+                    bool any = false;
+
+                    foreach (PostNodeDef node in PostTreeCatalog.For(post))
+                    {
+                        if (!record.InvestedNodeIds.Contains(node.Id)) continue;
+                        if (any) names.Append(", ");
+                        names.Append(node.Name);
+                        any = true;
+                    }
+
+                    if (!any) names.Append("none yet");
+
+                    int points = Mathf.FloorToInt(record.UnspentPoints);
+                    if (points > 0) names.Append($"  ·  {points} to invest in camp");
+
+                    var traditions = new Label(names.ToString()) { pickingMode = PickingMode.Ignore };
+                    traditions.AddToClassList("doctrine-row__effect");
+                    text.Add(traditions);
+                }
+
                 row.Add(text);
                 _body.Add(row);
             }

@@ -419,6 +419,24 @@
     background-color: rgba(0, 0, 0, 0.3);
 }
 
+/* A chip that happens to be a Button (office traditions) drops the default button chrome. */
+Button.chip {
+    margin: 0 4px 3px 0;
+    border-radius: 0;
+    background-image: none;
+}
+
+/* Office tradition chips: gold = held, dim = not yet; a lit border marks one buyable now. */
+.chip--buyable {
+    color: var(--parchment);
+    border-color: var(--gold);
+}
+
+.chip--buyable:hover {
+    background-color: var(--gold-dim);
+    color: var(--parchment);
+}
+
 /* =======================================================================================
  *  Command bar
  * ======================================================================================= */

@@ -60,6 +60,14 @@ namespace Century.App
             bool playerAmbushed = contact.Player.IsSurprised(_state.Clock.Now);
             bool enemyAmbushed = !playerAmbushed && contact.Enemy.IsSurprised(_state.Clock.Now);
 
+            // The tesserarius capstone: the watch is so tight the century is never caught unformed.
+            if (playerAmbushed && PostTreeCatalog.Invested(_state, "no_surprises"))
+            {
+                playerAmbushed = false;
+                _log?.Push(CampaignEventKind.Discovery, "No surprises",
+                    "The watch had them marked — the century forms in time", _state.Clock.Now.DayNumber);
+            }
+
             // Surprise is spent the moment it matters, whichever way the fight goes.
             contact.Player.SurprisedUntil = default;
             contact.Enemy.SurprisedUntil = default;
@@ -89,6 +97,9 @@ namespace Century.App
                 CommanderSkills = new System.Collections.Generic.List<string>(
                     _state.Commander.OwnedSkills),
                 CapturedBanners = System.Math.Min(2, contact.Player.Inventory.CountOf("banner_cherusci")),
+
+                // The establishment goes to war: offices and their traditions, flattened for battle.
+                PostEffects = PostTreeCatalog.Resolve(_state, contact.Player.Roster),
 
                 // TODO(step 4): sample the terrain under the contact point.
                 TerrainId = "open"

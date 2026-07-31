@@ -26,6 +26,8 @@ namespace Century.Campaign.Sim
             // night and terrain belong here too, when they come.
             float radius = player.DetectionRadius;
             if (state.Commander.Has("eyes_and_ears")) radius *= 1.12f;
+            // Password: the tesserarius' watch chain passes word of everything it sees.
+            if (PostTreeCatalog.Invested(state, "password")) radius *= 1.08f;
             return radius;
         }
 

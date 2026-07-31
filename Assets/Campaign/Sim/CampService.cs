@@ -139,6 +139,9 @@ namespace Century.Campaign.Sim
 
             // "Fortify the Camp": every night, a little Rome.
             if (_state.Commander.Has("fortify_the_camp")) healFactor *= 1.25f;
+
+            // Convalescence: the medicus runs a proper sick line, and the wounded mend faster.
+            if (PostTreeCatalog.Invested(_state, "convalescence")) healFactor *= 1.3f;
             float healPerMan = WoundHealPerHour * healFactor * (float)hours;
 
             int startingWounded = _party.Roster.WoundedCount;
@@ -406,6 +409,10 @@ namespace Century.Campaign.Sim
 
             bool optio = _party.Appointments.IsFilled(CampRole.Optio);
             int xpPerMan = Mathf.RoundToInt(TrainingBaseXp * trainingLevel * (optio ? 1.25f : 1f));
+
+            // Drill: the optio's tradition of the hastile — training bites half again as deep.
+            if (PostTreeCatalog.Invested(_state, "drill"))
+                xpPerMan = Mathf.RoundToInt(xpPerMan * 1.5f);
 
             _state.Commander.Note(CommanderPhilosophy.TrueRoman, 0.5f);
 

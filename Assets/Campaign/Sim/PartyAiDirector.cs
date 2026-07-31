@@ -164,6 +164,7 @@ namespace Century.Campaign.Sim
                 {
                     range *= _settings.EnemyDetectionOfPlayerFactor;
                     if (_state.Commander.Has("a_quiet_camp")) range *= 0.8f;
+                if (PostTreeCatalog.Invested(_state, "night_watch")) range *= 0.85f;
                 }
 
                 if (sqr > range * range) continue;
@@ -203,6 +204,7 @@ namespace Century.Campaign.Sim
             {
                 range *= _settings.EnemyDetectionOfPlayerFactor;
                 if (_state.Commander.Has("a_quiet_camp")) range *= 0.8f;
+                if (PostTreeCatalog.Invested(_state, "night_watch")) range *= 0.85f;
             }
 
             float leash = range * 1.75f;

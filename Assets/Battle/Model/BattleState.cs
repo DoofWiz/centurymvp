@@ -59,6 +59,12 @@ namespace Century.Battle.Model
 
         /// <summary>The Centurion is down and the Optio holds command: a degraded-control window
         /// with a closing clock, instead of an instant defeat (army brief, Centurio in Waiting).</summary>
+        /// <summary>Resolved office effects from the campaign. Never null.</summary>
+        public Century.Core.Contracts.PostEffectSet Effects = new Century.Core.Contracts.PostEffectSet();
+
+        /// <summary>Deaths already negated by the medicus this battle.</summary>
+        public int DeathsNegated;
+
         public bool CommandDevolved;
         public float SuccessionSecondsLeft;
 

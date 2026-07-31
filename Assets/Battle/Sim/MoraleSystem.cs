@@ -103,6 +103,10 @@ namespace Century.Battle.Sim
 
                 squad.Cohesion01 = Mathf.Clamp01(squad.Cohesion01 + delta);
 
+                // "It has never fallen": the standard's floor, player side, while a bearer stands.
+                if (isPlayerSide && _state.Effects.CohesionFloor > 0f && _playerStandard.HasValue)
+                    squad.Cohesion01 = Mathf.Max(squad.Cohesion01, _state.Effects.CohesionFloor);
+
                 UpdateRout(squad, isPlayerSide);
                 ReportTransitions(squad);
             }
@@ -214,11 +218,13 @@ namespace Century.Battle.Sim
 
             // "By the Eagle": the standard reaches farther and grips harder for the player's side.
             bool eagle = isPlayerSide && _state.HasSkill("by_the_eagle");
-            float radius = _settings.StandardAuraRadius * (eagle ? 1.35f : 1f);
+            float office = isPlayerSide ? _state.Effects.StandardAuraMultiplier : 1f;
+            float radius = _settings.StandardAuraRadius * (eagle ? 1.35f : 1f) * office;
 
             if ((standard.Value - squad.CentreOfMass()).sqrMagnitude > radius * radius) return 0f;
 
-            return _settings.StandardCohesionPerSecond * (eagle ? 1.25f : 1f) * deltaSeconds;
+            return _settings.StandardCohesionPerSecond * (eagle ? 1.25f : 1f)
+                   * (isPlayerSide ? _state.Effects.StandardAuraMultiplier : 1f) * deltaSeconds;
         }
 
         /// <summary>
@@ -277,7 +283,8 @@ namespace Century.Battle.Sim
         private float Recovery(BattleSquad squad, float deltaSeconds)
         {
             if (squad.EngagedCount > 0 || squad.RecentCasualtyPressure > 0.5f) return 0f;
-            return _settings.CohesionRecoveryPerSecond * deltaSeconds * squad.Dressed01;
+            float office = squad.IsPlayerSide ? _state.Effects.CohesionRecoveryMultiplier : 1f;
+            return _settings.CohesionRecoveryPerSecond * office * deltaSeconds * squad.Dressed01;
         }
 
         private void UpdateCommandAura(BattleSquad squad, bool isPlayerSide)
@@ -298,7 +305,12 @@ namespace Century.Battle.Sim
         private void UpdateRout(BattleSquad squad, bool isPlayerSide)
         {
             if (squad.IsRouted) return;
-            if (squad.Cohesion01 > _settings.RoutThreshold) return;
+
+            // The optio's office shifts where men break (invested: later; vacant: sooner), and
+            // the signifer's capstone can floor player cohesion outright while the standard stands.
+            float threshold = _settings.RoutThreshold;
+            if (isPlayerSide) threshold = Mathf.Clamp(threshold + _state.Effects.RoutThresholdShift, 0.02f, 0.35f);
+            if (squad.Cohesion01 > threshold) return;
 
             squad.IsRouted = true;
             squad.RallyProgress01 = 0f;

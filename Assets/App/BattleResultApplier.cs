@@ -61,10 +61,13 @@ namespace Century.App
         private void ApplyToPlayer(PartyState player, BattleResult result)
         {
             int wounded = 0;
+            bool anyRouted = false;
 
             for (int i = 0; i < result.Combatants.Count; i++)
             {
                 CombatantOutcome outcome = result.Combatants[i];
+                if (outcome.Routed) anyRouted = true;
+
                 SoldierRecord soldier = player.Roster.Find(outcome.SoldierId);
                 if (soldier == null) continue;
 
@@ -118,12 +121,22 @@ namespace Century.App
 
             ResolvePromotions(player);
 
+            // The offices that stood the field learn from it. After RemoveFallen, so an office
+            // whose holder died today has no living holder and earns nothing from the battle
+            // that killed him.
+            PostTreeCatalog.AwardBattlePoints(
+                _state, player.Roster, result.Outcome == BattleOutcome.Victory, wounded, anyRouted);
+
             LootBundle loot = result.Loot;
 
             // "Nothing Goes to Waste": the field is stripped to the bone.
             float lootScale = _state.Commander.Has("nothing_goes_to_waste") ? 1.3f : 1f;
+
+            // The Purse: the signifer banks a share of everything the field yields.
+            float coinScale = lootScale * (PostTreeCatalog.Invested(_state, "the_purse") ? 1.15f : 1f);
+
             player.Stores.Food += loot.Food * lootScale;
-            player.Stores.Coin += Mathf.RoundToInt(loot.Coin * lootScale);
+            player.Stores.Coin += Mathf.RoundToInt(loot.Coin * coinScale);
             player.Stores.Denarii += loot.Denarii;
             player.Stores.EquipmentCondition01 =
                 Mathf.Clamp01(player.Stores.EquipmentCondition01 + loot.EquipmentConditionDelta);
@@ -162,6 +175,10 @@ namespace Century.App
             float moraleShift = result.Outcome == BattleOutcome.Victory ? victoryShift
                 : result.Outcome == BattleOutcome.Withdrawal ? withdrawalShift
                 : -0.12f;
+
+            // Burial Club: the fallen get their rites, and the living carry them lighter.
+            if (fallen.Count > 0 && PostTreeCatalog.Invested(_state, "burial_club"))
+                moraleShift += 0.04f;
 
             // The record of how the commander fights, written after every field.
             NoteBattleStyle(result);

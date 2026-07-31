@@ -44,7 +44,7 @@ namespace Century.Battle.Sim
         private void Treat(BattleCombatant medicus, float deltaSeconds)
         {
             float radiusSqr = _settings.MedicusRadius * _settings.MedicusRadius;
-            float heal = _settings.MedicusHealPerSecond * deltaSeconds;
+            float heal = _settings.MedicusHealPerSecond * deltaSeconds * _state.Effects.MedicusSpeedMultiplier;
 
             for (int s = 0; s < _state.PlayerSquads.Count; s++)
             {

@@ -372,6 +372,8 @@ namespace Century.Campaign.View
 
             _orgList.Add(command);
 
+            BuildOffices();
+
             // The rank and file in their PERSISTENT tent groups — the same contubernia that form up
             // as battle squads, so the chart here is the line there. Officers are drawn out above
             // but keep their assignment and fight with their group.
@@ -425,6 +427,118 @@ namespace Century.Campaign.View
 
                 _orgList.Add(grid);
             }
+        }
+
+        // --- The offices -------------------------------------------------------------------------
+
+        /// <summary>
+        /// THE OFFICES: each office's tradition chips, investable here and only here — the ARMY
+        /// screen shows the establishment anywhere, the camp is where the player acts on it
+        /// (army brief §4.2). Points are earned by the office standing its battles; traditions
+        /// belong to the office and outlive the holder.
+        /// </summary>
+        private void BuildOffices()
+        {
+            PartyState party = _state.PlayerParty;
+            _state.Posts.EnsureSeeded(party.Roster, _state.Clock.Now.DayNumber);
+
+            _orgList.Add(SectionHeader("THE OFFICES", "an office learns; its traditions outlive the man"));
+
+            foreach (string post in PostId.Tier1)
+            {
+                // The speculator is the cohort's man and keeps no tree of ours (phase 3.5).
+                if (post == PostId.Speculator) continue;
+
+                PostRecord record = _state.Posts.Find(post);
+                SoldierRecord holder = _state.Posts.HolderOf(post, party.Roster);
+
+                var row = new VisualElement();
+                row.AddToClassList("doctrine-row");
+
+                var text = new VisualElement();
+                text.AddToClassList("doctrine-row__text");
+
+                int points = Mathf.FloorToInt(record.UnspentPoints);
+                var name = new Label(holder != null
+                    ? $"{PostRoster.DisplayName(post).ToUpperInvariant()}  —  {holder.DisplayName}" +
+                      (points > 0 ? $"  ·  {points} to invest" : string.Empty)
+                    : $"{PostRoster.DisplayName(post).ToUpperInvariant()}  —  VACANT");
+                name.AddToClassList("doctrine-row__name");
+                if (holder == null) name.AddToClassList("text-danger");
+                text.Add(name);
+
+                if (holder == null)
+                {
+                    var vacancy = new Label(PostRoster.VacancyPenalty(post));
+                    vacancy.AddToClassList("doctrine-row__effect");
+                    vacancy.AddToClassList("text-danger");
+                    text.Add(vacancy);
+                }
+
+                var chips = new VisualElement();
+                chips.style.flexDirection = FlexDirection.Row;
+                chips.style.flexWrap = Wrap.Wrap;
+                chips.style.marginTop = 3;
+
+                foreach (PostNodeDef node in PostTreeCatalog.For(post))
+                    chips.Add(MakeTraditionChip(record, node));
+
+                text.Add(chips);
+                row.Add(text);
+                _orgList.Add(row);
+            }
+        }
+
+        private VisualElement MakeTraditionChip(PostRecord record, PostNodeDef node)
+        {
+            bool invested = record.InvestedNodeIds.Contains(node.Id);
+            bool buyable = PostTreeCatalog.CanInvest(_state, _state.PlayerParty.Roster, node);
+
+            var chip = new Button
+            {
+                text = invested
+                    ? node.Name.ToUpperInvariant()
+                    : $"{node.Name.ToUpperInvariant()} · {node.Cost}"
+            };
+            chip.AddToClassList("chip");
+            if (!invested) chip.AddToClassList("chip--pending");
+            chip.EnableInClassList("chip--buyable", buyable);
+
+            // All chips stay enabled so they can explain themselves on hover; only a buyable
+            // one is given a click handler.
+
+            // Runtime UI Toolkit has no tooltips, so the org hint line explains whatever the
+            // cursor rests on — same channel the soldier cards use.
+            string state = invested ? "Held" : buyable ? $"Invest {node.Cost} points" : "Locked";
+            chip.RegisterCallback<MouseEnterEvent>(_ =>
+            {
+                if (_orgHint != null) _orgHint.text = $"{node.Name} — {node.Effect}. [{state}]";
+            });
+            chip.RegisterCallback<MouseLeaveEvent>(_ =>
+            {
+                if (_orgHint != null) _orgHint.text = DefaultOrgHint;
+            });
+
+            if (buyable)
+            {
+                chip.clicked += () =>
+                {
+                    if (!PostTreeCatalog.CanInvest(_state, _state.PlayerParty.Roster, node)) return;
+
+                    record.UnspentPoints -= node.Cost;
+                    record.InvestedNodeIds.Add(node.Id);
+
+                    _log?.Push(
+                        CampaignEventKind.Gain,
+                        $"{PostRoster.DisplayName(node.Post)}: {node.Name}",
+                        node.Effect,
+                        _state.Clock.Now.DayNumber);
+
+                    RebuildOrganisation();
+                };
+            }
+
+            return chip;
         }
 
         private bool IsOfficer(SoldierRecord soldier)

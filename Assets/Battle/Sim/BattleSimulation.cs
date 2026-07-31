@@ -199,7 +199,8 @@ namespace Century.Battle.Sim
                 if (player != null && !player.IsAlive)
                 {
                     _state.CommandDevolved = true;
-                    _state.SuccessionSecondsLeft = _settings.SuccessionWindowSeconds;
+                    _state.SuccessionSecondsLeft = _settings.SuccessionWindowSeconds
+                                                   + _state.Effects.SuccessionWindowBonusSeconds;
                 }
                 return;
             }

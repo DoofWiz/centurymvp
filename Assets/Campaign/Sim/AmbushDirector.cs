@@ -76,6 +76,8 @@ namespace Century.Campaign.Sim
             // Same biased envelope the pursuit AI uses, so "aware" means the same thing everywhere.
             float envelope = (other.DetectionRadius + playerVisibility) * _settings.EnemyDetectionOfPlayerFactor;
             if (_state.Commander.Has("a_quiet_camp")) envelope *= 0.8f;
+            // Night Watch: sentries posted by the book — the column is harder to mark.
+            if (PostTreeCatalog.Invested(_state, "night_watch")) envelope *= 0.85f;
             bool aware = distance <= envelope;
             bool wasAware = _wasAwareOfPlayer.Contains(other.Id);
 

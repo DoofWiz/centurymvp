@@ -359,6 +359,10 @@ namespace Century.Battle.View
             float delay = _settings.OrderBaseDelaySeconds + distance * _settings.OrderDelayPerMetre;
             if (squad.HasOfficer(OfficerRole.Tesserarius)) delay *= _settings.TesserariusDelayMultiplier;
 
+            // The tesserarius's OFFICE, resolved by the campaign: invested it speeds every order,
+            // vacant it slows them all (army layer).
+            delay *= _state.Effects.OrderPropagationMultiplier;
+
             // "Roman Order": drilled until the order and the act are the same thing.
             if (_state.HasSkill("roman_order")) delay *= 0.7f;
 
