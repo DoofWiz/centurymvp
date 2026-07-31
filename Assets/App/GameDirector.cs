@@ -147,6 +147,10 @@ namespace Century.App
             // reports elapsed time back through BattleResult.
             _ticker.IsRunning = sceneName == SceneNames.Overmap;
             _fader?.FadeIn();
+
+            // WebGL only: swap Polytope-shaded decor for stock URP materials (their custom
+            // shaders fail on the web target and render pink). No-op everywhere else.
+            Century.Core.World.WebGlShaderFallback.Sweep();
         }
 
         private void OnGameplaySceneUnloading(string sceneName)

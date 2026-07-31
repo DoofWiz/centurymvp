@@ -114,6 +114,9 @@ namespace Century.Battle.View
             // the NavMesh rebaked over it, before a single man is placed on it.
             BattleTerrainBuilder.Build(new Vector2(request.WorldX, request.WorldZ), _terrainDecor);
 
+            // The decor just spawned is Polytope-shaded; on WebGL those shaders fail pink.
+            WebGlShaderFallback.Sweep();
+
             _state = BattleFactory.Create(request, _settings);
             ServiceLocator.Register(_state);
 
