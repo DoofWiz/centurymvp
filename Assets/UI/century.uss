@@ -2618,8 +2618,31 @@
     left: var(--pad-loose);
     top: var(--pad-loose);
     bottom: 96px;
-    width: 300px;
+    width: 170px;
     flex-direction: column;
+}
+
+/* The left column is a sliver of the play area, so everything inside runs compact: tighter
+ * panel padding, smaller portraits, and bars that fill the card instead of a fixed width. */
+.battle-left .panel { padding: var(--pad-tight) 8px; }
+
+.battle-left .card__portrait {
+    width: 26px;
+    height: 30px;
+}
+
+.battle-left .card__glyph { font-size: var(--font-size-body); }
+
+.battle-left .card__icon,
+.battle-left .portrait__icon {
+    width: 16px;
+    height: 16px;
+}
+
+.battle-left .card__body .bar {
+    width: 100%;
+    height: 5px;
+    margin-top: 2px;
 }
 
 /* Fixed blocks may not shrink: a long officer roster must scroll inside its own panel, never
