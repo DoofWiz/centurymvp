@@ -48,6 +48,10 @@ namespace Century.Core.Contracts
         /// <summary>The establishment's resolved effects (army layer). Never null.</summary>
         public PostEffectSet PostEffects = new PostEffectSet();
 
+        /// <summary>The century's signum was lost in an earlier battle and has not been won back:
+        /// no standard takes this field, and no aura steadies the line.</summary>
+        public bool SignumAlreadyLost;
+
         /// <summary>Captured war banners travelling with the column (relevant to certain doctrines).</summary>
         public int CapturedBanners;
     }

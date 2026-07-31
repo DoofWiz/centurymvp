@@ -76,6 +76,16 @@ namespace Century.Battle.Sim
             result.EnemiesRouted = enemyRoutedAlive;
             result.EnemyAnnihilated = state.EnemyAliveCount <= 0;
 
+            // The signum's fate. In enemy hands or gone: lost. Still on the ground when the field
+            // is abandoned (defeat or withdrawal): left behind, which is the same shame. Only a
+            // victory recovers a fallen signum in the clearing of the field. A battle fought
+            // WITHOUT the signum (already lost before it) reports nothing new.
+            result.SignumFell = state.SignumEverFell;
+            result.SignumLost = !state.SignumLostBeforeBattle
+                && (state.Signum == SignumStatus.EnemyHeld
+                    || state.Signum == SignumStatus.Lost
+                    || (state.Signum == SignumStatus.Fallen && outcome != BattleOutcome.Victory));
+
             result.CommanderExperience = state.PlayerCharacter != null && state.PlayerCharacter.IsAlive
                 ? CommanderExperienceBase + state.PlayerCharacter.Kills * CommanderExperiencePerKill
                 : 0;

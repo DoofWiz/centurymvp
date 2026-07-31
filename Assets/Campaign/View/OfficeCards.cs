@@ -67,6 +67,14 @@ namespace Century.Campaign.View
                 card.Add(penalty);
             }
 
+            // The lost signum is the signifer's shame to wear until the century wins it back.
+            if (post == PostId.Signifer && state.SignumLost)
+            {
+                var lost = new Label("THE SIGNUM IS LOST — no standard steadies the line until it is won back");
+                lost.AddToClassList("office-card__penalty");
+                card.Add(lost);
+            }
+
             // Points strip — the card's call to action, or a line on where points come from.
             int points = record != null ? Mathf.FloorToInt(record.UnspentPoints) : 0;
             var pointsLabel = new Label(

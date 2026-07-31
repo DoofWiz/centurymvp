@@ -180,6 +180,27 @@ namespace Century.App
             if (fallen.Count > 0 && PostTreeCatalog.Invested(_state, "burial_club"))
                 moraleShift += 0.04f;
 
+            // The signum's fate outlives the battle. Losing it is a wound to every man in the
+            // column; carrying it home after it fell is a story they will tell for years.
+            if (result.SignumLost)
+            {
+                _state.SignumLost = true;
+                moraleShift -= 0.12f;
+                _log?.Push(
+                    CampaignEventKind.Loss,
+                    "The signum is lost",
+                    "The century's standard did not come home. The men march ashamed",
+                    _state.Clock.Now.DayNumber);
+            }
+            else if (result.SignumFell)
+            {
+                _log?.Push(
+                    CampaignEventKind.Gain,
+                    "The signum came home",
+                    "It fell in the press, and a man of the century raised it again",
+                    _state.Clock.Now.DayNumber);
+            }
+
             // The record of how the commander fights, written after every field.
             NoteBattleStyle(result);
 

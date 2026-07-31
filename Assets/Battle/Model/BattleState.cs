@@ -17,6 +17,21 @@ namespace Century.Battle.Model
         Aftermath = 3
     }
 
+    /// <summary>Where the century's standard is (army phase 3: the signum is a world object).</summary>
+    public enum SignumStatus
+    {
+        /// <summary>No signifer took the field; there is no signum in this battle.</summary>
+        Absent = 0,
+        /// <summary>In the hands of a man of the century (the signifer, or whoever raised it).</summary>
+        Carried = 1,
+        /// <summary>On the ground where its bearer fell. Anyone can reach it first.</summary>
+        Fallen = 2,
+        /// <summary>An enemy has it. Kill him and it falls again.</summary>
+        EnemyHeld = 3,
+        /// <summary>Carried off the field. It is not coming home today.</summary>
+        Lost = 4
+    }
+
     /// <summary>
     /// Root of everything in a single battle. Built from a BattleRequest on scene load and flattened
     /// into a BattleResult when the fight ends.
@@ -67,6 +82,26 @@ namespace Century.Battle.Model
 
         public bool CommandDevolved;
         public float SuccessionSecondsLeft;
+
+        // --- The signum -------------------------------------------------------------------------
+
+        public SignumStatus Signum = SignumStatus.Absent;
+
+        /// <summary>Whoever holds it right now — a man of the century, or an enemy. Null while
+        /// fallen, absent or lost.</summary>
+        public BattleCombatant SignumCarrier;
+
+        /// <summary>Authoritative world position: the carrier's while held, the fall point while down.</summary>
+        public Vector3 SignumPosition;
+
+        /// <summary>Bearer standing steady out of the press: the signum is planted and reaches farther.</summary>
+        public bool SignumPlanted;
+
+        /// <summary>It touched the ground at least once this battle — the campaign hears of it.</summary>
+        public bool SignumEverFell;
+
+        /// <summary>It was already gone before this battle began; its absence is old news.</summary>
+        public bool SignumLostBeforeBattle;
 
         public BattlePhase Phase = BattlePhase.Deployment;
 

@@ -25,6 +25,7 @@ namespace Century.Battle.Sim
         private readonly MeleeCombat _combat;
         private readonly MoraleSystem _morale;
         private readonly MedicusSystem _medicus;
+        private readonly SignumSystem _signum;
         private readonly EnemySquadAi _enemyAi;
         private readonly BattleOutcomeEvaluator _outcome;
 
@@ -49,10 +50,12 @@ namespace Century.Battle.Sim
             _combat = new MeleeCombat(state, settings);
             _morale = new MoraleSystem(state, settings);
             _medicus = new MedicusSystem(state, settings);
+            _signum = new SignumSystem(state, settings);
             _enemyAi = new EnemySquadAi(state, settings);
             _outcome = new BattleOutcomeEvaluator(state, settings);
 
             _morale.EventRaised += e => EventRaised?.Invoke(e);
+            _signum.EventRaised += e => EventRaised?.Invoke(e);
         }
 
         /// <summary>
@@ -78,6 +81,9 @@ namespace Century.Battle.Sim
                 _medicus.Tick(_moraleAccumulator);
                 _moraleAccumulator = 0f;
             }
+
+            // The signum every frame: its position must track its carrier smoothly for the view.
+            _signum.Tick(deltaSeconds);
 
             TickSuccession(deltaSeconds);
             _morale.TickRally(deltaSeconds, rallyHeld);

@@ -49,6 +49,14 @@ namespace Century.Battle.Sim
 
             state.Effects = request.PostEffects ?? new Century.Core.Contracts.PostEffectSet();
 
+            // A century that lost its signum fields no standard at all until it is won back:
+            // Lost from the first tick means no carrier, no aura, no floor — the absence bites.
+            if (request.SignumAlreadyLost)
+            {
+                state.Signum = SignumStatus.Lost;
+                state.SignumLostBeforeBattle = true;
+            }
+
             Deploy(state, settings);
             HoldBackEnemyReserve(state, settings);
             ApplyCommanderDoctrines(state);

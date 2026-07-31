@@ -179,6 +179,27 @@ namespace Century.Battle.Sim
         [Tooltip("Cohesion granted per second to a squad near its living standard.")]
         public float StandardCohesionPerSecond = 0.045f;
 
+        // --- The signum as a world object (army phase 3). CODE DEFAULTS: the asset only
+        // serializes fields through SquadFrontage, so these are tuned here, not in the Inspector.
+
+        /// <summary>How close a man must come to a fallen signum to take it up.</summary>
+        public float SignumPickupRadius = 2.4f;
+
+        /// <summary>One-time cohesion hit to every player squad the moment the signum falls.</summary>
+        public float SignumFallCohesionHit = 0.10f;
+
+        /// <summary>One-time cohesion hit when the enemy takes the signum off the ground.</summary>
+        public float SignumCapturedCohesionHit = 0.18f;
+
+        /// <summary>One-time cohesion surge when a man of the century raises it again.</summary>
+        public float SignumRecoveredCohesionBonus = 0.10f;
+
+        /// <summary>Aura radius multiplier while the signum is planted (bearer holding, out of the press).</summary>
+        public float SignumPlantedAuraBonus = 1.3f;
+
+        /// <summary>An enemy who carries the signum this far from the field centre is gone with it.</summary>
+        public float SignumLostRadius = 85f;
+
         [Header("Morale — command")]
         [Tooltip("Radius within which the Centurion steadies his men.")]
         public float CommandAuraRadius = 14f;

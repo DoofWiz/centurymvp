@@ -36,6 +36,12 @@ namespace Century.Core.Contracts
 
         /// <summary>True when the enemy force was destroyed outright rather than merely beaten.</summary>
         public bool EnemyAnnihilated;
+
+        /// <summary>The century's standard touched the ground at some point in the fight.</summary>
+        public bool SignumFell;
+
+        /// <summary>The standard did not come home: taken from the field, or left on it.</summary>
+        public bool SignumLost;
     }
 
     public sealed class CombatantOutcome

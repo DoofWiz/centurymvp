@@ -174,6 +174,12 @@ namespace Century.Battle.View
             // The blood-fleck read on every landed blow, for both sides and the Centurion himself.
             HitEffects.Create(_spawnRoot);
 
+            // The signum in the world: pole, crossbar and cloth, tracking the sim's authority.
+            var signumView = new GameObject("Signum").AddComponent<SignumView>();
+            signumView.transform.SetParent(_spawnRoot, false);
+            signumView.Initialise(_state);
+            _lastSignumStatus = _state.Signum;
+
             // Ground answers: order pings where commands land, rally arcs around squads being saved.
             var groundFx = new GameObject("BattleGroundFx").AddComponent<BattleGroundFx>();
             groundFx.transform.SetParent(_spawnRoot, false);
@@ -461,6 +467,8 @@ namespace Century.Battle.View
                 return;
             }
 
+            AnnounceSignumTransitions();
+
             // Centurio in Waiting: the moment command devolves, say so and swing the eye to the
             // man now carrying it. The battle itself keeps running.
             if (_state.CommandDevolved && !_successionAnnounced)
@@ -516,6 +524,14 @@ namespace Century.Battle.View
             double minutes = 12d + _state.ElapsedSeconds / 6d;
             BattleResult result = BattleConclusion.Build(_state, outcome, minutes);
 
+            // Losing the century's own standard is the story beat that outlives the battle.
+            if (_banner != null && result.SignumLost)
+                yield return _banner.Show("The signum is lost",
+                    "It did not come home", 1.7f, "stage-banner__frame--danger");
+            else if (_banner != null && result.SignumFell && outcome == BattleOutcome.Victory)
+                yield return _banner.Show("The signum came home",
+                    "It fell, and the century took it back", 1.5f);
+
             // The banner moment: taking a warband's standard is a story beat, not a loot line.
             if (_banner != null && outcome == BattleOutcome.Victory)
                 for (int i = 0; i < result.Loot.Items.Count; i++)
@@ -569,6 +585,46 @@ namespace Century.Battle.View
         }
 
         private bool _successionAnnounced;
+
+        /// <summary>
+        /// The signum's fate is announced like the succession is: state transitions, read once.
+        /// The event feed already carries the detail line; the banner is for the moments that
+        /// should stop the player's breath for a second.
+        /// </summary>
+        private void AnnounceSignumTransitions()
+        {
+            SignumStatus status = _state.Signum;
+            if (status == _lastSignumStatus) return;
+
+            SignumStatus previous = _lastSignumStatus;
+            _lastSignumStatus = status;
+            if (_banner == null) return;
+
+            switch (status)
+            {
+                case SignumStatus.Fallen when previous == SignumStatus.Carried:
+                    StartCoroutine(_banner.Show("The signum has fallen",
+                        "Raise it before they take it", 1.6f, "stage-banner__frame--danger"));
+                    break;
+
+                case SignumStatus.EnemyHeld:
+                    StartCoroutine(_banner.Show("They have the signum",
+                        "Take it back — kill the man who carries it", 1.8f, "stage-banner__frame--danger"));
+                    break;
+
+                case SignumStatus.Carried when previous != SignumStatus.Absent:
+                    StartCoroutine(_banner.Show("The signum is raised",
+                        "The standard flies again", 1.4f));
+                    break;
+
+                case SignumStatus.Lost:
+                    StartCoroutine(_banner.Show("The signum is carried away",
+                        "It is leaving the field", 1.8f, "stage-banner__frame--danger"));
+                    break;
+            }
+        }
+
+        private SignumStatus _lastSignumStatus = SignumStatus.Absent;
 
         private SoldierView FindOptioView()
         {

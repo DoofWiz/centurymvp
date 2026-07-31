@@ -100,6 +100,7 @@ namespace Century.App
 
                 // The establishment goes to war: offices and their traditions, flattened for battle.
                 PostEffects = PostTreeCatalog.Resolve(_state, contact.Player.Roster),
+                SignumAlreadyLost = _state.SignumLost,
 
                 // TODO(step 4): sample the terrain under the contact point.
                 TerrainId = "open"

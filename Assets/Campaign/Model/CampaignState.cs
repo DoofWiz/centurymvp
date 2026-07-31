@@ -37,6 +37,10 @@ namespace Century.Campaign.Model
         /// <summary>Engagements fought. Shown on the post-battle summary.</summary>
         public int BattlesFought;
 
+        /// <summary>The century's standard is in enemy hands (army phase 3). A standing shame the
+        /// men carry until future content lets them win it back.</summary>
+        public bool SignumLost;
+
         /// <summary>Monotonic counter used to mint unique ids without a GUID dependency.</summary>
         private int _nextEntityIndex;
 

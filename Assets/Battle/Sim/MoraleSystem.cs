@@ -57,7 +57,7 @@ namespace Century.Battle.Sim
 
         public void Tick(float deltaSeconds)
         {
-            _playerStandard = FindStandard(_state.PlayerSquads);
+            _playerStandard = PlayerStandardPosition();
             _enemyStandard = FindStandard(_state.EnemySquads);
 
             TickSide(_state.PlayerSquads, _state.EnemySquads, isPlayerSide: true, deltaSeconds);
@@ -103,8 +103,10 @@ namespace Century.Battle.Sim
 
                 squad.Cohesion01 = Mathf.Clamp01(squad.Cohesion01 + delta);
 
-                // "It has never fallen": the standard's floor, player side, while a bearer stands.
-                if (isPlayerSide && _state.Effects.CohesionFloor > 0f && _playerStandard.HasValue)
+                // "It has never fallen": the floor holds only while the signum is literally
+                // standing in the century's hands. On the ground, the words mean nothing.
+                if (isPlayerSide && _state.Effects.CohesionFloor > 0f
+                    && _state.Signum == SignumStatus.Carried)
                     squad.Cohesion01 = Mathf.Max(squad.Cohesion01, _state.Effects.CohesionFloor);
 
                 UpdateRout(squad, isPlayerSide);
@@ -219,12 +221,29 @@ namespace Century.Battle.Sim
             // "By the Eagle": the standard reaches farther and grips harder for the player's side.
             bool eagle = isPlayerSide && _state.HasSkill("by_the_eagle");
             float office = isPlayerSide ? _state.Effects.StandardAuraMultiplier : 1f;
-            float radius = _settings.StandardAuraRadius * (eagle ? 1.35f : 1f) * office;
+            float planted = isPlayerSide && _state.SignumPlanted ? _settings.SignumPlantedAuraBonus : 1f;
+            float radius = _settings.StandardAuraRadius * (eagle ? 1.35f : 1f) * office * planted;
 
             if ((standard.Value - squad.CentreOfMass()).sqrMagnitude > radius * radius) return 0f;
 
             return _settings.StandardCohesionPerSecond * (eagle ? 1.25f : 1f)
                    * (isPlayerSide ? _state.Effects.StandardAuraMultiplier : 1f) * deltaSeconds;
+        }
+
+        /// <summary>
+        /// The player's standard is the SIGNUM now — a world object with a location and a fate.
+        /// Carried, it steadies the men around it; on the ground or in enemy hands it steadies
+        /// no one, which is the whole point of it being takeable. Only a battle with no signum at
+        /// all (no signifer took the field) falls back to the old abstract bearer.
+        /// </summary>
+        private Vector3? PlayerStandardPosition()
+        {
+            switch (_state.Signum)
+            {
+                case SignumStatus.Carried: return _state.SignumPosition;
+                case SignumStatus.Absent: return FindStandard(_state.PlayerSquads);
+                default: return null;
+            }
         }
 
         /// <summary>
