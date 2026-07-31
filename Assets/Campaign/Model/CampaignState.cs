@@ -41,6 +41,10 @@ namespace Century.Campaign.Model
         /// men carry until future content lets them win it back.</summary>
         public bool SignumLost;
 
+        /// <summary>Demo onboarding: each explainer shows once per campaign, then never again.</summary>
+        public bool OvermapIntroSeen;
+        public bool BattleIntroSeen;
+
         /// <summary>Monotonic counter used to mint unique ids without a GUID dependency.</summary>
         private int _nextEntityIndex;
 

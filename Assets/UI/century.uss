@@ -3414,3 +3414,33 @@ Button.squad-card:hover { border-color: var(--gold); }
     margin-top: 3px;
     margin-bottom: 2px;
 }
+
+/* --- First-load explainers (overmap + first battle) -------------------------------------- */
+
+.intro-sheet {
+    width: 680px;
+    max-height: 88%;
+}
+
+.intro-row {
+    flex-direction: row;
+    margin-top: 8px;
+    align-items: flex-start;
+}
+
+.intro-key {
+    width: 120px;
+    flex-shrink: 0;
+    font-size: var(--font-size-small);
+    color: var(--gold);
+    letter-spacing: 2px;
+    -unity-font-style: bold;
+}
+
+.intro-text {
+    flex-grow: 1;
+    flex-shrink: 1;
+    font-size: var(--font-size-small);
+    color: var(--parchment);
+    white-space: normal;
+}

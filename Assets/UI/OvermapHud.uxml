@@ -286,6 +286,56 @@
             </ui:VisualElement>
         </ui:VisualElement>
 
+        <!-- ============================ FIRST-LOAD EXPLAINER ============================ -->
+        <!-- Shown once per campaign when the overmap first opens: what this demo is and what
+             the player can actually do. Controls stated plainly, no flavour. -->
+        <ui:VisualElement name="intro-modal" class="modal" style="display: none;">
+            <ui:VisualElement class="modal__sheet intro-sheet">
+                <ui:VisualElement class="modal__header">
+                    <ui:Label text="THE LONG ROAD HOME" class="modal__title" />
+                    <ui:Label text="A sandbox demo of Century's core loop. No fixed ending: keep the century alive, fed and growing."
+                              class="modal__subtitle" />
+                </ui:VisualElement>
+
+                <ui:VisualElement class="intro-row">
+                    <ui:Label text="RIGHT CLICK" class="intro-key" />
+                    <ui:Label text="March the column. Speed follows the men's stamina and the ground; night marches are slower and cost more. H halts."
+                              class="intro-text" />
+                </ui:VisualElement>
+                <ui:VisualElement class="intro-row">
+                    <ui:Label text="MAKE CAMP" class="intro-key" />
+                    <ui:Label text="Rest, cook and craft, build camp stations, drill the ranks, appoint officers and invest in their offices' traditions. Almost every action happens in camp."
+                              class="intro-text" />
+                </ui:VisualElement>
+                <ui:VisualElement class="intro-row">
+                    <ui:Label text="THE SCOUT" class="intro-key" />
+                    <ui:Label text="Appoint a Speculator, then send him out from camp: he marks prizes on the map worth marching to. A better office brings truer reports and fewer false leads."
+                              class="intro-text" />
+                </ui:VisualElement>
+                <ui:VisualElement class="intro-row">
+                    <ui:Label text="THE MAP" class="intro-key" />
+                    <ui:Label text="Markers are places worth stopping: each opens a choice. Warbands hunt you — red rings mean you are marked. Fight them, outrun them, or be caught unformed."
+                              class="intro-text" />
+                </ui:VisualElement>
+                <ui:VisualElement class="intro-row">
+                    <ui:Label text="TOP BAR" class="intro-key" />
+                    <ui:Label text="ARMY shows your men, officers and their bonds anywhere on the march. INVENTORY and COMMANDER likewise. Time controls and pace sit at the bottom."
+                              class="intro-text" />
+                </ui:VisualElement>
+                <ui:VisualElement class="intro-row">
+                    <ui:Label text="CAMERA" class="intro-key" />
+                    <ui:Label text="Q and E rotate, the wheel zooms, SPACE recentres on the column."
+                              class="intro-text" />
+                </ui:VisualElement>
+
+                <ui:VisualElement class="modal__footer detail-footer">
+                    <ui:Button name="intro-dismiss" class="button-start">
+                        <ui:Label text="TAKE THE ROAD" class="button-start__label" picking-mode="Ignore" />
+                    </ui:Button>
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
         <!-- ============================ POINT OF INTEREST EVENT ============================ -->
         <ui:VisualElement name="poi-modal" class="modal" style="display: none;">
             <ui:VisualElement class="modal__sheet poi-sheet">

@@ -102,9 +102,14 @@ namespace Century.App
                 PostEffects = PostTreeCatalog.Resolve(_state, contact.Player.Roster),
                 SignumAlreadyLost = _state.SignumLost,
 
+                // The first battle of a demo campaign opens with the how-to-fight explainer.
+                ShowIntro = !_state.BattleIntroSeen,
+
                 // TODO(step 4): sample the terrain under the contact point.
                 TerrainId = "open"
             };
+
+            _state.BattleIntroSeen = true;
 
             // "The Strongest Lead": with the doctrine taken, a man's hard-won experience finally
             // tells in the exchange of blows.

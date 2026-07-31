@@ -173,6 +173,8 @@ namespace Century.Campaign.View
 
             if (_log != null) _log.Added += OnEventAdded;
 
+            BindIntro(root);
+
             _bound = true;
             Refresh();
             RebuildEvents();
@@ -287,6 +289,33 @@ namespace Century.Campaign.View
         }
 
         /// <summary>Opens the inventory and freezes the campaign while the player takes stock.</summary>
+        /// <summary>The demo's first-load explainer: shows once per campaign, clock paused, and
+        /// never again after TAKE THE ROAD.</summary>
+        private void BindIntro(VisualElement root)
+        {
+            VisualElement modal = Find<VisualElement>(root, "intro-modal");
+            Button dismiss = Find<Button>(root, "intro-dismiss");
+            if (modal == null || _state == null) return;
+
+            if (_state.OvermapIntroSeen)
+            {
+                modal.style.display = DisplayStyle.None;
+                return;
+            }
+
+            modal.style.display = DisplayStyle.Flex;
+            TimeControl before = _ticker != null ? _ticker.Current : TimeControl.Normal;
+            _ticker?.SetTimeControl(TimeControl.Paused);
+
+            if (dismiss != null)
+                dismiss.clicked += () =>
+                {
+                    _state.OvermapIntroSeen = true;
+                    modal.style.display = DisplayStyle.None;
+                    _ticker?.SetTimeControl(before);
+                };
+        }
+
         private void OpenInventory()
         {
             if (_inventory == null || _inventory.IsOpen || _activePoi != null) return;

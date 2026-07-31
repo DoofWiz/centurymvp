@@ -52,6 +52,9 @@ namespace Century.Core.Contracts
         /// no standard takes this field, and no aura steadies the line.</summary>
         public bool SignumAlreadyLost;
 
+        /// <summary>First battle of the campaign: show the how-to-fight explainer before it.</summary>
+        public bool ShowIntro;
+
         /// <summary>Captured war banners travelling with the column (relevant to certain doctrines).</summary>
         public int CapturedBanners;
     }

@@ -163,6 +163,10 @@ namespace Century.Battle.View
             if (_hud != null) _hud.Bind(_state, _settings, _commandInput, _eventFeed, _player);
             if (_debugHud != null) _debugHud.Bind(_state, _commandInput, _eventFeed, _player);
 
+            // First battle of the campaign: the how-to-fight explainer, over the deployment
+            // screen, before anything asks the player to act.
+            if (request.ShowIntro) ShowBattleIntro();
+
             // Command of the clock: HUD speed buttons plus held-Space tactical time.
             if (_hud != null)
             {
@@ -622,6 +626,20 @@ namespace Century.Battle.View
                         "It is leaving the field", 1.8f, "stage-banner__frame--danger"));
                     break;
             }
+        }
+
+        private void ShowBattleIntro()
+        {
+            VisualElement root = _hud != null ? _hud.Root : null;
+            if (root == null) return;
+
+            VisualElement modal = root.Q<VisualElement>("battle-intro");
+            Button dismiss = root.Q<Button>("battle-intro-dismiss");
+            if (modal == null) return;
+
+            modal.style.display = DisplayStyle.Flex;
+            if (dismiss != null)
+                dismiss.clicked += () => modal.style.display = DisplayStyle.None;
         }
 
         private SignumStatus _lastSignumStatus = SignumStatus.Absent;

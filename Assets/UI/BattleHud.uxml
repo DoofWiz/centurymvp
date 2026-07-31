@@ -356,5 +356,55 @@
             <ui:VisualElement name="summary-floaters" class="summary-floaters" picking-mode="Ignore" />
         </ui:VisualElement>
 
+        <!-- ============================ FIRST-BATTLE EXPLAINER ============================ -->
+        <!-- Shown once per campaign, over the deployment screen of the first battle: the
+             objective and the controls, stated plainly. -->
+        <ui:VisualElement name="battle-intro" class="modal" style="display: none;">
+            <ui:VisualElement class="modal__sheet intro-sheet">
+                <ui:VisualElement class="modal__header">
+                    <ui:Label text="HOW A BATTLE IS FOUGHT" class="modal__title" />
+                    <ui:Label text="Break the enemy - kill them or make them run - or withdraw with the men you still have. Cohesion is the real health bar: squads that lose heart break long before they die."
+                              class="modal__subtitle" />
+                </ui:VisualElement>
+
+                <ui:VisualElement class="intro-row">
+                    <ui:Label text="YOU" class="intro-key" />
+                    <ui:Label text="WASD moves the Centurion. LEFT CLICK slashes; hold and release it to thrust. Hold RIGHT CLICK to aim a pilum, release to throw. L-CTRL raises the shield, SHIFT sprints."
+                              class="intro-text" />
+                </ui:VisualElement>
+                <ui:VisualElement class="intro-row">
+                    <ui:Label text="RALLY" class="intro-key" />
+                    <ui:Label text="Hold R beside a broken squad to bring it back to the line. It costs you your own place in the fight."
+                              class="intro-text" />
+                </ui:VisualElement>
+                <ui:VisualElement class="intro-row">
+                    <ui:Label text="SQUADS" class="intro-key" />
+                    <ui:Label text="Hover a squad and press TAB to add it to your selection; 0 clears. Then: 2 ADVANCE to the cursor, 3 HOLD, 4 FOLLOW ME, 5 SKIRMISH, 6 FALL BACK, 7 RETREAT. 1 opens the formation menu."
+                              class="intro-text" />
+                </ui:VisualElement>
+                <ui:VisualElement class="intro-row">
+                    <ui:Label text="THE SIGNUM" class="intro-key" />
+                    <ui:Label text="Your standard steadies every squad near it. If its bearer falls, reach it before the enemy does - lose it and the century fights without a standard until it is won back."
+                              class="intro-text" />
+                </ui:VisualElement>
+                <ui:VisualElement class="intro-row">
+                    <ui:Label text="RESERVES" class="intro-key" />
+                    <ui:Label text="8 summons any held-back squads at the marked map edge. Hold SPACE for tactical time; the buttons by the clock pause or speed it."
+                              class="intro-text" />
+                </ui:VisualElement>
+                <ui:VisualElement class="intro-row">
+                    <ui:Label text="IF YOU FALL" class="intro-key" />
+                    <ui:Label text="The Optio holds command for a closing window - win, withdraw, or lose properly inside it. BACKSPACE withdraws at any time: costly, not shameful."
+                              class="intro-text" />
+                </ui:VisualElement>
+
+                <ui:VisualElement class="modal__footer detail-footer">
+                    <ui:Button name="battle-intro-dismiss" class="button-start">
+                        <ui:Label text="FORM THE LINE" class="button-start__label" picking-mode="Ignore" />
+                    </ui:Button>
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
     </ui:VisualElement>
 </ui:UXML>
