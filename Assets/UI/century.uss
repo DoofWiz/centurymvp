@@ -3369,3 +3369,43 @@ Button.squad-card {
 }
 
 Button.squad-card:hover { border-color: var(--gold); }
+
+/* --- Veterancy ladder strip: the four steps in order, the current one lit ---------------- */
+
+.tier-strip {
+    flex-direction: row;
+    align-items: center;
+    margin-top: 3px;
+    margin-bottom: 4px;
+}
+
+.tier-strip__step {
+    font-size: var(--font-size-micro);
+    letter-spacing: 1px;
+    color: var(--parchment-faint);
+    padding: 1px 6px;
+    margin-right: 4px;
+    border-width: var(--rule);
+    border-color: rgba(104, 99, 89, 0.35);
+    background-color: rgba(0, 0, 0, 0.25);
+}
+
+.tier-strip__step--past {
+    color: var(--parchment-dim);
+    border-color: var(--gold-dim);
+    background-color: rgba(201, 162, 39, 0.08);
+}
+
+.tier-strip__step--current {
+    color: var(--gold-bright);
+    border-color: var(--gold);
+    background-color: var(--gold-faint);
+}
+
+.tier-desc {
+    font-size: var(--font-size-micro);
+    color: var(--parchment-dim);
+    white-space: normal;
+    margin-top: 3px;
+    margin-bottom: 2px;
+}

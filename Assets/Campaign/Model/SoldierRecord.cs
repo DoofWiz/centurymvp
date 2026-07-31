@@ -128,6 +128,36 @@ namespace Century.Campaign.Model
             }
         }
 
+        /// <summary>The tier with its plain meaning attached. Latin alone tells a new player
+        /// nothing about the ladder; "Tiro (Recruit)" tells them everything at a glance.</summary>
+        public static string Word(VeterancyTier tier)
+        {
+            switch (tier)
+            {
+                case VeterancyTier.Miles: return "Miles (Trained)";
+                case VeterancyTier.Veteranus: return "Veteranus (Veteran)";
+                case VeterancyTier.Evocatus: return "Evocatus (Elite)";
+                default: return "Tiro (Recruit)";
+            }
+        }
+
+        /// <summary>What the tier means MECHANICALLY, for the soldier sheet. States what it does
+        /// in the game, never flavour.</summary>
+        public static string Describe(VeterancyTier tier)
+        {
+            switch (tier)
+            {
+                case VeterancyTier.Miles:
+                    return "Trained: can hold most offices, and his experience tells in the exchange of blows.";
+                case VeterancyTier.Veteranus:
+                    return "Veteran: can hold any office, the Optio's included. The training ground has nothing left to teach him.";
+                case VeterancyTier.Evocatus:
+                    return "Elite: the steadiest men in the century, with the strongest edge in battle. First in line for promotion.";
+                default:
+                    return "Recruit: the bottom of the ladder. Cannot hold an office until he has trained or fought his way to Miles.";
+            }
+        }
+
         /// <summary>Progress through the current tier, 0..1. Full when at the top tier.</summary>
         public static float Progress01(int experience)
         {

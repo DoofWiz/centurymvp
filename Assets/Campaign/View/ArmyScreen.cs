@@ -242,7 +242,7 @@ namespace Century.Campaign.View
                 text.Add(name);
 
                 var detail = new Label(
-                    $"{man.Tier} · {man.Kills} kills · {man.BattlesSurvived} fights" +
+                    $"{VeterancyLadder.Word(man.Tier)} · {man.Kills} kills · {man.BattlesSurvived} fights" +
                     (man.IsWounded ? " · WOUNDED" : string.Empty))
                     { pickingMode = PickingMode.Ignore };
                 detail.AddToClassList("pick-row__detail");
@@ -289,6 +289,10 @@ namespace Century.Campaign.View
 
             head.Add(names);
             _body.Add(head);
+
+            var tierNote = new Label(VeterancyLadder.Describe(man.Tier)) { pickingMode = PickingMode.Ignore };
+            tierNote.AddToClassList("tier-desc");
+            _body.Add(tierNote);
 
             AddDetailRow("ATTITUDE TO YOU",
                 RelationshipLedger.AttitudeWord(man.Loyalty01),
@@ -365,8 +369,8 @@ namespace Century.Campaign.View
         {
             if (man.RankId == "centurion") return "Centurion — you";
             if (_state.PlayerParty.Appointments.HoldsAnyRole(man.Id, out CampRole role))
-                return $"{CampRoleInfo.For(role).Latin} — {man.Tier}";
-            return man.Tier.ToString();
+                return $"{CampRoleInfo.For(role).Latin} — {VeterancyLadder.Word(man.Tier)}";
+            return VeterancyLadder.Word(man.Tier);
         }
 
         private string TierDiscClass(SoldierRecord man)

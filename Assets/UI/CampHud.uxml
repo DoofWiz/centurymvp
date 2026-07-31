@@ -261,10 +261,13 @@
                     <ui:Label name="soldier-attitude" text="—" class="detail-value" />
                 </ui:VisualElement>
 
-                <ui:Label name="soldier-rankprog-label" text="RANK" class="detail-label detail-label--block" />
+                <ui:Label name="soldier-rankprog-label" text="VETERANCY" class="detail-label detail-label--block" />
+                <!-- The whole ladder, in order, current step lit: Latin words explain themselves. -->
+                <ui:VisualElement name="soldier-tier-strip" class="tier-strip" />
                 <ui:VisualElement class="bar bar--thick">
                     <ui:VisualElement name="soldier-rankprog-fill" class="bar__fill bar__fill--gold" />
                 </ui:VisualElement>
+                <ui:Label name="soldier-tier-desc" text="—" class="tier-desc" />
 
                 <ui:Label name="soldier-morale-label" text="MORALE" class="detail-label detail-label--block" />
                 <ui:VisualElement class="bar bar--thick">

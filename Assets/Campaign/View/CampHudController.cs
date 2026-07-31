@@ -81,7 +81,8 @@ namespace Century.Campaign.View
         private SoldierRecord _openSoldier;
         private VisualElement _soldierAvatar;
         private Label _soldierName, _soldierRank, _soldierFlavour, _soldierAttitude;
-        private VisualElement _soldierTies;
+        private VisualElement _soldierTies, _soldierTierStrip;
+        private Label _soldierTierDesc;
         private Label _soldierRankLabel, _soldierMoraleLabel, _soldierFitnessLabel, _soldierEquipment;
         private VisualElement _soldierRankFill, _soldierMoraleFill, _soldierFitnessFill;
         private Button _soldierClose;
@@ -243,6 +244,8 @@ namespace Century.Campaign.View
             _soldierFitnessLabel = Find<Label>(root, "soldier-fitness-label");
             _soldierEquipment = Find<Label>(root, "soldier-equipment");
             _soldierTies = Find<VisualElement>(root, "soldier-ties");
+            _soldierTierStrip = Find<VisualElement>(root, "soldier-tier-strip");
+            _soldierTierDesc = Find<Label>(root, "soldier-tier-desc");
             _soldierRankFill = Find<VisualElement>(root, "soldier-rankprog-fill");
             _soldierMoraleFill = Find<VisualElement>(root, "soldier-morale-fill");
             _soldierFitnessFill = Find<VisualElement>(root, "soldier-fitness-fill");
@@ -561,7 +564,7 @@ namespace Century.Campaign.View
             name.AddToClassList("soldier-card__name");
             body.Add(name);
 
-            var rank = new Label(overrideRank ?? soldier.Tier.ToString()) { pickingMode = PickingMode.Ignore };
+            var rank = new Label(overrideRank ?? VeterancyLadder.Word(soldier.Tier)) { pickingMode = PickingMode.Ignore };
             rank.AddToClassList("soldier-card__rank");
             rank.AddToClassList(TierColorClass(soldier));
             body.Add(rank);
@@ -656,20 +659,23 @@ namespace Century.Campaign.View
             SetText(_soldierAttitude, attitude);
             Recolour(_soldierAttitude, LoyaltyColorClass(soldier.Loyalty01));
 
-            // Rank progress.
+            // Veterancy: the whole ladder shown in order, so the Latin explains itself.
             VeterancyTier tier = soldier.Tier;
             int next = VeterancyLadder.NextThreshold(tier);
             if (next <= 0)
             {
-                SetText(_soldierRankLabel, $"RANK — {tier} (the steadiest of the steady)");
+                SetText(_soldierRankLabel, $"VETERANCY — {VeterancyLadder.Word(tier)} · the top of the ladder");
                 SetFill(_soldierRankFill, 1f);
             }
             else
             {
                 SetText(_soldierRankLabel,
-                    $"RANK — {tier} · {soldier.Experience}/{next} xp to {tier + 1}");
+                    $"VETERANCY — {VeterancyLadder.Word(tier)} · {soldier.Experience}/{next} xp to {VeterancyLadder.Word(tier + 1)}");
                 SetFill(_soldierRankFill, VeterancyLadder.Progress01(soldier.Experience));
             }
+
+            RebuildTierStrip(tier);
+            SetText(_soldierTierDesc, VeterancyLadder.Describe(tier));
 
             var morale = new MoraleState { Value01 = soldier.Morale01 };
             SetText(_soldierMoraleLabel, $"MORALE — {morale.Band}");
@@ -684,6 +690,23 @@ namespace Century.Campaign.View
             RebuildTies(soldier);
 
             Show(_soldierModal);
+        }
+
+        /// <summary>The four steps of the ladder in order, the man's current one lit: a new player
+        /// learns what Tiro and Miles ARE by seeing where they sit.</summary>
+        private void RebuildTierStrip(VeterancyTier current)
+        {
+            if (_soldierTierStrip == null) return;
+            _soldierTierStrip.Clear();
+
+            for (VeterancyTier tier = VeterancyTier.Tiro; tier <= VeterancyTier.Evocatus; tier++)
+            {
+                var step = new Label(tier.ToString().ToUpperInvariant()) { pickingMode = PickingMode.Ignore };
+                step.AddToClassList("tier-strip__step");
+                if (tier < current) step.AddToClassList("tier-strip__step--past");
+                else if (tier == current) step.AddToClassList("tier-strip__step--current");
+                _soldierTierStrip.Add(step);
+            }
         }
 
         /// <summary>The man's social circle, strongest feelings first, each with its reason. This
@@ -784,8 +807,8 @@ namespace Century.Campaign.View
         {
             if (soldier.RankId == "centurion") return "Centurion — you";
             if (_state.PlayerParty.Appointments.HoldsAnyRole(soldier.Id, out CampRole role))
-                return $"{CampRoleInfo.For(role).Latin} — {soldier.Tier}";
-            return soldier.Tier.ToString();
+                return $"{CampRoleInfo.For(role).Latin} — {VeterancyLadder.Word(soldier.Tier)}";
+            return VeterancyLadder.Word(soldier.Tier);
         }
 
         private static readonly string[] IdleFlavour =
@@ -1051,7 +1074,9 @@ namespace Century.Campaign.View
 
             CampRoleInfo info = CampRoleInfo.For(role);
             SetText(_pickerTitle, $"APPOINT {info.Latin.ToUpperInvariant()}");
-            SetText(_pickerSubtitle, info.Benefit);
+            SetText(_pickerSubtitle, info.MinimumTier > VeterancyTier.Tiro
+                ? $"{info.Benefit}  Needs {VeterancyLadder.Word(info.MinimumTier)} or better."
+                : info.Benefit);
 
             if (_pickerList != null)
             {
@@ -1092,7 +1117,7 @@ namespace Century.Campaign.View
             text.Add(name);
 
             var detail = new Label(
-                $"{soldier.Tier} · {soldier.Kills} kills · {soldier.BattlesSurvived} fights")
+                $"{VeterancyLadder.Word(soldier.Tier)} · {soldier.Kills} kills · {soldier.BattlesSurvived} fights")
                 { pickingMode = PickingMode.Ignore };
             detail.AddToClassList("pick-row__detail");
             text.Add(detail);
