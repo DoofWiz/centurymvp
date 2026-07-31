@@ -50,6 +50,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Campaign\View\OvermapHudController.cs" />
+    <Compile Include="Assets\Campaign\View\ArmyScreen.cs" />
     <Compile Include="Assets\Campaign\Sim\CampaignSimulation.cs" />
     <Compile Include="Assets\Campaign\Sim\PoiFightFactory.cs" />
     <Compile Include="Assets\Campaign\View\OvermapWorld.cs" />
@@ -82,6 +83,7 @@
     <Compile Include="Assets\Campaign\Sim\PartySpeedCalculator.cs" />
     <Compile Include="Assets\Campaign\View\OvermapMoveMarker.cs" />
     <Compile Include="Assets\Campaign\Sim\LineOfSight.cs" />
+    <Compile Include="Assets\Campaign\Model\PostRoster.cs" />
     <Compile Include="Assets\Campaign\Model\SoldierRecord.cs" />
     <Compile Include="Assets\Campaign\Sim\ContuberniumLedger.cs" />
     <Compile Include="Assets\Campaign\View\PartyView.cs" />

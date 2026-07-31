@@ -197,6 +197,7 @@ namespace Century.Battle.View
         /// <summary>Public entry point for the HUD's formation button: opens or closes the picker.</summary>
         public void ToggleFormationMenu()
         {
+            if (_state != null && _state.CommandDevolved) return;   // no re-dressing under the Optio
             FormationMenuOpen = !FormationMenuOpen;
             if (FormationMenuOpen) _menuOpenedAt = Time.unscaledTime;
         }
@@ -301,8 +302,19 @@ namespace Century.Battle.View
             OrderIssued?.Invoke(null);
         }
 
+        /// <summary>Under the Optio only holding, falling back and retreating can be asked of the
+        /// century — he keeps them alive; he does not manoeuvre them (Centurio in Waiting).</summary>
+        private bool OrderAllowed(SquadOrder order)
+        {
+            if (_state == null || !_state.CommandDevolved) return true;
+            return order == SquadOrder.HoldPosition
+                   || order == SquadOrder.Fallback
+                   || order == SquadOrder.Retreat;
+        }
+
         private void IssueOrder(SquadOrder order, bool useCursor)
         {
+            if (!OrderAllowed(order)) return;
             Vector3 cursor = Vector3.zero;
             bool hasCursor = useCursor && _cameraRig != null && _cameraRig.TryGetCursorGroundPoint(out cursor);
 
@@ -344,7 +356,10 @@ namespace Century.Battle.View
             // "Roman Order": drilled until the order and the act are the same thing.
             if (_state.HasSkill("roman_order")) delay *= 0.7f;
 
-            return Mathf.Min(delay, _settings.MaxOrderDelaySeconds);
+            // Orders travel slower under the Optio: he is not the voice the men trained to.
+            if (_state != null && _state.CommandDevolved) delay *= 1.6f;
+
+            return Mathf.Min(delay, _settings.MaxOrderDelaySeconds * (_state != null && _state.CommandDevolved ? 1.6f : 1f));
         }
 
         private IEnumerable<BattleSquad> SelectedSquads()

@@ -70,9 +70,23 @@ namespace Century.Battle.Sim
 
             bool commanderDown = _state.PlayerCharacter == null || !_state.PlayerCharacter.IsAlive;
 
+            // Centurio in Waiting: with a living Optio on the field, the commander's fall opens a
+            // succession window instead of ending the battle. Defeat only if there is no successor,
+            // the successor also falls, or the window has closed (which withdraws, not defeats:
+            // the Optio's whole office is bringing the century home).
+            bool optioHolds = _state.CommandDevolved && _state.SuccessionSecondsLeft > 0f
+                              && AnyLivingOptio();
+            if (commanderDown && _state.CommandDevolved && _state.SuccessionSecondsLeft <= 0f
+                && AnyLivingOptio())
+            {
+                Reason = "The Optio pulls the century out";
+                outcome = BattleOutcome.Withdrawal;
+                return true;
+            }
+
             BattleOutcome candidate;
 
-            if (commanderDown) candidate = BattleOutcome.Defeat;
+            if (commanderDown && !optioHolds) candidate = BattleOutcome.Defeat;
             else if (playerLost >= _settings.PlayerBrokenFraction) candidate = BattleOutcome.Defeat;
             else if (enemyLost >= _settings.EnemyBrokenFraction) candidate = BattleOutcome.Victory;
             else candidate = BattleOutcome.Aborted;
@@ -92,16 +106,28 @@ namespace Century.Battle.Sim
 
             _candidateHeldFor += deltaSeconds;
 
-            // A commander's death ends things immediately; there is nobody left to give orders.
-            float required = commanderDown ? 0f : _settings.OutcomeConfirmSeconds;
+            // A commander's death with no successor ends things immediately.
+            float required = commanderDown && !optioHolds ? 0f : _settings.OutcomeConfirmSeconds;
             if (_candidateHeldFor < required) return false;
 
-            Reason = commanderDown ? "The Centurion has fallen"
+            Reason = commanderDown && !optioHolds
+                ? (_state.CommandDevolved ? "Command died with the Optio" : "The Centurion has fallen")
                 : candidate == BattleOutcome.Defeat ? "The century is broken"
                 : "The enemy is broken";
 
             outcome = candidate;
             return true;
+        }
+
+        private bool AnyLivingOptio()
+        {
+            for (int s = 0; s < _state.PlayerSquads.Count; s++)
+            {
+                var members = _state.PlayerSquads[s].Members;
+                for (int m = 0; m < members.Count; m++)
+                    if (members[m].IsAlive && members[m].Role == OfficerRole.Optio) return true;
+            }
+            return false;
         }
     }
 }

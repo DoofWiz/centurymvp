@@ -79,6 +79,7 @@ namespace Century.Battle.Sim
                 _moraleAccumulator = 0f;
             }
 
+            TickSuccession(deltaSeconds);
             _morale.TickRally(deltaSeconds, rallyHeld);
             RecoverStamina(deltaSeconds);
             ClearFallen();
@@ -185,6 +186,26 @@ namespace Century.Battle.Sim
                     if (man.Target != null && !man.Target.IsAlive) man.Target = null;
                 }
             }
+        }
+
+        /// <summary>Centurio in Waiting: the moment the Centurion goes down with an Optio still
+        /// standing, command devolves and the window opens. The evaluator reads the clock.</summary>
+        private void TickSuccession(float deltaSeconds)
+        {
+            BattleCombatant player = _state.PlayerCharacter;
+
+            if (!_state.CommandDevolved)
+            {
+                if (player != null && !player.IsAlive)
+                {
+                    _state.CommandDevolved = true;
+                    _state.SuccessionSecondsLeft = _settings.SuccessionWindowSeconds;
+                }
+                return;
+            }
+
+            if (_state.SuccessionSecondsLeft > 0f)
+                _state.SuccessionSecondsLeft = Mathf.Max(0f, _state.SuccessionSecondsLeft - deltaSeconds);
         }
     }
 }

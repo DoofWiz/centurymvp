@@ -95,8 +95,6 @@ namespace Century.Battle.View
         {
             if (_settings == null || _combatant == null) return;
 
-            if (!_combatant.IsAlive) return;
-
             if (!IsControlEnabled)
             {
                 IsRallying = false;
@@ -109,6 +107,28 @@ namespace Century.Battle.View
                 // Follow the model while control is suspended, so deployment moves are reflected here.
                 transform.position = _combatant.WorldPosition;
                 _gear?.Pose(_combatant, Time.deltaTime);
+                return;
+            }
+
+            // A dead Centurion gives no orders and swings no blade; he lies where he fell while
+            // the Optio's window runs (Centurio in Waiting).
+            if (_combatant != null && !_combatant.IsAlive)
+            {
+                if (!_playerDown)
+                {
+                    _playerDown = true;
+                    HitEffects.SpawnDeath(transform.position + Vector3.up * 0.9f);
+                    if (_bodyRoot != null)
+                    {
+                        _bodyRoot.rotation = Quaternion.Euler(90f, _bodyRoot.eulerAngles.y, 0f);
+                        _bodyRoot.localPosition += Vector3.up * 0.12f;
+                    }
+                    if (_controller != null) _controller.enabled = false;
+                }
+                IsRallying = false;
+                ShieldHeld = false;
+                ThrowRequested = false;
+                IsAiming = false;
                 return;
             }
 
@@ -176,6 +196,7 @@ namespace Century.Battle.View
         }
 
         private SoldierRig _rig;
+        private bool _playerDown;
 
         /// <summary>The Centurion in the flesh: transverse crest, bronze, a head above the ranks.
         /// Replaces whatever placeholder the prefab carried; its colliders stay untouched.</summary>

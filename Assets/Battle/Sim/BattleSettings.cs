@@ -217,6 +217,11 @@ namespace Century.Battle.Sim
 
         public float MedicusRadius = 5f;
 
+        [Header("Succession")]
+        [Tooltip("Seconds the Optio can hold command after the Centurion falls. Win, withdraw, " +
+                 "or lose properly inside this window; when it closes he pulls the century out.")]
+        public float SuccessionWindowSeconds = 45f;
+
         [Header("Battle end")]
         [Tooltip("Fraction of the enemy that must be dead or routed for a victory.")]
         [Range(0.5f, 1f)] public float EnemyBrokenFraction = 0.8f;

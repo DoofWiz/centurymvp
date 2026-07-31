@@ -461,6 +461,18 @@ namespace Century.Battle.View
                 return;
             }
 
+            // Centurio in Waiting: the moment command devolves, say so and swing the eye to the
+            // man now carrying it. The battle itself keeps running.
+            if (_state.CommandDevolved && !_successionAnnounced)
+            {
+                _successionAnnounced = true;
+                SoldierView optio = FindOptioView();
+                if (optio != null && _cameraRig != null) _cameraRig.SetTarget(optio.transform);
+                if (_banner != null)
+                    StartCoroutine(_banner.Show("The Centurion is down",
+                        "The Optio holds command — bring them home", 1.8f, "stage-banner__frame--danger"));
+            }
+
             if (_simulation.IsConcluded && !_outcomeDecided)
                 StartCoroutine(BeginAftermath(_simulation.Outcome));
         }
@@ -554,6 +566,19 @@ namespace Century.Battle.View
             Time.timeScale = 1f;
             ServiceLocator.Unregister<BattleState>();
             UnityEngine.SceneManagement.SceneManager.LoadScene(gameObject.scene.name);
+        }
+
+        private bool _successionAnnounced;
+
+        private SoldierView FindOptioView()
+        {
+            for (int i = 0; i < _soldierViews.Count; i++)
+            {
+                var combatant = _soldierViews[i].Combatant;
+                if (combatant != null && combatant.IsAlive && combatant.Role == Century.Battle.Model.OfficerRole.Optio)
+                    return _soldierViews[i];
+            }
+            return null;
         }
     }
 }

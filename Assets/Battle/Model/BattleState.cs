@@ -57,6 +57,11 @@ namespace Century.Battle.Model
         /// <summary>Seconds since the battle began. Drives order propagation, not campaign time.</summary>
         public float ElapsedSeconds;
 
+        /// <summary>The Centurion is down and the Optio holds command: a degraded-control window
+        /// with a closing clock, instead of an instant defeat (army brief, Centurio in Waiting).</summary>
+        public bool CommandDevolved;
+        public float SuccessionSecondsLeft;
+
         public BattlePhase Phase = BattlePhase.Deployment;
 
         // --- Deployment ------------------------------------------------------------------------
