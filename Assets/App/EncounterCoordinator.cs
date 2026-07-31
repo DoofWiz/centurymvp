@@ -131,11 +131,18 @@ namespace Century.App
                 SoldierRecord soldier = party.Roster.Soldiers[i];
                 if (!soldier.IsCombatReady) continue;   // the badly wounded stay with the baggage
 
+                // An office held by appointment IS the man's battle role: the appointed signifer
+                // carries the standard whatever rank he was raised from.
+                string rankId = soldier.RankId;
+                if (markPlayerControlled
+                    && party.Appointments.HoldsAnyRole(soldier.Id, out CampRole heldRole))
+                    rankId = PostRoster.PostFor(heldRole) ?? rankId;
+
                 target.Add(new CombatantSpec
                 {
                     SoldierId = soldier.Id,
                     DisplayName = soldier.DisplayName,
-                    RankId = soldier.RankId,
+                    RankId = rankId,
                     ArchetypeId = soldier.ArchetypeId,
                     Health01 = soldier.Health01,
                     Stamina01 = soldier.Stamina01,

@@ -351,6 +351,9 @@ namespace Century.Campaign.Sim
             PoiCatalog.CreateOpportunity(_state, _settings, _party.WorldPosition);
             _state.Commander.Note(CommanderPhilosophy.Survivor, 0.4f);
 
+            // The speculator's office learns by ranging — his points come from rides, not battles.
+            PostTreeCatalog.AwardScoutPoint(_state, _party.Roster);
+
             int scoutFire = _party.Facilities.LevelOf(CampStationId.ScoutFire);
             string detail = scoutFire > 0
                 ? "The scout's fire lets them range farther — a richer prospect."

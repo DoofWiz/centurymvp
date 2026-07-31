@@ -42,11 +42,13 @@ namespace Century.Campaign.Sim
                 : 1f;
 
             // "Know the Land": the commander reads the ground like the natives read the sky.
+            // "Read the Ground": the speculator finds the firm path for everyone behind him.
             float doctrine = 1f;
-            if (party.IsPlayer
-                && Century.Core.ServiceLocator.TryGet(out CampaignState campaign)
-                && campaign.Commander.Has("know_the_land"))
-                doctrine = 1.08f;
+            if (party.IsPlayer && Century.Core.ServiceLocator.TryGet(out CampaignState campaign))
+            {
+                if (campaign.Commander.Has("know_the_land")) doctrine = 1.08f;
+                if (PostTreeCatalog.Invested(campaign, "read_the_ground")) doctrine *= 1.05f;
+            }
 
             return settings.BaseMarchSpeedKph
                    * party.SpeedModifier

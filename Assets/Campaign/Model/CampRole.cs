@@ -14,7 +14,9 @@ namespace Century.Campaign.Model
         /// <summary>Lead scout. Ranges ahead from camp and brings back Opportunities.</summary>
         Speculator = 2,
         /// <summary>Standard bearer. His presence stiffens morale in the line.</summary>
-        Signifer = 3
+        Signifer = 3,
+        /// <summary>The bandage box. More men come back from the fields they fall on.</summary>
+        Medicus = 4
     }
 
     /// <summary>
@@ -61,6 +63,10 @@ namespace Century.Campaign.Model
                     return new CampRoleInfo(role, "Standard Bearer", "Signifer",
                         "Carries the standard — bolsters morale through the night.",
                         VeterancyTier.Miles);
+                case CampRole.Medicus:
+                    return new CampRoleInfo(role, "Physician", "Medicus",
+                        "Keeps the bandage box — more of the fallen found alive, faster healing.",
+                        VeterancyTier.Miles);
                 default:
                     return new CampRoleInfo(role, role.ToString(), role.ToString(), string.Empty,
                         VeterancyTier.Tiro);
@@ -69,7 +75,7 @@ namespace Century.Campaign.Model
 
         /// <summary>Every role, in display order. Allocates a small array; call once and cache.</summary>
         public static readonly CampRole[] All =
-            { CampRole.Optio, CampRole.Tesserarius, CampRole.Speculator, CampRole.Signifer };
+            { CampRole.Optio, CampRole.Tesserarius, CampRole.Speculator, CampRole.Signifer, CampRole.Medicus };
 
         /// <summary>Can this man hold this role? The centurion never steps down to a subordinate post.</summary>
         public bool IsEligible(SoldierRecord soldier)

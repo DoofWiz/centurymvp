@@ -28,6 +28,8 @@ namespace Century.Campaign.Sim
             if (state.Commander.Has("eyes_and_ears")) radius *= 1.12f;
             // Password: the tesserarius' watch chain passes word of everything it sees.
             if (PostTreeCatalog.Invested(state, "password")) radius *= 1.08f;
+            // Far Rider: the speculator ranges the ridgelines ahead of the column.
+            if (PostTreeCatalog.Invested(state, "far_rider")) radius *= 1.10f;
             return radius;
         }
 
@@ -42,12 +44,16 @@ namespace Century.Campaign.Sim
         public static float Visibility01(CampaignState state, Vector3 worldPosition) =>
             Visibility01(state, worldPosition, 1f);
 
-        /// <summary>Party-aware visibility: a stealthed party is spotted far later.</summary>
+        /// <summary>Party-aware visibility: a stealthed party is spotted far later — unless the
+        /// speculator's capstone holds, and stealth hides nothing from the column.</summary>
         public static float Visibility01(CampaignState state, PartyState observed)
         {
             if (observed == null) return 0f;
+
+            bool hidden = observed.IsStealthed
+                && !PostTreeCatalog.Invested(state, "nothing_unseen");
             return Visibility01(state, observed.WorldPosition,
-                observed.IsStealthed ? StealthedSightFraction : 1f);
+                hidden ? StealthedSightFraction : 1f);
         }
 
         private static float Visibility01(CampaignState state, Vector3 worldPosition, float radiusFraction)

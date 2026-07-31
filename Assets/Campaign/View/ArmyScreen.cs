@@ -46,7 +46,7 @@ namespace Century.Campaign.View
             Roster roster = _state.PlayerParty?.Roster;
             if (roster == null || _body == null) return;
 
-            _state.Posts.EnsureSeeded(roster, _state.Clock.Now.DayNumber);
+            _state.Posts.EnsureSeeded(roster, _state.Clock.Now.DayNumber, _state.PlayerParty?.Appointments);
             ContuberniumLedger.EnsureAssigned(roster);
 
             int wounded = 0;

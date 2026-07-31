@@ -23,7 +23,7 @@ namespace Century.Campaign.View
     public sealed class CampHudController : MonoBehaviour
     {
         private const string DefaultOrgHint =
-            "Click a man to inspect him. Click a post to appoint an officer.";
+            "Click a man to inspect him. Click an office to see its traditions, invest, or appoint.";
 
         [SerializeField] private float _refreshInterval = 0.25f;
 
@@ -52,10 +52,17 @@ namespace Century.Campaign.View
         private ScrollView _stationsList;
         private ScrollView _craftingList;
 
-        // Sub-screen tabs: 0 Century, 1 Rest & Orders, 2 Crafting, 3 Stations, 4 Offices.
-        private readonly Button[] _campTabs = new Button[5];
-        private readonly VisualElement[] _campPages = new VisualElement[5];
-        private ScrollView _officesList;
+        // Sub-screen tabs: 0 Century, 1 Rest & Orders, 2 Crafting, 3 Stations.
+        private readonly Button[] _campTabs = new Button[4];
+        private readonly VisualElement[] _campPages = new VisualElement[4];
+
+        // Office overlay: opened by clicking an officer slot in the COMMAND band.
+        private VisualElement _officeModal;
+        private Label _officeSubtitle;
+        private ScrollView _officeBody;
+        private Button _officeAppoint, _officeCloseButton;
+        private Label _officeAppointLabel;
+        private CampRole _openOfficeRole;
         private Label _restReadout, _orderScoutHint, _orderTrainHint, _orderHuntHint;
         private Button _orderHunt;
         private Button _restWatch, _restDawn, _orderScout, _orderTrain, _breakCamp;
@@ -126,7 +133,6 @@ namespace Century.Campaign.View
 
             _bound = true;
             RebuildOrganisation();
-            RebuildOffices();
             RebuildStations();
             RebuildCrafting();
             Refresh();
@@ -149,9 +155,6 @@ namespace Century.Campaign.View
                 if (_campPages[i] != null)
                     _campPages[i].style.display = i == index ? DisplayStyle.Flex : DisplayStyle.None;
             }
-
-            // Offices refresh on open so battle-earned points are always current.
-            if (index == 4 && changed && _bound) RebuildOffices();
 
             VisualElement page = index >= 0 && index < _campPages.Length ? _campPages[index] : null;
             if (!changed || page == null) return;
@@ -179,7 +182,21 @@ namespace Century.Campaign.View
 
             _orgHint = Find<Label>(root, "org-hint");
             _orgList = Find<ScrollView>(root, "org-list");
-            _officesList = Find<ScrollView>(root, "offices-list");
+
+            _officeModal = Find<VisualElement>(root, "office-modal");
+            _officeSubtitle = Find<Label>(root, "office-subtitle");
+            _officeBody = Find<ScrollView>(root, "office-body");
+            _officeAppoint = Find<Button>(root, "office-appoint");
+            _officeAppointLabel = Find<Label>(root, "office-appoint-label");
+            _officeCloseButton = Find<Button>(root, "office-close");
+            if (_officeAppoint != null)
+                _officeAppoint.clicked += () =>
+                {
+                    CampRole role = _openOfficeRole;
+                    CloseOffice();
+                    OpenPicker(role);
+                };
+            if (_officeCloseButton != null) _officeCloseButton.clicked += CloseOffice;
 
             _stationsList = Find<ScrollView>(root, "stations-list");
             _craftingList = Find<ScrollView>(root, "crafting-list");
@@ -369,7 +386,11 @@ namespace Century.Campaign.View
             PartyState party = _state.PlayerParty;
             List<SoldierRecord> soldiers = party.Roster.Soldiers;
 
-            // Command band: the four senior posts. The centurion is the player and gets no card here.
+            // Sync the establishment with the appointment chart before drawing either: rank-held
+            // officers surface as appointments, and the office cards agree with these slots.
+            _state.Posts.EnsureSeeded(party.Roster, _state.Clock.Now.DayNumber, party.Appointments);
+
+            // Command band: the senior posts. The centurion is the player and gets no card here.
             _orgList.Add(SectionHeader("COMMAND"));
 
             var command = MakeGrid();
@@ -436,20 +457,36 @@ namespace Century.Campaign.View
         // --- The offices -------------------------------------------------------------------------
 
         /// <summary>
-        /// THE OFFICES tab: one tradition card per office (built by <see cref="OfficeCards"/>,
-        /// the same cards the ARMY screen shows read-only). Investing is possible here and only
-        /// here — the camp is where the player acts (army brief §4.2).
+        /// The office overlay: clicking an officer slot opens that office's tradition card (the
+        /// same card the ARMY screen shows read-only) with invest live and the appointment flow
+        /// a button away. The camp is where the player acts (army brief §4.2).
         /// </summary>
-        private void RebuildOffices()
+        private void OpenOffice(CampRole role)
         {
-            if (_officesList == null) return;
-            _officesList.Clear();
-
-            PartyState party = _state.PlayerParty;
-            if (party == null) return;
-
-            _officesList.Add(OfficeCards.BuildRow(_state, party.Roster, InvestInTradition));
+            if (_officeModal == null) return;
+            _openOfficeRole = role;
+            RefreshOfficeModal();
+            Show(_officeModal);
         }
+
+        private void RefreshOfficeModal()
+        {
+            PartyState party = _state.PlayerParty;
+            if (_officeBody == null || party == null) return;
+
+            string post = PostRoster.PostFor(_openOfficeRole);
+            if (post == null) return;
+
+            SetText(_officeSubtitle, PostRoster.Charge(post));
+
+            _officeBody.Clear();
+            _officeBody.Add(OfficeCards.BuildCard(_state, party.Roster, post, InvestInTradition));
+
+            bool filled = party.Appointments.IsFilled(_openOfficeRole);
+            SetText(_officeAppointLabel, filled ? "REPLACE THE MAN" : "APPOINT A MAN");
+        }
+
+        private void CloseOffice() => Hide(_officeModal);
 
         private void InvestInTradition(PostNodeDef node)
         {
@@ -466,7 +503,8 @@ namespace Century.Campaign.View
                 node.Effect,
                 _state.Clock.Now.DayNumber);
 
-            RebuildOffices();
+            RefreshOfficeModal();
+            RebuildOrganisation();   // the slot badges show unspent points
         }
 
         private bool IsOfficer(SoldierRecord soldier)
@@ -584,7 +622,13 @@ namespace Century.Campaign.View
             text.Add(title);
 
             slot.Add(text);
-            slot.clicked += () => OpenPicker(role);
+
+            // Unspent tradition points wait on the office: the badge is the call to action.
+            PostRecord record = _state.Posts.Find(PostRoster.PostFor(role));
+            int points = record != null ? Mathf.FloorToInt(record.UnspentPoints) : 0;
+            if (points > 0) slot.Add(Badge($"{points} pts", "badge--points"));
+
+            slot.clicked += () => OpenOffice(role);
             return slot;
         }
 
@@ -1024,6 +1068,7 @@ namespace Century.Campaign.View
                 _camp.AssignRole(_pickerRole, soldierId);
                 ClosePicker();
                 RebuildOrganisation();
+                OpenOffice(_pickerRole);   // straight back to the office, new man in place
             };
 
             return row;
@@ -1043,6 +1088,7 @@ namespace Century.Campaign.View
             _camp.AssignRole(_pickerRole, null);
             ClosePicker();
             RebuildOrganisation();
+            OpenOffice(_pickerRole);   // the card now shows the vacancy and what it costs
         }
 
         private void ClosePicker() => Hide(_pickerModal);
@@ -1257,6 +1303,7 @@ namespace Century.Campaign.View
             Hide(_pickerModal);
             Hide(_soldierModal);
             Hide(_scoutModal);
+            Hide(_officeModal);
         }
 
         private static void SetText(Label label, string text)

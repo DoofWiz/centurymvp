@@ -100,11 +100,6 @@
             <ui:Button name="camp-tab-0" class="pill">
                 <ui:Label text="THE CENTURY" class="pill__label" picking-mode="Ignore" />
             </ui:Button>
-            <!-- Index 4 sits second in reading order on purpose: the offices belong beside the
-                 century chart, but the tab indices are a stable contract with the controller. -->
-            <ui:Button name="camp-tab-4" class="pill">
-                <ui:Label text="THE OFFICES" class="pill__label" picking-mode="Ignore" />
-            </ui:Button>
             <ui:Button name="camp-tab-1" class="pill">
                 <ui:Label text="REST &amp; ORDERS" class="pill__label" picking-mode="Ignore" />
             </ui:Button>
@@ -129,19 +124,6 @@
                     </ui:VisualElement>
                     <ui:VisualElement class="rule rule--short" />
                     <ui:ScrollView name="org-list" class="org-list" />
-                </ui:VisualElement>
-            </ui:VisualElement>
-
-            <!-- ============================ PAGE: THE OFFICES ============================ -->
-            <ui:VisualElement name="camp-page-4" class="camp-page" style="display: none;">
-                <ui:VisualElement class="panel camp-block camp-block--grow">
-                    <ui:VisualElement class="org-head">
-                        <ui:Label text="THE OFFICES" class="heading" />
-                        <ui:Label text="An office learns from the battles it stands. Its traditions belong to the office, and outlive the man who holds it."
-                                  class="org-hint" />
-                    </ui:VisualElement>
-                    <ui:VisualElement class="rule rule--short" />
-                    <ui:ScrollView name="offices-list" class="org-list" />
                 </ui:VisualElement>
             </ui:VisualElement>
 
@@ -218,6 +200,28 @@
             <ui:Button name="break-camp" class="button-start camp-break">
                 <ui:Label text="BREAK CAMP" class="button-start__label" picking-mode="Ignore" />
             </ui:Button>
+        </ui:VisualElement>
+
+        <!-- ============================ OFFICE OVERLAY ============================ -->
+        <!-- Opened by clicking an officer slot on the century chart: the office's tradition
+             card with invest live, and the appointment flow one button away. -->
+        <ui:VisualElement name="office-modal" class="modal" style="display: none;">
+            <ui:VisualElement class="modal__sheet office-sheet">
+                <ui:VisualElement class="modal__header">
+                    <ui:Label text="THE OFFICE" class="modal__title" />
+                    <ui:Label name="office-subtitle" text="—" class="modal__subtitle" />
+                </ui:VisualElement>
+                <ui:ScrollView name="office-body" class="office-body" />
+                <ui:VisualElement class="modal__footer detail-footer">
+                    <ui:Button name="office-appoint" class="button-ghost">
+                        <ui:Label name="office-appoint-label" text="APPOINT A MAN"
+                                  class="button-ghost__label" picking-mode="Ignore" />
+                    </ui:Button>
+                    <ui:Button name="office-close" class="button-ghost">
+                        <ui:Label text="CLOSE" class="button-ghost__label" picking-mode="Ignore" />
+                    </ui:Button>
+                </ui:VisualElement>
+            </ui:VisualElement>
         </ui:VisualElement>
 
         <!-- ============================ SOLDIER PICKER MODAL ============================ -->

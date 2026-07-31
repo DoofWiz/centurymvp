@@ -22,8 +22,6 @@ namespace Century.Campaign.View
         /// <summary>A wrapping row of one card per Tier-1 office, Speculator included.</summary>
         public static VisualElement BuildRow(CampaignState state, Roster roster, Action<PostNodeDef> onInvest)
         {
-            state.Posts.EnsureSeeded(roster, state.Clock.Now.DayNumber);
-
             var row = new VisualElement();
             row.AddToClassList("office-row");
 
@@ -33,9 +31,12 @@ namespace Century.Campaign.View
             return row;
         }
 
-        private static VisualElement BuildCard(
+        /// <summary>One office's card, used standalone by the camp's office overlay.</summary>
+        public static VisualElement BuildCard(
             CampaignState state, Roster roster, string post, Action<PostNodeDef> onInvest)
         {
+            state.Posts.EnsureSeeded(roster, state.Clock.Now.DayNumber, state.PlayerParty?.Appointments);
+
             PostRecord record = state.Posts.Find(post);
             SoldierRecord holder = state.Posts.HolderOf(post, roster);
             bool vacant = holder == null;
@@ -59,23 +60,6 @@ namespace Century.Campaign.View
             charge.AddToClassList("office-card__charge");
             card.Add(charge);
 
-            // The Speculator is the cohort's man and keeps no tree of ours; his card exists so
-            // the hole he leaves is visible in the establishment, not silently absent.
-            if (post == PostId.Speculator)
-            {
-                var away = new Label(vacant ? "He has not found the column. Until he does:" : string.Empty);
-                if (vacant)
-                {
-                    away.AddToClassList("office-card__charge");
-                    card.Add(away);
-
-                    var penalty = new Label(PostRoster.VacancyPenalty(post));
-                    penalty.AddToClassList("office-card__penalty");
-                    card.Add(penalty);
-                }
-                return card;
-            }
-
             if (vacant)
             {
                 var penalty = new Label(PostRoster.VacancyPenalty(post));
@@ -88,6 +72,7 @@ namespace Century.Campaign.View
             var pointsLabel = new Label(
                 vacant ? "AN EMPTY OFFICE LEARNS NOTHING"
                 : points > 0 ? (points == 1 ? "1 POINT TO INVEST" : $"{points} POINTS TO INVEST")
+                : post == PostId.Speculator ? "POINTS ARE WON RANGING AHEAD"
                 : "POINTS ARE WON IN BATTLE");
             pointsLabel.AddToClassList("office-card__points");
             if (points <= 0 || vacant) pointsLabel.AddToClassList("office-card__points--none");

@@ -2904,6 +2904,32 @@
     padding-top: var(--pad-tight);
 }
 
+/* The camp's office overlay: one card, given the sheet. */
+.office-sheet {
+    width: 600px;
+    max-height: 86%;
+}
+
+.office-body { flex-grow: 1; }
+
+/* Inside the sheet the card IS the content: no frame-within-a-frame, full width. */
+.office-body .office-card {
+    flex-basis: auto;
+    max-width: none;
+    margin-right: 0;
+    margin-bottom: 0;
+    border-width: 0;
+    background-color: rgba(0, 0, 0, 0);
+    padding: 0 var(--pad-tight);
+}
+
+/* Unspent tradition points waiting on an officer slot. */
+.badge--points {
+    color: var(--gold-bright);
+    background-color: var(--gold-faint);
+    border-color: var(--gold-dim);
+}
+
 .office-card {
     flex-basis: 300px;
     flex-grow: 1;

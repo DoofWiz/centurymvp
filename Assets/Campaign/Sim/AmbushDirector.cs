@@ -78,6 +78,8 @@ namespace Century.Campaign.Sim
             if (_state.Commander.Has("a_quiet_camp")) envelope *= 0.8f;
             // Night Watch: sentries posted by the book — the column is harder to mark.
             if (PostTreeCatalog.Invested(_state, "night_watch")) envelope *= 0.85f;
+            // Cold Trails: the speculator sweeps the column's sign; hunters mark it late.
+            if (PostTreeCatalog.Invested(_state, "cold_trails")) envelope *= 0.9f;
             bool aware = distance <= envelope;
             bool wasAware = _wasAwareOfPlayer.Contains(other.Id);
 

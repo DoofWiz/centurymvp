@@ -51,41 +51,91 @@ namespace Century.Campaign.Model
     {
         public List<PostRecord> Records = new List<PostRecord>();
 
-        /// <summary>Seeds Tier 1 from the roster's existing ranks. The speculator deliberately
-        /// starts VACANT: he is the cohort's man, and he finds the column later — the player
-        /// learns his value by his absence (brief §10.10).</summary>
-        public void EnsureSeeded(Roster roster, int day)
+        /// <summary>The camp appointment that fills each office. The offices and the camp's
+        /// appointment flow are ONE system; this is the join that keeps them agreeing.</summary>
+        public static CampRole? RoleFor(string post)
+        {
+            switch (post)
+            {
+                case PostId.Optio: return CampRole.Optio;
+                case PostId.Signifer: return CampRole.Signifer;
+                case PostId.Tesserarius: return CampRole.Tesserarius;
+                case PostId.Medicus: return CampRole.Medicus;
+                case PostId.Speculator: return CampRole.Speculator;
+                default: return null;
+            }
+        }
+
+        public static string PostFor(CampRole role)
+        {
+            switch (role)
+            {
+                case CampRole.Optio: return PostId.Optio;
+                case CampRole.Signifer: return PostId.Signifer;
+                case CampRole.Tesserarius: return PostId.Tesserarius;
+                case CampRole.Medicus: return PostId.Medicus;
+                case CampRole.Speculator: return PostId.Speculator;
+                default: return null;
+            }
+        }
+
+        /// <summary>
+        /// Seeds and SYNCS the establishment. The camp appointment is the authority on who holds
+        /// an office; a man holding the matching rank is the fallback (and is written back into
+        /// the appointment chart, so both surfaces always agree). Idempotent — call before any
+        /// read. The speculator has no rank in the ladder, so he is filled by appointment only.
+        /// </summary>
+        public void EnsureSeeded(Roster roster, int day, CampAppointments appointments = null)
         {
             foreach (string post in PostId.Tier1)
             {
-                PostRecord existing = Find(post);
-                if (existing != null)
+                SoldierRecord holder = ResolveHolder(post, roster, appointments);
+
+                PostRecord record = Find(post);
+                if (record == null)
                 {
-                    // A dead or missing holder is refilled from the rank ladder: when promotion
-                    // raises a new optio, the office follows the rank. (A dedicated appointment
-                    // flow will take this over; until then the office never lags the chart.)
-                    SoldierRecord current = existing.HolderSoldierId != null
-                        ? roster.Find(existing.HolderSoldierId) : null;
-                    if (current == null || !current.IsAlive)
+                    Records.Add(new PostRecord
                     {
-                        SoldierRecord next = post == PostId.Speculator ? null : roster.FindByRank(post);
-                        if (next != null)
-                        {
-                            existing.HolderSoldierId = next.Id;
-                            existing.DayAppointed = day;
-                        }
-                    }
+                        Post = post,
+                        HolderSoldierId = holder?.Id,
+                        DayAppointed = day
+                    });
                     continue;
                 }
 
-                SoldierRecord holder = post == PostId.Speculator ? null : roster.FindByRank(post);
-                Records.Add(new PostRecord
+                if (record.HolderSoldierId != holder?.Id)
                 {
-                    Post = post,
-                    HolderSoldierId = holder?.Id,
-                    DayAppointed = day
-                });
+                    record.HolderSoldierId = holder?.Id;
+                    record.DayAppointed = day;
+                }
             }
+        }
+
+        private static SoldierRecord ResolveHolder(string post, Roster roster, CampAppointments appointments)
+        {
+            CampRole? role = RoleFor(post);
+
+            if (appointments != null && role.HasValue)
+            {
+                string id = appointments.GetHolderId(role.Value);
+                SoldierRecord appointed = id == null ? null : roster.Find(id);
+                if (appointed != null && appointed.IsAlive) return appointed;
+            }
+
+            // Rank fallback: promotion raised a man to the rank but nobody was appointed. He is
+            // written into the chart too — unless he already holds a different office, because
+            // one man holds one job.
+            SoldierRecord ranked = roster.FindByRank(post);
+            if (ranked == null) return null;
+
+            if (appointments != null && role.HasValue)
+            {
+                if (appointments.HoldsAnyRole(ranked.Id, out CampRole other) && other != role.Value)
+                    return null;
+                appointments.Assign(role.Value, ranked.Id);
+            }
+
+            return ranked;
         }
 
         public PostRecord Find(string post)

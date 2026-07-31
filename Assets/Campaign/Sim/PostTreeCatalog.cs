@@ -41,6 +41,11 @@ namespace Century.Campaign.Sim
             new PostNodeDef{ Id="convalescence", Post=PostId.Medicus, Name="Convalescence", Rank=2, Cost=3, Effect="The wounded mend a third faster in camp" },
             new PostNodeDef{ Id="clean_hands", Post=PostId.Medicus, Name="Clean Hands", Rank=3, Cost=3, Effect="The medicus works faster on the field" },
             new PostNodeDef{ Id="he_lives", Post=PostId.Medicus, Name="He Lives", Rank=4, Cost=5, Effect="Once each battle, a death is refused outright" },
+
+            new PostNodeDef{ Id="far_rider", Post=PostId.Speculator, Name="Far Rider", Rank=1, Cost=2, Effect="He rides the ridgelines — the column sees farther" },
+            new PostNodeDef{ Id="cold_trails", Post=PostId.Speculator, Name="Cold Trails", Rank=2, Cost=3, Effect="He reads what a column leaves behind — hunters mark the century late" },
+            new PostNodeDef{ Id="read_the_ground", Post=PostId.Speculator, Name="Read the Ground", Rank=3, Cost=3, Effect="He finds the firm path — the column marches faster" },
+            new PostNodeDef{ Id="nothing_unseen", Post=PostId.Speculator, Name="Nothing Moves Unseen", Rank=4, Cost=5, Effect="No stalker closes on the column hidden — stealth avails them nothing" },
         };
 
         public static IEnumerable<PostNodeDef> For(string post)
@@ -76,7 +81,7 @@ namespace Century.Campaign.Sim
         public static PostEffectSet Resolve(CampaignState state, Roster roster)
         {
             // Idempotent; guards the fresh campaign where no screen has seeded the roster yet.
-            state.Posts.EnsureSeeded(roster, state.Clock.Now.DayNumber);
+            state.Posts.EnsureSeeded(roster, state.Clock.Now.DayNumber, state.PlayerParty?.Appointments);
 
             var effects = new PostEffectSet();
             PostRoster posts = state.Posts;
@@ -108,12 +113,20 @@ namespace Century.Campaign.Sim
         /// <summary>Post experience earned from a battle's shape — the office is used, it learns.</summary>
         public static void AwardBattlePoints(CampaignState state, Roster roster, bool victory, int wounded, bool anyRouted)
         {
-            state.Posts.EnsureSeeded(roster, state.Clock.Now.DayNumber);
+            state.Posts.EnsureSeeded(roster, state.Clock.Now.DayNumber, state.PlayerParty?.Appointments);
 
             Award(state, roster, PostId.Optio, 1f + (anyRouted ? 0f : 1f));
             Award(state, roster, PostId.Signifer, victory ? 2f : 1f);
             Award(state, roster, PostId.Tesserarius, 1.5f);
             Award(state, roster, PostId.Medicus, 1f + wounded * 0.5f);
+            // The speculator's office learns from RANGING, not fighting — see AwardScoutPoint.
+        }
+
+        /// <summary>The speculator earns his points by doing his job: each ride out is a lesson.</summary>
+        public static void AwardScoutPoint(CampaignState state, Roster roster)
+        {
+            state.Posts.EnsureSeeded(roster, state.Clock.Now.DayNumber, state.PlayerParty?.Appointments);
+            Award(state, roster, PostId.Speculator, 1.5f);
         }
 
         private static void Award(CampaignState state, Roster roster, string post, float points)
