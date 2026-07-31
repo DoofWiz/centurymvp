@@ -74,6 +74,7 @@
     <Compile Include="Assets\Core\World\TerrainDressing.cs" />
     <Compile Include="Assets\Core\Contracts\CommanderBehaviour.cs" />
     <Compile Include="Assets\Core\Ui\StageBanner.cs" />
+    <Compile Include="Assets\Core\Contracts\PostEffectSet.cs" />
     <Compile Include="Assets\Core\Ui\UiTween.cs" />
   </ItemGroup>
   <ItemGroup>

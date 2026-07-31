@@ -419,24 +419,6 @@
     background-color: rgba(0, 0, 0, 0.3);
 }
 
-/* A chip that happens to be a Button (office traditions) drops the default button chrome. */
-Button.chip {
-    margin: 0 4px 3px 0;
-    border-radius: 0;
-    background-image: none;
-}
-
-/* Office tradition chips: gold = held, dim = not yet; a lit border marks one buyable now. */
-.chip--buyable {
-    color: var(--parchment);
-    border-color: var(--gold);
-}
-
-.chip--buyable:hover {
-    background-color: var(--gold-dim);
-    color: var(--parchment);
-}
-
 /* =======================================================================================
  *  Command bar
  * ======================================================================================= */
@@ -2901,4 +2883,248 @@ Button.chip {
     margin-right: 5px;
     opacity: 0.8;
     -unity-background-image-tint-color: rgb(224, 206, 160);
+}
+
+/* =======================================================================================
+ *  The army layer: office tradition cards + contubernium cards
+ *  One visual language on both surfaces: the camp's THE OFFICES tab (interactive) and the
+ *  ARMY screen (read-only). Three node states only: held (solid gold), ready (lit),
+ *  locked (dim) - and the single clickable thing on a card is also the single lit thing.
+ * ======================================================================================= */
+
+.office-row {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    padding-top: var(--pad-tight);
+}
+
+.office-card {
+    width: 272px;
+    margin-right: var(--pad);
+    margin-bottom: var(--pad);
+    padding: var(--pad);
+    background-color: var(--ink-deep);
+    border-width: var(--rule);
+    border-color: var(--gold-dim);
+}
+
+.office-card--vacant { border-color: var(--blood-dim); }
+
+.office-card__post {
+    font-size: var(--font-size-small);
+    color: var(--gold);
+    letter-spacing: 3px;
+    -unity-font-style: bold;
+}
+
+.office-card__holder {
+    font-size: var(--font-size-small);
+    color: var(--parchment);
+    margin-top: 2px;
+}
+
+.office-card__holder--vacant { color: var(--blood); }
+
+.office-card__charge {
+    font-size: var(--font-size-micro);
+    color: var(--parchment-dim);
+    white-space: normal;
+    margin-top: 2px;
+}
+
+.office-card__penalty {
+    font-size: var(--font-size-micro);
+    color: var(--blood);
+    white-space: normal;
+    margin-top: 4px;
+}
+
+.office-card__points {
+    margin-top: var(--pad-tight);
+    padding: 3px 6px;
+    font-size: var(--font-size-micro);
+    letter-spacing: 2px;
+    color: var(--gold-bright);
+    background-color: var(--gold-faint);
+    border-width: var(--rule);
+    border-color: var(--gold-dim);
+}
+
+.office-card__points--none {
+    color: var(--parchment-faint);
+    background-color: rgba(0, 0, 0, 0.25);
+    border-color: rgba(104, 99, 89, 0.35);
+}
+
+.office-track { margin-top: var(--pad-tight); }
+
+.office-track__rail {
+    position: absolute;
+    left: 6px;
+    top: 10px;
+    bottom: 10px;
+    width: 1px;
+    background-color: var(--gold-dim);
+}
+
+/* A vacant office keeps its tree visible but clearly out of reach. */
+.office-card--vacant .office-track { opacity: 0.45; }
+
+.trad-node {
+    flex-direction: row;
+    padding: 4px 4px 4px 0;
+    margin: 0;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    border-radius: 0;
+}
+
+Button.trad-node:hover { background-color: var(--gold-faint); }
+
+.trad-node__marker {
+    width: 13px;
+    height: 13px;
+    margin-top: 2px;
+    margin-right: 8px;
+    flex-shrink: 0;
+    border-width: var(--rule);
+    border-color: var(--parchment-faint);
+    background-color: var(--ink-solid);
+}
+
+.trad-node--held .trad-node__marker {
+    background-color: var(--gold);
+    border-color: var(--gold);
+}
+
+.trad-node--ready .trad-node__marker {
+    border-color: var(--gold-bright);
+    background-color: var(--gold-faint);
+}
+
+.trad-node__body {
+    flex-grow: 1;
+    flex-shrink: 1;
+}
+
+.trad-node__head {
+    flex-direction: row;
+    align-items: center;
+}
+
+.trad-node__rank {
+    width: 22px;
+    flex-shrink: 0;
+    font-size: var(--font-size-micro);
+    color: var(--parchment-faint);
+    letter-spacing: 1px;
+}
+
+.trad-node__name {
+    font-size: var(--font-size-small);
+    color: var(--parchment);
+    letter-spacing: 1px;
+    flex-grow: 1;
+    flex-shrink: 1;
+    white-space: normal;
+}
+
+.trad-node__cost {
+    font-size: var(--font-size-micro);
+    color: var(--parchment-dim);
+    letter-spacing: 1px;
+    margin-left: 6px;
+    flex-shrink: 0;
+}
+
+.trad-node--held .trad-node__cost { color: var(--gold); }
+.trad-node--ready .trad-node__cost { color: var(--gold-bright); }
+
+.trad-node__effect {
+    font-size: var(--font-size-micro);
+    color: var(--parchment-dim);
+    white-space: normal;
+    margin-top: 1px;
+}
+
+.trad-node--locked .trad-node__name { color: var(--parchment-faint); }
+.trad-node--locked .trad-node__effect { color: var(--parchment-faint); }
+
+.office-card__note {
+    margin-top: var(--pad-tight);
+    font-size: var(--font-size-micro);
+    color: var(--parchment-dim);
+    white-space: normal;
+}
+
+/* --- Contubernium cards (ARMY screen): strength reads before a single name does. -------- */
+
+.squad-grid {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    padding-top: var(--pad-tight);
+}
+
+.squad-card {
+    width: 252px;
+    margin-right: var(--pad);
+    margin-bottom: var(--pad);
+    padding: var(--pad-tight) var(--pad);
+    background-color: var(--ink-deep);
+    border-width: var(--rule);
+    border-color: var(--gold-faint);
+}
+
+.squad-card__head {
+    flex-direction: row;
+    align-items: center;
+}
+
+.squad-card__title {
+    font-size: var(--font-size-small);
+    color: var(--parchment);
+    letter-spacing: 2px;
+    flex-grow: 1;
+}
+
+.squad-card__count {
+    font-size: var(--font-size-micro);
+    color: var(--parchment-dim);
+}
+
+.pip-row {
+    flex-direction: row;
+    margin-top: 4px;
+}
+
+.pip {
+    width: 16px;
+    height: 5px;
+    margin-right: 3px;
+    background-color: var(--olive);
+}
+
+.pip--wounded { background-color: var(--brass); }
+
+.pip--empty {
+    background-color: rgba(0, 0, 0, 0.3);
+    border-width: var(--rule);
+    border-color: rgba(104, 99, 89, 0.5);
+}
+
+.squad-card__decanus {
+    margin-top: 4px;
+    font-size: var(--font-size-micro);
+    color: var(--gold-bright);
+}
+
+.squad-card__decanus--none { color: var(--blood); }
+
+.squad-card__men {
+    margin-top: 2px;
+    font-size: var(--font-size-micro);
+    color: var(--parchment-dim);
+    white-space: normal;
 }

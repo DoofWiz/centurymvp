@@ -58,7 +58,25 @@ namespace Century.Campaign.Model
         {
             foreach (string post in PostId.Tier1)
             {
-                if (Find(post) != null) continue;
+                PostRecord existing = Find(post);
+                if (existing != null)
+                {
+                    // A dead or missing holder is refilled from the rank ladder: when promotion
+                    // raises a new optio, the office follows the rank. (A dedicated appointment
+                    // flow will take this over; until then the office never lags the chart.)
+                    SoldierRecord current = existing.HolderSoldierId != null
+                        ? roster.Find(existing.HolderSoldierId) : null;
+                    if (current == null || !current.IsAlive)
+                    {
+                        SoldierRecord next = post == PostId.Speculator ? null : roster.FindByRank(post);
+                        if (next != null)
+                        {
+                            existing.HolderSoldierId = next.Id;
+                            existing.DayAppointed = day;
+                        }
+                    }
+                    continue;
+                }
 
                 SoldierRecord holder = post == PostId.Speculator ? null : roster.FindByRank(post);
                 Records.Add(new PostRecord

@@ -100,6 +100,11 @@
             <ui:Button name="camp-tab-0" class="pill">
                 <ui:Label text="THE CENTURY" class="pill__label" picking-mode="Ignore" />
             </ui:Button>
+            <!-- Index 4 sits second in reading order on purpose: the offices belong beside the
+                 century chart, but the tab indices are a stable contract with the controller. -->
+            <ui:Button name="camp-tab-4" class="pill">
+                <ui:Label text="THE OFFICES" class="pill__label" picking-mode="Ignore" />
+            </ui:Button>
             <ui:Button name="camp-tab-1" class="pill">
                 <ui:Label text="REST &amp; ORDERS" class="pill__label" picking-mode="Ignore" />
             </ui:Button>
@@ -124,6 +129,19 @@
                     </ui:VisualElement>
                     <ui:VisualElement class="rule rule--short" />
                     <ui:ScrollView name="org-list" class="org-list" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- ============================ PAGE: THE OFFICES ============================ -->
+            <ui:VisualElement name="camp-page-4" class="camp-page" style="display: none;">
+                <ui:VisualElement class="panel camp-block camp-block--grow">
+                    <ui:VisualElement class="org-head">
+                        <ui:Label text="THE OFFICES" class="heading" />
+                        <ui:Label text="An office learns from the battles it stands. Its traditions belong to the office, and outlive the man who holds it."
+                                  class="org-hint" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="rule rule--short" />
+                    <ui:ScrollView name="offices-list" class="org-list" />
                 </ui:VisualElement>
             </ui:VisualElement>
 

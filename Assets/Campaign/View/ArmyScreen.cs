@@ -68,64 +68,9 @@ namespace Century.Campaign.View
         {
             AddHeading("THE ESTABLISHMENT");
 
-            foreach (string post in PostId.Tier1)
-            {
-                SoldierRecord holder = _state.Posts.HolderOf(post, roster);
-
-                var row = new VisualElement { pickingMode = PickingMode.Ignore };
-                row.AddToClassList("doctrine-row");
-
-                var text = new VisualElement { pickingMode = PickingMode.Ignore };
-                text.AddToClassList("doctrine-row__text");
-
-                var name = new Label(
-                    holder != null
-                        ? $"{PostRoster.DisplayName(post).ToUpperInvariant()}  —  {holder.DisplayName}"
-                        : $"{PostRoster.DisplayName(post).ToUpperInvariant()}  —  VACANT")
-                    { pickingMode = PickingMode.Ignore };
-                name.AddToClassList("doctrine-row__name");
-                if (holder == null) name.AddToClassList("text-danger");
-                text.Add(name);
-
-                var detail = new Label(
-                    holder != null
-                        ? $"{PostRoster.Charge(post)}  ·  {holder.Kills} kills, {holder.BattlesSurvived} battles" +
-                          (holder.IsWounded ? "  ·  WOUNDED" : "")
-                        : PostRoster.VacancyPenalty(post))
-                    { pickingMode = PickingMode.Ignore };
-                detail.AddToClassList("doctrine-row__effect");
-                if (holder == null) detail.AddToClassList("text-danger");
-                text.Add(detail);
-
-                // The office's traditions travel with the standard; the ARMY screen shows them
-                // anywhere, the camp is where points are spent (brief §4.2).
-                PostRecord record = _state.Posts.Find(post);
-                if (record != null && (record.InvestedNodeIds.Count > 0 || record.UnspentPoints >= 1f))
-                {
-                    var names = new System.Text.StringBuilder("Traditions: ");
-                    bool any = false;
-
-                    foreach (PostNodeDef node in PostTreeCatalog.For(post))
-                    {
-                        if (!record.InvestedNodeIds.Contains(node.Id)) continue;
-                        if (any) names.Append(", ");
-                        names.Append(node.Name);
-                        any = true;
-                    }
-
-                    if (!any) names.Append("none yet");
-
-                    int points = Mathf.FloorToInt(record.UnspentPoints);
-                    if (points > 0) names.Append($"  ·  {points} to invest in camp");
-
-                    var traditions = new Label(names.ToString()) { pickingMode = PickingMode.Ignore };
-                    traditions.AddToClassList("doctrine-row__effect");
-                    text.Add(traditions);
-                }
-
-                row.Add(text);
-                _body.Add(row);
-            }
+            // The same tradition cards the camp invests through, read-only here: the points
+            // banner names what is waiting and the camp is where it gets spent (brief §4.2).
+            _body.Add(OfficeCards.BuildRow(_state, roster, null));
         }
 
         // --- The contubernia ---------------------------------------------------------------------
@@ -133,6 +78,9 @@ namespace Century.Campaign.View
         private void RenderContubernia(Roster roster)
         {
             AddHeading("THE CONTUBERNIA");
+
+            var grid = new VisualElement { pickingMode = PickingMode.Ignore };
+            grid.AddToClassList("squad-grid");
 
             for (int group = 0; group < 16; group++)
             {
@@ -145,35 +93,73 @@ namespace Century.Campaign.View
 
                 if (members.Count == 0) continue;
 
-                var row = new VisualElement { pickingMode = PickingMode.Ignore };
-                row.AddToClassList("doctrine-row");
-
-                var text = new VisualElement { pickingMode = PickingMode.Ignore };
-                text.AddToClassList("doctrine-row__text");
-
-                SoldierRecord decanus = FindDecanus(members);
-                var title = new Label(
-                    $"CONTUBERNIUM {ToRoman(group + 1)}  ·  {members.Count}/{ContuberniumLedger.Size}" +
-                    (decanus != null ? $"  ·  Decanus: {decanus.DisplayName}" : "  ·  no decanus"))
-                    { pickingMode = PickingMode.Ignore };
-                title.AddToClassList("doctrine-row__name");
-                text.Add(title);
-
-                var line = new System.Text.StringBuilder();
-                for (int i = 0; i < members.Count; i++)
-                {
-                    if (i > 0) line.Append("   ");
-                    line.Append(members[i].DisplayName);
-                    if (members[i].IsWounded) line.Append(" (wounded)");
-                }
-
-                var men = new Label(line.ToString()) { pickingMode = PickingMode.Ignore };
-                men.AddToClassList("doctrine-row__effect");
-                text.Add(men);
-
-                row.Add(text);
-                _body.Add(row);
+                grid.Add(MakeSquadCard(group, members));
             }
+
+            _body.Add(grid);
+        }
+
+        /// <summary>One tent group as a card: numeral, strength pips (fit / wounded / empty
+        /// bunk), the decanus, and the men — strength readable before a single name is.</summary>
+        private static VisualElement MakeSquadCard(
+            int group, System.Collections.Generic.List<SoldierRecord> members)
+        {
+            var card = new VisualElement { pickingMode = PickingMode.Ignore };
+            card.AddToClassList("squad-card");
+
+            var head = new VisualElement { pickingMode = PickingMode.Ignore };
+            head.AddToClassList("squad-card__head");
+
+            var title = new Label($"CONTUBERNIUM {ToRoman(group + 1)}") { pickingMode = PickingMode.Ignore };
+            title.AddToClassList("squad-card__title");
+            head.Add(title);
+
+            var count = new Label($"{members.Count}/{ContuberniumLedger.Size}") { pickingMode = PickingMode.Ignore };
+            count.AddToClassList("squad-card__count");
+            head.Add(count);
+
+            card.Add(head);
+
+            // Wounded pips gather at the right so the healthy block reads as one bar.
+            var pips = new VisualElement { pickingMode = PickingMode.Ignore };
+            pips.AddToClassList("pip-row");
+
+            int fit = 0, wounded = 0;
+            for (int i = 0; i < members.Count; i++)
+                if (members[i].IsWounded) wounded++; else fit++;
+
+            for (int slot = 0; slot < ContuberniumLedger.Size; slot++)
+            {
+                var pip = new VisualElement { pickingMode = PickingMode.Ignore };
+                pip.AddToClassList("pip");
+                if (slot >= fit + wounded) pip.AddToClassList("pip--empty");
+                else if (slot >= fit) pip.AddToClassList("pip--wounded");
+                pips.Add(pip);
+            }
+
+            card.Add(pips);
+
+            SoldierRecord decanus = FindDecanus(members);
+            var lead = new Label(decanus != null
+                ? $"Decanus — {decanus.DisplayName}"
+                : "No decanus appointed") { pickingMode = PickingMode.Ignore };
+            lead.AddToClassList("squad-card__decanus");
+            if (decanus == null) lead.AddToClassList("squad-card__decanus--none");
+            card.Add(lead);
+
+            var line = new System.Text.StringBuilder();
+            for (int i = 0; i < members.Count; i++)
+            {
+                if (i > 0) line.Append(", ");
+                line.Append(members[i].DisplayName);
+                if (members[i].IsWounded) line.Append(" (wounded)");
+            }
+
+            var men = new Label(line.ToString()) { pickingMode = PickingMode.Ignore };
+            men.AddToClassList("squad-card__men");
+            card.Add(men);
+
+            return card;
         }
 
         private static SoldierRecord FindDecanus(System.Collections.Generic.List<SoldierRecord> members)
