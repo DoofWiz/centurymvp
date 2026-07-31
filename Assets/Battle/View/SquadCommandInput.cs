@@ -346,6 +346,12 @@ namespace Century.Battle.View
         /// </summary>
         private float DelayFor(BattleSquad squad)
         {
+            // Under the Optio: NOT measured from the fallen Centurion's body — the voice is the
+            // Optio in the line. Flat base delay, slowed, so command feels degraded but never dead
+            // (the corpse-distance bug made every order take the full cap and read as no control).
+            if (_state != null && _state.CommandDevolved)
+                return Mathf.Min(_settings.OrderBaseDelaySeconds * 1.6f + 0.4f, _settings.MaxOrderDelaySeconds);
+
             float distance = _player == null
                 ? 0f
                 : Vector3.Distance(_player.transform.position, squad.AnchorPosition);
@@ -356,10 +362,7 @@ namespace Century.Battle.View
             // "Roman Order": drilled until the order and the act are the same thing.
             if (_state.HasSkill("roman_order")) delay *= 0.7f;
 
-            // Orders travel slower under the Optio: he is not the voice the men trained to.
-            if (_state != null && _state.CommandDevolved) delay *= 1.6f;
-
-            return Mathf.Min(delay, _settings.MaxOrderDelaySeconds * (_state != null && _state.CommandDevolved ? 1.6f : 1f));
+            return Mathf.Min(delay, _settings.MaxOrderDelaySeconds);
         }
 
         private IEnumerable<BattleSquad> SelectedSquads()

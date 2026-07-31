@@ -452,6 +452,31 @@ namespace Century.Battle.View
             }
         }
 
+        /// <summary>The crippled order set, made visible: while the Optio holds command, every
+        /// button he cannot use fades and stops responding to the eye as an option.</summary>
+        private void RefreshDevolvedOrderBar()
+        {
+            bool devolved = _state.CommandDevolved;
+
+            foreach (var pair in _orderButtons)
+            {
+                bool allowed = !devolved
+                               || pair.Key == SquadOrder.HoldPosition
+                               || pair.Key == SquadOrder.Fallback
+                               || pair.Key == SquadOrder.Retreat;
+
+                if (pair.Value == null) continue;
+                pair.Value.SetEnabled(allowed);
+                pair.Value.style.opacity = allowed ? 1f : 0.25f;
+            }
+
+            if (_formationButton != null)
+            {
+                _formationButton.SetEnabled(!devolved);
+                _formationButton.style.opacity = devolved ? 0.25f : 1f;
+            }
+        }
+
         /// <summary>The picker's visibility lives on the command input; the HUD only mirrors it.</summary>
         private void UpdateFormationMenu()
         {
@@ -511,7 +536,19 @@ namespace Century.Battle.View
 
             SetText(_statKilled, killed.ToString());
 
-            SetText(_battleTimer, FormatClock(_state.ElapsedSeconds));
+            // Under the Optio the clock IS the succession window, counting down in red; the order
+            // bar visibly loses everything he cannot ask of the century.
+            if (_state.CommandDevolved)
+            {
+                SetText(_battleTimer, $"OPTIO  {FormatClock(_state.SuccessionSecondsLeft)}");
+                if (_battleTimer != null) _battleTimer.style.color = new Color(0.85f, 0.3f, 0.24f);
+            }
+            else
+            {
+                SetText(_battleTimer, FormatClock(_state.ElapsedSeconds));
+            }
+
+            RefreshDevolvedOrderBar();
         }
 
         private int CountOffField()
