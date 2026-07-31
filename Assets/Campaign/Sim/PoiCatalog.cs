@@ -340,8 +340,13 @@ namespace Century.Campaign.Sim
                             },
                             ResultText = "You lay in materials for the road ahead."
                         }),
-                    new PoiChoice("Buy food", "-50 denarii, +100 rations",
-                        new PoiOutcome { Denarii = -50, Food = 100, ResultText = "The wagons are heavier with grain now." }),
+                    new PoiChoice("Buy food", "-50 denarii, +100 rations and flour",
+                        new PoiOutcome
+                        {
+                            Denarii = -50, Food = 100,
+                            Items = new[] { new PoiOutcome.ItemGrant("flour_sack", 2) },
+                            ResultText = "The wagons are heavier with grain and good flour now."
+                        }),
                     new PoiChoice("Change coin for denarii", "-100 coin, +40 denarii",
                         new PoiOutcome { Coin = -100, Denarii = 40, ResultText = "You trade local tokens for good Roman silver." }),
                     new PoiChoice("Move on", "keep your purse shut",
@@ -455,6 +460,7 @@ namespace Century.Campaign.Sim
                             Items = new[]
                             {
                                 new PoiOutcome.ItemGrant("grain_sack", 4),
+                                new PoiOutcome.ItemGrant("flour_sack", 1),
                                 new PoiOutcome.ItemGrant("salt_blocks", 2),
                                 new PoiOutcome.ItemGrant("fur_pelts", 3),
                                 new PoiOutcome.ItemGrant("amber_lumps", 1),
@@ -524,6 +530,7 @@ namespace Century.Campaign.Sim
                             Items = new[]
                             {
                                 new PoiOutcome.ItemGrant("grain_sack", 6),
+                                new PoiOutcome.ItemGrant("flour_sack", 2),
                                 new PoiOutcome.ItemGrant("salt_blocks", 3),
                                 new PoiOutcome.ItemGrant("fur_pelts", 4),
                                 new PoiOutcome.ItemGrant("amber_lumps", 3),

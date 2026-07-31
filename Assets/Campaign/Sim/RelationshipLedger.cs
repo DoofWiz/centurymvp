@@ -71,6 +71,19 @@ namespace Century.Campaign.Sim
             return "Bad blood";
         }
 
+        /// <summary>How the man's regard for the Centurion reads, in words.</summary>
+        public static string AttitudeWord(float loyalty01)
+        {
+            if (loyalty01 >= 0.8f) return "Devoted to you";
+            if (loyalty01 >= 0.6f) return "Loyal";
+            if (loyalty01 >= 0.4f) return "Dutiful";
+            if (loyalty01 >= 0.2f) return "Resentful";
+            return "Near mutiny";
+        }
+
+        public static string AttitudeColorClass(float loyalty01) =>
+            loyalty01 >= 0.6f ? "text-good" : loyalty01 >= 0.4f ? "text-dim" : "text-danger";
+
         /// <summary>USS class for the band, or null for the plain default.</summary>
         public static string BandColorClass(float value)
         {

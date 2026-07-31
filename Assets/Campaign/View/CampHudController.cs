@@ -483,7 +483,8 @@ namespace Century.Campaign.View
             SetText(_officeSubtitle, PostRoster.Charge(post));
 
             _officeBody.Clear();
-            _officeBody.Add(OfficeCards.BuildCard(_state, party.Roster, post, InvestInTradition));
+            _officeBody.Add(OfficeCards.BuildCard(_state, party.Roster, post, InvestInTradition,
+                soldier => { CloseOffice(); OpenSoldierDetail(soldier); }));
 
             bool filled = party.Appointments.IsFilled(_openOfficeRole);
             SetText(_officeAppointLabel, filled ? "REPLACE THE MAN" : "APPOINT A MAN");

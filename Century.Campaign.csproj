@@ -56,6 +56,7 @@
     <Compile Include="Assets\Campaign\View\OvermapWorld.cs" />
     <Compile Include="Assets\Campaign\Model\CommanderProgress.cs" />
     <Compile Include="Assets\Campaign\Model\CampFacilities.cs" />
+    <Compile Include="Assets\Campaign\Sim\RelationshipLedger.cs" />
     <Compile Include="Assets\Campaign\View\InventoryScreen.cs" />
     <Compile Include="Assets\Campaign\Model\CampaignState.cs" />
     <Compile Include="Assets\Campaign\View\OvermapPursuitMarkers.cs" />
@@ -97,6 +98,7 @@
     <Compile Include="Assets\Campaign\Model\CampRole.cs" />
     <Compile Include="Assets\Campaign\Sim\PartyAiDirector.cs" />
     <Compile Include="Assets\Campaign\Model\PromotionLadder.cs" />
+    <Compile Include="Assets\Campaign\Model\RelationTie.cs" />
     <Compile Include="Assets\Campaign\Model\PointOfInterest.cs" />
     <Compile Include="Assets\Campaign\Model\MoraleState.cs" />
     <Compile Include="Assets\Campaign\Sim\CampaignSettings.cs" />

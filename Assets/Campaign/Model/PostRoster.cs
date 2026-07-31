@@ -183,16 +183,22 @@ namespace Century.Campaign.Model
             }
         }
 
-        /// <summary>One line of what the office is for, shown beside the holder.</summary>
+        /// <summary>One line of what the office DOES, shown beside the holder. Mechanics in plain
+        /// words, not flavour — the player reads this to decide who to appoint and what to invest.</summary>
         public static string Charge(string post)
         {
             switch (post)
             {
-                case PostId.Optio: return "The man behind — discipline, and the line that does not break";
-                case PostId.Signifer: return "The standard and the purse";
-                case PostId.Tesserarius: return "The watchword — orders and the night";
-                case PostId.Medicus: return "The bandage box";
-                case PostId.Speculator: return "The man who is not there — what the column knows";
+                case PostId.Optio:
+                    return "Squads break later and steady faster; he takes command if you fall in battle";
+                case PostId.Signifer:
+                    return "Carries the signum in battle — squads near it hold their nerve";
+                case PostId.Tesserarius:
+                    return "Your orders reach the squads faster; the camp is harder to surprise";
+                case PostId.Medicus:
+                    return "More of the fallen are found alive as wounded, and the wounded heal faster";
+                case PostId.Speculator:
+                    return "Rides out from camp to mark prizes on the map — a better office finds richer prizes and fewer false leads";
                 default: return string.Empty;
             }
         }

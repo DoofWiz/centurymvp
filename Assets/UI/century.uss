@@ -3295,3 +3295,77 @@ Button.trad-node:hover { background-color: var(--gold-faint); }
     margin-top: 3px;
     white-space: normal;
 }
+
+/* --- ARMY screen navigation (root / squad / man pages) ----------------------------------- */
+
+.army-back {
+    align-self: flex-start;
+    margin-bottom: var(--pad-tight);
+    padding: 4px 12px;
+    background-color: rgba(0, 0, 0, 0.3);
+    border-width: var(--rule);
+    border-color: var(--gold-dim);
+    border-radius: 0;
+    color: var(--gold-bright);
+    font-size: var(--font-size-small);
+    letter-spacing: 2px;
+}
+
+.army-back:hover {
+    background-color: var(--gold-faint);
+    border-color: var(--gold-bright);
+}
+
+.army-man__head {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: var(--pad-tight);
+}
+
+.army-man__name {
+    font-size: var(--font-size-title);
+    color: var(--parchment);
+    letter-spacing: 1px;
+}
+
+.army-man__rank {
+    font-size: var(--font-size-small);
+    color: var(--gold);
+    letter-spacing: 1px;
+    margin-top: 2px;
+}
+
+/* A holder's name that is a door to the man: plain text at rest, gold under the cursor. */
+Button.office-card__holder--link {
+    margin: 3px 0 0 0;
+    padding: 0;
+    background-color: rgba(0, 0, 0, 0);
+    background-image: none;
+    border-width: 0;
+    border-radius: 0;
+    -unity-text-align: upper-left;
+}
+
+Button.office-card__holder--link:hover { color: var(--gold-bright); }
+
+/* A bond row that navigates to the other man. */
+Button.tie-row--link {
+    margin: 4px 0 0 0;
+    padding: 3px 4px;
+    background-color: rgba(0, 0, 0, 0);
+    background-image: none;
+    border-width: 0;
+    border-radius: 0;
+}
+
+Button.tie-row--link:hover { background-color: var(--gold-faint); }
+
+/* Squad cards double as buttons on the ARMY screen. */
+Button.squad-card {
+    margin-top: 0;
+    margin-left: 0;
+    background-image: none;
+    border-radius: 0;
+}
+
+Button.squad-card:hover { border-color: var(--gold); }

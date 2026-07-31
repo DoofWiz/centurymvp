@@ -19,21 +19,25 @@ namespace Century.Campaign.View
     /// </remarks>
     public static class OfficeCards
     {
-        /// <summary>A wrapping row of one card per Tier-1 office, Speculator included.</summary>
-        public static VisualElement BuildRow(CampaignState state, Roster roster, Action<PostNodeDef> onInvest)
+        /// <summary>A wrapping row of one card per Tier-1 office, Speculator included. Pass
+        /// <paramref name="onInspect"/> to make each holder's name a link to the man himself.</summary>
+        public static VisualElement BuildRow(
+            CampaignState state, Roster roster,
+            Action<PostNodeDef> onInvest, Action<SoldierRecord> onInspect = null)
         {
             var row = new VisualElement();
             row.AddToClassList("office-row");
 
             foreach (string post in PostId.Tier1)
-                row.Add(BuildCard(state, roster, post, onInvest));
+                row.Add(BuildCard(state, roster, post, onInvest, onInspect));
 
             return row;
         }
 
         /// <summary>One office's card, used standalone by the camp's office overlay.</summary>
         public static VisualElement BuildCard(
-            CampaignState state, Roster roster, string post, Action<PostNodeDef> onInvest)
+            CampaignState state, Roster roster, string post,
+            Action<PostNodeDef> onInvest, Action<SoldierRecord> onInspect = null)
         {
             state.Posts.EnsureSeeded(roster, state.Clock.Now.DayNumber, state.PlayerParty?.Appointments);
 
@@ -49,12 +53,27 @@ namespace Century.Campaign.View
             postName.AddToClassList("office-card__post");
             card.Add(postName);
 
-            var holderLabel = new Label(
-                vacant ? "THE OFFICE STANDS EMPTY"
-                       : holder.DisplayName + (holder.IsWounded ? "  ·  WOUNDED" : string.Empty));
-            holderLabel.AddToClassList("office-card__holder");
-            if (vacant) holderLabel.AddToClassList("office-card__holder--vacant");
-            card.Add(holderLabel);
+            string holderText = vacant
+                ? "THE OFFICE STANDS EMPTY"
+                : holder.DisplayName + (holder.IsWounded ? "  ·  WOUNDED" : string.Empty);
+
+            if (!vacant && onInspect != null)
+            {
+                // The holder's name is a door to the man: his record, his bonds, his grudges.
+                var holderButton = new Button { text = holderText };
+                holderButton.AddToClassList("office-card__holder");
+                holderButton.AddToClassList("office-card__holder--link");
+                SoldierRecord captured = holder;
+                holderButton.clicked += () => onInspect(captured);
+                card.Add(holderButton);
+            }
+            else
+            {
+                var holderLabel = new Label(holderText);
+                holderLabel.AddToClassList("office-card__holder");
+                if (vacant) holderLabel.AddToClassList("office-card__holder--vacant");
+                card.Add(holderLabel);
+            }
 
             var charge = new Label(PostRoster.Charge(post));
             charge.AddToClassList("office-card__charge");
