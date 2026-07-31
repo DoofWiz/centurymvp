@@ -81,6 +81,7 @@
     <Compile Include="Assets\Campaign\View\PlayerPartyController.cs" />
     <Compile Include="Assets\Campaign\Sim\PoiDirector.cs" />
     <Compile Include="Assets\Campaign\Sim\PostTreeCatalog.cs" />
+    <Compile Include="Assets\Campaign\View\OfficeCards.cs" />
     <Compile Include="Assets\Campaign\Sim\PartySpeedCalculator.cs" />
     <Compile Include="Assets\Campaign\View\OvermapMoveMarker.cs" />
     <Compile Include="Assets\Campaign\Sim\LineOfSight.cs" />
