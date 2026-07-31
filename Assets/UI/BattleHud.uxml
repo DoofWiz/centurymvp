@@ -362,8 +362,8 @@
         <ui:VisualElement name="battle-intro" class="modal" style="display: none;">
             <ui:VisualElement class="modal__sheet intro-sheet">
                 <ui:VisualElement class="modal__header">
-                    <ui:Label text="HOW A BATTLE IS FOUGHT" class="modal__title" />
-                    <ui:Label text="Break the enemy - kill them or make them run - or withdraw with the men you still have. Cohesion is the real health bar: squads that lose heart break long before they die."
+                    <ui:Label text="HOW TO BATTLE" class="modal__title" />
+                    <ui:Label text="Fight alongside your troops while commanding them. Break their morale to rout them, and avoid them doing it to you."
                               class="modal__subtitle" />
                 </ui:VisualElement>
 

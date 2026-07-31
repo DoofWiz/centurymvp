@@ -292,8 +292,8 @@
         <ui:VisualElement name="intro-modal" class="modal" style="display: none;">
             <ui:VisualElement class="modal__sheet intro-sheet">
                 <ui:VisualElement class="modal__header">
-                    <ui:Label text="THE LONG ROAD HOME" class="modal__title" />
-                    <ui:Label text="A sandbox demo of Century's core loop. No fixed ending: keep the century alive, fed and growing."
+                    <ui:Label text="WELCOME TO CENTURY DEMO" class="modal__title" />
+                    <ui:Label text="A sandbox demo. Play around with the game, keep your army alive and get better and better."
                               class="modal__subtitle" />
                 </ui:VisualElement>
 
