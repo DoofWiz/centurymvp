@@ -40,15 +40,15 @@ namespace Century.Campaign.Sim
             // ---- Cooking Fire: raw stores into Food ------------------------------------------------
             new CraftingRecipe
             {
-                Id = "bake_bread", Icon = "bread", Name = "Bake Bread", Station = CampStationId.CookingFire,
+                Id = "bake_bread", Icon = "bread", Name = "Bake Flatbread", Station = CampStationId.CookingFire,
                 Inputs = new[] { ("grain_sack", 1) }, FoodYield = 7f,
-                Flavour = "Flat loaves off the fire-stones. The smell alone is worth morale."
+                Flavour = "Rough-milled spelt into flat loaves off the fire-stones."
             },
             new CraftingRecipe
             {
-                Id = "bake_flour", Icon = "bread", Name = "Bake Loaves of Flour", Station = CampStationId.CookingFire,
+                Id = "bake_flour", Icon = "bread", Name = "Bake Bread", Station = CampStationId.CookingFire,
                 Inputs = new[] { ("flour_sack", 1) }, FoodYield = 8f,
-                Flavour = "Proper bread, near enough. The men stop calling it porridge duty."
+                Flavour = "Fine flour into proper loaves. The men stop calling it porridge duty."
             },
             new CraftingRecipe
             {
