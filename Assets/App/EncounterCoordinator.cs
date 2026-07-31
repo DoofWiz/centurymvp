@@ -151,7 +151,8 @@ namespace Century.App
                     IsPlayerControlled = commander != null && ReferenceEquals(soldier, commander),
                     GroupIndex = markPlayerControlled ? soldier.Contubernium : -1,
                     IsGroupLeader = markPlayerControlled && soldier.IsDecanus,
-                    DamageMultiplier = veterancyTells ? soldier.VeterancyMultiplier : 1f
+                    DamageMultiplier = veterancyTells ? soldier.VeterancyMultiplier : 1f,
+                    VeterancyLabel = markPlayerControlled ? VeterancyLadder.Word(soldier.Tier) : null
                 });
             }
         }

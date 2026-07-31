@@ -122,6 +122,8 @@ namespace Century.Core.Contracts
                     SoldierId = $"test_roman_{i}",
                     DisplayName = $"{(char)('A' + group % 26)}. {Pick(RomanNames, random)}",
                     RankId = i < officerRanks.Length ? officerRanks[i] : "legionary",
+                    VeterancyLabel = i < officerRanks.Length ? "Veteranus (Veteran)"
+                        : i % 3 == 0 ? "Miles (Trained)" : "Tiro (Recruit)",
                     ArchetypeId = "legionary_heavy",
                     Stamina01 = Jitter(config.RomanStamina01, random),
                     Morale01 = Jitter(config.RomanMorale01, random),

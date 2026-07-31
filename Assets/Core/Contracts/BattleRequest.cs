@@ -86,5 +86,9 @@ namespace Century.Core.Contracts
         /// <summary>Multiplier on this man's melee damage. Carries veterancy when doctrine says
         /// experience should tell; 1 otherwise.</summary>
         public float DamageMultiplier = 1f;
+
+        /// <summary>Display-only veterancy line for the battle HUD, e.g. "Miles (Trained)".
+        /// A string because the tier enum lives campaign-side and battle only shows it.</summary>
+        public string VeterancyLabel;
     }
 }

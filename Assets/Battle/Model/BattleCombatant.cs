@@ -14,6 +14,9 @@ namespace Century.Battle.Model
     {
         public string SoldierId;
         public string DisplayName;
+
+        /// <summary>Display-only veterancy line from the campaign ("Miles (Trained)"), or null.</summary>
+        public string VeterancyLabel;
         public string ArchetypeId;
         public OfficerRole Role;
 

@@ -256,6 +256,14 @@ namespace Century.Battle.View
             card.Rank.AddToClassList("card__rank");
             body.Add(card.Rank);
 
+            // Veterancy under the role — the Commander is the player and needs no ladder.
+            if (!isCommander && !string.IsNullOrEmpty(man.VeterancyLabel))
+            {
+                var vet = new Label(man.VeterancyLabel) { pickingMode = PickingMode.Ignore };
+                vet.AddToClassList("card__vet");
+                body.Add(vet);
+            }
+
             card.Health = AddBar(body, "bar__fill--health");
             card.Stamina = AddBar(body, "bar__fill--stamina");
             card.Morale = AddBar(body, "bar__fill--morale");

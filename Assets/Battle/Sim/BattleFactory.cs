@@ -140,6 +140,7 @@ namespace Century.Battle.Sim
                 {
                     SoldierId = spec.SoldierId,
                     DisplayName = spec.DisplayName,
+                    VeterancyLabel = spec.VeterancyLabel,
                     ArchetypeId = spec.ArchetypeId,
                     Role = OfficerRoleParser.FromRankId(spec.RankId),
                     Health01 = spec.Health01,

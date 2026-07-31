@@ -356,6 +356,11 @@
     font-size: var(--font-size-micro);
     color: var(--gold);
     letter-spacing: 1px;
+}
+
+.card__vet {
+    font-size: var(--font-size-micro);
+    color: var(--parchment-dim);
     margin-bottom: 3px;
 }
 
