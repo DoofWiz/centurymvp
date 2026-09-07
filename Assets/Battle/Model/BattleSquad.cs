@@ -61,6 +61,18 @@ namespace Century.Battle.Model
         /// <summary>Where a routed squad is running to.</summary>
         public Vector3 RoutDestination;
 
+        /// <summary>Under a script's hand (the opening sequence): the enemy AI leaves its orders
+        /// alone. Cleared when the script hands the squad over to the ordinary fight.</summary>
+        public bool Scripted;
+
+        /// <summary>Has not marked the Centurion: its men never pick him as a target, whatever the
+        /// range. The opening's warband stays so until it spots a man on his feet.</summary>
+        public bool Unaware;
+
+        /// <summary>Fights to the death: no fear reaches this squad and it never routs. The opening's
+        /// looter, whom the player must actually kill.</summary>
+        public bool Fearless;
+
         /// <summary>Decaying count of men lost recently. Fresh casualties frighten more than old ones.</summary>
         public float RecentCasualtyPressure;
 

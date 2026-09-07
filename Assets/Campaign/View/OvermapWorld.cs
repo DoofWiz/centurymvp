@@ -29,21 +29,9 @@ namespace Century.Campaign.View
         [Header("Scene")]
         [SerializeField] private Transform _partyRoot;
 
-        [Header("Points of interest")]
-        [Tooltip("Optional marker prefab. If empty, a coloured primitive is generated per POI.")]
-        [SerializeField] private GameObject _poiMarkerPrefab;
-
-        private sealed class PoiMarker
-        {
-            public GameObject Root;
-            public Material Material;
-            public Color BaseColour;
-            public PoiKind Kind;
-        }
-
         private readonly Dictionary<string, PartyView> _views = new Dictionary<string, PartyView>();
-        private readonly Dictionary<string, PoiMarker> _poiMarkers = new Dictionary<string, PoiMarker>();
-        private readonly Dictionary<PoiKind, Material> _poiMaterials = new Dictionary<PoiKind, Material>();
+        private readonly Dictionary<string, PoiMarkerView> _poiMarkers = new Dictionary<string, PoiMarkerView>();
+        private Font _worldFont;
 
         public CampaignState State { get; private set; }
         public PartyView PlayerView { get; private set; }
@@ -56,6 +44,10 @@ namespace Century.Campaign.View
             ServiceLocator.TryGet(out ITimeControlSource timeSource);
 
             if (_partyRoot == null) _partyRoot = transform;
+
+            // The world font for place names; the engine's face until the designer's is in.
+            _worldFont = Resources.Load<Font>("Fonts/CenturyWorld")
+                         ?? Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
 
             for (int i = 0; i < State.Parties.Count; i++)
             {
@@ -107,9 +99,10 @@ namespace Century.Campaign.View
         // --- Points of interest ----------------------------------------------------------------
 
         /// <summary>
-        /// Keeps a marker on the map for every discovered, unresolved POI. Cheap to run each frame for
-        /// the handful of POIs a campaign holds; markers appear as they are sighted and vanish as they
-        /// are dealt with, with no explicit event plumbing.
+        /// Keeps a marker on the map for every discovered, unresolved place. Cheap to run each frame
+        /// for the handful of places a campaign holds; markers appear as they are sighted and vanish
+        /// as they are dealt with, with no explicit event plumbing. The story's current target is
+        /// told apart every frame, so the marker turns gold the moment the objective moves on.
         /// </summary>
         private void Update()
         {
@@ -119,87 +112,37 @@ namespace Century.Campaign.View
             for (int i = 0; i < pois.Count; i++)
             {
                 PointOfInterest poi = pois[i];
-                bool shouldShow = poi.Discovered && !poi.Resolved;
-                bool has = _poiMarkers.TryGetValue(poi.Id, out PoiMarker marker);
+                bool shouldShow = poi.Discovered && !poi.Resolved && !poi.Hidden;
+                bool has = _poiMarkers.TryGetValue(poi.Id, out PoiMarkerView marker);
 
                 if (shouldShow && !has)
                 {
-                    _poiMarkers[poi.Id] = CreateMarker(poi);
+                    marker = PoiMarkerView.Create(_partyRoot, poi, ColourFor(poi.Kind), _worldFont);
+                    _poiMarkers[poi.Id] = marker;
                 }
                 else if (!shouldShow && has)
                 {
-                    if (marker.Root != null) Destroy(marker.Root);
+                    if (marker != null) Destroy(marker.gameObject);
                     _poiMarkers.Remove(poi.Id);
+                    continue;
                 }
-                else if (shouldShow && has)
-                {
-                    FadeMarker(marker, poi);
-                }
+
+                if (marker == null) continue;
+
+                marker.SetObjective(OnboardingDirector.IsObjectivePoi(State, poi));
+                marker.SetVisibility(VisibilityFor(poi));
             }
         }
 
         /// <summary>
-        /// A discovered place is remembered, so its marker never vanishes — it dims beyond the line of
-        /// sight, the way explored ground does in an RTS. An Opportunity the scouts brought back is
-        /// the exception: the whole point of the report is that you know exactly where it is.
+        /// A discovered place is remembered, so its marker never vanishes: it dims beyond the line of
+        /// sight, the way explored ground does in an RTS. A scouted prize and the story's objective
+        /// are the exceptions: the whole point of the report is that you know exactly where it is.
         /// </summary>
-        private void FadeMarker(PoiMarker marker, PointOfInterest poi)
+        private float VisibilityFor(PointOfInterest poi)
         {
-            if (marker.Material == null) return;
-
-            float alpha = marker.Kind == PoiKind.Opportunity
-                ? 1f
-                : Mathf.Lerp(0.35f, 1f, LineOfSight.Visibility01(State, poi.WorldPosition));
-
-            PartyVisibility.SetAlpha(marker.Material, marker.BaseColour, alpha);
-        }
-
-        private PoiMarker CreateMarker(PointOfInterest poi)
-        {
-            GameObject root;
-            if (_poiMarkerPrefab != null)
-            {
-                root = Instantiate(_poiMarkerPrefab, poi.WorldPosition, Quaternion.identity, _partyRoot);
-            }
-            else
-            {
-                root = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-                root.transform.SetParent(_partyRoot, false);
-
-                // Stand on the sculpted ground: POI positions are authored flat, the world is not.
-                Vector3 grounded = poi.WorldPosition;
-                grounded.y = Century.Core.World.WorldTerrainForge.HeightAt(grounded.x, grounded.z);
-                root.transform.position = grounded + Vector3.up * 3f;
-                root.transform.localScale = new Vector3(3.5f, 3f, 3.5f);
-
-                // A marker must never eat the click-to-move raycast, so it carries no collider.
-                Collider collider = root.GetComponent<Collider>();
-                if (collider != null) Destroy(collider);
-            }
-
-            root.name = $"POI [{poi.DisplayName}]";
-
-            // Per-marker material instance so each can fade with the line of sight independently.
-            var marker = new PoiMarker { Root = root, Kind = poi.Kind };
-            Renderer renderer = root.GetComponentInChildren<Renderer>();
-            if (renderer != null)
-            {
-                marker.Material = new Material(MarkerMaterial(poi.Kind));
-                PartyVisibility.MakeTransparentCapable(marker.Material);
-                marker.BaseColour = PartyVisibility.BaseColour(marker.Material);
-                renderer.material = marker.Material;
-            }
-
-            return marker;
-        }
-
-        private Material MarkerMaterial(PoiKind kind)
-        {
-            if (_poiMaterials.TryGetValue(kind, out Material cached) && cached != null) return cached;
-
-            Material material = Century.Core.World.FxMaterials.Unlit(ColourFor(kind));
-            _poiMaterials[kind] = material;
-            return material;
+            if (poi.Kind == PoiKind.Opportunity || OnboardingDirector.IsObjectivePoi(State, poi)) return 1f;
+            return Mathf.Lerp(0.35f, 1f, LineOfSight.Visibility01(State, poi.WorldPosition));
         }
 
         private static Color ColourFor(PoiKind kind)
@@ -212,6 +155,11 @@ namespace Century.Campaign.View
                 case PoiKind.RaiderCamp: return new Color(0.80f, 0.30f, 0.25f);
                 case PoiKind.Battlefield: return new Color(0.52f, 0.42f, 0.30f);
                 case PoiKind.Opportunity: return new Color(1.00f, 0.85f, 0.20f);
+                case PoiKind.Corpses: return new Color(0.60f, 0.48f, 0.38f);
+                case PoiKind.Hounds: return new Color(0.68f, 0.54f, 0.30f);
+                case PoiKind.Looters: return new Color(0.85f, 0.32f, 0.22f);
+                case PoiKind.SafePlace: return new Color(0.45f, 0.78f, 0.58f);
+                case PoiKind.Passage: return new Color(1.00f, 0.85f, 0.20f);
                 default: return new Color(0.85f, 0.70f, 0.32f); // Settlement / fallback
             }
         }

@@ -35,6 +35,13 @@ namespace Century.Battle.View
         /// <summary>True while held Space has the world slowed.</summary>
         public bool TacticalHeld { get; private set; }
 
+        /// <summary>A script (the opening's tutorial pop-ups) has the world stopped. Overrides the
+        /// buttons and Space until released; the HUD's own controls are hidden meanwhile.</summary>
+        public bool ScriptHold { get; private set; }
+
+        public void Hold() => ScriptHold = true;
+        public void ReleaseHold() => ScriptHold = false;
+
         public void Initialise(BattleState state, VisualElement root)
         {
             _state = state;
@@ -63,6 +70,13 @@ namespace Century.Battle.View
         private void Update()
         {
             if (_state == null) return;
+
+            if (ScriptHold)
+            {
+                Time.timeScale = 0f;
+                TacticalHeld = false;
+                return;
+            }
 
             if (_state.Phase != BattlePhase.Fighting)
             {

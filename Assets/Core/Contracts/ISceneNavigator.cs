@@ -16,5 +16,12 @@ namespace Century.Core.Contracts
     {
         void LoadOvermap(Action onComplete = null);
         void LoadCamp(Action onComplete = null);
+
+        /// <summary>Back to the title screen. The running campaign is closed by the App layer.</summary>
+        void LoadTitle(Action onComplete = null);
+
+        /// <summary>Loads (or reloads) the battle scene for a request. The opening sequence uses it
+        /// to restart itself when the player dies; the campaign uses it through the encounter path.</summary>
+        void LoadBattle(BattleRequest request, Action onComplete = null);
     }
 }

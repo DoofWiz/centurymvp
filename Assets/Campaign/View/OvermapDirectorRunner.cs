@@ -22,6 +22,7 @@ namespace Century.Campaign.View
         private EncounterDetector _detector;
         private PoiDirector _poi;
         private AmbushDirector _ambush;
+        private OnboardingDirector _onboarding;
         private ITimeControlSource _timeSource;
 
         private float _accumulator;
@@ -32,6 +33,11 @@ namespace Century.Campaign.View
 
         /// <summary>Raised when the column reaches a point of interest. The overmap HUD handles it.</summary>
         public static event System.Action<Model.PointOfInterest> PoiTriggered;
+
+        /// <summary>The guided start's beats, forwarded from the onboarding director for the HUD.</summary>
+        public static event System.Action<OnboardingDirector.Narration> Narrated;
+        public static event System.Action ObjectiveChanged;
+        public static event System.Action OpenWorldEntered;
 
         private void Start()
         {
@@ -45,7 +51,24 @@ namespace Century.Campaign.View
             _poi = new PoiDirector(_state, log);
             _ambush = new AmbushDirector(_state, _settings);
             _poi.Triggered += p => PoiTriggered?.Invoke(p);
+
+            _onboarding = new OnboardingDirector(_state, _settings, log);
+            _onboarding.Narrated += ForwardNarration;
+            _onboarding.ObjectiveChanged += ForwardObjective;
+            _onboarding.OpenWorldEntered += ForwardOpenWorld;
         }
+
+        private void OnDestroy()
+        {
+            if (_onboarding == null) return;
+            _onboarding.Narrated -= ForwardNarration;
+            _onboarding.ObjectiveChanged -= ForwardObjective;
+            _onboarding.OpenWorldEntered -= ForwardOpenWorld;
+        }
+
+        private static void ForwardNarration(OnboardingDirector.Narration n) => Narrated?.Invoke(n);
+        private static void ForwardObjective() => ObjectiveChanged?.Invoke();
+        private static void ForwardOpenWorld() => OpenWorldEntered?.Invoke();
 
         private void Update()
         {
@@ -60,6 +83,9 @@ namespace Century.Campaign.View
 
             _ai.Evaluate();
             _ambush.Tick();
+
+            // The guided start speaks before anything else fires: its modal pauses the clock.
+            if (_onboarding.Tick()) return;
 
             // A point of interest takes precedence: it pauses time as it opens, which stops us here
             // next tick, and it must not fire in the same frame as a battle contact.

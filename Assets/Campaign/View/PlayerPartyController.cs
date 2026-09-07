@@ -31,6 +31,7 @@ namespace Century.Campaign.View
 
         private string _pursuitTargetId;
         private float _nextRepathAt;
+        private float _leashNoticeAt;
         private Vector3 _lastQuarryPosition;
         private bool _hasLastQuarryPosition;
 
@@ -81,8 +82,24 @@ namespace Century.Campaign.View
                 return;
             }
 
+            // The Aftermath is a leash: the forest beyond it is impassable until the passage is
+            // found, so an order past the edge marches to the edge and says why.
+            Vector3 destination = hit.point;
+            if (_state?.Onboarding != null && !_state.Onboarding.AllowsPosition(destination))
+            {
+                destination = _state.Onboarding.ClampToZone(destination);
+                if (Time.time > _leashNoticeAt)
+                {
+                    _leashNoticeAt = Time.time + 6f;
+                    ServiceLocator.TryGet(out CampaignEventLog log);
+                    log?.Push(CampaignEventKind.Threat, "The forest closes in",
+                        "No way through here. The scout's passage is the only road out",
+                        _state.Clock.Now.DayNumber);
+                }
+            }
+
             _pursuitTargetId = null;
-            if (!_world.PlayerView.MoveTo(hit.point)) return;
+            if (!_world.PlayerView.MoveTo(destination)) return;
 
             _marker.Show(() =>
                 _state?.PlayerParty != null && _state.PlayerParty.Destination.HasValue

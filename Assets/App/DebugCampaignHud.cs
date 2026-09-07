@@ -31,7 +31,8 @@ namespace Century.App
         {
             if (!_visible) return;
 
-            if (_state == null && !ServiceLocator.TryGet(out _state)) return;
+            // Re-fetched every draw: a campaign can end (the title) or be replaced (a load).
+            if (!ServiceLocator.TryGet(out _state)) return;
             if (_settings == null && !ServiceLocator.TryGet(out _settings)) return;
             if (_ticker == null && !ServiceLocator.TryGet(out _ticker)) return;
 

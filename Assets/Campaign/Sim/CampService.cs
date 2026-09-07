@@ -112,6 +112,10 @@ namespace Century.Campaign.Sim
             RecoverMorale(hours, warmth);
             RepairEquipment(hours);
 
+            // The scout comes in with the report at the end of the rest, not the moment he left.
+            LastRestScoutReport = default;
+            DeliverScoutReport();
+
             // Individual morale changed above; roll it back up to the party figure.
             _party.Morale.Value01 = _party.Roster.AverageMorale01;
 
@@ -357,7 +361,14 @@ namespace Century.Campaign.Sim
 
         // --- Orders ----------------------------------------------------------------------------
 
-        public bool CanScout => _party.Appointments.IsFilled(CampRole.Speculator);
+        public bool CanScout => _party.Appointments.IsFilled(CampRole.Speculator) && !_party.ScoutRidingOut;
+
+        /// <summary>The scout is out and will report when the column next rests.</summary>
+        public bool ScoutIsOut => _party.ScoutRidingOut;
+
+        /// <summary>What the last rest's scouting brought in, if the scout was out. The camp screen
+        /// reads this straight after <see cref="Rest"/>; <c>Sent</c> is false when there was none.</summary>
+        public ScoutReport LastRestScoutReport { get; private set; }
 
         /// <summary>What the speculator reports back, for the scout-result modal. HONEST about
         /// what was rolled — vague or exact by the office's intel quality — except that a false
@@ -367,7 +378,12 @@ namespace Century.Campaign.Sim
             public readonly bool Sent;
             public readonly string Title, Detail, Reward, Risk, Distance;
 
-            public ScoutReport(string title, string detail, string reward, string risk, string distance)
+            /// <summary>The modal's headline: "Opportunity sighted" for a prize, something else for
+            /// a report that is not one (the Aftermath's passage).</summary>
+            public readonly string Heading;
+
+            public ScoutReport(string title, string detail, string reward, string risk, string distance,
+                string heading = "Opportunity sighted")
             {
                 Sent = true;
                 Title = title;
@@ -375,6 +391,7 @@ namespace Century.Campaign.Sim
                 Reward = reward;
                 Risk = risk;
                 Distance = distance;
+                Heading = heading;
             }
         }
 
@@ -383,17 +400,38 @@ namespace Century.Campaign.Sim
         /// <see cref="SpeculatorInfluence"/> seam and seeded as a real POI; the report the player
         /// reads describes THAT find, at whatever precision the office has earned.
         /// </summary>
-        public ScoutReport SendScouting()
+        public bool SendScouting()
         {
-            if (!CanScout) return default;
+            if (!CanScout) return false;
 
-            _clock.Advance(CampaignTime.MinutesPerWatch);
-
-            // The scout's report becomes a real prize on the overmap: an Opportunity POI to pursue.
-            PointOfInterest poi = PoiCatalog.CreateOpportunity(_state, _settings, _party.WorldPosition);
+            // He rides out now; what he found comes back with him at the end of the next rest.
+            _party.ScoutRidingOut = true;
             _state.Commander.Note(CommanderPhilosophy.Survivor, 0.4f);
 
-            // The speculator's office learns by ranging — his points come from rides, not battles.
+            _log?.Push(CampaignEventKind.Discovery, "The scout rides out",
+                "He reports when the column next rests", _clock.Now.DayNumber);
+            return true;
+        }
+
+        /// <summary>
+        /// The scout's return, at the end of a rest. In the Aftermath the first ride finds the
+        /// passage; otherwise a real prize is seeded through the speculator seam and the report
+        /// describes THAT find, at whatever precision the office has earned.
+        /// </summary>
+        private void DeliverScoutReport()
+        {
+            if (OnboardingDirector.TryDeliverPassage(_state, _settings, _log, out ScoutReport passage))
+            {
+                LastRestScoutReport = passage;
+                return;
+            }
+
+            if (!_party.ScoutRidingOut) return;
+            _party.ScoutRidingOut = false;
+
+            PointOfInterest poi = PoiCatalog.CreateOpportunity(_state, _settings, _party.WorldPosition);
+
+            // The speculator's office learns by ranging: his points come from rides, not battles.
             PostTreeCatalog.AwardScoutPoint(_state, _party.Roster);
 
             ScoutReport report = ComposeReport(poi);
@@ -402,7 +440,7 @@ namespace Century.Campaign.Sim
                 poi.EventId == "signum_held" ? "Word of the signum" : "Opportunity sighted",
                 report.Detail,
                 _clock.Now.DayNumber);
-            return report;
+            LastRestScoutReport = report;
         }
 
         private ScoutReport ComposeReport(PointOfInterest poi)

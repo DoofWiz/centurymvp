@@ -82,6 +82,12 @@ namespace Century.Battle.View
         private bool _outcomeDecided;
         private BattleOutcome _pendingOutcome = BattleOutcome.Aborted;
 
+        // The opening sequence: the scene in scripted mode, owned by its director.
+        private BattleRequest _request;
+        private bool _openingMode;
+        private OpeningDirector _opening;
+        private BattleTimeControls _timeControls;
+
         private void Start()
         {
             UiInputBootstrapper.EnsureEventSystem();
@@ -119,6 +125,10 @@ namespace Century.Battle.View
 
             _state = BattleFactory.Create(request, _settings);
             ServiceLocator.Register(_state);
+            _request = request;
+
+            // The opening lays its actors out by hand before a single view spawns.
+            if (request.OpeningSequence) OpeningDirector.Layout(_state, _settings);
 
             BuildRoots();
             SpawnPlayer();
@@ -142,9 +152,12 @@ namespace Century.Battle.View
             reticle.transform.SetParent(_spawnRoot, false);
             reticle.Initialise(_cameraRig, _commandInput, _player);
 
-            var labels = new GameObject("SquadLabels").AddComponent<SquadLabels>();
-            labels.transform.SetParent(_spawnRoot, false);
-            labels.Initialise(_state.PlayerSquads, _state.EnemySquads, _commandInput);
+            if (!request.OpeningSequence)
+            {
+                var labels = new GameObject("SquadLabels").AddComponent<SquadLabels>();
+                labels.transform.SetParent(_spawnRoot, false);
+                labels.Initialise(_state.PlayerSquads, _state.EnemySquads, _commandInput);
+            }
 
             // Trampled field-earth for the bare terrain, which otherwise renders as blown-out white
             // (worst in WebGL). Slightly browner than the overmap's moss: ground that armies churn.
@@ -159,9 +172,12 @@ namespace Century.Battle.View
             dayNight.HourSource = () => _state.TimeOfDay.TotalHours + _state.ElapsedSeconds / 360d;
 
             // Hides squads waiting off the field and reveals them when summoned; draws the boundary.
-            var reinforcements = new GameObject("Reinforcements").AddComponent<ReinforcementsView>();
-            reinforcements.transform.SetParent(_spawnRoot, false);
-            reinforcements.Initialise(_soldierViews, _settings);
+            if (!request.OpeningSequence)
+            {
+                var reinforcements = new GameObject("Reinforcements").AddComponent<ReinforcementsView>();
+                reinforcements.transform.SetParent(_spawnRoot, false);
+                reinforcements.Initialise(_soldierViews, _settings);
+            }
 
             if (_hud != null) _hud.Bind(_state, _settings, _commandInput, _eventFeed, _player);
             if (_debugHud != null) _debugHud.Bind(_state, _commandInput, _eventFeed, _player);
@@ -173,9 +189,9 @@ namespace Century.Battle.View
             // Command of the clock: HUD speed buttons plus held-Space tactical time.
             if (_hud != null)
             {
-                var timeControls = new GameObject("BattleTimeControls").AddComponent<BattleTimeControls>();
-                timeControls.transform.SetParent(_spawnRoot, false);
-                timeControls.Initialise(_state, _hud.Root);
+                _timeControls = new GameObject("BattleTimeControls").AddComponent<BattleTimeControls>();
+                _timeControls.transform.SetParent(_spawnRoot, false);
+                _timeControls.Initialise(_state, _hud.Root);
             }
 
             // The blood-fleck read on every landed blow, for both sides and the Centurion himself.
@@ -196,6 +212,14 @@ namespace Century.Battle.View
 
             Debug.Log($"[Battle] {_state.PlayerSideAliveCount} on the field against {_state.EnemyAliveCount} " +
                       $"({_state.EnemyBehaviour}), {_state.Reserve.Count} in reserve.");
+
+            // The opening sequence is not a battle: no deployment, no banner, no verdict. Its
+            // director runs the beats over the ordinary simulation.
+            if (request.OpeningSequence)
+            {
+                BeginOpeningSequence();
+                return;
+            }
 
             // An ambushed column gets no deployment: the fight starts where the trap was sprung,
             // in whatever order the march was in. That is what an ambush IS.
@@ -466,6 +490,9 @@ namespace Century.Battle.View
                 if (_player.Combatant.WasGuardBreakThisTick) HitEffects.SpawnGuardBreak(chest);
             }
 
+            // The opening's director owns its ending; none of the battle's exits apply.
+            if (_openingMode) return;
+
             // Manual withdrawal remains available: leaving the field with the men you still have is a
             // legitimate strategic choice, not a failure.
             if (Input.GetKeyDown(KeyCode.Backspace))
@@ -629,6 +656,80 @@ namespace Century.Battle.View
                         "It is leaving the field", 1.8f, "stage-banner__frame--danger"));
                     break;
             }
+        }
+
+        // --- The opening sequence -------------------------------------------------------------
+
+        /// <summary>
+        /// Scripted mode: the fighting interface is stripped to the Centurion's own bars, no
+        /// outcome is ever evaluated, and the director takes the stage. It finishes by handing the
+        /// campaign an Aborted result (nothing to apply; the App layer reads the flag and moves the
+        /// story on), or by reloading the scene when the Centurion falls.
+        /// </summary>
+        private void BeginOpeningSequence()
+        {
+            _openingMode = true;
+            _simulation.SuppressOutcome = true;
+            _state.Phase = BattlePhase.Fighting;
+            SetWorldInputEnabled(false);
+            if (_player != null) _player.PilaRemaining = 0;
+
+            VisualElement root = _hud != null ? _hud.Root : null;
+            _hud?.SetCombatUiVisible(false);
+            SetDisplay(root, false, "battle-timer-bar", "left-column", "squad-panel", "command-bar", "selection-hint");
+            SetDisplay(root, true, "commander-panel");
+
+            _opening = new GameObject("OpeningDirector").AddComponent<OpeningDirector>();
+            _opening.transform.SetParent(_spawnRoot, false);
+            _opening.Initialise(new OpeningDirector.Context
+            {
+                State = _state,
+                Settings = _settings,
+                Player = _player,
+                Camera = _cameraRig,
+                HudRoot = root,
+                SpawnRoot = _spawnRoot,
+                Decor = _terrainDecor,
+                Time = _timeControls,
+                SetWorldInput = SetWorldInputEnabled,
+                Finished = OnOpeningFinished,
+                PlayerDied = OnOpeningPlayerDied
+            });
+        }
+
+        private static void SetDisplay(VisualElement root, bool visible, params string[] names)
+        {
+            if (root == null) return;
+            for (int i = 0; i < names.Length; i++)
+            {
+                VisualElement element = root.Q<VisualElement>(names[i]);
+                if (element != null) element.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
+            }
+        }
+
+        private void OnOpeningFinished()
+        {
+            Submit(new BattleResult
+            {
+                Outcome = BattleOutcome.Aborted,
+                PlayerPartyId = _state.PlayerPartyId,
+                EnemyPartyId = _state.EnemyPartyId
+            });
+        }
+
+        /// <summary>The Centurion fell in the forest: the same request runs again from the top.</summary>
+        private void OnOpeningPlayerDied()
+        {
+            if (_submitted) return;
+            _submitted = true;
+
+            Time.timeScale = 1f;
+            ServiceLocator.Unregister<BattleState>();
+
+            if (ServiceLocator.TryGet(out ISceneNavigator navigator) && _request != null)
+                navigator.LoadBattle(_request);
+            else
+                Debug.LogError("[Battle] No ISceneNavigator registered; the opening cannot restart.", this);
         }
 
         private void ShowBattleIntro()

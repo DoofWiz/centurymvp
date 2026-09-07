@@ -15,6 +15,16 @@ namespace Century.Campaign.Sim
         public float Heal01;      // health restored to each wounded man
         public int Recruits;
 
+        /// <summary>Recruit up to this many men in total (the looters' wagon frees however many are
+        /// needed to reach the survivors' target). Zero means "use Recruits as written".</summary>
+        public int RecruitsToReach;
+
+        /// <summary>Condition of the men who join: massacre survivors crawl out at a fraction of
+        /// this; the well-fed default is what a refugee column offers.</summary>
+        public float RecruitHealthMin = 0.7f;
+        public float RecruitHealthMax = 1f;
+        public int RecruitExperienceMax;
+
         public bool SpawnFight;
         public int FightStrength;
 
@@ -75,7 +85,10 @@ namespace Century.Campaign.Sim
                 player.Morale.Value01 = player.Roster.AverageMorale01;
             }
 
-            for (int i = 0; i < Recruits; i++) player.Roster.Add(MakeRecruit());
+            int recruits = Recruits;
+            if (RecruitsToReach > 0)
+                recruits = Mathf.Max(recruits, RecruitsToReach - player.Roster.ActiveCount);
+            for (int i = 0; i < recruits; i++) player.Roster.Add(MakeRecruit(state));
 
             if (Items != null)
                 for (int i = 0; i < Items.Length; i++)
@@ -123,7 +136,7 @@ namespace Century.Campaign.Sim
         private static readonly string[] Nomina =
             { "Valerius", "Aquilius", "Vorenus", "Secundus", "Felix", "Cornelius", "Fabius", "Sergius" };
 
-        private static SoldierRecord MakeRecruit()
+        private SoldierRecord MakeRecruit(CampaignState state)
         {
             string name = $"{Praenomina[Random.Range(0, Praenomina.Length)][0]}. {Nomina[Random.Range(0, Nomina.Length)]}";
             return new SoldierRecord
@@ -132,10 +145,12 @@ namespace Century.Campaign.Sim
                 DisplayName = name,
                 RankId = "legionary",
                 ArchetypeId = "legionary_heavy",
-                Health01 = Random.Range(0.7f, 1f),
-                Stamina01 = Random.Range(0.7f, 1f),
+                Health01 = Random.Range(RecruitHealthMin, RecruitHealthMax),
+                Stamina01 = Random.Range(0.5f, 0.9f),
                 Morale01 = Random.Range(0.45f, 0.65f),
-                Loyalty01 = 0.5f
+                Loyalty01 = 0.5f,
+                Experience = RecruitExperienceMax > 0 ? Random.Range(0, RecruitExperienceMax + 1) : 0,
+                DayJoined = state != null ? state.Clock.Now.DayNumber : 0
             };
         }
     }
@@ -572,7 +587,137 @@ namespace Century.Campaign.Sim
                 }
             });
 
+            AddAftermathEvents(Add);
             return map;
+        }
+
+        /// <summary>
+        /// THE AFTERMATH: the guided start's story places. Every survivor-yielding event hands over
+        /// men in the state the massacre left them, and the looters' wagon frees exactly as many
+        /// as the objective still needs.
+        /// </summary>
+        private static void AddAftermathEvents(System.Action<PoiEvent> Add)
+        {
+            Add(new PoiEvent
+            {
+                Id = "aftermath_corpses",
+                Title = "A Wasteland of Corpses",
+                Subtitle = "The massacre, a day cold",
+                Body = "Legionaries lie as they fell, three deep where the line broke. Horses, mules, shields split " +
+                       "like kindling. The crows have started. Anything the barbarians did not want is still here, " +
+                       "and anything that hid may be here too.",
+                OfficerRemark = "Valerius: \"Quietly, sir. If any of ours are alive in this, they'll not answer a shout.\"",
+                Choices = new[]
+                {
+                    new PoiChoice("Comb the field", "salvage, and whatever hides among the dead",
+                        new PoiOutcome
+                        {
+                            Recruits = 2, RecruitHealthMin = 0.4f, RecruitHealthMax = 0.65f, RecruitExperienceMax = 160,
+                            Morale = -0.02f,
+                            Items = new[]
+                            {
+                                new PoiOutcome.ItemGrant("scutum_spare", 1),
+                                new PoiOutcome.ItemGrant("pila_bundle", 1),
+                                new PoiOutcome.ItemGrant("linen_bandages", 2),
+                                new PoiOutcome.ItemGrant("hardtack", 3),
+                            },
+                            ResultText = "Two men crawl out from beneath a dead horse, alive and shaking. You take what iron the field gives up."
+                        }),
+                    new PoiChoice("Search for the living only", "no salvage; the men keep their stomachs",
+                        new PoiOutcome
+                        {
+                            Recruits = 2, RecruitHealthMin = 0.4f, RecruitHealthMax = 0.65f, RecruitExperienceMax = 160,
+                            Morale = 0.02f,
+                            ResultText = "Two men, hidden beneath the carcass of a horse. They weep when they see the crest."
+                        }),
+                }
+            });
+
+            Add(new PoiEvent
+            {
+                Id = "aftermath_hounds",
+                Title = "Hounds on the Field",
+                Subtitle = "A pack worrying the dead",
+                Body = "Forest dogs gone wild on the feast snarl over the bodies. As you close, shouts break out from " +
+                       "among the corpses: Roman voices. Two men have been playing dead under the pack's noses since dawn.",
+                OfficerRemark = "Valerius: \"They'll not stand against shields, sir. Drive them off and get those two up.\"",
+                Choices = new[]
+                {
+                    new PoiChoice("Drive off the hounds", "shields forward; the men take heart",
+                        new PoiOutcome
+                        {
+                            Recruits = 2, RecruitHealthMin = 0.45f, RecruitHealthMax = 0.7f, RecruitExperienceMax = 200,
+                            Morale = 0.03f,
+                            ResultText = "The pack scatters before a wall of shields. Two men rise from the dead, grey with fright."
+                        }),
+                    new PoiChoice("Throw them the horse meat", "-6 food, no risk to the wounded",
+                        new PoiOutcome
+                        {
+                            Food = -6f,
+                            Recruits = 2, RecruitHealthMin = 0.45f, RecruitHealthMax = 0.7f, RecruitExperienceMax = 200,
+                            ResultText = "The hounds fall on the meat and forget the living. Two men come out of the dead on their hands and knees."
+                        }),
+                }
+            });
+
+            Add(new PoiEvent
+            {
+                Id = "aftermath_looters",
+                Title = "Looters at the Fire",
+                Subtitle = "Roman men chained to a wagon",
+                Body = "A fire in a hollow, and round it looters picking over a wagon of plunder. Chained to its wheel, " +
+                       "Romans: to be sold when the slave-fair comes. The looters are drunk on stolen wine, but they are armed, " +
+                       "and there are more of them than of you.",
+                OfficerRemark = "Valerius: \"Slaves, sir. That's what we all are to them now. I say we cut those chains.\"",
+                Choices = new[]
+                {
+                    new PoiChoice("Free them: attack the fire", "a fight; the freed men are starved and cannot fight yet",
+                        new PoiOutcome
+                        {
+                            SpawnFight = true, FightStrength = 7,
+                            RecruitsToReach = 12, RecruitHealthMin = 0.15f, RecruitHealthMax = 0.24f, RecruitExperienceMax = 220,
+                            Items = new[] { new PoiOutcome.ItemGrant("grain_sack", 2), new PoiOutcome.ItemGrant("wine_amphora", 1) },
+                            ResultText = "You fall on the fire with a shout. The chains come off."
+                        }),
+                    new PoiChoice("Wait for dark and cut them loose", "no fight; the looters keep the plunder",
+                        new PoiOutcome
+                        {
+                            RecruitsToReach = 12, RecruitHealthMin = 0.15f, RecruitHealthMax = 0.24f, RecruitExperienceMax = 220,
+                            Morale = 0.02f,
+                            ResultText = "In the small hours a knife works at the chains. By first light the wagon is empty and you are gone."
+                        }),
+                }
+            });
+
+            Add(new PoiEvent
+            {
+                Id = "aftermath_safe_place",
+                Title = "A Hollow in the Rocks",
+                Subtitle = "Ground fit to camp on",
+                Body = "A fold in the hillside, screened by rock and old pines, with a spring at the bottom. Out of the " +
+                       "wind, out of sight of the road. The men are on their last legs.",
+                OfficerRemark = "Valerius: \"Here, sir. Press CAMP and let them sleep. I'll show you how a camp is kept.\"",
+                Choices = new[]
+                {
+                    new PoiChoice("Halt here", "the men drop where they stand",
+                        new PoiOutcome { Morale = 0.03f, ResultText = "The men drop where they stand. A fire is lit in the lee of the rock." }),
+                }
+            });
+
+            Add(new PoiEvent
+            {
+                Id = "aftermath_passage",
+                Title = "The Passage",
+                Subtitle = "An old ravine through the forested rock",
+                Body = "The scout's ravine: a cleft in the high ground, stone walls hung with roots, the old track beneath " +
+                       "a foot of leaf-litter. Beyond it the forest opens, and the long road home begins.",
+                OfficerRemark = "Valerius: \"Through here and we're out of the killing ground, sir. Where we go after that is yours to say.\"",
+                Choices = new[]
+                {
+                    new PoiChoice("Take the passage", "leave the Aftermath behind",
+                        new PoiOutcome { Morale = 0.04f, ResultText = "The century files into the ravine." }),
+                }
+            });
         }
     }
 }

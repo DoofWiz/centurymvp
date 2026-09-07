@@ -1,4 +1,5 @@
 using System;
+using UnityEngine;
 
 namespace Century.Core
 {
@@ -11,7 +12,12 @@ namespace Century.Core
     /// the daylight shown in the overmap mock-up. The split is a design choice, not a historical
     /// one (Roman vigiliae covered the night only) and lives in one place so it can be changed.
     /// </remarks>
-    public readonly struct CampaignTime : IEquatable<CampaignTime>, IComparable<CampaignTime>
+    /// <para>
+    /// Serialisable: the single backing field is a private <c>[SerializeField]</c> so the struct
+    /// round-trips through JsonUtility inside a save file. It is still immutable from the outside.
+    /// </para>
+    [Serializable]
+    public struct CampaignTime : IEquatable<CampaignTime>, IComparable<CampaignTime>
     {
         public const int MinutesPerHour = 60;
         public const int HoursPerDay = 24;
@@ -22,11 +28,13 @@ namespace Century.Core
 
         public static readonly CampaignTime Zero = new CampaignTime(0d);
 
-        public double TotalMinutes { get; }
+        [SerializeField] private double _totalMinutes;
+
+        public double TotalMinutes => _totalMinutes;
 
         public CampaignTime(double totalMinutes)
         {
-            TotalMinutes = totalMinutes < 0d ? 0d : totalMinutes;
+            _totalMinutes = totalMinutes < 0d ? 0d : totalMinutes;
         }
 
         public static CampaignTime FromDays(double days) => new CampaignTime(days * MinutesPerDay);

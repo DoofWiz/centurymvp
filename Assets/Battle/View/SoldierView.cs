@@ -169,8 +169,8 @@ namespace Century.Battle.View
             _combatant.WorldPosition = transform.position;
             _combatant.Facing = _bodyRoot.forward;
 
-            _gear?.Pose(_combatant, Time.deltaTime, _rig);
             _rig?.Animate(_agent.enabled ? _agent.velocity.magnitude : 0f, Time.deltaTime);
+            _gear?.Pose(_combatant, Time.deltaTime, _rig);
 
             if (_combatant.WasHitThisTick)
             {

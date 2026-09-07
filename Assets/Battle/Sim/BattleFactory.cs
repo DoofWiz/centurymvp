@@ -148,8 +148,8 @@ namespace Century.Battle.Sim
                     Morale01 = spec.Morale01,
                     IsPlayerControlled = spec.IsPlayerControlled,
                     IsPlayerSide = isPlayerSide,
-                    Weapon = isLegionary ? WeaponClass.Sword : WeaponClass.Spear,
-                    HasShield = true,
+                    Weapon = WeaponFor(spec.Loadout, isLegionary),
+                    HasShield = ShieldFor(spec.Loadout),
                     Stamina = staminaClass,
                     PilaRemaining = settings.PilaCount,
                     GroupIndex = spec.GroupIndex,
@@ -165,6 +165,31 @@ namespace Century.Battle.Sim
         /// scutum, Germanic fighters the spear behind a lighter, wider board.</summary>
         private static bool IsLegionary(string archetypeId) =>
             string.IsNullOrEmpty(archetypeId) || archetypeId.StartsWith("legionary");
+
+        /// <summary>The spec's loadout, or the archetype's default kit when it names none.</summary>
+        private static WeaponClass WeaponFor(string loadout, bool isLegionary)
+        {
+            switch (loadout)
+            {
+                case "sword":
+                case "sword_shield": return WeaponClass.Sword;
+                case "spear":
+                case "spear_shield": return WeaponClass.Spear;
+                case "longsword": return WeaponClass.Longsword;
+                default: return isLegionary ? WeaponClass.Sword : WeaponClass.Spear;
+            }
+        }
+
+        private static bool ShieldFor(string loadout)
+        {
+            switch (loadout)
+            {
+                case "sword":
+                case "spear":
+                case "longsword": return false;
+                default: return true;
+            }
+        }
 
         /// <summary>The Centurion fights as himself, outside the squad structure.</summary>
         private static BattleCombatant ExtractPlayerCharacter(List<BattleCombatant> men)

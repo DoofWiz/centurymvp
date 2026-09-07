@@ -59,6 +59,14 @@ namespace Century.Battle.View
             if (snap && target != null) _pivot = target.position;
         }
 
+        /// <summary>Sets the boom length from a script (the opening comes in close). Eases there
+        /// unless snapped; the player's wheel takes over again afterwards.</summary>
+        public void SetDistance(float distance, bool snap = false)
+        {
+            _targetDistance = Mathf.Clamp(distance, _minDistance, _maxDistance);
+            if (snap) _distance = _targetDistance;
+        }
+
         /// <summary>
         /// World point under the cursor ON THE GROUND. Physics first (the sculpted terrain), the
         /// flat plane as fallback — a plane-only answer lands orders metres off on any hillside.

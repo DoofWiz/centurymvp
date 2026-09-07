@@ -26,6 +26,12 @@
             <ui:Button name="nav-commander" class="nav-item nav-item--live">
                 <ui:Label text="COMMANDER" class="nav-item__label" picking-mode="Ignore" />
             </ui:Button>
+            <ui:Button name="nav-save" class="nav-item nav-item--live">
+                <ui:Label text="SAVE" class="nav-item__label" picking-mode="Ignore" />
+            </ui:Button>
+            <ui:Button name="nav-title" class="nav-item nav-item--live">
+                <ui:Label text="TITLE" class="nav-item__label" picking-mode="Ignore" />
+            </ui:Button>
             <ui:VisualElement class="nav-item nav-item--inert">
                 <ui:Label text="JOURNAL" class="nav-item__label" />
             </ui:VisualElement>
@@ -348,6 +354,113 @@
                 <ui:VisualElement name="poi-choices" class="poi-choices" />
             </ui:VisualElement>
         </ui:VisualElement>
+
+        <!-- ============================ OVERMAP TUTORIAL ============================ -->
+        <!-- The map's own pop-ups: one on the world and the right mouse button, one on the
+             first stranger sighted. Clock paused while up; dismissed by the action it names. -->
+        <ui:VisualElement name="overmap-tutorial" class="opening-tutorial overmap-tutorial" picking-mode="Ignore" style="display: none;">
+            <ui:VisualElement class="opening-tutorial__sheet" picking-mode="Ignore">
+                <ui:Label name="overmap-tutorial-title" text="OVERMAP" class="opening-tutorial__title" picking-mode="Ignore" />
+                <ui:Label name="overmap-tutorial-body" text="" class="opening-tutorial__body" picking-mode="Ignore" />
+                <ui:Label name="overmap-tutorial-hint" text="RIGHT CLICK TO CONTINUE" class="opening-tutorial__hint" picking-mode="Ignore" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- ============================ THE DECANUS SPEAKS ============================ -->
+        <!-- The guided start's narration: one beat at a time, clock paused, acknowledged
+             with the button. Filled by OvermapHudController from the onboarding director. -->
+        <ui:VisualElement name="narration-modal" class="modal" style="display: none;">
+            <ui:VisualElement class="modal__sheet narration-sheet">
+                <ui:VisualElement class="modal__header">
+                    <ui:Label name="narration-title" text="—" class="modal__title" />
+                </ui:VisualElement>
+                <ui:Label name="narration-speaker" text="—" class="narration__speaker" />
+                <ui:Label name="narration-body" text="—" class="narration__body" />
+                <ui:VisualElement class="modal__footer detail-footer">
+                    <ui:Button name="narration-dismiss" class="button-start">
+                        <ui:Label name="narration-dismiss-label" text="CONTINUE" class="button-start__label" picking-mode="Ignore" />
+                    </ui:Button>
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- ================================ QUIT PROMPT ================================ -->
+        <ui:VisualElement name="quit-modal" class="modal" style="display: none;">
+            <ui:VisualElement class="modal__sheet quit-sheet">
+                <ui:VisualElement class="modal__header">
+                    <ui:Label text="RETURN TO THE TITLE?" class="modal__title" />
+                    <ui:Label text="Anything not saved is lost." class="modal__subtitle" />
+                </ui:VisualElement>
+                <ui:VisualElement class="modal__footer quit-actions">
+                    <ui:Button name="quit-save" class="button-primary">
+                        <ui:Label text="SAVE FIRST" class="button-primary__label" picking-mode="Ignore" />
+                    </ui:Button>
+                    <ui:VisualElement style="flex-direction: row;">
+                        <ui:Button name="quit-confirm" class="button-ghost">
+                            <ui:Label text="QUIT TO TITLE" class="button-ghost__label" picking-mode="Ignore" />
+                        </ui:Button>
+                        <ui:Button name="quit-stay" class="button-ghost">
+                            <ui:Label text="STAY" class="button-ghost__label" picking-mode="Ignore" />
+                        </ui:Button>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- ================================ SAVE SLOTS ================================ -->
+        <ui:VisualElement name="save-modal" class="modal" style="display: none;">
+            <ui:VisualElement class="modal__sheet save-sheet">
+                <ui:VisualElement class="save-head">
+                    <ui:VisualElement picking-mode="Ignore">
+                        <ui:Label name="save-title" text="LOAD SAVE" class="modal__title" />
+                        <ui:Label name="save-subtitle" text="Choose a slot" class="modal__subtitle" />
+                    </ui:VisualElement>
+                    <ui:Button name="save-close" class="save-close">
+                        <ui:Label text="X" class="save-close__label" picking-mode="Ignore" />
+                    </ui:Button>
+                </ui:VisualElement>
+
+                <ui:VisualElement name="save-slots" class="save-slots">
+                    <ui:Button name="save-slot-0" class="save-slot">
+                        <ui:Label text="I" class="save-slot__numeral" picking-mode="Ignore" />
+                        <ui:VisualElement class="save-slot__text" picking-mode="Ignore">
+                            <ui:Label name="save-slot-title-0" text="EMPTY SLOT" class="save-slot__title" picking-mode="Ignore" />
+                            <ui:Label name="save-slot-detail-0" text="" class="save-slot__detail" picking-mode="Ignore" />
+                            <ui:Label name="save-slot-date-0" text="" class="save-slot__date" picking-mode="Ignore" />
+                        </ui:VisualElement>
+                    </ui:Button>
+                    <ui:Button name="save-slot-1" class="save-slot">
+                        <ui:Label text="II" class="save-slot__numeral" picking-mode="Ignore" />
+                        <ui:VisualElement class="save-slot__text" picking-mode="Ignore">
+                            <ui:Label name="save-slot-title-1" text="EMPTY SLOT" class="save-slot__title" picking-mode="Ignore" />
+                            <ui:Label name="save-slot-detail-1" text="" class="save-slot__detail" picking-mode="Ignore" />
+                            <ui:Label name="save-slot-date-1" text="" class="save-slot__date" picking-mode="Ignore" />
+                        </ui:VisualElement>
+                    </ui:Button>
+                    <ui:Button name="save-slot-2" class="save-slot">
+                        <ui:Label text="III" class="save-slot__numeral" picking-mode="Ignore" />
+                        <ui:VisualElement class="save-slot__text" picking-mode="Ignore">
+                            <ui:Label name="save-slot-title-2" text="EMPTY SLOT" class="save-slot__title" picking-mode="Ignore" />
+                            <ui:Label name="save-slot-detail-2" text="" class="save-slot__detail" picking-mode="Ignore" />
+                            <ui:Label name="save-slot-date-2" text="" class="save-slot__date" picking-mode="Ignore" />
+                        </ui:VisualElement>
+                    </ui:Button>
+                </ui:VisualElement>
+
+                <ui:VisualElement class="modal__footer save-footer">
+                    <ui:Label name="save-status" text="" class="body body--dim" />
+                    <ui:VisualElement class="save-footer__actions">
+                        <ui:Button name="save-delete" class="button-ghost">
+                            <ui:Label text="DELETE" class="button-ghost__label" picking-mode="Ignore" />
+                        </ui:Button>
+                        <ui:Button name="save-action" class="button-start">
+                            <ui:Label name="save-action-label" text="LOAD" class="button-start__label" picking-mode="Ignore" />
+                        </ui:Button>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
 
     </ui:VisualElement>
 </ui:UXML>

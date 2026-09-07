@@ -348,7 +348,11 @@ namespace Century.Battle.Sim
                 && victim.Stance != MeleeStance.Striking)
             {
                 MeleeProfile board = MeleeProfile.For(victim.Weapon);
-                bool inCone = FrontDot(man, victim) > board.BlockArcDot;
+
+                // The Centurion's facing follows a mouse, not a drilled front: his board covers a
+                // wider arc than a ranker's, or a raised shield reads as doing nothing.
+                float blockArc = victim.IsPlayerControlled ? Mathf.Min(board.BlockArcDot, 0.2f) : board.BlockArcDot;
+                bool inCone = FrontDot(man, victim) > blockArc;
                 if (inCone)
                 {
                     if (victim.Stamina01 > board.GuardFloor)
@@ -479,6 +483,13 @@ namespace Century.Battle.Sim
 
         private void AcquireTarget(BattleCombatant man, BattleSquad squad)
         {
+            // A squad that has not marked the Centurion (the opening's passing warband) fights nobody.
+            if (squad.Unaware)
+            {
+                man.Target = null;
+                return;
+            }
+
             MeleeProfile profile = MeleeProfile.For(man.Weapon);
 
             // The leash is measured from the man's SLOT, not his live position — this is what stops a

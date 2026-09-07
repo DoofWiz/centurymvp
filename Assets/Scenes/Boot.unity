@@ -179,7 +179,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Century.App::Century.App.GameDirector
   _campaignSettings: {fileID: 11400000, guid: 903f1ce5872d50841adad5ae900b2b7c, type: 2}
   _campaignSeed: 90409
-  _loadOvermapOnStart: 1
+  _startMode: 0
   _ticker: {fileID: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:

@@ -27,7 +27,9 @@ namespace Century.Battle.Model
     public enum WeaponClass
     {
         Sword = 0,
-        Spear = 1
+        Spear = 1,
+        /// <summary>A Germanic long blade, swung two-handed with no board: quick, reaching, and open.</summary>
+        Longsword = 2
     }
 
     /// <summary>
@@ -75,6 +77,14 @@ namespace Century.Battle.Model
         {
             switch (weapon)
             {
+                case WeaponClass.Longsword:
+                    // The looter's blade: longer than a gladius and swung with intent, coming at
+                    // the man in front of it every couple of seconds. No shield to speak of, so the
+                    // guard numbers are the Roman ones and never used.
+                    return new MeleeProfile(
+                        reach: 2.1f, slash: 0.12f, thrust: 0.15f, charge: 0.32f, strike: 0.2f,
+                        recover: 0.6f, arc: 0.3f, standoff: 0f, interval: 2.6f,
+                        blockArc: 0.45f, blockStamina: 0.05f, guardFloor: 0.10f);
                 case WeaponClass.Spear:
                     // Long reach; hacks at the line often and skips back out of range between blows.
                     // German board: a wide but tiring guard — covers more angle, costs more wind, and

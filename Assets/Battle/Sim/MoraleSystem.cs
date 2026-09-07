@@ -73,7 +73,9 @@ namespace Century.Battle.Sim
                 if (squad.IsDestroyed) continue;
 
                 // Reinforcements wait beyond the field: no fear reaches them, none leaves them.
-                if (squad.IsOffField) continue;
+                // A scripted squad (the opening's extras) is outside the fight for the same reason,
+                // and a fearless one has nothing to lose heart with.
+                if (squad.IsOffField || squad.Scripted || squad.Fearless) continue;
 
                 int lostThisTick = AccumulateCasualtyPressure(squad, deltaSeconds);
                 UpdateCommandAura(squad, isPlayerSide);

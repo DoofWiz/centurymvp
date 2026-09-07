@@ -12,6 +12,9 @@ EditorBuildSettings:
     path: Assets/Scenes/Boot.unity
     guid: e6f8d195f49075843b0fd97499124b7f
   - enabled: 1
+    path: Assets/Scenes/Title.unity
+    guid: af0f18aada0d46b393a48f4ee69d84e1
+  - enabled: 1
     path: Assets/Scenes/Overmap.unity
     guid: 28da0d7943f2c0b4bb490e62e5c4a5a1
   - enabled: 1

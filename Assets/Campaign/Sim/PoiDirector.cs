@@ -40,7 +40,7 @@ namespace Century.Campaign.Sim
             for (int i = 0; i < pois.Count; i++)
             {
                 PointOfInterest poi = pois[i];
-                if (poi.Resolved) continue;
+                if (poi.Resolved || poi.Hidden) continue;
 
                 // FLAT distance: the player stands at terrain height, and a POI authored at y = 0
                 // under a 15m hill would otherwise be unreachable — the vertical gap alone can

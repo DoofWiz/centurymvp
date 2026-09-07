@@ -57,6 +57,14 @@ namespace Century.Core.Contracts
 
         /// <summary>Captured war banners travelling with the column (relevant to certain doctrines).</summary>
         public int CapturedBanners;
+
+        /// <summary>
+        /// The scripted OPENING SEQUENCE rather than a battle: one wounded Centurion alone on a
+        /// rainy forest floor, tutorial pop-ups, a warband to slip past and one looter to kill. The
+        /// battle scene runs it with the same simulation but no deployment, no outcome evaluation
+        /// and no squad interface; the director in the scene owns the beats.
+        /// </summary>
+        public bool OpeningSequence;
     }
 
     /// <summary>A single fighter, flattened out of the campaign roster.</summary>
@@ -93,5 +101,12 @@ namespace Century.Core.Contracts
         /// <summary>Display-only veterancy line for the battle HUD, e.g. "Miles (Trained)".
         /// A string because the tier enum lives campaign-side and battle only shows it.</summary>
         public string VeterancyLabel;
+
+        /// <summary>
+        /// What he fights with, overriding the archetype's default kit. Null or empty keeps the
+        /// default (legionaries: sword and scutum; warriors: spear and board). Recognised values:
+        /// "sword", "sword_shield", "spear", "spear_shield", "longsword".
+        /// </summary>
+        public string Loadout;
     }
 }

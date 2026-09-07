@@ -42,6 +42,10 @@ namespace Century.Battle.Sim
         /// <summary>Physical melee. The bootstrap feeds the Centurion's slash/thrust/shield into it.</summary>
         public MeleeCombat Combat => _combat;
 
+        /// <summary>The opening sequence: no outcome is ever evaluated and command never devolves;
+        /// the scene's director decides when it is over.</summary>
+        public bool SuppressOutcome { get; set; }
+
         public BattleSimulation(BattleState state, BattleSettings settings)
         {
             _state = state;
@@ -85,11 +89,12 @@ namespace Century.Battle.Sim
             // The signum every frame: its position must track its carrier smoothly for the view.
             _signum.Tick(deltaSeconds);
 
-            TickSuccession(deltaSeconds);
+            if (!SuppressOutcome) TickSuccession(deltaSeconds);
             _morale.TickRally(deltaSeconds, rallyHeld);
             RecoverStamina(deltaSeconds);
             ClearFallen();
 
+            if (SuppressOutcome) return;
             if (!_outcome.TryEvaluate(deltaSeconds, out BattleOutcome outcome)) return;
 
             IsConcluded = true;

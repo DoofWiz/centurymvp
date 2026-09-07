@@ -3444,3 +3444,355 @@ Button.squad-card:hover { border-color: var(--gold); }
     color: var(--parchment);
     white-space: normal;
 }
+
+
+/* =======================================================================================
+ *  Onboarding flow: title screen, save slots, the decanus' narration, camp coach marks,
+ *  and the opening sequence's subtitles and tutorial pop-ups.
+ * ======================================================================================= */
+
+/* --- Title screen --------------------------------------------------------------------- */
+/* Free-floating text, no containers: bigger, brighter, and a gold underline that grows out
+   from the centre of a hovered action. */
+
+.title-menu {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 9%;
+    align-items: center;
+}
+
+.title-menu__eyebrow {
+    font-size: 18px;
+    color: rgb(232, 226, 212);
+    letter-spacing: 10px;
+    -unity-font-style: bold;
+    margin-bottom: 22px;
+}
+
+.title-link {
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    padding-left: 22px;
+    padding-right: 22px;
+    padding-top: 10px;
+    padding-bottom: 8px;
+    margin-top: 6px;
+    margin-bottom: 0;
+    align-items: center;
+}
+
+.title-link:hover,
+.title-link:active,
+.title-link:focus {
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+}
+
+.title-link__label {
+    font-size: 34px;
+    color: rgb(244, 240, 230);
+    letter-spacing: 7px;
+    -unity-font-style: bold;
+    transition-property: color;
+    transition-duration: 0.12s;
+}
+
+.title-link:hover .title-link__label { color: var(--gold-bright); }
+
+.title-link__underline {
+    width: 100%;
+    height: 2px;
+    margin-top: 6px;
+    background-color: var(--gold-bright);
+    scale: 0 1;
+    transition-property: scale;
+    transition-duration: 0.16s;
+    transition-timing-function: ease-out;
+}
+
+.title-link:hover .title-link__underline { scale: 1 1; }
+
+.title-menu__version {
+    margin-top: 30px;
+    font-size: 13px;
+    color: rgb(190, 184, 170);
+    letter-spacing: 5px;
+}
+
+/* --- Save slots ------------------------------------------------------------------------ */
+
+.save-sheet { width: 640px; }
+
+.save-head {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+}
+
+.save-close {
+    background-color: rgba(0, 0, 0, 0.4);
+    border-width: var(--rule);
+    border-color: var(--gold-dim);
+    width: 34px;
+    height: 34px;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    margin: 0;
+}
+
+.save-close:hover { border-color: var(--gold-bright); }
+
+.save-close__label {
+    font-size: var(--font-size-body);
+    color: var(--gold-bright);
+    -unity-font-style: bold;
+}
+
+.save-slots { margin-top: 4px; }
+
+.save-slot {
+    flex-direction: row;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.35);
+    border-width: var(--rule);
+    border-color: var(--gold-dim);
+    border-left-width: 3px;
+    border-left-color: var(--gold);
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-left: 14px;
+    padding-right: 14px;
+    margin-top: 8px;
+    transition-property: border-color, background-color;
+    transition-duration: 0.12s;
+}
+
+.save-slot:hover { border-color: var(--gold-bright); }
+
+.save-slot--selected {
+    background-color: rgba(50, 42, 26, 0.94);
+    border-color: var(--gold-bright);
+}
+
+.save-slot--empty { border-left-color: var(--parchment-faint); }
+
+.save-slot__numeral {
+    width: 44px;
+    font-size: var(--font-size-title);
+    color: var(--gold-bright);
+    letter-spacing: 2px;
+    -unity-font-style: bold;
+}
+
+.save-slot__text { flex-grow: 1; }
+
+.save-slot__title {
+    font-size: var(--font-size-body);
+    color: var(--parchment);
+    letter-spacing: 2px;
+    -unity-font-style: bold;
+}
+
+.save-slot--empty .save-slot__title { color: var(--parchment-faint); }
+
+.save-slot__detail {
+    font-size: var(--font-size-small);
+    color: var(--parchment-dim);
+    margin-top: 2px;
+}
+
+.save-slot__date {
+    font-size: var(--font-size-micro);
+    color: var(--parchment-faint);
+    letter-spacing: 1px;
+    margin-top: 2px;
+}
+
+.save-footer__actions { flex-direction: row; align-items: center; }
+.save-footer__actions .button-ghost { margin-right: 10px; }
+
+/* --- Quit prompt (overmap) ------------------------------------------------------------- */
+
+.quit-sheet { width: 520px; }
+
+.quit-actions { flex-direction: row; align-items: center; }
+.quit-actions .button-ghost { margin-left: 8px; }
+
+/* --- Narration: the decanus speaks ----------------------------------------------------- */
+
+.narration-sheet { width: 640px; }
+
+.narration__speaker {
+    font-size: var(--font-size-small);
+    color: var(--gold);
+    letter-spacing: 3px;
+    -unity-font-style: bold;
+    margin-top: 10px;
+}
+
+.narration__body {
+    font-size: var(--font-size-body);
+    color: var(--parchment);
+    white-space: normal;
+    margin-top: 8px;
+}
+
+/* --- Camp coach marks ------------------------------------------------------------------ */
+
+.coach-panel {
+    position: absolute;
+    width: 380px;
+    background-color: var(--ink-solid);
+    border-width: 2px;
+    border-color: var(--gold);
+    padding: 14px;
+}
+
+.coach-panel__title {
+    font-size: var(--font-size-large);
+    color: var(--gold-bright);
+    letter-spacing: 3px;
+    -unity-font-style: bold;
+    margin-top: 4px;
+}
+
+.coach-panel__body {
+    font-size: var(--font-size-small);
+    color: var(--parchment);
+    white-space: normal;
+    margin-top: 8px;
+}
+
+.coach-panel__footer {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 12px;
+}
+
+.coach-target {
+    border-width: 2px;
+    border-color: var(--gold-bright);
+    background-color: rgba(70, 58, 30, 0.55);
+}
+
+/* --- The opening sequence (battle scene, scripted) ------------------------------------- */
+
+.opening-subtitle {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 14%;
+    align-items: center;
+    opacity: 0;
+}
+
+.opening-subtitle__text {
+    font-size: var(--font-size-title);
+    color: var(--parchment);
+    letter-spacing: 2px;
+    background-color: rgba(3, 3, 2, 0.55);
+    padding-left: 22px;
+    padding-right: 22px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    white-space: normal;
+    max-width: 900px;
+    -unity-text-align: middle-center;
+}
+
+.opening-tutorial {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 22%;
+    align-items: center;
+}
+
+.opening-tutorial__sheet {
+    background-color: var(--ink-solid);
+    border-width: 2px;
+    border-color: var(--gold);
+    padding-left: 34px;
+    padding-right: 34px;
+    padding-top: 22px;
+    padding-bottom: 22px;
+    align-items: center;
+    min-width: 440px;
+    max-width: 640px;
+}
+
+.opening-tutorial__title {
+    font-size: var(--font-size-alert);
+    color: var(--gold-bright);
+    letter-spacing: 6px;
+    -unity-font-style: bold;
+}
+
+.opening-tutorial__keys {
+    font-size: var(--font-size-title);
+    color: var(--parchment);
+    letter-spacing: 4px;
+    margin-top: 10px;
+    -unity-font-style: bold;
+}
+
+.opening-tutorial__body {
+    font-size: var(--font-size-body);
+    color: var(--parchment-dim);
+    white-space: normal;
+    margin-top: 10px;
+    -unity-text-align: middle-center;
+}
+
+.opening-tutorial__hint {
+    font-size: var(--font-size-micro);
+    color: var(--gold);
+    letter-spacing: 3px;
+    margin-top: 14px;
+}
+
+.opening-eyelid {
+    position: absolute;
+    left: 0;
+    right: 0;
+    background-color: rgb(0, 0, 0);
+}
+
+.opening-eyelid--top { top: 0; height: 0; }
+.opening-eyelid--bottom { bottom: 0; height: 0; }
+
+.opening-stealth {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 6%;
+    align-items: center;
+    display: none;
+}
+
+.opening-stealth__label {
+    font-size: var(--font-size-small);
+    color: var(--gold-bright);
+    letter-spacing: 5px;
+    -unity-font-style: bold;
+    background-color: rgba(3, 3, 2, 0.6);
+    padding-left: 14px;
+    padding-right: 14px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+}
+
+/* --- Overmap tutorial pop-ups: the opening's sheet, sat a little lower ------------------ */
+
+.overmap-tutorial { top: 26%; }
+
+.overmap-tutorial .opening-tutorial__body {
+    color: var(--parchment);
+    font-size: var(--font-size-large);
+    max-width: 560px;
+}

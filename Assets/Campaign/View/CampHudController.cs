@@ -139,7 +139,25 @@ namespace Century.Campaign.View
             RebuildStations();
             RebuildCrafting();
             Refresh();
+
+            // The Aftermath's first camp: the decanus walks the player through the screen.
+            OnboardingState ob = _state.Onboarding;
+            if (ob != null && ob.IsAftermath && ob.Objective == AftermathObjective.MakeCamp
+                && !ob.CampWalkthroughDone)
+            {
+                _walkthrough = new CampWalkthrough(root, _state, SelectCampTab, IsAnyModalOpen);
+                _walkthrough.Begin();
+            }
         }
+
+        private CampWalkthrough _walkthrough;
+        private Label _scoutHeading;
+
+        private bool IsAnyModalOpen() =>
+            IsShown(_pickerModal) || IsShown(_soldierModal) || IsShown(_scoutModal) || IsShown(_officeModal);
+
+        private static bool IsShown(VisualElement modal) =>
+            modal != null && modal.style.display == DisplayStyle.Flex;
 
         private void OnDisable() => _bound = false;
 
@@ -254,6 +272,7 @@ namespace Century.Campaign.View
             _soldierDecanusLabel = Find<Label>(root, "soldier-decanus-label");
 
             _scoutModal = Find<VisualElement>(root, "scout-modal");
+            _scoutHeading = Find<Label>(root, "scout-heading");
             _scoutTitle = Find<Label>(root, "scout-title");
             _scoutDetail = Find<Label>(root, "scout-detail");
             _scoutReward = Find<Label>(root, "scout-reward");
@@ -323,6 +342,13 @@ namespace Century.Campaign.View
             SetText(_restReadout, DescribeRest(result));
             RebuildOrganisation();
             Refresh();
+
+            // The scout comes in with the dawn: his report is read at the end of the rest.
+            if (_camp.LastRestScoutReport.Sent)
+            {
+                ShowScoutResult(_camp.LastRestScoutReport);
+                _walkthrough?.OnRested();
+            }
         }
 
         private static string DescribeRest(RestResult r)
@@ -343,8 +369,8 @@ namespace Century.Campaign.View
         private void DoScout()
         {
             if (_camp == null || !_camp.CanScout) return;
-            CampService.ScoutReport report = _camp.SendScouting();
-            if (report.Sent) ShowScoutResult(report);
+            if (_camp.SendScouting())
+                SetText(_restReadout, "The Speculator rides out. He reports when the column next rests.");
             Refresh();
         }
 
@@ -602,7 +628,7 @@ namespace Century.Campaign.View
             string holderId = _state.PlayerParty.Appointments.GetHolderId(role);
             SoldierRecord holder = holderId == null ? null : _state.PlayerParty.Roster.Find(holderId);
 
-            var slot = new Button { text = string.Empty };
+            var slot = new Button { text = string.Empty, name = $"officer-slot-{role}" };
             slot.AddToClassList("officer-slot");
             slot.EnableInClassList("officer-slot--vacant", holder == null);
 
@@ -856,6 +882,7 @@ namespace Century.Campaign.View
         {
             if (_scoutModal == null) return;
 
+            SetText(_scoutHeading, (report.Heading ?? "Opportunity sighted").ToUpperInvariant());
             SetText(_scoutTitle, report.Title);
             SetText(_scoutDetail, report.Detail);
             SetText(_scoutReward, report.Reward);
@@ -1166,6 +1193,8 @@ namespace Century.Campaign.View
         {
             if (!_bound || _state == null) return;
 
+            _walkthrough?.Tick();
+
             _accumulator += Time.unscaledDeltaTime;
             if (_accumulator < _refreshInterval) return;
             _accumulator = 0f;
@@ -1206,9 +1235,11 @@ namespace Century.Campaign.View
         {
             if (_camp == null) return;
 
-            SetText(_orderScoutHint, _camp.CanScout
-                ? "The Speculator rides out · costs a watch"
-                : "Needs a Speculator appointed");
+            SetText(_orderScoutHint, _camp.ScoutIsOut
+                ? "The Speculator is out ranging · he reports after the next rest"
+                : _camp.CanScout
+                    ? "The Speculator rides out · reports after the next rest"
+                    : "Needs a Speculator appointed");
             _orderScout?.SetEnabled(_camp.CanScout);
 
             SetText(_orderTrainHint, _camp.CanTrain

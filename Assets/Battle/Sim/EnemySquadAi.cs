@@ -48,7 +48,7 @@ namespace Century.Battle.Sim
             for (int i = 0; i < _state.EnemySquads.Count; i++)
             {
                 BattleSquad squad = _state.EnemySquads[i];
-                if (!squad.IsEffective || squad.IsOffField) continue;
+                if (!squad.IsEffective || squad.IsOffField || squad.Scripted) continue;
                 Decide(squad);
             }
         }

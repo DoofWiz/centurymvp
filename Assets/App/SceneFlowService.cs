@@ -7,8 +7,8 @@ using UnityEngine.SceneManagement;
 namespace Century.App
 {
     /// <summary>
-    /// Owns scene transitions. Overmap, Camp and Battle are mutually exclusive additive scenes on top
-    /// of the persistent Boot scene; only one is ever loaded at a time.
+    /// Owns scene transitions. Title, Overmap, Camp and Battle are mutually exclusive additive scenes
+    /// on top of the persistent Boot scene; only one is ever loaded at a time.
     /// </summary>
     /// <remarks>
     /// Coroutine based rather than async/await so the project does not need UniTask yet. The public
@@ -21,6 +21,10 @@ namespace Century.App
         private string _activeGameplayScene;
 
         public bool IsTransitioning { get; private set; }
+
+        /// <summary>The scene currently standing on top of Boot, or null before the first load.</summary>
+        public string ActiveScene => _activeGameplayScene;
+
         public event Action<string> GameplaySceneLoaded;
         public event Action<string> GameplaySceneUnloading;
 
@@ -28,6 +32,9 @@ namespace Century.App
         {
             _coroutineHost = coroutineHost ?? throw new ArgumentNullException(nameof(coroutineHost));
         }
+
+        public void LoadTitle(Action onComplete = null) =>
+            _coroutineHost.StartCoroutine(SwapTo(SceneNames.Title, onComplete));
 
         public void LoadOvermap(Action onComplete = null) =>
             _coroutineHost.StartCoroutine(SwapTo(SceneNames.Overmap, onComplete));
@@ -65,6 +72,12 @@ namespace Century.App
             }
 
             AsyncOperation load = SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
+            if (load == null)
+            {
+                Debug.LogError($"[SceneFlow] Scene '{sceneName}' is not in Build Settings. Add it (File > Build Profiles).");
+                IsTransitioning = false;
+                yield break;
+            }
             while (!load.isDone) yield return null;
 
             Scene loaded = SceneManager.GetSceneByName(sceneName);

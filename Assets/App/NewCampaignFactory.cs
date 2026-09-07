@@ -7,9 +7,10 @@ using UnityEngine;
 namespace Century.App
 {
     /// <summary>
-    /// Builds a starting campaign. Temporary: this will be replaced by save-file loading and by
-    /// designer-authored scenario assets, but having a concrete state on boot means every system
-    /// below it can be exercised from day one.
+    /// Builds a starting campaign: the guided start (a handful of survivors, the Aftermath laid out
+    /// around them) or the sandbox (the full century, the open map). Warbands and places are the
+    /// seeder's business (<see cref="CampaignSeeder"/>), so the guided start can seed the open
+    /// world later, the moment the passage is taken.
     /// </summary>
     public static class NewCampaignFactory
     {
@@ -19,16 +20,91 @@ namespace Century.App
         private static readonly string[] Nomina =
             { "Valerius", "Aquilius", "Vorenus", "Secundus", "Felix", "Cornelius", "Antonius", "Fabius", "Iulius", "Sergius" };
 
-        private static readonly string[] WarbandNames =
-            { "Marsi Warband", "Bructeri Hunters", "Chatti Outriders", "Cherusci Scouts", "Sicambri Spears" };
+        // --- The guided start -----------------------------------------------------------------
 
-        private static readonly string[] RaiderNames =
-            { "Cherusci Raiders", "Broken Men", "Wolf Brothers", "River Wolves" };
+        /// <summary>
+        /// The morning after Teutoburg: a wounded Centurion, a decanus and four men, at the edge of
+        /// the killing ground. The chapter opens on the opening sequence; the App layer moves it to
+        /// the Aftermath when that is done.
+        /// </summary>
+        public static CampaignState CreateOnboarding(int seed, CampaignSettings settings)
+        {
+            // Day one, first light. Everything is counted from the massacre.
+            var clock = new CampaignClock(CampaignTime.FromHours(6.5d));
+            var state = new CampaignState(clock) { RandomSeed = seed };
 
-        private static readonly string[] WarHostNames =
-            { "Host of the Cherusci", "Arminius' Vanguard", "The Gathered Tribes" };
+            Random.State previousRandomState = Random.state;
+            Random.InitState(seed);
 
-        public static CampaignState Create(int seed, CampaignSettings settings)
+            state.AddParty(CreateSurvivors(state, settings));
+            CampaignSeeder.SeedAftermath(state, settings);
+            state.Onboarding.Chapter = OnboardingChapter.Opening;
+
+            Random.state = previousRandomState;
+            return state;
+        }
+
+        private static PartyState CreateSurvivors(CampaignState state, CampaignSettings settings)
+        {
+            var party = new PartyState
+            {
+                Id = state.MintId("party"),
+                DisplayName = "Centuria Cornelia",
+                Faction = PartyFaction.Roman,
+                IsPlayer = true,
+                WorldPosition = CampaignSeeder.AftermathStart,
+                DetectionRadius = settings.PlayerDetectionRadius,
+                SpeedModifier = 1f,
+                Stores =
+                {
+                    Food = 9f,                   // a day and a half, scraped from the packs of the dead
+                    Coin = 14,
+                    Denarii = 36,
+                    EquipmentCondition01 = 0.52f
+                }
+            };
+
+            party.Roster.Capacity = 120;
+
+            // The Centurion, wounded but on his feet; the decanus who kept four men alive; the four.
+            // Experience is spread so two of them can hold the Speculator's office when asked.
+            SoldierRecord centurion = MakeSoldier("M. Cornelius", "centurion", "legionary_officer", 0.72f, 910, 0.55f);
+            SoldierRecord decanus = MakeSoldier(OnboardingDirector.DecanusName, "legionary", "legionary_heavy", 0.66f, 430, 0.7f);
+            party.Roster.Add(centurion);
+            party.Roster.Add(decanus);
+            party.Roster.Add(MakeSoldier("Q. Fabius", "legionary", "legionary_heavy", 0.52f, 160, 0.62f));
+            party.Roster.Add(MakeSoldier("S. Antonius", "legionary", "legionary_heavy", 0.48f, 135, 0.45f));
+            party.Roster.Add(MakeSoldier("L. Sergius", "legionary", "legionary_heavy", 0.44f, 60, 0.8f));
+            party.Roster.Add(MakeSoldier("A. Iulius", "legionary", "legionary_heavy", 0.40f, 20, 0.58f));
+
+            ContuberniumLedger.EnsureAssigned(party.Roster);
+            ContuberniumLedger.SetDecanus(party.Roster, decanus.Id);
+
+            // What six men carried out of the forest.
+            PartyInventory inv = party.Inventory;
+            inv.Add("hardtack", 3);
+            inv.Add("salt_pork", 1);
+            inv.Add("firewood_bundle", 6);
+            inv.Add("linen_bandages", 2);
+            inv.Add("healing_herbs", 1);
+            inv.Add("gladius_spare", 1);
+            inv.Add("pila_bundle", 1);
+            inv.Add("dolabra", 2);
+            inv.Add("whetstone", 1);
+            inv.Add("rope_coils", 1);
+            inv.Add("timber", 2);
+
+            // A fire, and nothing else standing. Every other station is theirs to raise.
+            party.Facilities.SetLevel(CampStationId.CookingFire, 1);
+
+            party.Morale.Value01 = party.Roster.AverageMorale01;
+            return party;
+        }
+
+        // --- The sandbox ----------------------------------------------------------------------
+
+        /// <summary>The free start: the full century on the open map, warbands and places seeded.</summary>
+        public static CampaignState CreateSandbox(int seed, CampaignSettings settings)
         {
             var clock = new CampaignClock(CampaignTime.FromDays(22).Plus(12 * CampaignTime.MinutesPerHour));
             var state = new CampaignState(clock) { RandomSeed = seed };
@@ -37,17 +113,8 @@ namespace Century.App
             Random.InitState(seed);
 
             state.AddParty(CreatePlayerParty(state, settings));
-
-            // A mixed opposition: quick opportunists, middling warbands, and one host you should
-            // think very hard about meeting at all.
-            state.AddParty(CreateWarband(state, 0, settings, PartyKind.Raiders));
-            state.AddParty(CreateWarband(state, 1, settings, PartyKind.Raiders));
-            state.AddParty(CreateWarband(state, 2, settings, PartyKind.Warband));
-            state.AddParty(CreateWarband(state, 3, settings, PartyKind.Warband));
-            state.AddParty(CreateWarband(state, 4, settings, PartyKind.Warband));
-            state.AddParty(CreateWarband(state, 5, settings, PartyKind.WarHost));
-
-            SeedPointsOfInterest(state, settings);
+            CampaignSeeder.SeedOpenWorld(state, settings);
+            state.Onboarding.Chapter = OnboardingChapter.None;
 
             Random.state = previousRandomState;
             return state;
@@ -111,7 +178,7 @@ namespace Century.App
 
         /// <summary>
         /// What a century that fought its way out of the forest still carries: working spares and
-        /// tools, a modest baggage train, a few things worth trading — and its own standard.
+        /// tools, a modest baggage train, a few things worth trading, and its own standard.
         /// </summary>
         private static void SeedInventory(PartyState party)
         {
@@ -153,7 +220,7 @@ namespace Century.App
             inv.Add("bronze_fibulae", 3);
             inv.Add("silver_torc", 1);
 
-            // Spare kit — the difference between a loss and a bad day.
+            // Spare kit: the difference between a loss and a bad day.
             inv.Add("gladius_spare", 5);
             inv.Add("pugio_spare", 4);
             inv.Add("scutum_spare", 4);
@@ -180,86 +247,11 @@ namespace Century.App
             inv.Add("riding_horse", 2);
         }
 
-        private static PartyState CreateWarband(
-            CampaignState state, int index, CampaignSettings settings, PartyKind kind)
-        {
-            float angle = index / 6f * Mathf.PI * 2f + Random.Range(-0.4f, 0.4f);
-
-            // The host starts far out — a storm on the horizon, not a doorstep surprise.
-            float radius = kind == PartyKind.WarHost ? Random.Range(380f, 520f) : Random.Range(180f, 420f);
-
-            // Clamped so a warband cannot spawn beyond the terrain and fail to reach the NavMesh.
-            Vector3 spawn = settings.ClampToWorld(
-                new Vector3(Mathf.Cos(angle) * radius, 0f, Mathf.Sin(angle) * radius));
-
-            string displayName;
-            int strength;
-            switch (kind)
-            {
-                case PartyKind.Raiders:
-                    displayName = RaiderNames[index % RaiderNames.Length];
-                    strength = Random.Range(8, 17);
-                    break;
-                case PartyKind.WarHost:
-                    displayName = WarHostNames[index % WarHostNames.Length];
-                    strength = Random.Range(55, 91);
-                    break;
-                default:
-                    displayName = WarbandNames[index % WarbandNames.Length];
-                    strength = Random.Range(18, 46);
-                    break;
-            }
-
-            var party = new PartyState
-            {
-                Id = state.MintId("party"),
-                DisplayName = displayName,
-                Faction = PartyFaction.Germanic,
-                Kind = kind,
-                WorldPosition = spawn,
-                DetectionRadius = Random.Range(settings.WarbandDetectionRadiusMin, settings.WarbandDetectionRadiusMax),
-                SpeedModifier = Random.Range(settings.WarbandSpeedModifierMin, settings.WarbandSpeedModifierMax),
-                Behaviour = kind == PartyKind.Raiders
-                    ? Century.Core.Contracts.CommanderBehaviour.Skirmisher
-                    : CommanderBehaviourPool.Pick(),
-                Stores = { Food = 120f + strength * 2f }
-            };
-
-            party.Roster.Capacity = strength;
-            for (int i = 0; i < strength; i++)
-                party.Roster.Add(MakeSoldier($"Warrior {i + 1}", "warrior", "cherusci_warrior", Random.Range(0.55f, 1f)));
-
-            party.Morale.Value01 = party.Roster.AverageMorale01;
-            return party;
-        }
-
-        /// <summary>
-        /// Scatters the opening points of interest across the map. A couple sit inside the column's
-        /// starting sight so the player sees the mechanic at once; the rest reward marching out.
-        /// </summary>
-        private static void SeedPointsOfInterest(CampaignState state, CampaignSettings settings)
-        {
-            void Add(PoiKind kind, string eventId, string name, Vector3 pos) =>
-                state.PointsOfInterest.Add(new PointOfInterest
-                {
-                    Id = state.MintId("poi"),
-                    Kind = kind,
-                    EventId = eventId,
-                    DisplayName = name,
-                    WorldPosition = settings.ClampToWorld(pos)
-                });
-
-            Add(PoiKind.Settlement, "shrine", "A roadside shrine", new Vector3(70f, 0f, 45f));
-            Add(PoiKind.Grove, "grove", "A druid's grove", new Vector3(165f, 0f, 130f));
-            Add(PoiKind.Refugees, "refugees", "A refugee column", new Vector3(-185f, 0f, 95f));
-            Add(PoiKind.Settlement, "merchant", "A travelling merchant", new Vector3(75f, 0f, -195f));
-            Add(PoiKind.Ruin, "watchtower", "An abandoned watchtower", new Vector3(-150f, 0f, -155f));
-            Add(PoiKind.RaiderCamp, "raiders", "A raider camp", new Vector3(255f, 0f, -70f));
-            Add(PoiKind.Battlefield, "battlefield", "An old battlefield", new Vector3(-60f, 0f, 235f));
-        }
+        // --- Shared -----------------------------------------------------------------------------
 
         private static SoldierRecord MakeSoldier(
-            string displayName, string rankId, string archetypeId, float morale, int experience = 0)
+            string displayName, string rankId, string archetypeId, float morale, int experience = 0,
+            float health = -1f)
         {
             return new SoldierRecord
             {
@@ -267,7 +259,7 @@ namespace Century.App
                 DisplayName = displayName,
                 RankId = rankId,
                 ArchetypeId = archetypeId,
-                Health01 = Random.Range(0.55f, 1f),
+                Health01 = health >= 0f ? health : Random.Range(0.55f, 1f),
                 Stamina01 = Random.Range(0.6f, 1f),
                 Morale01 = morale,
                 Loyalty01 = Mathf.Clamp01(morale + Random.Range(-0.2f, 0.2f)),

@@ -133,8 +133,8 @@ namespace Century.Campaign.Sim
             party.PursuitTargetId = null;
             party.IsCamped = false;
             party.IsStealthed = false;   // fleeing is done openly, at the double
-            party.Destination = _settings.ClampToWorld(
-                party.WorldPosition + away.normalized * (threat.DetectionRadius * 2f));
+            party.Destination = party.ClampToHomeZone(_settings.ClampToWorld(
+                party.WorldPosition + away.normalized * (threat.DetectionRadius * 2f)));
             party.NextDecisionTime = now.Plus(_settings.AiDecisionIntervalMinutes * 0.5d);
         }
 
@@ -150,6 +150,9 @@ namespace Century.Campaign.Sim
                 PartyState candidate = parties[i];
                 if (candidate.IsDisbanded || !candidate.CanFight) continue;
                 if (!PartyRelations.IsHostile(hunter, candidate)) continue;
+
+                // A leashed band (the Aftermath's looters) only hunts inside its own ground.
+                if (!hunter.InHomeZone(candidate.WorldPosition)) continue;
 
                 float sqr = (candidate.WorldPosition - hunter.WorldPosition).sqrMagnitude;
                 if (sqr >= bestSqr) continue;
@@ -198,6 +201,9 @@ namespace Century.Campaign.Sim
             PartyState target = _state.FindParty(hunter.PursuitTargetId);
             if (target == null || target.IsDisbanded || !target.CanFight) return false;
 
+            // A leashed band gives up the moment its quarry leaves its ground.
+            if (!hunter.InHomeZone(target.WorldPosition)) return false;
+
             // Lost contact: the quarry outran the hunter's detection envelope.
             float visibility = target.VisibilityRadius(_settings.StealthVisibilityMultiplier);
             float range = hunter.DetectionRadius + visibility;
@@ -232,7 +238,7 @@ namespace Century.Campaign.Sim
             Vector3 offset = new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle)) * distance;
 
             party.AiState = PartyAiState.Wandering;
-            party.Destination = _settings.ClampToWorld(party.WorldPosition + offset);
+            party.Destination = party.ClampToHomeZone(_settings.ClampToWorld(party.WorldPosition + offset));
             party.NextDecisionTime = now.Plus(NextInterval());
         }
 

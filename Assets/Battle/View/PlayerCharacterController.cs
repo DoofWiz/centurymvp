@@ -27,6 +27,10 @@ namespace Century.Battle.View
         [SerializeField] private int _attackMouseButton;      // left mouse: slash / charge a thrust
         [SerializeField] private int _throwMouseButton = 1;   // right mouse, hurl a pilum
         [SerializeField] private KeyCode _shieldKey = KeyCode.LeftControl;
+        [SerializeField] private KeyCode _stealthKey = KeyCode.C;
+
+        [Tooltip("Movement speed multiplier while crouched in stealth.")]
+        [Range(0.2f, 1f)] [SerializeField] private float _stealthMoveFraction = 0.5f;
 
         private CombatantGear _gear;
         private bool _lmbCharging;
@@ -71,6 +75,38 @@ namespace Century.Battle.View
         /// </summary>
         public bool IsControlEnabled { get; set; } = true;
 
+        /// <summary>The stealth stance is a thing the opening teaches; until then C does nothing.</summary>
+        public bool StealthAllowed { get; set; }
+
+        /// <summary>Crouched and slow: men who have not marked him look past him (opening sequence).</summary>
+        public bool IsStealthed { get; private set; }
+
+        /// <summary>Forward pitch of the body, degrees: 82 lies him flat, 0 stands him. Driven by a
+        /// script while control is suspended (the opening's waking), zero otherwise.</summary>
+        public float PosePitch { get; set; }
+
+        public void SetStealth(bool on) => IsStealthed = on && StealthAllowed;
+
+        /// <summary>While control is suspended, the Centurion walks himself here (the opening's
+        /// exit): a scripted march with the ordinary stride, gravity and facing. Null stands him
+        /// where the model says.</summary>
+        public Vector3? ScriptedDestination { get; set; }
+
+        /// <summary>Metres per second of a scripted walk.</summary>
+        public float ScriptedSpeed { get; set; } = 2.4f;
+
+        /// <summary>True when there is no scripted walk left to do.</summary>
+        public bool ScriptedArrived
+        {
+            get
+            {
+                if (!ScriptedDestination.HasValue) return true;
+                Vector3 to = ScriptedDestination.Value - transform.position;
+                to.y = 0f;
+                return to.sqrMagnitude <= 0.36f;
+            }
+        }
+
         private void Awake()
         {
             _controller = GetComponent<CharacterController>();
@@ -104,9 +140,17 @@ namespace Century.Battle.View
                 IsAiming = false;
                 _lmbCharging = false;
 
+                if (ScriptedDestination.HasValue && !ScriptedArrived)
+                {
+                    ScriptedStep();
+                    return;
+                }
+
                 // Follow the model while control is suspended, so deployment moves are reflected here.
                 transform.position = _combatant.WorldPosition;
-                _gear?.Pose(_combatant, Time.deltaTime);
+                ApplyPosePitch();
+                _rig?.Animate(0f, Time.deltaTime);
+                _gear?.Pose(_combatant, Time.deltaTime, _rig);
                 return;
             }
 
@@ -135,6 +179,10 @@ namespace Century.Battle.View
             // Rallying is a commitment: you stand and shout instead of moving or fighting.
             IsRallying = Input.GetKey(_rallyKey);
 
+            // Stealth toggles on C once the opening has taught it; a sprint stands him up.
+            if (StealthAllowed && Input.GetKeyDown(_stealthKey)) IsStealthed = !IsStealthed;
+            if (IsStealthed && Input.GetKey(KeyCode.LeftShift)) IsStealthed = false;
+
             HandleMeleeInput();
             ShieldHeld = !IsRallying && Input.GetKey(_shieldKey);
 
@@ -146,9 +194,10 @@ namespace Century.Battle.View
 
             if (!IsRallying) ApplyMovement();
             ApplyFacing();
+            ApplyPosePitch();
 
             _combatant.WorldPosition = transform.position;
-            _combatant.Facing = _bodyRoot.forward;
+            _combatant.Facing = Facing;
 
             if (_combatant.WasHitThisTick) _rig?.NotifyHit();
             _rig?.Animate(_controller != null ? _controller.velocity.magnitude : 0f, Time.deltaTime);
@@ -212,7 +261,6 @@ namespace Century.Battle.View
 
             _rig = SoldierRig.Build(_bodyRoot, chest, roman: true,
                 Century.Battle.Model.OfficerRole.Centurion, leader: false, variant: 0);
-            _rig.transform.localScale = Vector3.one * 1.05f;
         }
 
         private void ApplyMovement()
@@ -240,6 +288,7 @@ namespace Century.Battle.View
                              && _combatant.Stamina01 > 0.1f
                              && !IsAiming;
             float pace = sprinting ? 1f : _settings.NormalMoveFraction;
+            if (IsStealthed) pace *= _stealthMoveFraction;
             if (sprinting)
                 _combatant.Stamina01 =
                     Mathf.Max(0f, _combatant.Stamina01 - _settings.SprintStaminaPerSecond * Time.deltaTime);
@@ -259,6 +308,50 @@ namespace Century.Battle.View
             velocity.y = _verticalVelocity;
 
             _controller.Move(velocity * Time.deltaTime);
+        }
+
+        /// <summary>One frame of the scripted walk: the same controller move as the player's own,
+        /// pointed by the script instead of the keys.</summary>
+        private void ScriptedStep()
+        {
+            Vector3 to = ScriptedDestination.Value - transform.position;
+            to.y = 0f;
+            Vector3 dir = to.normalized;
+
+            _verticalVelocity = _controller.isGrounded ? -1f : _verticalVelocity + _gravity * Time.deltaTime;
+            Vector3 velocity = dir * ScriptedSpeed;
+            velocity.y = _verticalVelocity;
+            _controller.Move(velocity * Time.deltaTime);
+
+            Facing = dir;
+            _bodyRoot.rotation = Quaternion.RotateTowards(
+                _bodyRoot.rotation, Quaternion.LookRotation(dir, Vector3.up), _settings.PlayerTurnSpeed * Time.deltaTime);
+
+            _combatant.WorldPosition = transform.position;
+            _combatant.Facing = dir;
+
+            _rig?.Animate(ScriptedSpeed, Time.deltaTime);
+            _gear?.Pose(_combatant, Time.deltaTime, _rig);
+        }
+
+        private float _crouch;
+        private bool _posePitched;
+
+        /// <summary>Body pitch on top of the facing: the scripted lie-down, and the stealth crouch.
+        /// Applied after facing so the yaw is the facing's and the pitch is this.</summary>
+        private void ApplyPosePitch()
+        {
+            if (_bodyRoot == null) return;
+
+            float crouchTarget = IsStealthed ? 22f : 0f;
+            _crouch = Mathf.MoveTowards(_crouch, crouchTarget, 110f * Time.unscaledDeltaTime);
+
+            float pitch = PosePitch + _crouch;
+            bool pitched = Mathf.Abs(pitch) > 0.01f;
+            if (!pitched && !_posePitched) return;
+            _posePitched = pitched;
+
+            _bodyRoot.rotation = Quaternion.Euler(pitch, _bodyRoot.eulerAngles.y, 0f);
         }
 
         private void ApplyFacing()

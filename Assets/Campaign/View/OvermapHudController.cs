@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using Century.Campaign.Model;
 using Century.Campaign.Sim;
@@ -81,6 +82,31 @@ namespace Century.Campaign.View
 
         [Tooltip("How close the cursor must be to a warband, in world units, to sight it.")]
         [SerializeField] private float _hoverRadius = 6f;
+
+        // The guided start: the objective line, the decanus' narration, the camp prompt pulse.
+        private Label _objectiveText, _objectiveTracked;
+        private VisualElement _narrationModal;
+        private Label _narrationTitle, _narrationSpeaker, _narrationBody, _narrationButtonLabel;
+        private readonly Queue<OnboardingDirector.Narration> _narrations = new Queue<OnboardingDirector.Narration>();
+        private bool _narrationOpen;
+        private TimeControl _controlBeforeNarration = TimeControl.Normal;
+        private StageBanner _banner;
+        private bool _leavingForOpenWorld;
+        private float _campPulse;
+
+        // The map's own tutorial pop-ups: one on the world and the mouse, one on strangers.
+        private VisualElement _tutorial;
+        private Label _tutorialTitle, _tutorialBody, _tutorialHint;
+        private bool _tutorialOpen;
+        private bool _tutorialWantsRightClick;
+        private float _lastPopupClosedAt = -100f;
+        private TimeControl _controlBeforeTutorial = TimeControl.Normal;
+
+        // Save slots and the quit prompt, both pausing the clock like every other overlay.
+        private SaveSlotsPanel _saves;
+        private TimeControl _controlBeforeSaves = TimeControl.Normal;
+        private VisualElement _quitModal;
+        private bool _quitOpen;
 
         private void Awake() => _document = GetComponent<UIDocument>();
 
@@ -174,6 +200,8 @@ namespace Century.Campaign.View
             if (_log != null) _log.Added += OnEventAdded;
 
             BindIntro(root);
+            BindOnboarding(root);
+            BindSaves(root);
 
             _bound = true;
             Refresh();
@@ -184,6 +212,9 @@ namespace Century.Campaign.View
         {
             if (_log != null) _log.Added -= OnEventAdded;
             OvermapDirectorRunner.PoiTriggered -= OnPoiTriggered;
+            OvermapDirectorRunner.Narrated -= OnNarrated;
+            OvermapDirectorRunner.ObjectiveChanged -= RefreshObjective;
+            OvermapDirectorRunner.OpenWorldEntered -= OnOpenWorldEntered;
             _bound = false;
         }
 
@@ -278,6 +309,15 @@ namespace Century.Campaign.View
             if (_army != null && _army.IsOpen && Input.GetKeyDown(KeyCode.Escape))
                 CloseArmy();
 
+            if (_saves != null && _saves.IsOpen && Input.GetKeyDown(KeyCode.Escape))
+                CloseSaves();
+
+            if (_quitOpen && Input.GetKeyDown(KeyCode.Escape))
+                CloseQuit();
+
+            PulseCampPill();
+            TickTutorials();
+
             // The tooltip tracks the cursor, so it runs every frame; the panels poll at the interval.
             RefreshHoverTip();
 
@@ -297,7 +337,8 @@ namespace Century.Campaign.View
             Button dismiss = Find<Button>(root, "intro-dismiss");
             if (modal == null || _state == null) return;
 
-            if (_state.OvermapIntroSeen)
+            // The guided start has its own voice: the sandbox explainer waits for the open world.
+            if (_state.OvermapIntroSeen || (_state.Onboarding != null && _state.Onboarding.IsAftermath))
             {
                 modal.style.display = DisplayStyle.None;
                 return;
@@ -318,7 +359,7 @@ namespace Century.Campaign.View
 
         private void OpenInventory()
         {
-            if (_inventory == null || _inventory.IsOpen || _activePoi != null) return;
+            if (_inventory == null || _inventory.IsOpen || _activePoi != null || _narrationOpen || _quitOpen) return;
 
             if (_ticker != null)
             {
@@ -340,7 +381,7 @@ namespace Century.Campaign.View
         /// <summary>Opens the commander's screen; the campaign holds its breath meanwhile.</summary>
         private void OpenCommander()
         {
-            if (_commander == null || _commander.IsOpen || _activePoi != null) return;
+            if (_commander == null || _commander.IsOpen || _activePoi != null || _narrationOpen || _quitOpen) return;
             if (_inventory != null && _inventory.IsOpen) return;
 
             if (_ticker != null)
@@ -363,7 +404,7 @@ namespace Century.Campaign.View
         /// <summary>The army is readable anywhere; the campaign holds its breath while it is.</summary>
         private void OpenArmy()
         {
-            if (_army == null || _army.IsOpen || _activePoi != null) return;
+            if (_army == null || _army.IsOpen || _activePoi != null || _narrationOpen || _quitOpen) return;
             if (_inventory != null && _inventory.IsOpen) return;
             if (_commander != null && _commander.IsOpen) return;
 
@@ -395,7 +436,8 @@ namespace Century.Campaign.View
 
             // A modal owns the screen; the world tooltip stays out of it.
             if ((_inventory != null && _inventory.IsOpen) || (_commander != null && _commander.IsOpen)
-                || (_army != null && _army.IsOpen))
+                || (_army != null && _army.IsOpen) || _narrationOpen || _quitOpen || _tutorialOpen
+                || (_saves != null && _saves.IsOpen))
             {
                 _hoverTip.style.display = DisplayStyle.None;
                 return;
@@ -523,6 +565,7 @@ namespace Century.Campaign.View
             RefreshTime();
             RefreshToggles(party);
             RefreshContact(party);
+            RefreshObjective();
         }
 
         private void RefreshMorale(PartyState party)
@@ -630,9 +673,14 @@ namespace Century.Campaign.View
 
         private void RefreshToggles(PartyState party)
         {
-            _pillCamp?.EnableInClassList("pill--active", party.IsCamped);
+            if (!CampPromptActive) _pillCamp?.EnableInClassList("pill--active", party.IsCamped);
             _pillStealth?.EnableInClassList("pill--active", party.IsStealthed);
         }
+
+        /// <summary>The Aftermath is asking for the CAMP button: the pill breathes instead of reporting.</summary>
+        private bool CampPromptActive =>
+            _state?.Onboarding != null && _state.Onboarding.IsAftermath
+            && _state.Onboarding.Objective == AftermathObjective.MakeCamp;
 
         /// <summary>Nearest hostile, so the player can see a threat closing without hunting for it.</summary>
         private void RefreshContact(PartyState party)
@@ -763,7 +811,7 @@ namespace Century.Campaign.View
 
         private void OnPoiTriggered(PointOfInterest poi)
         {
-            if (_poiModal == null || poi == null || _activePoi != null) return;
+            if (_poiModal == null || poi == null || _activePoi != null || _narrationOpen) return;
 
             PoiEvent evt = PoiCatalog.Find(poi.EventId);
             if (evt == null)
@@ -836,6 +884,308 @@ namespace Century.Campaign.View
             if (_poiModal != null) _poiModal.style.display = DisplayStyle.None;
             if (_ticker != null) _ticker.SetTimeControl(_controlBeforePoi);
             _activePoi = null;
+        }
+
+        // --- The guided start ----------------------------------------------------------------
+
+        private void BindOnboarding(VisualElement root)
+        {
+            _objectiveText = Find<Label>(root, "objective-text");
+            _objectiveTracked = Find<Label>(root, "objective-tracked");
+
+            _narrationModal = Find<VisualElement>(root, "narration-modal");
+            _narrationTitle = Find<Label>(root, "narration-title");
+            _narrationSpeaker = Find<Label>(root, "narration-speaker");
+            _narrationBody = Find<Label>(root, "narration-body");
+            _narrationButtonLabel = Find<Label>(root, "narration-dismiss-label");
+            Button dismiss = Find<Button>(root, "narration-dismiss");
+            if (dismiss != null) dismiss.clicked += DismissNarration;
+            if (_narrationModal != null) _narrationModal.style.display = DisplayStyle.None;
+
+            OvermapDirectorRunner.Narrated -= OnNarrated;
+            OvermapDirectorRunner.Narrated += OnNarrated;
+            OvermapDirectorRunner.ObjectiveChanged -= RefreshObjective;
+            OvermapDirectorRunner.ObjectiveChanged += RefreshObjective;
+            OvermapDirectorRunner.OpenWorldEntered -= OnOpenWorldEntered;
+            OvermapDirectorRunner.OpenWorldEntered += OnOpenWorldEntered;
+
+            _banner = new StageBanner(root);
+
+            // The first sight of the Aftermath earns a title card; the decanus speaks right after.
+            OnboardingState ob = _state.Onboarding;
+            if (ob != null && ob.IsAftermath && !ob.ArrivalTold)
+                StartCoroutine(_banner.Show("The Aftermath", "Teutoburg Forest, the day after", 2.2f));
+            else if (ob != null && ob.Chapter == OnboardingChapter.OpenWorld && !_state.OvermapIntroSeen)
+                StartCoroutine(_banner.Show("The long road home", "Germania lies open", 2.2f));
+
+            RefreshObjective();
+        }
+
+        private void RefreshObjective()
+        {
+            if (_state == null) return;
+
+            string text = OnboardingDirector.ObjectiveText(_state);
+            string tracked = OnboardingDirector.ObjectiveTracked(_state);
+
+            // Outside the guided start the panel keeps the campaign's standing objective.
+            SetText(_objectiveText, text ?? "Make your way out of Germania and return to Italia.");
+            SetText(_objectiveTracked, tracked ?? "Reach the Rhine crossing");
+        }
+
+        private void OnNarrated(OnboardingDirector.Narration narration)
+        {
+            _narrations.Enqueue(narration);
+            if (!_narrationOpen) ShowNextNarration();
+        }
+
+        private void ShowNextNarration()
+        {
+            if (_narrationModal == null || _narrations.Count == 0) return;
+
+            OnboardingDirector.Narration n = _narrations.Dequeue();
+
+            if (!_narrationOpen && _ticker != null)
+            {
+                _controlBeforeNarration = _ticker.Current == TimeControl.Paused
+                    ? TimeControl.Normal
+                    : _ticker.Current;
+                _ticker.SetTimeControl(TimeControl.Paused);
+            }
+
+            _narrationOpen = true;
+            SetText(_narrationTitle, (n.Title ?? string.Empty).ToUpperInvariant());
+            SetText(_narrationSpeaker, n.Speaker ?? string.Empty);
+            SetText(_narrationBody, n.Body ?? string.Empty);
+            SetText(_narrationButtonLabel, string.IsNullOrEmpty(n.Button) ? "CONTINUE" : n.Button);
+            _narrationModal.style.display = DisplayStyle.Flex;
+        }
+
+        private void DismissNarration()
+        {
+            if (!_narrationOpen) return;
+
+            if (_narrations.Count > 0)
+            {
+                ShowNextNarration();
+                return;
+            }
+
+            _narrationOpen = false;
+            _lastPopupClosedAt = Time.unscaledTime;
+            if (_narrationModal != null) _narrationModal.style.display = DisplayStyle.None;
+            if (_ticker != null && !_leavingForOpenWorld) _ticker.SetTimeControl(_controlBeforeNarration);
+        }
+
+        // --- The map's tutorial pop-ups -----------------------------------------------------------
+
+        /// <summary>
+        /// Two pop-ups, after the decanus has had his say and never within three seconds of the
+        /// last thing dismissed: the world and the right mouse button, once; strangers, the first
+        /// time a hostile band is in sight. The clock stands still under each.
+        /// </summary>
+        private void TickTutorials()
+        {
+            if (_state?.Onboarding == null) return;
+            OnboardingState ob = _state.Onboarding;
+
+            if (_tutorialOpen)
+            {
+                bool done = _tutorialWantsRightClick ? Input.GetMouseButtonDown(1) : Input.GetMouseButtonDown(0);
+                if (done) CloseTutorial();
+                return;
+            }
+
+            if (!ob.IsAftermath || !ob.ArrivalTold || _narrationOpen) return;
+            if (AnyOverlayOpen) return;
+            if (Time.unscaledTime - _lastPopupClosedAt < 3f) return;
+
+            if (!ob.OvermapTutorialTold)
+            {
+                ob.OvermapTutorialTold = true;
+                ShowTutorial("OVERMAP",
+                    "This is the world around you and your surviving men. Use RMB to tell your party " +
+                    "where to go and explore the world around you.",
+                    "RIGHT CLICK TO CONTINUE", rightClick: true);
+                return;
+            }
+
+            if (!ob.StrangersTutorialTold && HostileInSight())
+            {
+                ob.StrangersTutorialTold = true;
+                ShowTutorial("ROAMING STRANGERS",
+                    "You have sighted another group. Whether they are friend or foe can be seen by " +
+                    "hovering over their icon. RMB on another party to approach and engage them. " +
+                    "If they are hostile, this will start a battle.",
+                    "CLICK TO CONTINUE", rightClick: false);
+            }
+        }
+
+        private bool HostileInSight()
+        {
+            PartyState player = _state.PlayerParty;
+            if (player == null) return false;
+
+            for (int i = 0; i < _state.Parties.Count; i++)
+            {
+                PartyState other = _state.Parties[i];
+                if (other.IsPlayer || other.IsDisbanded || !other.CanFight) continue;
+                if (!PartyRelations.IsHostile(player, other)) continue;
+                if (LineOfSight.Visibility01(_state, other) > 0.05f) return true;
+            }
+
+            return false;
+        }
+
+        private void ShowTutorial(string title, string body, string hint, bool rightClick)
+        {
+            if (_tutorial == null)
+            {
+                VisualElement root = _document.rootVisualElement;
+                _tutorial = Find<VisualElement>(root, "overmap-tutorial");
+                _tutorialTitle = Find<Label>(root, "overmap-tutorial-title");
+                _tutorialBody = Find<Label>(root, "overmap-tutorial-body");
+                _tutorialHint = Find<Label>(root, "overmap-tutorial-hint");
+                if (_tutorial == null) return;
+            }
+
+            SetText(_tutorialTitle, title);
+            SetText(_tutorialBody, body);
+            SetText(_tutorialHint, hint);
+            if (_tutorialBody != null) _tutorialBody.style.display = DisplayStyle.Flex;
+            if (_tutorialHint != null) _tutorialHint.style.display = DisplayStyle.Flex;
+
+            _tutorialWantsRightClick = rightClick;
+            _tutorialOpen = true;
+
+            if (_ticker != null)
+            {
+                _controlBeforeTutorial = _ticker.Current == TimeControl.Paused ? TimeControl.Normal : _ticker.Current;
+                _ticker.SetTimeControl(TimeControl.Paused);
+            }
+
+            _tutorial.style.display = DisplayStyle.Flex;
+        }
+
+        private void CloseTutorial()
+        {
+            if (!_tutorialOpen) return;
+            _tutorialOpen = false;
+            _lastPopupClosedAt = Time.unscaledTime;
+            if (_tutorial != null) _tutorial.style.display = DisplayStyle.None;
+            if (_ticker != null) _ticker.SetTimeControl(_controlBeforeTutorial);
+        }
+
+        /// <summary>The CAMP pill breathes gold while the objective is to press it.</summary>
+        private void PulseCampPill()
+        {
+            if (_pillCamp == null || _state?.Onboarding == null) return;
+
+            if (!CampPromptActive) return;
+
+            _campPulse += Time.unscaledDeltaTime;
+            bool lit = Mathf.Repeat(_campPulse, 1.1f) < 0.55f;
+            _pillCamp.EnableInClassList("pill--active", lit);
+        }
+
+        /// <summary>Through the passage: a title card, then the overmap is rebuilt around the new
+        /// ground with the sandbox's warbands and places in it.</summary>
+        private void OnOpenWorldEntered()
+        {
+            if (_leavingForOpenWorld) return;
+            _leavingForOpenWorld = true;
+            StartCoroutine(LeaveForOpenWorld());
+        }
+
+        private IEnumerator LeaveForOpenWorld()
+        {
+            _ticker?.SetTimeControl(TimeControl.Paused);
+            if (_banner != null)
+                yield return _banner.Show("Through the passage", "The forest opens", 2f);
+
+            // The rebuilt overmap must not inherit a paused clock, or the world stands still.
+            _ticker?.SetTimeControl(TimeControl.Normal);
+            if (ServiceLocator.TryGet(out ISceneNavigator navigator)) navigator.LoadOvermap();
+            else Debug.LogWarning("[OvermapHud] No ISceneNavigator registered; cannot reload the overmap.");
+        }
+
+        // --- Save slots and the quit prompt -------------------------------------------------------
+
+        private void BindSaves(VisualElement root)
+        {
+            _saves = new SaveSlotsPanel(root);
+            _saves.Closed += OnSavesClosed;
+
+            Button navSave = Find<Button>(root, "nav-save");
+            if (navSave != null) navSave.clicked += OpenSaves;
+
+            Button navTitle = Find<Button>(root, "nav-title");
+            if (navTitle != null) navTitle.clicked += OpenQuit;
+
+            _quitModal = Find<VisualElement>(root, "quit-modal");
+            if (_quitModal != null) _quitModal.style.display = DisplayStyle.None;
+
+            Button quitSave = Find<Button>(root, "quit-save");
+            if (quitSave != null) quitSave.clicked += () => { CloseQuit(); OpenSaves(); };
+            Button quitConfirm = Find<Button>(root, "quit-confirm");
+            if (quitConfirm != null) quitConfirm.clicked += QuitToTitle;
+            Button quitStay = Find<Button>(root, "quit-stay");
+            if (quitStay != null) quitStay.clicked += CloseQuit;
+        }
+
+        private bool AnyOverlayOpen =>
+            (_inventory != null && _inventory.IsOpen) || (_commander != null && _commander.IsOpen)
+            || (_army != null && _army.IsOpen) || _activePoi != null || _narrationOpen || _quitOpen
+            || _tutorialOpen || (_saves != null && _saves.IsOpen);
+
+        private void OpenSaves()
+        {
+            if (_saves == null || AnyOverlayOpen) return;
+
+            if (_ticker != null)
+            {
+                _controlBeforeSaves = _ticker.Current;
+                _ticker.SetTimeControl(TimeControl.Paused);
+            }
+
+            _saves.Open(SaveSlotsPanel.Mode.Save);
+        }
+
+        private void CloseSaves() => _saves?.Close();
+
+        private void OnSavesClosed()
+        {
+            if (_ticker != null) _ticker.SetTimeControl(_controlBeforeSaves);
+        }
+
+        private void OpenQuit()
+        {
+            if (_quitModal == null || AnyOverlayOpen) return;
+
+            if (_ticker != null)
+            {
+                _controlBeforeSaves = _ticker.Current;
+                _ticker.SetTimeControl(TimeControl.Paused);
+            }
+
+            _quitOpen = true;
+            _quitModal.style.display = DisplayStyle.Flex;
+        }
+
+        private void CloseQuit()
+        {
+            if (!_quitOpen) return;
+            _quitOpen = false;
+            if (_quitModal != null) _quitModal.style.display = DisplayStyle.None;
+            if (_ticker != null) _ticker.SetTimeControl(_controlBeforeSaves);
+        }
+
+        private void QuitToTitle()
+        {
+            _quitOpen = false;
+            if (_quitModal != null) _quitModal.style.display = DisplayStyle.None;
+            if (ServiceLocator.TryGet(out ISceneNavigator navigator)) navigator.LoadTitle();
+            else Debug.LogWarning("[OvermapHud] No ISceneNavigator registered; cannot return to the title.");
         }
 
         // --- Helpers --------------------------------------------------------------------------

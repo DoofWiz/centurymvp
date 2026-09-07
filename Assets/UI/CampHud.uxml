@@ -303,7 +303,7 @@
         <ui:VisualElement name="scout-modal" class="modal" style="display: none;">
             <ui:VisualElement class="modal__sheet scout-sheet">
                 <ui:VisualElement class="modal__header">
-                    <ui:Label text="OPPORTUNITY SIGHTED" class="modal__title" />
+                    <ui:Label name="scout-heading" text="OPPORTUNITY SIGHTED" class="modal__title" />
                     <ui:Label name="scout-title" text="—" class="modal__subtitle" />
                 </ui:VisualElement>
 
@@ -327,6 +327,21 @@
                         <ui:Label text="MARK IT ON THE MAP" class="button-start__label" picking-mode="Ignore" />
                     </ui:Button>
                 </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- ============================ THE DECANUS' COACH MARKS ============================ -->
+        <!-- Declared last so it paints over the pages. Pinned beside whatever it explains by
+             CampWalkthrough; hidden whenever a modal is up. -->
+        <ui:VisualElement name="coach-panel" class="coach-panel" style="display: none;">
+            <ui:Label name="coach-step" text="THE DECANUS" class="eyebrow" />
+            <ui:Label name="coach-title" text="—" class="coach-panel__title" />
+            <ui:Label name="coach-body" text="—" class="coach-panel__body" />
+            <ui:VisualElement class="coach-panel__footer">
+                <ui:Label name="coach-wait" text="" class="body body--dim" />
+                <ui:Button name="coach-next" class="button-primary">
+                    <ui:Label name="coach-next-label" text="NEXT" class="button-primary__label" picking-mode="Ignore" />
+                </ui:Button>
             </ui:VisualElement>
         </ui:VisualElement>
 

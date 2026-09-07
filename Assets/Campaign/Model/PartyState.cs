@@ -63,6 +63,30 @@ namespace Century.Campaign.Model
         /// comes home (the speculator's "signum_held" lead spawns exactly one such party).</summary>
         public bool CarriesPlayerSignum;
 
+        /// <summary>The Speculator is out ranging. His report arrives when the column next rests;
+        /// a scout who reported back the moment he left was the old behaviour, and it read wrong.</summary>
+        public bool ScoutRidingOut;
+
+        /// <summary>
+        /// An AI party leashed to a patch of the map (the Aftermath's looters): it wanders inside
+        /// the rectangle and only hunts what is inside it. Off for every party that roams freely.
+        /// </summary>
+        public bool HasHomeZone;
+        public float HomeMinX, HomeMinZ, HomeMaxX, HomeMaxZ;
+
+        public bool InHomeZone(Vector3 position) =>
+            !HasHomeZone
+            || (position.x >= HomeMinX && position.x <= HomeMaxX
+                && position.z >= HomeMinZ && position.z <= HomeMaxZ);
+
+        public Vector3 ClampToHomeZone(Vector3 position)
+        {
+            if (!HasHomeZone) return position;
+            position.x = Mathf.Clamp(position.x, HomeMinX, HomeMaxX);
+            position.z = Mathf.Clamp(position.z, HomeMinZ, HomeMaxZ);
+            return position;
+        }
+
         // --- Overmap AI ---------------------------------------------------------------------
 
         /// <summary>Ignored for the player's party, which is driven by input.</summary>

@@ -28,6 +28,14 @@ namespace Century.App
             ServiceLocator.Register<ITimeControlSource>(this);
         }
 
+        /// <summary>Points the ticker at a campaign's clock: a new campaign, or one loaded from a
+        /// save. Null between campaigns (the title screen), when nothing advances.</summary>
+        public void SetClock(CampaignClock clock)
+        {
+            _clock = clock;
+            Current = TimeControl.Normal;
+        }
+
         public void SetTimeControl(TimeControl control) => Current = control;
 
         public void TogglePause() =>
