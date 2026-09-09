@@ -1,0 +1,129 @@
+<!-- title: Title Screen -->
+<!-- desc: CENTURY in the rain-soaked clearing: free-floating links with the centre-growing underline, and the three-slot LOAD SAVE overlay (click LOAD SAVE to open it). -->
+<!-- world: title -->
+<style>
+  .clearing { position: absolute; inset: 0; overflow: hidden; }
+  .trees { position: absolute; bottom: 0; left: 0; right: 0; height: 100%; }
+  .ground { position: absolute; left: 0; right: 0; bottom: 0; height: 32%;
+            background: linear-gradient(180deg, rgba(120,102,64,0) 0%, rgba(114,96,60,.35) 30%, rgba(90,74,44,.55) 100%); }
+  .mist { position: absolute; left: -10%; right: -10%; bottom: 18%; height: 30%;
+          background: radial-gradient(ellipse 60% 50% at 50% 50%, rgba(250,244,226,.28), transparent 70%); filter: blur(12px); }
+  .rain { position: absolute; inset: -200px 0 0 0; pointer-events: none; opacity: .22;
+          background: repeating-linear-gradient(112deg, transparent 0 18px, rgba(108,124,138,.45) 18px 19px, transparent 19px 42px);
+          animation: rain .55s linear infinite; }
+  .rain--far { opacity: .12; background-size: 60% 60%; animation-duration: .9s; }
+  @keyframes rain { from { transform: translateY(-160px) } to { transform: translateY(0) } }
+
+  .wordmark { position: absolute; left: 0; right: 0; top: 268px; text-align: center; }
+  .wordmark__main { font-family: var(--font-display); font-size: 168px; letter-spacing: 34px; padding-left: 34px; font-weight: 700; line-height: 1;
+                    color: #4a3620;
+                    text-shadow: 0 1px 0 rgba(248,241,222,.85), 0 2px 0 #8a7147, 0 3px 0 #7a6340, 0 4px 0 #6a5536,
+                                 0 5px 0 #5a472d, 0 6px 0 #4a3a24, 0 12px 24px rgba(66,44,20,.45), 0 30px 60px rgba(66,44,20,.35); }
+  .wordmark__sub { margin-top: 26px; font-size: 14px; letter-spacing: 12px; padding-left: 12px; color: var(--parchment-dim); text-transform: uppercase; }
+  .wordmark__rule { width: 120px; height: 1px; margin: 22px auto 0; background: linear-gradient(90deg, transparent, var(--gold), transparent); }
+
+  .links { position: absolute; left: 0; right: 0; top: 640px; display: flex; flex-direction: column; align-items: center; gap: 26px; }
+  .title-link { position: relative; background: none; border: 0; padding: 6px 4px; font-family: var(--font-body); font-size: 22px; letter-spacing: 8px; padding-left: 8px;
+                color: #3a2c1a; text-transform: uppercase; transition: color .15s;
+                text-shadow: 0 1px 0 rgba(248,241,222,.6); }
+  .title-link::after { content: ""; position: absolute; left: 50%; right: 50%; bottom: -2px; height: 1px; background: var(--gold-bright); transition: left .2s ease, right .2s ease; }
+  .title-link:hover, .title-link--hover { color: var(--gold-bright); }
+  .title-link:hover::after, .title-link--hover::after { left: 8px; right: 0; }
+  .title-link--dim { color: var(--parchment-faint); font-size: 14px; letter-spacing: 5px; }
+  .version { position: absolute; right: 24px; bottom: 18px; font-size: var(--fs-micro); letter-spacing: 2px; color: var(--parchment-faint); text-transform: uppercase; }
+
+  /* save modal */
+  .save-sheet { width: 640px; padding: 26px 28px 22px; }
+  .slot { display: flex; flex-direction: row; align-items: center; gap: 16px; border: 1px solid rgba(74,54,32,.35); background: rgba(250,244,226,.35); padding: 12px 16px; margin-top: 8px; cursor: pointer; }
+  .slot:hover { border-color: var(--gold-dim); }
+  .slot--selected { border-color: var(--gold-bright); background: var(--ink-raised); }
+  .slot__numeral { font-family: var(--font-display); font-size: 26px; color: var(--gold); width: 44px; text-align: center; }
+  .slot--selected .slot__numeral { color: var(--gold-bright); }
+  .slot__title { font-size: var(--fs-large); color: var(--parchment); letter-spacing: 1px; }
+  .slot__meta { font-size: var(--fs-small); color: var(--parchment-dim); margin-top: 3px; letter-spacing: 1px; }
+  .slot--empty .slot__title { color: var(--parchment-faint); letter-spacing: 3px; text-transform: uppercase; font-size: var(--fs-small); }
+  .slot--empty .slot__numeral { color: var(--parchment-faint); }
+  .slot__when { margin-left: auto; text-align: right; font-size: var(--fs-micro); color: var(--parchment-faint); letter-spacing: 1px; text-transform: uppercase; }
+  .save-actions { display: flex; justify-content: space-between; margin-top: 18px; }
+  .x { position: absolute; right: 12px; top: 8px; background: none; border: 0; color: var(--parchment-dim); font-size: 20px; line-height: 1; }
+  .x:hover { color: var(--gold-bright); }
+</style>
+
+<div data-tabs>
+<div class="clearing">
+  <svg class="trees" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="trunk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="rgb(84,68,42)"/><stop offset="1" stop-color="rgb(110,92,58)"/></linearGradient>
+    </defs>
+    <!-- far treeline -->
+    <g fill="#a89c6e" stroke="#4a3e28" stroke-width="2">
+      <path d="M0 620 L60 480 L120 620 L170 430 L230 620 L290 470 L350 620 L410 440 L470 620 L520 500 L580 620 L640 450 L700 620 L760 480 L820 620 L880 430 L940 620 L1000 470 L1060 620 L1120 440 L1180 620 L1240 500 L1300 620 L1360 450 L1420 620 L1480 480 L1540 620 L1600 430 L1660 620 L1720 470 L1780 620 L1840 440 L1920 620 L1920 1080 L0 1080z" opacity=".8"/>
+    </g>
+    <!-- near trunks -->
+    <g fill="url(#trunk)" stroke="#4a3e28" stroke-width="1.5">
+      <rect x="90" y="120" width="54" height="960"/><rect x="230" y="60" width="38" height="1020"/><rect x="1660" y="90" width="46" height="990"/><rect x="1800" y="140" width="62" height="940"/>
+      <rect x="1560" y="200" width="28" height="880" opacity=".7"/><rect x="340" y="220" width="26" height="860" opacity=".7"/>
+    </g>
+    <!-- corpses on the clearing floor (dark shapes) -->
+    <g fill="#5c4a32" opacity=".8">
+      <ellipse cx="620" cy="900" rx="70" ry="14"/><ellipse cx="1290" cy="930" rx="80" ry="16"/><ellipse cx="980" cy="990" rx="60" ry="12"/><ellipse cx="1500" cy="880" rx="55" ry="11"/>
+    </g>
+  </svg>
+  <div class="mist"></div>
+  <div class="ground"></div>
+  <div class="rain rain--far"></div>
+  <div class="rain"></div>
+</div>
+
+<div class="wordmark">
+  <div class="wordmark__main">CENTURY</div>
+  <div class="wordmark__sub">After Teutoburg</div>
+  <div class="wordmark__rule"></div>
+</div>
+
+<div class="links">
+  <button class="title-link title-link--hover">Start Prototype</button>
+  <button class="title-link tab" data-tab="save">Load Save</button>
+  <button class="title-link title-link--dim">Quit</button>
+</div>
+<div class="version">Prototype · build 0.4 · not for distribution</div>
+
+<!-- ===== LOAD SAVE overlay (hidden until LOAD SAVE is clicked) ===== -->
+<div class="modal" data-page="save" hidden>
+  <div class="modal__sheet save-sheet">
+    <button class="x tab" data-tab="none" title="Close">×</button>
+    <div class="modal__header">
+      <div class="modal__title" style="font-size:24px">Load Save</div>
+      <div class="modal__subtitle">Choose a slot</div>
+    </div>
+    <div class="slot slot--selected">
+      <div class="slot__numeral">I</div>
+      <div>
+        <div class="slot__title">Centuria Valeria · Day 4</div>
+        <div class="slot__meta">41 men · Confident · food for 6 days · the open country east of the Weser</div>
+      </div>
+      <div class="slot__when">Saved<br>2nd watch</div>
+    </div>
+    <div class="slot">
+      <div class="slot__numeral">II</div>
+      <div>
+        <div class="slot__title">The Aftermath · Day 1</div>
+        <div class="slot__meta">6 men · Wavering · Teutoburg Forest</div>
+      </div>
+      <div class="slot__when">Saved<br>Dawn</div>
+    </div>
+    <div class="slot slot--empty">
+      <div class="slot__numeral">III</div>
+      <div><div class="slot__title">Empty slot</div></div>
+    </div>
+    <div class="save-actions">
+      <button class="button-ghost button-danger">Delete</button>
+      <button class="button-primary">Load</button>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="mock-note" style="left:1220px;top:280px">The wordmark stands in for the 3D TextMesh in the clearing; the layered shadow fakes the extrusion. Rain is two CSS layers at different speeds.</div>
+<div class="mock-note" style="left:1090px;top:640px">Links are free-floating text, no containers. Hover: gold + a hairline that grows from the centre. START PROTOTYPE is shown in its hover state.</div>
+<div class="mock-note" style="left:1090px;top:760px">Click LOAD SAVE to open the three-slot overlay. Same overlay is reused from the overmap SAVE pill.</div>

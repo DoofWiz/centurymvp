@@ -1,0 +1,202 @@
+<!-- title: Encyclopedia -->
+<!-- desc: A proposed Encyclopedia overlay: every rule of the sim stated as mechanics, with the Formations entry open. -->
+<!-- world: overmap -->
+<style>
+  .map { position: absolute; inset: 0; }
+  .index { flex: 0 0 280px; width: 280px; display: flex; flex-direction: column; gap: 12px; overflow-y: auto; min-height: 0; padding-right: 6px; }
+  .index__group .eyebrow { margin-bottom: 3px; padding-left: 10px; }
+  .index__item { display: flex; align-items: center; justify-content: space-between; padding: 6px 10px; border: var(--rule) solid transparent; cursor: pointer;
+                 font-size: var(--fs-small); color: var(--parchment); letter-spacing: 1px; text-transform: uppercase; transition: border-color .12s; }
+  .index__item:hover { border-color: #9a7b3a; }
+  .index__item--active { border-color: #9a7b3a; background: rgba(255,250,232,.55); box-shadow: inset 0 0 0 1px rgba(154,123,58,.4); color: var(--gold-bright); }
+  .index__item--unseen { color: var(--parchment-faint); }
+  .index__tag { font-size: var(--fs-micro); color: var(--parchment-faint); letter-spacing: 1px; }
+
+  .entry { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; overflow-y: auto; min-height: 0; padding-right: 8px; }
+  .entry__title { font-size: var(--fs-title); color: var(--parchment); letter-spacing: 3px; text-transform: uppercase; margin-top: 2px; }
+  .entry__intro { font-size: var(--fs-body); color: var(--parchment); line-height: 1.5; margin-top: 8px; max-width: 860px; }
+
+  .formations { display: flex; flex-direction: row; gap: 10px; margin-top: 16px; }
+  .formation { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 8px; background: rgba(250,244,226,.35); border: var(--rule) solid rgba(74,54,32,.35); padding: 10px;
+               transition: border-color .12s, background .12s; }
+  .formation:hover, .formation--hover { border-color: #9a7b3a; background: rgba(255,250,232,.55); }
+  .formation__head { display: flex; justify-content: space-between; align-items: baseline; }
+  .formation__name { font-size: var(--fs-small); color: var(--gold); letter-spacing: 2px; font-weight: 700; text-transform: uppercase; }
+  .formation__order { font-size: var(--fs-micro); color: var(--parchment-faint); letter-spacing: 1px; }
+  .formation__diagram { display: block; width: 100%; height: 108px; background: rgba(250,244,226,.45); border: var(--rule) solid rgba(74,54,32,.35); }
+  .formation__line { font-size: var(--fs-small); color: var(--parchment); line-height: 1.4; }
+  .formation__line--dim { color: var(--parchment-dim); }
+  .formation__key { display: flex; align-items: center; gap: 6px; margin-top: auto; padding-top: 4px; font-size: var(--fs-micro); color: var(--parchment-dim); letter-spacing: 1px; text-transform: uppercase; }
+  .dot { fill: #4a3620; }
+  .front { stroke: #9a7b3a; stroke-width: 1.5; fill: none; }
+  .front-tag { font-family: var(--font-body); font-size: 8px; letter-spacing: 2px; text-transform: uppercase; fill: var(--parchment-dim); }
+
+  .rules { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 20px; margin-top: 14px; }
+  .rule-item { display: flex; gap: 8px; align-items: flex-start; font-size: var(--fs-small); color: var(--parchment-dim); line-height: 1.4; }
+  .rule-item__glyph { color: var(--gold); flex: 0 0 auto; }
+  .see-also { display: flex; align-items: center; gap: 8px; margin-top: 18px; }
+</style>
+
+<!-- ===== the overmap behind (paused) ===== -->
+<svg class="map" viewBox="0 0 1920 1080" xmlns="http://www.w3.org/2000/svg">
+  <g fill="#9d9e69" opacity=".5"><ellipse cx="300" cy="260" rx="260" ry="150"/><ellipse cx="1650" cy="220" rx="300" ry="170"/><ellipse cx="1500" cy="900" rx="330" ry="150"/><ellipse cx="520" cy="880" rx="240" ry="120"/></g>
+  <path d="M1180 -20 C 1120 200, 1300 360, 1220 520 S 1080 820, 1180 1100" fill="none" stroke="#7f8b94" stroke-width="26" stroke-linecap="round" opacity=".6"/>
+  <path d="M120 720 C 400 640, 700 700, 960 560 S 1400 380, 1800 440" fill="none" stroke="#6b5230" stroke-width="4" stroke-dasharray="14 10" opacity=".5"/>
+  <g transform="translate(960,560)"><ellipse rx="34" ry="14" fill="rgba(154,123,58,.15)" stroke="#9a7b3a" stroke-width="1.5"/></g>
+</svg>
+
+<!-- ===== overlay frame ===== -->
+<div class="nav-bar">
+  <button class="nav-item nav-item--live">Inventory</button>
+  <button class="nav-item nav-item--live">Army</button>
+  <button class="nav-item nav-item--live">Commander</button>
+  <button class="nav-item nav-item--live">Save</button>
+  <button class="nav-item nav-item--live">Title</button>
+  <span class="nav-item nav-item--inert">Journal</span>
+  <button class="nav-item nav-item--live nav-item--active">Encyclopedia</button>
+</div>
+<div class="time-box"><svg class="ico ico--sm ico--gold"><use href="#i-sun"/></svg><span class="time-box__clock">Day 4 · 2nd Watch</span><span class="text-dim small">14:20</span><span class="time-button time-button--active"><svg class="ico ico--sm"><use href="#i-pause"/></svg></span></div>
+
+<div class="modal">
+  <div class="modal__sheet overlay-sheet">
+    <div class="overlay-head">
+      <div><div class="modal__title">Encyclopedia</div><div class="modal__subtitle">The rules of the march · clock paused</div></div>
+      <button class="button-ghost">Close · Esc</button>
+    </div>
+
+    <div class="overlay-body">
+      <!-- ---------- INDEX ---------- -->
+      <div class="index">
+        <div class="index__group">
+          <div class="eyebrow">The Century</div>
+          <div class="index__item"><span>Veterancy</span></div>
+          <div class="index__item"><span>Offices</span></div>
+          <div class="index__item"><span>Contubernia</span></div>
+          <div class="index__item"><span>Bonds</span></div>
+        </div>
+        <div class="index__group">
+          <div class="eyebrow">Battle</div>
+          <div class="index__item index__item--active"><span>Formations</span><span class="index__tag text-gold">›</span></div>
+          <div class="index__item"><span>Orders</span></div>
+          <div class="index__item"><span>The Morale Ladder</span></div>
+          <div class="index__item"><span>Stamina</span></div>
+          <div class="index__item"><span>The Signum</span></div>
+          <div class="index__item index__item--unseen"><span>Reinforcements</span><span class="index__tag">Unseen</span></div>
+        </div>
+        <div class="index__group">
+          <div class="eyebrow">The March</div>
+          <div class="index__item"><span>Sight and Fog</span></div>
+          <div class="index__item index__item--unseen"><span>Ambush and Surprise</span><span class="index__tag">Unseen</span></div>
+          <div class="index__item"><span>Pace</span></div>
+          <div class="index__item"><span>Food and Fuel</span></div>
+        </div>
+        <div class="index__group">
+          <div class="eyebrow">Camp</div>
+          <div class="index__item"><span>Stations</span></div>
+          <div class="index__item"><span>Crafting</span></div>
+          <div class="index__item"><span>Rest</span></div>
+        </div>
+      </div>
+
+      <!-- ---------- ENTRY: FORMATIONS ---------- -->
+      <div class="entry">
+        <div class="eyebrow">Battle</div>
+        <div class="entry__title">Formations</div>
+        <div class="entry__intro">A contubernium holds one formation at a time. The selected squad cycles through the five below in the order shown. A formation sets three things: how much of a frontal blow is blocked, how fast the squad moves, and how fast the men tire. Changing formation takes a few seconds; while it re-forms the squad neither blocks nor moves. Wounded men keep their place. An empty bunk leaves a gap.</div>
+
+        <div class="formations">
+          <div class="formation">
+            <div class="formation__head"><span class="formation__name">Line</span><span class="formation__order">1 of 5</span></div>
+            <svg class="formation__diagram" viewBox="0 0 160 108" xmlns="http://www.w3.org/2000/svg">
+              <text x="80" y="22" text-anchor="middle" class="front-tag">Front</text>
+              <path d="M16 32h128" class="front"/><path d="M80 26l4 6h-8z" fill="#9a7b3a"/>
+              <g class="dot"><circle cx="24" cy="60" r="4.5"/><circle cx="40" cy="60" r="4.5"/><circle cx="56" cy="60" r="4.5"/><circle cx="72" cy="60" r="4.5"/><circle cx="88" cy="60" r="4.5"/><circle cx="104" cy="60" r="4.5"/><circle cx="120" cy="60" r="4.5"/><circle cx="136" cy="60" r="4.5"/></g>
+            </svg>
+            <div class="formation__line">Blocks frontal blows. Normal speed.</div>
+            <div class="formation__line formation__line--dim">Flanks are open. The default on deployment.</div>
+            <div class="formation__key"><span class="keycap">1</span><span>Cycle</span></div>
+          </div>
+
+          <div class="formation formation--hover">
+            <div class="formation__head"><span class="formation__name">Testudo</span><span class="formation__order">2 of 5</span></div>
+            <svg class="formation__diagram" viewBox="0 0 160 108" xmlns="http://www.w3.org/2000/svg">
+              <text x="80" y="22" text-anchor="middle" class="front-tag">Front</text>
+              <path d="M44 32h72" class="front"/><path d="M80 26l4 6h-8z" fill="#9a7b3a"/>
+              <rect x="44" y="40" width="72" height="44" fill="rgba(154,123,58,.15)" stroke="#9a7b3a" stroke-width="1" stroke-dasharray="3 2"/>
+              <g class="dot"><circle cx="56" cy="52" r="4.5"/><circle cx="72" cy="52" r="4.5"/><circle cx="88" cy="52" r="4.5"/><circle cx="104" cy="52" r="4.5"/><circle cx="56" cy="72" r="4.5"/><circle cx="72" cy="72" r="4.5"/><circle cx="88" cy="72" r="4.5"/><circle cx="104" cy="72" r="4.5"/></g>
+            </svg>
+            <div class="formation__line">Blocks most frontal blows. Slow.</div>
+            <div class="formation__line formation__line--dim">Men tire faster. Blocks flank blows in part.</div>
+            <div class="formation__key"><span class="keycap">1</span><span>Cycle</span></div>
+          </div>
+
+          <div class="formation">
+            <div class="formation__head"><span class="formation__name">Double line</span><span class="formation__order">3 of 5</span></div>
+            <svg class="formation__diagram" viewBox="0 0 160 108" xmlns="http://www.w3.org/2000/svg">
+              <text x="80" y="22" text-anchor="middle" class="front-tag">Front</text>
+              <path d="M32 32h96" class="front"/><path d="M80 26l4 6h-8z" fill="#9a7b3a"/>
+              <g class="dot"><circle cx="44" cy="50" r="4.5"/><circle cx="68" cy="50" r="4.5"/><circle cx="92" cy="50" r="4.5"/><circle cx="116" cy="50" r="4.5"/></g>
+              <g class="dot" opacity=".55"><circle cx="44" cy="80" r="4.5"/><circle cx="68" cy="80" r="4.5"/><circle cx="92" cy="80" r="4.5"/><circle cx="116" cy="80" r="4.5"/></g>
+            </svg>
+            <div class="formation__line">The rear rank relieves the front as it tires.</div>
+            <div class="formation__line formation__line--dim">Holds longer. Covers half the ground of Line.</div>
+            <div class="formation__key"><span class="keycap">1</span><span>Cycle</span></div>
+          </div>
+
+          <div class="formation">
+            <div class="formation__head"><span class="formation__name">Loose</span><span class="formation__order">4 of 5</span></div>
+            <svg class="formation__diagram" viewBox="0 0 160 108" xmlns="http://www.w3.org/2000/svg">
+              <text x="80" y="22" text-anchor="middle" class="front-tag">Front</text>
+              <path d="M12 32h136" class="front"/><path d="M80 26l4 6h-8z" fill="#9a7b3a"/>
+              <g class="dot"><circle cx="22" cy="48" r="4.5"/><circle cx="60" cy="44" r="4.5"/><circle cx="98" cy="50" r="4.5"/><circle cx="138" cy="46" r="4.5"/><circle cx="40" cy="80" r="4.5"/><circle cx="78" cy="84" r="4.5"/><circle cx="118" cy="78" r="4.5"/><circle cx="150" cy="86" r="4.5"/></g>
+            </svg>
+            <div class="formation__line">Hardly blocks. Fast.</div>
+            <div class="formation__line formation__line--dim">Used to skirmish and to run. Pila loose sooner.</div>
+            <div class="formation__key"><span class="keycap">1</span><span>Cycle</span></div>
+          </div>
+
+          <div class="formation">
+            <div class="formation__head"><span class="formation__name">Column</span><span class="formation__order">5 of 5</span></div>
+            <svg class="formation__diagram" viewBox="0 0 160 108" xmlns="http://www.w3.org/2000/svg">
+              <text x="80" y="14" text-anchor="middle" class="front-tag">Front</text>
+              <path d="M60 22h40" class="front"/><path d="M80 16l4 6h-8z" fill="#9a7b3a"/>
+              <g class="dot"><circle cx="72" cy="36" r="4.5"/><circle cx="88" cy="36" r="4.5"/><circle cx="72" cy="52" r="4.5"/><circle cx="88" cy="52" r="4.5"/><circle cx="72" cy="68" r="4.5"/><circle cx="88" cy="68" r="4.5"/><circle cx="72" cy="84" r="4.5"/><circle cx="88" cy="84" r="4.5"/></g>
+            </svg>
+            <div class="formation__line">Moves fastest. Only the head fights.</div>
+            <div class="formation__line formation__line--dim">Breaks easily if struck. The march formation on contact.</div>
+            <div class="formation__key"><span class="keycap">1</span><span>Cycle</span></div>
+          </div>
+        </div>
+
+        <div class="heading" style="margin-top:18px">What breaks a formation</div>
+        <div class="rules">
+          <div class="rule-item"><span class="rule-item__glyph">◆</span><span>Entering forest or a ford drops any formation to Loose until the squad is clear of it.</span></div>
+          <div class="rule-item"><span class="rule-item__glyph">◆</span><span>A blow from the flank ignores the block of Line and Double line. Only Testudo blocks it in part.</span></div>
+          <div class="rule-item"><span class="rule-item__glyph">◆</span><span>A squad that loses its decanus re-forms slower until a man is appointed in camp.</span></div>
+          <div class="rule-item"><span class="rule-item__glyph">◆</span><span>A squad at Breaking or below cannot enter Testudo. A Broken squad holds no formation at all.</span></div>
+          <div class="rule-item"><span class="rule-item__glyph">◆</span><span>Stamina drains at the formation's rate while the squad moves, faster still on a slope.</span></div>
+          <div class="rule-item"><span class="rule-item__glyph">◆</span><span>Orders given to a squad mid-change wait until it has re-formed.</span></div>
+        </div>
+
+        <div class="see-also">
+          <span class="eyebrow">See also</span>
+          <button class="pill">Orders</button>
+          <button class="pill">Stamina</button>
+          <button class="pill">The Morale Ladder</button>
+          <button class="pill">Contubernia</button>
+          <button class="pill" disabled>Reinforcements · unseen</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="overlay-foot">
+      <span class="micro text-dim">BATTLE · FORMATIONS · 17 ENTRIES · 2 UNSEEN</span>
+      <div class="row gap-tight"><button class="button-ghost">‹ Bonds</button><button class="button-ghost">Orders ›</button></div>
+    </div>
+  </div>
+</div>
+
+<div class="mock-note" style="left:346px;top:150px">Copy rule for this screen: every entry states mechanics only. No lore, no flavour — that lives in events and narration.</div>
+<div class="mock-note" style="left:346px;top:520px">Entries unlock as the sim first touches them. Unseen entries stay listed but faint, so the player knows a rule exists that they have not met.</div>
+<div class="mock-note" style="left:1080px;top:236px">The dot diagrams are the same glyph as the formation icon on the squad card in the battle HUD, so the player learns one shape per formation.</div>
+<div class="mock-note" style="left:1400px;top:640px">Key hints use the same keycap component as the tutorial pop-ups. One key cycles; there is no direct-select key for a formation.</div>

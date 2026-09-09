@@ -1,0 +1,176 @@
+<!-- title: Camp — The Century -->
+<!-- desc: The organisation chart: command band with the six offices (Signifer vacant), then the five contubernia with rich soldier cards, tier discs and status chips. -->
+<!-- world: camp -->
+<style>
+  .chart { display: flex; flex-direction: column; gap: 14px; height: 100%; overflow: hidden; }
+  .band { padding: 12px 14px; }
+  .band__head { display: flex; justify-content: space-between; align-items: baseline; }
+  .officers { display: flex; gap: 12px; margin-top: 10px; }
+  .office { flex: 1 1 0; display: flex; gap: 10px; align-items: center; padding: 10px 12px; border: 1px solid rgba(74,54,32,.35); background: rgba(250,244,226,.35); position: relative; cursor: pointer; }
+  .office:hover { border-color: #9a7b3a; background: rgba(255,250,232,.55); }
+  .office--commander { border-color: var(--gold); }
+  .office--vacant { border-color: var(--blood-dim); border-style: dashed; }
+  .office__portrait { width: 46px; height: 46px; border: 1px solid var(--gold-dim); background: rgba(250,244,226,.5); display: flex; align-items: center; justify-content: center; color: var(--gold); flex: 0 0 auto; }
+  .office--vacant .office__portrait { color: var(--parchment-faint); border-style: dashed; }
+  .office__post { font-size: var(--fs-micro); color: var(--gold); letter-spacing: 3px; text-transform: uppercase; }
+  .office__name { font-size: var(--fs-body); color: var(--parchment); margin-top: 2px; }
+  .office--vacant .office__name { color: var(--blood); letter-spacing: 2px; text-transform: uppercase; font-size: var(--fs-small); }
+  .office__tier { display: flex; align-items: center; gap: 6px; margin-top: 3px; font-size: var(--fs-micro); color: var(--parchment-dim); letter-spacing: 1px; text-transform: uppercase; }
+  .office__pts { position: absolute; right: 8px; top: 6px; font-size: var(--fs-micro); color: var(--blood); letter-spacing: 1px; border: 1px solid var(--blood-dim); background: rgba(250,244,226,.5); padding: 1px 5px; font-weight: 700; }
+  .office__penalty { font-size: var(--fs-micro); color: var(--blood); margin-top: 3px; letter-spacing: .5px; }
+
+  .squads { flex: 1 1 0; min-height: 0; display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+  .squad { display: flex; flex-direction: column; min-height: 0; padding: 10px 12px; }
+  .squad__head { display: flex; justify-content: space-between; align-items: baseline; }
+  .squad__numeral { font-family: var(--font-display); font-size: 18px; color: var(--gold-bright); letter-spacing: 2px; }
+  .squad__decanus { font-size: var(--fs-micro); color: var(--parchment-dim); letter-spacing: 1px; text-transform: uppercase; margin-top: 2px; }
+  .squad__strength { font-size: var(--fs-micro); color: var(--parchment-dim); letter-spacing: 1px; text-transform: uppercase; }
+  .men { display: flex; flex-direction: column; gap: 5px; margin-top: 10px; overflow: hidden; }
+  .man { display: flex; align-items: center; gap: 8px; padding: 9px 10px; border: 1px solid rgba(74,54,32,.35); background: rgba(250,244,226,.35); cursor: pointer; }
+  .man:hover { border-color: #9a7b3a; background: rgba(255,250,232,.55); }
+  .man--decanus { border-color: var(--gold-dim); }
+  .man--wounded { border-color: var(--amber); }
+  .man--empty { border-style: dashed; border-color: rgba(74,54,32,.25); background: transparent; cursor: default; }
+  .man--empty .man__name { color: var(--parchment-faint); font-size: var(--fs-micro); letter-spacing: 2px; text-transform: uppercase; }
+  .man__name { font-size: var(--fs-body); color: var(--parchment); flex: 1 1 auto; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.15; }
+  .man__name small { display: block; font-size: var(--fs-micro); color: var(--parchment-dim); letter-spacing: 1px; text-transform: uppercase; margin-top: 3px; }
+  .man__role { font-size: var(--fs-micro); color: var(--gold); letter-spacing: 1px; text-transform: uppercase; }
+  .chips { display: flex; gap: 4px; }
+  .chip { font-size: 8px; letter-spacing: 1px; text-transform: uppercase; padding: 2px 5px; border: 1px solid var(--gold-faint); color: var(--parchment-dim); }
+  .chip--good { color: var(--olive); border-color: rgba(109,122,60,.5); }
+  .chip--warn { color: var(--amber); border-color: rgba(176,132,48,.5); }
+  .chip--bad { color: var(--blood); border-color: var(--blood-dim); }
+</style>
+
+<div class="top-bar">
+  <div class="unit-identity"><div class="identity__legion">Marching Camp</div><div class="identity__name">Centuria Valeria</div></div>
+  <div class="resource-strip">
+    <div class="resource"><svg class="ico resource__icon"><use href="#i-helmet"/></svg><div><div class="resource__label">Men</div><div class="resource__value">41</div></div></div>
+    <div class="resource"><svg class="ico resource__icon"><use href="#i-wheat"/></svg><div><div class="resource__label">Food</div><div class="resource__value resource__value--low">6 days</div></div></div>
+    <div class="resource"><svg class="ico resource__icon"><use href="#i-fire"/></svg><div><div class="resource__label">Firewood</div><div class="resource__value">14</div></div></div>
+    <div class="resource"><svg class="ico resource__icon"><use href="#i-bandage"/></svg><div><div class="resource__label">Medicine</div><div class="resource__value">3 doses</div></div></div>
+    <div class="resource"><svg class="ico resource__icon"><use href="#i-coin"/></svg><div><div class="resource__label">Coin</div><div class="resource__value">212</div></div></div>
+    <div class="resource"><svg class="ico resource__icon"><use href="#i-denarii"/></svg><div><div class="resource__label">Denarii</div><div class="resource__value">38</div></div></div>
+    <div class="resource"><svg class="ico resource__icon"><use href="#i-shield"/></svg><div><div class="resource__label">Equipment</div><div class="resource__value">Serviceable</div></div></div>
+  </div>
+  <div class="morale-block"><div class="row between"><span class="metric-label">Morale</span><span class="text-good caps small">Confident</span></div><div class="bar bar--thick"><div class="bar__fill bar__fill--morale" style="width:62%"></div></div></div>
+</div>
+
+<div class="camp-tabs pill-row" data-tabs>
+  <button class="pill pill--active" data-tab="century">The Century</button>
+  <button class="pill" data-tab="rest">Rest &amp; Orders</button>
+  <button class="pill" data-tab="craft">Crafting</button>
+  <button class="pill" data-tab="stations">Camp Stations</button>
+</div>
+
+<div class="camp-page" data-page="century">
+  <div class="chart">
+    <!-- command band -->
+    <div class="panel band">
+      <div class="band__head"><span class="heading">Command</span><span class="micro text-dim">Click an office to see its tradition · click a man to see his sheet</span></div>
+      <div class="officers">
+        <div class="office office--commander">
+          <div class="office__portrait"><svg class="ico ico--lg"><use href="#i-helmet"/></svg></div>
+          <div><div class="office__post">Centurion</div><div class="office__name">Marcus Cornelius</div><div class="office__tier"><span class="tier-disc tier-disc--officer"></span>Level 3 · True Roman</div></div>
+        </div>
+        <div class="office">
+          <span class="office__pts">2 pts</span>
+          <div class="office__portrait"><svg class="ico ico--lg"><use href="#i-crest"/></svg></div>
+          <div><div class="office__post">Optio</div><div class="office__name">Gaius Aurelius</div><div class="office__tier"><span class="tier-disc tier-disc--evocatus"></span>Evocatus (Elite)</div></div>
+        </div>
+        <div class="office">
+          <div class="office__portrait"><svg class="ico ico--lg"><use href="#i-scroll"/></svg></div>
+          <div><div class="office__post">Tesserarius</div><div class="office__name">Lucius Pedo</div><div class="office__tier"><span class="tier-disc tier-disc--veteranus"></span>Veteranus · <span class="text-amber">wounded</span></div></div>
+        </div>
+        <div class="office">
+          <div class="office__portrait"><svg class="ico ico--lg"><use href="#i-cross"/></svg></div>
+          <div><div class="office__post">Medicus</div><div class="office__name">Quintus Fabius</div><div class="office__tier"><span class="tier-disc tier-disc--miles"></span>Miles (Trained)</div></div>
+        </div>
+        <div class="office office--vacant">
+          <div class="office__portrait"><svg class="ico ico--lg"><use href="#i-banner"/></svg></div>
+          <div><div class="office__post">Signifer</div><div class="office__name">Vacant</div><div class="office__penalty">Standard aura halved · the signum is lost</div></div>
+        </div>
+        <div class="office">
+          <div class="office__portrait"><svg class="ico ico--lg"><use href="#i-eye"/></svg></div>
+          <div><div class="office__post">Speculator</div><div class="office__name">Sextus Varro</div><div class="office__tier"><span class="tier-disc tier-disc--veteranus"></span>Veteranus · riding out</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- contubernia -->
+    <div class="squads">
+      <div class="panel squad">
+        <div class="squad__head"><div><div class="squad__numeral">I</div><div class="squad__decanus">Decanus · Titus Valerius</div></div><span class="squad__strength">8 of 8</span></div>
+        <div class="men">
+          <div class="man man--decanus"><span class="tier-disc tier-disc--veteranus"></span><span class="man__name">Titus Valerius<small>Veteranus (Veteran)</small></span><span class="man__role">Decanus</span></div>
+          <div class="man"><span class="tier-disc tier-disc--miles"></span><span class="man__name">Publius Naso<small>Miles (Trained)</small></span><div class="chips"><span class="chip chip--good">Fit</span></div></div>
+          <div class="man"><span class="tier-disc tier-disc--miles"></span><span class="man__name">Titus Vibius<small>Miles (Trained)</small></span><div class="chips"><span class="chip chip--good">Fit</span></div></div>
+          <div class="man"><span class="tier-disc tier-disc--tiro"></span><span class="man__name">Servius Balbus<small>Tiro (Recruit)</small></span><div class="chips"><span class="chip chip--warn">Weary</span></div></div>
+          <div class="man"><span class="tier-disc tier-disc--miles"></span><span class="man__name">Caius Nerva<small>Miles (Trained)</small></span><div class="chips"><span class="chip chip--good">Fit</span></div></div>
+          <div class="man"><span class="tier-disc tier-disc--tiro"></span><span class="man__name">Spurius Macer<small>Tiro (Recruit)</small></span><div class="chips"><span class="chip">Sullen</span></div></div>
+          <div class="man"><span class="tier-disc tier-disc--veteranus"></span><span class="man__name">Vibius Crassus<small>Veteranus (Veteran)</small></span><div class="chips"><span class="chip chip--good">Fit</span></div></div>
+          <div class="man"><span class="tier-disc tier-disc--miles"></span><span class="man__name">Numerius Longus<small>Miles (Trained)</small></span><div class="chips"><span class="chip chip--good">Fit</span></div></div>
+        </div>
+      </div>
+      <div class="panel squad">
+        <div class="squad__head"><div><div class="squad__numeral">II</div><div class="squad__decanus">Decanus · Aulus Rufus</div></div><span class="squad__strength text-amber">6 of 8</span></div>
+        <div class="men">
+          <div class="man man--decanus"><span class="tier-disc tier-disc--miles"></span><span class="man__name">Aulus Rufus<small>Miles (Trained)</small></span><span class="man__role">Decanus</span></div>
+          <div class="man man--wounded"><span class="tier-disc tier-disc--miles"></span><span class="man__name">Tiberius Flaccus<small>Miles (Trained)</small></span><div class="chips"><span class="chip chip--warn">Wounded</span></div></div>
+          <div class="man man--wounded"><span class="tier-disc tier-disc--tiro"></span><span class="man__name">Marcus Ovidius<small>Tiro (Recruit)</small></span><div class="chips"><span class="chip chip--warn">Wounded</span></div></div>
+          <div class="man"><span class="tier-disc tier-disc--miles"></span><span class="man__name">Lucius Sabinus<small>Miles (Trained)</small></span><div class="chips"><span class="chip chip--bad">Wavering</span></div></div>
+          <div class="man"><span class="tier-disc tier-disc--tiro"></span><span class="man__name">Appius Gallus<small>Tiro (Recruit)</small></span><div class="chips"><span class="chip chip--good">Fit</span></div></div>
+          <div class="man"><span class="tier-disc tier-disc--miles"></span><span class="man__name">Hostus Rullus<small>Miles (Trained)</small></span><div class="chips"><span class="chip chip--good">Fit</span></div></div>
+          <div class="man man--empty"><span class="tier-disc" style="border:1px dashed var(--parchment-faint)"></span><span class="man__name">Empty bunk · fallen at the ford</span></div>
+          <div class="man man--empty"><span class="tier-disc" style="border:1px dashed var(--parchment-faint)"></span><span class="man__name">Empty bunk · fallen at the ford</span></div>
+        </div>
+      </div>
+      <div class="panel squad">
+        <div class="squad__head"><div><div class="squad__numeral">III</div><div class="squad__decanus">Decanus · Decimus Silo</div></div><span class="squad__strength">8 of 8</span></div>
+        <div class="men">
+          <div class="man man--decanus"><span class="tier-disc tier-disc--evocatus"></span><span class="man__name">Decimus Silo<small>Evocatus (Elite)</small></span><span class="man__role">Decanus</span></div>
+          <div class="man" style="border-color:var(--gold-bright);background:var(--ink-raised)"><span class="tier-disc tier-disc--veteranus"></span><span class="man__name">Sextus Tullius<small>Veteranus (Veteran)</small></span><div class="chips"><span class="chip chip--good">Fit</span><span class="chip chip--good">Loyal</span></div></div>
+          <div class="man"><span class="tier-disc tier-disc--miles"></span><span class="man__name">Quintus Hirtius<small>Miles (Trained)</small></span><div class="chips"><span class="chip chip--good">Fit</span></div></div>
+          <div class="man"><span class="tier-disc tier-disc--miles"></span><span class="man__name">Gaius Mallius<small>Miles (Trained)</small></span><div class="chips"><span class="chip chip--good">Fit</span></div></div>
+          <div class="man"><span class="tier-disc tier-disc--miles"></span><span class="man__name">Lucius Vettius<small>Miles (Trained)</small></span><div class="chips"><span class="chip chip--good">Fit</span></div></div>
+          <div class="man"><span class="tier-disc tier-disc--tiro"></span><span class="man__name">Cnaeus Dento<small>Tiro (Recruit)</small></span><div class="chips"><span class="chip">Content</span></div></div>
+          <div class="man"><span class="tier-disc tier-disc--miles"></span><span class="man__name">Publius Varro<small>Miles (Trained)</small></span><div class="chips"><span class="chip chip--good">Fit</span></div></div>
+          <div class="man"><span class="tier-disc tier-disc--tiro"></span><span class="man__name">Aulus Fimbria<small>Tiro (Recruit)</small></span><div class="chips"><span class="chip chip--warn">Weary</span></div></div>
+        </div>
+      </div>
+      <div class="panel squad">
+        <div class="squad__head"><div><div class="squad__numeral">IV</div><div class="squad__decanus">Decanus · Manius Cotta</div></div><span class="squad__strength text-amber">7 of 8</span></div>
+        <div class="men">
+          <div class="man man--decanus"><span class="tier-disc tier-disc--veteranus"></span><span class="man__name">Manius Cotta<small>Veteranus (Veteran)</small></span><span class="man__role">Decanus</span></div>
+          <div class="man"><span class="tier-disc tier-disc--miles"></span><span class="man__name">Marcus Lepidus<small>Miles (Trained)</small></span><div class="chips"><span class="chip chip--good">Fit</span></div></div>
+          <div class="man"><span class="tier-disc tier-disc--miles"></span><span class="man__name">Gaius Aurelius<small>Miles (Trained)</small></span><span class="man__role">Optio</span></div>
+          <div class="man"><span class="tier-disc tier-disc--tiro"></span><span class="man__name">Lucius Cinna<small>Tiro (Recruit)</small></span><div class="chips"><span class="chip chip--good">Fit</span></div></div>
+          <div class="man man--wounded"><span class="tier-disc tier-disc--miles"></span><span class="man__name">Sextus Varro<small>Miles (Trained)</small></span><span class="man__role">Speculator</span></div>
+          <div class="man"><span class="tier-disc tier-disc--miles"></span><span class="man__name">Quintus Fabius<small>Miles (Trained)</small></span><span class="man__role">Medicus</span></div>
+          <div class="man"><span class="tier-disc tier-disc--tiro"></span><span class="man__name">Titus Norbanus<small>Tiro (Recruit)</small></span><div class="chips"><span class="chip chip--good">Fit</span></div></div>
+          <div class="man man--empty"><span class="tier-disc" style="border:1px dashed var(--parchment-faint)"></span><span class="man__name">Empty bunk</span></div>
+        </div>
+      </div>
+      <div class="panel squad">
+        <div class="squad__head"><div><div class="squad__numeral">V</div><div class="squad__decanus">Decanus · Gnaeus Piso</div></div><span class="squad__strength text-danger">4 of 8</span></div>
+        <div class="men">
+          <div class="man man--decanus"><span class="tier-disc tier-disc--miles"></span><span class="man__name">Gnaeus Piso<small>Miles (Trained)</small></span><span class="man__role">Decanus (acting)</span></div>
+          <div class="man man--wounded"><span class="tier-disc tier-disc--veteranus"></span><span class="man__name">Lucius Pedo<small>Veteranus (Veteran)</small></span><span class="man__role text-amber">Tesserarius</span></div>
+          <div class="man"><span class="tier-disc tier-disc--tiro"></span><span class="man__name">Marcus Attius<small>Tiro (Recruit)</small></span><div class="chips"><span class="chip chip--bad">Wavering</span></div></div>
+          <div class="man"><span class="tier-disc tier-disc--tiro"></span><span class="man__name">Publius Curio<small>Tiro (Recruit)</small></span><div class="chips"><span class="chip">Sullen</span></div></div>
+          <div class="man man--empty"><span class="tier-disc" style="border:1px dashed var(--parchment-faint)"></span><span class="man__name">Empty bunk</span></div>
+          <div class="man man--empty"><span class="tier-disc" style="border:1px dashed var(--parchment-faint)"></span><span class="man__name">Empty bunk</span></div>
+          <div class="man man--empty"><span class="tier-disc" style="border:1px dashed var(--parchment-faint)"></span><span class="man__name">Empty bunk</span></div>
+          <div class="man man--empty"><span class="tier-disc" style="border:1px dashed var(--parchment-faint)"></span><span class="man__name">Empty bunk</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="camp-footer"><span class="body body--dim">A hollow off the forest track · Day 4 · 2nd watch</span><button class="button-primary">Break Camp</button></div>
+
+<div class="mock-note" style="left:1420px;top:150px">Signifer sits vacant with its penalty stated inline: the vacancy is felt, not just labelled. Clicking opens THE OFFICE overlay with APPOINT A MAN.</div>
+<div class="mock-note" style="left:620px;top:150px">Gold "2 pts" badge = tradition points waiting to be invested in that office.</div>
+<div class="mock-note" style="left:1000px;top:620px">A hovered card (Sextus Tullius) shows the raised state. Chips are words only — never percentages.</div>
+<div class="mock-note" style="left:1560px;top:620px">Contubernium V is thin: bunks stay empty until recruits are folded in. Same groups fight together in battle.</div>

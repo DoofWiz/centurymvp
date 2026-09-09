@@ -1,0 +1,154 @@
+<!-- title: Opening Sequence -->
+<!-- desc: The scripted wake-up in the rain: edge blur, mid-blink bars, a guide chevron over the Centurion, the subtitle band and the STEALTH controls-only sheet that holds time. -->
+<!-- world: battle -->
+<style>
+  /* ---- scene layers (stand-in for the 3D battle scene) ------------------------------------ */
+  .scene { position: absolute; inset: 0; overflow: hidden; }
+  .scene__far { position: absolute; inset: -30px; filter: blur(9px); }               /* the extra backdrop div: blurred */
+  .scene__ground { position: absolute; inset: 0; pointer-events: none;
+    background:
+      radial-gradient(ellipse 26% 10% at 44% 76%, rgba(96,108,118,.10), transparent 70%),
+      radial-gradient(ellipse 20% 8% at 63% 84%, rgba(96,108,118,.08), transparent 70%),
+      linear-gradient(180deg, rgba(40,28,14,0) 0%, rgba(40,28,14,0) 44%, rgba(40,28,14,.42) 60%, rgba(40,28,14,.68) 100%); }
+  .scene__near { position: absolute; inset: 0; }
+  .rain { position: absolute; left: 0; right: 0; top: -260px; bottom: 0; pointer-events: none; opacity: .32;
+    background: repeating-linear-gradient(100deg, transparent 0 22px, rgba(140,155,170,.5) 22px 23px, transparent 23px 48px);
+    -webkit-mask-image: repeating-linear-gradient(to bottom, transparent 0 60px, #000 90px 150px, transparent 180px 260px);
+    mask-image: repeating-linear-gradient(to bottom, transparent 0 60px, #000 90px 150px, transparent 180px 260px);
+    animation: rainFall .5s linear infinite; }
+  .rain--slow { opacity: .14; background: repeating-linear-gradient(100deg, transparent 0 34px, rgba(140,155,170,.45) 34px 35px, transparent 35px 70px); animation-duration: .85s; }
+  @keyframes rainFall { from { transform: translateY(-260px); } to { transform: translateY(0); } }
+  .eyelid { position: absolute; inset: 0; pointer-events: none;                       /* the ink-wash radial "eyelid" */
+    background: radial-gradient(ellipse 60% 64% at 50% 54%, transparent 38%, rgba(40,28,14,.5) 72%, rgba(33,23,11,.94) 100%); }
+  .blink { position: absolute; left: 0; right: 0; height: 150px; pointer-events: none;   /* mid-blink bars */
+    background: linear-gradient(to bottom, rgb(35,25,12) 0%, rgb(35,25,12) 58%, rgba(35,25,12,0) 100%); }
+  .blink--top { top: 0; } .blink--bottom { bottom: 0; transform: scaleY(-1); }
+
+  /* ---- guide chevron over the Centurion ---------------------------------------------------- */
+  .guide { position: absolute; left: 924px; top: 548px; width: 72px; height: 64px; animation: bob 1.3s ease-in-out infinite; }
+  @keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(12px); } }
+
+  /* ---- subtitle band ------------------------------------------------------------------------ */
+  .subtitle { position: absolute; left: 0; right: 0; top: 866px; height: 86px; display: flex; flex-direction: column; align-items: center;
+    justify-content: center; gap: 6px; pointer-events: none;
+    background: linear-gradient(to right, transparent 0, rgba(240,231,207,.85) 22%, rgba(240,231,207,.85) 78%, transparent 100%); }
+  .subtitle__text { font-size: 22px; color: var(--parchment); letter-spacing: .4px; font-style: italic; }
+
+  /* ---- tutorial sheets: controls only, no prose -------------------------------------------- */
+  .tut { position: absolute; width: 310px; background: var(--ink-deep); border: var(--rule) solid var(--gold-dim); padding: 14px 18px 16px; }
+  .tut__title { font-family: var(--font-display); font-size: var(--fs-title); color: var(--gold-bright); letter-spacing: 5px; font-weight: 700;
+    text-transform: uppercase; margin-top: 4px; }
+  .tut__keys { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+  .tut__hint { font-size: var(--fs-small); color: var(--parchment-dim); margin-top: 10px; }
+  .tut__lead { position: absolute; left: -160px; top: 50%; width: 160px; height: 1px; background: linear-gradient(to left, var(--gold-dim), transparent); }
+  .tut--ghost { opacity: .3; }
+
+  /* ---- minimal HUD -------------------------------------------------------------------------- */
+  .held-clock { position: absolute; top: 24px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 10px;
+    background: var(--ink-deep); border: var(--rule) solid var(--gold-dim); padding: 6px 16px; }
+  .held-clock__word { font-size: var(--fs-small); color: var(--gold-bright); letter-spacing: 4px; font-weight: 700; text-transform: uppercase; }
+  .centurion { position: absolute; left: 24px; bottom: 24px; width: 290px; }
+</style>
+
+<!-- ===== the world: a rain-soaked forest corridor, seen through half-open eyes ===== -->
+<div class="scene">
+  <!-- far layer: blurred -->
+  <div class="scene__far">
+    <svg viewBox="0 0 1920 1080" preserveAspectRatio="none" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+      <rect width="1920" height="1080" fill="rgb(188,174,134)"/>
+      <ellipse cx="960" cy="-120" rx="1200" ry="420" fill="rgb(122,104,68)"/>
+      <g fill="rgb(106,86,56)">
+        <polygon points="540,0 590,0 620,900 560,900"/><polygon points="660,0 690,0 700,880 660,880"/><polygon points="800,0 826,0 830,870 796,870"/>
+        <polygon points="1100,0 1130,0 1126,860 1096,860"/><polygon points="1230,0 1268,0 1256,900 1214,900"/><polygon points="1320,0 1372,0 1350,880 1300,880"/>
+      </g>
+      <rect x="0" y="380" width="1920" height="360" fill="rgba(96,108,118,.2)"/>
+      <rect x="0" y="600" width="1920" height="480" fill="rgb(138,120,82)"/>
+    </svg>
+  </div>
+  <div class="scene__ground"></div>
+  <!-- near layer: crisp tree walls, the fallen, the Centurion -->
+  <svg class="scene__near" viewBox="0 0 1920 1080" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="300" cy="-40" rx="620" ry="260" fill="rgb(90,74,44)"/>
+    <ellipse cx="1640" cy="-60" rx="640" ry="280" fill="rgb(90,74,44)"/>
+    <!-- left wall -->
+    <polygon points="0,0 176,0 152,1080 0,1080" fill="rgb(90,74,44)"/>
+    <polygon points="236,0 322,0 356,1080 246,1080" fill="rgb(106,88,54)"/>
+    <line x1="322" y1="0" x2="356" y2="1080" stroke="rgba(210,195,150,.35)" stroke-width="2"/>
+    <polygon points="430,0 476,0 506,1080 436,1080" fill="rgb(116,96,60)"/>
+    <!-- right wall -->
+    <polygon points="1744,0 1920,0 1920,1080 1768,1080" fill="rgb(90,74,44)"/>
+    <polygon points="1598,0 1684,0 1674,1080 1564,1080" fill="rgb(106,88,54)"/>
+    <line x1="1598" y1="0" x2="1564" y2="1080" stroke="rgba(210,195,150,.35)" stroke-width="2"/>
+    <polygon points="1444,0 1490,0 1484,1080 1414,1080" fill="rgb(116,96,60)"/>
+    <g fill="rgb(99,81,47)"><ellipse cx="300" cy="1040" rx="120" ry="60"/><ellipse cx="1620" cy="1040" rx="120" ry="60"/><ellipse cx="470" cy="1060" rx="90" ry="40"/><ellipse cx="1450" cy="1060" rx="90" ry="40"/></g>
+    <!-- the fallen -->
+    <g fill="rgb(74,58,36)" stroke="rgba(230,220,195,.22)" stroke-width="1">
+      <ellipse cx="700" cy="760" rx="58" ry="14"/><ellipse cx="1180" cy="720" rx="52" ry="12" transform="rotate(-12 1180 720)"/>
+      <ellipse cx="820" cy="850" rx="66" ry="16" transform="rotate(8 820 850)"/><ellipse cx="1300" cy="830" rx="60" ry="14" transform="rotate(-20 1300 830)"/>
+      <ellipse cx="1060" cy="905" rx="70" ry="17"/><ellipse cx="600" cy="660" rx="44" ry="11" transform="rotate(16 600 660)"/>
+      <ellipse cx="1380" cy="650" rx="40" ry="10" transform="rotate(-8 1380 650)"/>
+    </g>
+    <!-- dropped kit: a scutum on its face, a snapped pilum -->
+    <ellipse cx="900" cy="800" rx="30" ry="42" fill="rgb(92,67,38)" stroke="rgba(230,220,195,.18)"/>
+    <line x1="1120" y1="780" x2="1230" y2="808" stroke="rgb(67,57,44)" stroke-width="3"/>
+    <!-- the Centurion, prone, coming to (bronze rim light marks the player) -->
+    <ellipse cx="962" cy="700" rx="40" ry="16" fill="rgb(63,47,28)" stroke="rgba(176,132,48,.55)" stroke-width="1.5"/>
+    <circle cx="936" cy="686" r="13" fill="rgb(69,51,34)" stroke="rgba(176,132,48,.7)" stroke-width="1.5"/>
+    <path d="M924 678 q12 -10 24 0" fill="none" stroke="rgba(142,47,34,.85)" stroke-width="3"/>
+  </svg>
+  <div class="rain"></div>
+  <div class="rain rain--slow"></div>
+  <div class="eyelid"></div>
+  <div class="blink blink--top"></div>
+  <div class="blink blink--bottom"></div>
+</div>
+
+<!-- ===== guide chevron (lives in the world, over the player's position) ===== -->
+<svg class="guide" viewBox="0 0 72 64" xmlns="http://www.w3.org/2000/svg">
+  <path d="M12 6 L36 28 L60 6" fill="none" stroke="#9a7b3a" stroke-width="4" opacity=".45"/>
+  <path d="M12 26 L36 48 L60 26" fill="none" stroke="#b08430" stroke-width="5"/>
+</svg>
+
+<!-- ===== HUD ===== -->
+<div class="held-clock">
+  <svg class="ico ico--sm ico--gold"><use href="#i-pause"/></svg>
+  <span class="held-clock__word">Held</span>
+  <span class="micro text-faint caps">Day 1 · first light</span>
+</div>
+
+<div class="subtitle">
+  <span class="eyebrow">Marcus Cornelius</span>
+  <span class="subtitle__text">Barbarians… gods be good, they've slaughtered everyone. I cannot be seen…</span>
+</div>
+
+<!-- the live beat: STEALTH -->
+<div class="tut" style="left:1180px; top:548px">
+  <span class="tut__lead"></span>
+  <div class="eyebrow">Controls</div>
+  <div class="tut__title">Stealth</div>
+  <div class="tut__keys"><span class="keycap keycap--gold">C</span><span class="micro text-dim caps">press</span></div>
+  <div class="tut__hint">Time holds until you press it.</div>
+</div>
+
+<!-- the previous beat, ghosted: MOVE -->
+<div class="tut tut--ghost" style="left:1180px; top:690px">
+  <div class="eyebrow">Controls</div>
+  <div class="tut__title">Move</div>
+  <div class="tut__keys"><span class="keycap">W</span><span class="keycap">A</span><span class="keycap">S</span><span class="keycap">D</span><span class="micro text-dim caps">hold</span></div>
+  <div class="tut__hint">Follow the chevron.</div>
+</div>
+
+<div class="centurion panel panel--deep">
+  <div class="eyebrow">Centurion</div>
+  <div class="large" style="letter-spacing:2px; margin-top:2px">Marcus Cornelius</div>
+  <div class="row between" style="margin-top:10px"><span class="metric-label">Health</span><span class="text-amber caps micro">Wounded</span></div>
+  <div class="bar bar--thick"><div class="bar__fill bar__fill--health" style="width:55%"></div></div>
+  <div class="row between" style="margin-top:8px"><span class="metric-label">Stamina</span><span class="text-dim caps micro">Fresh</span></div>
+  <div class="bar bar--thick"><div class="bar__fill bar__fill--stamina" style="width:100%"></div></div>
+</div>
+
+<!-- ===== design notes (press N) ===== -->
+<div class="mock-note" style="left:300px; top:150px">Blink bars close twice over the first three seconds, then hold open. The edge blur eases off as the Centurion rises to a crouch; the eyelid vignette stays until STEALTH is pressed.</div>
+<div class="mock-note" style="left:1180px; top:470px">Controls-only sheet: title, key, one-line hint. Nothing explains what stealth does. It fades the moment C is pressed and the HELD clock releases in the same frame.</div>
+<div class="mock-note" style="left:1180px; top:816px">Ghost = the previous beat (MOVE). Each beat holds time until its key is pressed; the sequence is MOVE, STEALTH, then the chevron leads to the tree line.</div>
+<div class="mock-note" style="left:620px; top:560px">The guide chevron lives in the world over the Centurion while time is held, then jumps to the next waypoint. Never a minimap arrow.</div>

@@ -1,0 +1,156 @@
+<!-- title: Scout Report -->
+<!-- desc: OPPORTUNITY SIGHTED: the Speculator's report after the night's rest, with intel quality in words, three tallies, a risk line and MARK IT ON THE MAP / LET IT LIE. -->
+<!-- world: camp -->
+<style>
+  /* ---- Rest & Orders stand-in behind the modal ---- */
+  .option { background: rgba(250,244,226,.35); border: var(--rule) solid rgba(74,54,32,.35); padding: 12px 14px; margin-top: 10px; }
+  .option--hover { border-color: var(--gold-bright); background: var(--ink-raised); }
+  .option__title { font-size: var(--fs-large); color: var(--parchment); letter-spacing: 2px; text-transform: uppercase; }
+  .option--hover .option__title { color: var(--gold-bright); }
+  .option__sub { font-size: var(--fs-micro); color: var(--parchment-dim); letter-spacing: 2px; text-transform: uppercase; margin-top: 2px; }
+  .effect { display: flex; align-items: center; gap: 8px; font-size: var(--fs-small); color: var(--parchment-dim); margin-top: 6px; }
+  .effect--warn { color: var(--amber); }
+  .watch-strip { display: flex; gap: 6px; margin-top: 14px; }
+  .watch-strip__cell { flex: 1 1 0; text-align: center; padding: 5px 0; font-size: var(--fs-micro); letter-spacing: 2px; text-transform: uppercase;
+    color: var(--parchment-faint); border: 1px solid var(--gold-faint); }
+  .watch-strip__cell--now { color: var(--gold-bright); border-color: var(--gold); background: var(--ink-raised); }
+  .order { display: flex; align-items: center; gap: 12px; background: rgba(250,244,226,.35); border: var(--rule) solid rgba(74,54,32,.35); padding: 12px 14px; margin-top: 10px; }
+  .order__title { font-size: var(--fs-body); color: var(--parchment); letter-spacing: 2px; text-transform: uppercase; }
+  .order__desc { font-size: var(--fs-small); color: var(--parchment-dim); margin-top: 3px; }
+  .order__hint { font-size: var(--fs-micro); letter-spacing: 1px; text-transform: uppercase; color: var(--gold); margin-top: 4px; }
+  .order__chev { margin-left: auto; color: var(--gold); font-size: 18px; }
+  .order__tag { margin-left: auto; font-size: var(--fs-micro); letter-spacing: 2px; text-transform: uppercase; color: var(--gold-bright); border: 1px solid var(--gold-dim); padding: 3px 8px; }
+  /* ---- the report ---- */
+  .modal__sheet.report { width: 760px; padding: 22px 26px 22px; }
+  .report__head { display: flex; align-items: flex-start; gap: 16px; }
+  .portrait-slot { width: 64px; height: 64px; border: var(--rule) solid var(--gold-dim); background: rgba(250,244,226,.35); display: flex; align-items: center;
+    justify-content: center; position: relative; flex: 0 0 auto; }
+  .portrait-slot .tier-disc { position: absolute; right: -6px; bottom: -6px; border: 1px solid var(--ink-solid); }
+  .report__title { font-family: var(--font-display); font-size: 26px; color: var(--gold-bright); letter-spacing: 5px; font-weight: 700; text-transform: uppercase; margin-top: 4px; }
+  .intel { display: inline-flex; align-items: center; gap: 8px; margin-top: 10px; padding: 4px 10px; border: var(--rule) solid var(--gold);
+    font-size: var(--fs-micro); letter-spacing: 2px; text-transform: uppercase; color: var(--gold-bright); font-weight: 700; }
+  .intel__why { color: var(--parchment-dim); letter-spacing: 0; text-transform: none; font-size: var(--fs-small); font-weight: 400; }
+  .report__p { font-size: 14px; line-height: 1.55; color: var(--parchment); margin: 14px 0 0; }
+  .tally__value--text { font-size: 16px; letter-spacing: 1px; }
+  .risk { display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: rgba(250,244,226,.35); border: var(--rule) solid rgba(74,54,32,.35);
+    font-size: var(--fs-small); color: #7d5f24; }
+  .report__foot { display: flex; align-items: flex-start; justify-content: space-between; margin-top: 18px; }
+  .foot__btn { display: flex; flex-direction: column; gap: 5px; }
+  .foot__btn--right { align-items: flex-end; }
+  .foot__hint { font-size: var(--fs-micro); letter-spacing: 1px; text-transform: uppercase; }
+  .button-primary.is-hover { background: var(--ink-hover); }
+</style>
+
+<!-- ===== camp frame ===== -->
+<div class="top-bar">
+  <div class="unit-identity"><div class="identity__legion">Marching Camp</div><div class="identity__name">Centuria Valeria</div></div>
+  <div class="resource-strip">
+    <div class="resource"><svg class="ico resource__icon"><use href="#i-helmet"/></svg><div><div class="resource__label">Men</div><div class="resource__value">41</div></div></div>
+    <div class="resource"><svg class="ico resource__icon"><use href="#i-wheat"/></svg><div><div class="resource__label">Food</div><div class="resource__value resource__value--low">6 days</div></div></div>
+    <div class="resource"><svg class="ico resource__icon"><use href="#i-fire"/></svg><div><div class="resource__label">Firewood</div><div class="resource__value">14</div></div></div>
+    <div class="resource"><svg class="ico resource__icon"><use href="#i-bandage"/></svg><div><div class="resource__label">Medicine</div><div class="resource__value">3 doses</div></div></div>
+    <div class="resource"><svg class="ico resource__icon"><use href="#i-coin"/></svg><div><div class="resource__label">Coin</div><div class="resource__value">212</div></div></div>
+    <div class="resource"><svg class="ico resource__icon"><use href="#i-denarii"/></svg><div><div class="resource__label">Denarii</div><div class="resource__value">38</div></div></div>
+    <div class="resource"><svg class="ico resource__icon"><use href="#i-shield"/></svg><div><div class="resource__label">Equipment</div><div class="resource__value">Serviceable</div></div></div>
+  </div>
+  <div class="morale-block"><div class="row between"><span class="metric-label">Morale</span><span class="text-good caps small">Confident</span></div><div class="bar bar--thick"><div class="bar__fill bar__fill--morale" style="width:62%"></div></div></div>
+</div>
+<div class="camp-tabs pill-row" data-tabs>
+  <button class="pill" data-tab="century">The Century</button>
+  <button class="pill pill--active" data-tab="rest">Rest &amp; Orders</button>
+  <button class="pill" data-tab="craft">Crafting</button>
+  <button class="pill" data-tab="stations">Camp Stations</button>
+</div>
+
+<div class="camp-page" data-page="rest">
+  <div class="camp-half">
+    <div class="panel">
+      <div class="row between"><span class="heading">Rest the column</span><span class="micro text-dim caps">The camp is quiet.</span></div>
+      <div class="rule"></div>
+      <div class="option">
+        <div class="option__title">Rest a watch</div>
+        <div class="option__sub">3 hours</div>
+        <div class="effect"><svg class="ico ico--sm ico--gold"><use href="#i-fire"/></svg>Firewood −1</div>
+        <div class="effect"><svg class="ico ico--sm ico--gold"><use href="#i-cross"/></svg>The medicus tends 2 men</div>
+        <div class="effect"><svg class="ico ico--sm ico--gold"><use href="#i-boot"/></svg>Stamina: rested</div>
+        <div class="effect"><svg class="ico ico--sm ico--gold"><use href="#i-wheat"/></svg>Food −41 rations</div>
+      </div>
+      <div class="option option--hover">
+        <div class="option__title">Until dawn</div>
+        <div class="option__sub">Through the night</div>
+        <div class="effect"><svg class="ico ico--sm ico--gold"><use href="#i-fire"/></svg>Firewood −3</div>
+        <div class="effect"><svg class="ico ico--sm ico--gold"><use href="#i-cross"/></svg>The medicus tends 5 men</div>
+        <div class="effect"><svg class="ico ico--sm ico--gold"><use href="#i-boot"/></svg>Stamina: fully rested</div>
+        <div class="effect"><svg class="ico ico--sm ico--gold"><use href="#i-wheat"/></svg>Food −41 rations · one day</div>
+        <div class="effect effect--warn"><svg class="ico ico--sm"><use href="#i-moon"/></svg>Night marches nearby: raiders move in the dark</div>
+      </div>
+      <div class="watch-strip">
+        <div class="watch-strip__cell watch-strip__cell--now">1st watch</div>
+        <div class="watch-strip__cell">2nd watch</div>
+        <div class="watch-strip__cell">3rd watch</div>
+        <div class="watch-strip__cell">4th watch</div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="row between"><span class="heading">Orders</span><span class="micro text-dim caps">Day 4 · dawn</span></div>
+      <div class="rule"></div>
+      <div class="order">
+        <svg class="ico ico--lg ico--gold"><use href="#i-eye"/></svg>
+        <div><div class="order__title">Send the scout</div><div class="order__desc">Sextus Varro rides out at first light; his report arrives after the rest.</div><div class="order__hint">Awards the Speculator tradition</div></div>
+        <span class="order__tag">Reported</span>
+      </div>
+      <div class="order" disabled>
+        <svg class="ico ico--lg ico--gold"><use href="#i-swords"/></svg>
+        <div><div class="order__title">Drill the ranks</div><div class="order__desc">Two contubernia train through a watch; Tirones may reach Miles.</div><div class="order__hint text-danger">Needs a Training Ground built</div></div>
+        <span class="order__chev">›</span>
+      </div>
+      <div class="order">
+        <svg class="ico ico--lg ico--gold"><use href="#i-hound"/></svg>
+        <div><div class="order__title">Send hunters</div><div class="order__desc">Costs a watch · raw game 2–4, sometimes pelts · scaled by the Scout's Fire.</div></div>
+        <span class="order__chev">›</span>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="camp-footer"><span class="body body--dim">A hollow off the forest track · Day 4 · dawn</span><button class="button-primary">Break Camp</button></div>
+
+<!-- ===== the report ===== -->
+<div class="modal">
+  <div class="modal__sheet report">
+    <div class="report__head">
+      <div class="portrait-slot"><svg class="ico ico--xl ico--gold"><use href="#i-eye"/></svg><span class="tier-disc tier-disc--veteranus tier-disc--lg"></span></div>
+      <div class="grow">
+        <div class="eyebrow">The Speculator reports · after the night's rest</div>
+        <div class="report__title">Chieftain's Steading</div>
+        <div class="modal__subtitle" style="margin-top:2px">Opportunity sighted · Sextus Varro · clock paused</div>
+        <div class="row gap-loose">
+          <div class="intel"><svg class="ico ico--sm"><use href="#i-eye"/></svg>Exact intel<span class="intel__why">— he counted the spears</span></div>
+          <span class="micro text-gold caps" style="margin-top:10px">Speculator · tradition +1</span>
+        </div>
+      </div>
+    </div>
+    <p class="report__p">A timber hall behind a palisade, on a rise above the east track. Smoke from three fires, a granary on stilts, salt pans by the stream. Varro lay in the tree line through the second watch and counted twenty spears in and out of the gate, most of them greybeards and boys. No sign of the war host, and no dogs.</p>
+    <div class="tally-row" style="margin-top:14px">
+      <div class="tally"><div class="tally__label">Possible reward</div><div class="tally__value tally__value--text">Grain, salt, a hoard</div></div>
+      <div class="tally"><div class="tally__label">Expected resistance</div><div class="tally__value tally__value--text">≈ 20 spears</div></div>
+      <div class="tally"><div class="tally__label">Distance</div><div class="tally__value tally__value--text">3 miles east</div></div>
+    </div>
+    <div class="risk"><svg class="ico ico--sm"><use href="#i-spear"/></svg>A palisade favours the defender. Expect wounded; deaths are possible. The men are rested and the ground is dry.</div>
+    <div class="report__foot">
+      <div class="foot__btn">
+        <button class="button-ghost">Let it lie</button>
+        <span class="foot__hint text-amber">Morale −1 step among the men who rode</span>
+      </div>
+      <div class="foot__btn foot__btn--right">
+        <button class="button-primary is-hover"><svg class="ico ico--sm"><use href="#i-map"/></svg>Mark it on the map</button>
+        <span class="foot__hint text-dim">◆ Opportunity marker · 3 miles east · no cost</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== design notes (press N) ===== -->
+<div class="mock-note" style="left:1350px; top:360px">RUMOUR variant: the chip reads "RUMOUR — he heard it from a herdsman" in parchment-dim with a dim border, EXPECTED RESISTANCE reads "unknown", and a false lead is laid out identically to a real one.</div>
+<div class="mock-note" style="left:1350px; top:560px">Tallies are words, never percentages. "≈ 20 spears" is allowed because it is a count the scout made; with RUMOUR intel the same tally says "a warband, maybe".</div>
+<div class="mock-note" style="left:330px; top:720px">LET IT LIE discards the marker. The steading can still be found by walking into sight of it, but the men who rode lose a morale step now and the tradition point is kept.</div>
+<div class="mock-note" style="left:1350px; top:160px">The report interrupts the morning before the player can issue new orders. Behind it, SEND THE SCOUT carries a REPORTED tag for the day, DRILL THE RANKS is disabled (no Training Ground).</div>

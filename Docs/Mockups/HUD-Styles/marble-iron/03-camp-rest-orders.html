@@ -1,0 +1,439 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>CENTURY — Marble &amp; Iron: Camp — Rest &amp; Orders</title>
+<style>
+/* ===== CENTURY · Marble & Iron · 03 — CAMP: REST & ORDERS ===== */
+:root {
+  --marble-hi:   #e4e1da;
+  --marble:      #d9d6cf;
+  --marble-lo:   #b9b5ab;
+  --marble-deep: #a6a297;
+  --groove:      #8f8b80;
+  --slate:       #3b3a36;
+  --slate-dim:   #6b6960;
+  --slate-faint: #8d8a80;
+  --purple:      #5c2a4d;
+  --purple-soft: rgba(92,42,77,.28);
+  --bronze:      #a8842c;
+  --bronze-deep: #7c6120;
+  --oxblood:     #7e2a20;
+  --laurel:      #6d7a5c;
+  --sienna:      #8c531d;
+  --engrave: 0 1px 0 rgba(255,255,255,.6);
+  --font-head: Impact, "Arial Narrow", "Franklin Gothic Medium", sans-serif;
+  --font-body: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --meander: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='8'><path d='M1 7 V1 H9 V5 H5 V3 H13 V7' fill='none' stroke='%236b6960' stroke-width='1' opacity='.6'/></svg>");
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; background: #0c0b09; overflow: hidden; }
+body { font-family: var(--font-body); font-size: 13px; color: var(--slate); }
+button { font: inherit; font-family: var(--font-body); color: inherit; cursor: pointer; }
+#stage { position: absolute; left: 50%; top: 50%; width: 1920px; height: 1080px;
+  transform-origin: center; overflow: hidden;
+  /* the real game's dark camp world behind the marble HUD */
+  background:
+    radial-gradient(ellipse 45% 40% at 50% 70%, rgba(120,72,20,.22), transparent 70%),
+    linear-gradient(180deg, #0d0d0b 0%, #14120d 60%, #0f0e0a 100%); }
+#stage::before { content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 0;
+  background: radial-gradient(ellipse 90% 80% at 50% 45%, transparent 55%, rgba(0,0,0,.45) 100%); }
+.style-label { position: fixed; left: 10px; top: 8px; z-index: 999; font-family: var(--font-head);
+  font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: #efece5;
+  background: rgba(59,58,54,.75); padding: 4px 10px; border: 1px solid rgba(255,255,255,.25); }
+
+/* ---- carved type ---- */
+.head { font-family: var(--font-head); font-weight: 400; text-transform: uppercase; }
+.eyebrow { font-family: var(--font-head); font-weight: 400; font-size: 10px; color: var(--slate);
+  letter-spacing: 3px; text-transform: uppercase; text-shadow: var(--engrave);
+  padding-bottom: 5px; background: var(--meander) left bottom repeat-x; display: inline-block; }
+.page-title { font-family: var(--font-head); font-weight: 400; font-size: 27px; color: var(--slate);
+  letter-spacing: 4px; text-transform: uppercase; text-shadow: var(--engrave); margin-top: 4px; line-height: 1.05; }
+.micro { font-family: var(--font-head); font-weight: 400; font-size: 9.5px; letter-spacing: 1.5px;
+  text-transform: uppercase; text-shadow: var(--engrave); color: var(--slate-dim); }
+.body { font-size: 13px; line-height: 1.45; text-shadow: var(--engrave); }
+.heading { font-family: var(--font-head); font-weight: 400; font-size: 12px; letter-spacing: 2.5px;
+  text-transform: uppercase; color: var(--purple); text-shadow: var(--engrave); }
+.caps { text-transform: uppercase; letter-spacing: 2px; }
+.text-good { color: var(--laurel); } .text-danger { color: var(--oxblood); }
+.text-bronze { color: var(--bronze-deep); } .text-dim { color: var(--slate-dim); }
+.text-faint { color: var(--slate-faint); } .text-sienna { color: var(--sienna); }
+.row { display: flex; align-items: center; } .between { justify-content: space-between; }
+.grow { flex: 1 1 0; }
+.rule { height: 1px; background: rgba(59,58,54,.32); box-shadow: 0 1px 0 rgba(255,255,255,.5); margin: 10px 0; }
+
+/* ---- marble slab chrome ---- */
+.slab { position: relative;
+  background:
+    repeating-linear-gradient(112deg, transparent 0 18px, rgba(122,116,104,.10) 18px 19px, transparent 19px 47px),
+    repeating-linear-gradient(64deg, transparent 0 30px, rgba(255,255,255,.14) 30px 31px, transparent 31px 66px),
+    linear-gradient(160deg, var(--marble-hi) 0%, var(--marble) 45%, var(--marble-lo) 100%);
+  border-top: 1px solid #efede7; border-left: 1px solid #eae7e0;
+  border-bottom: 2px solid var(--groove); border-right: 1px solid #9c988d;
+  box-shadow: 0 10px 26px rgba(20,18,14,.55); padding: 12px; }
+.slab::before { content: ""; position: absolute; inset: 4px; pointer-events: none;
+  border: 1px solid rgba(59,58,54,.28); box-shadow: inset 0 1px 0 rgba(255,255,255,.45); }
+.slab > * { position: relative; }
+
+/* ---- inlaid stone bars ---- */
+.bar { height: 5px; margin-top: 3px; background: linear-gradient(#a29d91, #b4afa3);
+  border: 1px solid var(--groove); border-bottom-color: #d9d6cf;
+  box-shadow: inset 0 1px 2px rgba(40,37,31,.45); overflow: hidden; }
+.bar--thick { height: 8px; }
+.bar__fill { height: 100%; box-shadow: inset 0 1px 0 rgba(255,255,255,.30), inset 0 -1px 0 rgba(0,0,0,.25); }
+.bar__fill--morale { background: linear-gradient(#7c8a6a, #5c684d); }
+
+/* ---- icon bosses (recessed stone squares) ---- */
+.ico { fill: currentColor; flex: 0 0 auto; display: block; }
+.boss { flex: 0 0 auto; display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(#c6c2b8, #aeaa9f); border: 1px solid var(--groove);
+  box-shadow: inset 0 1px 2px rgba(40,37,31,.30); color: var(--bronze-deep); }
+.boss--res { width: 30px; height: 30px; }
+.boss--fx  { width: 26px; height: 26px; }
+.boss--order { width: 42px; height: 42px; }
+
+/* ---- top bar: marble architrave ---- */
+.top-bar { position: absolute; left: 0; top: 0; right: 0; height: 74px; z-index: 10;
+  display: flex; align-items: center; padding: 0 26px 6px; }
+.top-bar::after { content: ""; position: absolute; left: 6px; right: 6px; bottom: 2px; height: 8px;
+  background: var(--meander) left bottom repeat-x; opacity: .8; pointer-events: none; }
+.unit-identity { min-width: 232px; border-right: 1px solid var(--groove); padding-right: 24px;
+  box-shadow: 1px 0 0 rgba(255,255,255,.5); }
+.identity__legion { font-family: var(--font-head); font-size: 9px; color: var(--bronze-deep);
+  letter-spacing: 3px; text-transform: uppercase; text-shadow: var(--engrave); }
+.identity__name { font-family: var(--font-head); font-size: 21px; color: var(--slate);
+  letter-spacing: 3px; text-transform: uppercase; text-shadow: var(--engrave); margin-top: 2px; }
+.resource-strip { flex: 1 1 0; display: flex; align-items: center; gap: 26px; padding-left: 26px; }
+.resource { display: flex; align-items: center; gap: 9px; }
+.resource__label { font-family: var(--font-head); font-size: 8.5px; color: var(--slate-dim);
+  letter-spacing: 1.5px; text-transform: uppercase; text-shadow: var(--engrave); }
+.resource__value { font-family: var(--font-head); font-size: 16px; color: var(--slate);
+  letter-spacing: 1px; text-transform: uppercase; text-shadow: var(--engrave); margin-top: 1px; }
+.resource__value--low { color: var(--sienna); }
+.morale-block { min-width: 208px; border-left: 1px solid rgba(255,255,255,.5); padding-left: 24px;
+  box-shadow: -1px 0 0 var(--groove); }
+.metric-label { font-family: var(--font-head); font-size: 10px; color: var(--slate-dim);
+  letter-spacing: 1.5px; text-transform: uppercase; text-shadow: var(--engrave); }
+.morale-word { font-family: var(--font-head); font-size: 10px; letter-spacing: 2px;
+  text-transform: uppercase; text-shadow: var(--engrave); }
+
+/* ---- camp tabs: small carved tablets ---- */
+.camp-tabs { position: absolute; left: 26px; top: 88px; z-index: 10; display: flex; gap: 8px; }
+.tab { display: inline-flex; align-items: center; justify-content: center; height: 32px; padding: 0 18px;
+  font-family: var(--font-head); font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--slate); text-shadow: var(--engrave);
+  background: linear-gradient(165deg, var(--marble-hi), var(--marble) 55%, var(--marble-lo));
+  border: 1px solid var(--groove); border-top-color: #efede7; border-bottom-width: 3px;
+  box-shadow: 0 5px 12px rgba(20,18,14,.5); }
+.tab:hover { border-color: var(--bronze-deep); border-top-color: #cfa94c; }
+.tab--active { background: linear-gradient(165deg, var(--marble-lo), var(--marble-deep));
+  border-color: var(--purple); border-top-color: var(--purple); border-bottom-width: 1px;
+  box-shadow: inset 0 2px 6px rgba(40,30,38,.45); transform: translateY(2px); color: var(--purple); }
+
+/* ---- page frame ---- */
+.camp-page { position: absolute; left: 26px; right: 26px; top: 136px; bottom: 78px; z-index: 5; }
+.camp-half { display: flex; gap: 22px; height: 100%; }
+.camp-half > * { flex: 1 1 0; min-width: 0; }
+.panel { display: flex; flex-direction: column; padding: 16px 18px; overflow: hidden; }
+.panel::before { z-index: 1; }
+.panel > * { z-index: 2; }
+
+/* ---- status + watch strip ---- */
+.status { display: flex; align-items: center; gap: 8px; }
+.status__dot { width: 9px; height: 9px; background: linear-gradient(var(--laurel), #59654a);
+  border: 1px solid var(--groove); box-shadow: inset 0 1px 0 rgba(255,255,255,.3); }
+.watch-wrap { position: relative; padding-bottom: 26px; margin-top: 8px; }
+.watch-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
+.watch { position: relative; height: 34px; display: flex; align-items: center; justify-content: center; gap: 8px;
+  background: linear-gradient(#a8a397, #b7b2a6); border: 1px solid var(--groove); border-bottom-color: #d9d6cf;
+  box-shadow: inset 0 1px 3px rgba(40,37,31,.40); overflow: hidden;
+  font-family: var(--font-head); font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--slate-dim); text-shadow: var(--engrave); }
+.watch > svg, .watch > span { position: relative; }
+.watch--night { color: var(--slate-faint); }
+.watch--now { border-color: var(--purple); color: var(--purple); }
+.watch__fill { position: absolute; left: 0; top: 0; bottom: 0; width: 40%;
+  background: linear-gradient(rgba(184,147,60,.45), rgba(124,97,32,.40));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.25); }
+.watch__now { position: absolute; left: 40%; top: 0; bottom: 0; width: 2px; background: var(--purple); }
+.span-bar { position: absolute; left: 35%; right: 0; bottom: 9px; height: 7px;
+  border: 1px solid var(--bronze-deep); border-top: 0; box-shadow: 0 1px 0 rgba(255,255,255,.45); }
+.span-bar__label { position: absolute; left: 50%; bottom: -12px; transform: translateX(-50%);
+  font-family: var(--font-head); font-size: 9px; letter-spacing: 2px; color: var(--bronze-deep);
+  text-transform: uppercase; text-shadow: var(--engrave); background: #d4d1c9; padding: 0 8px; white-space: nowrap; }
+
+/* ---- rest option cards: raised marble tablets ---- */
+.option { display: flex; flex-direction: column; margin-top: 14px; padding: 13px 15px; cursor: pointer;
+  background: linear-gradient(165deg, var(--marble-hi), var(--marble) 55%, var(--marble-lo));
+  border: 1px solid var(--groove); border-top-color: #efede7; border-bottom-width: 3px;
+  box-shadow: 0 4px 10px rgba(20,18,14,.35); }
+.option:hover, .option--hover { border-color: var(--bronze-deep); border-top-color: #cfa94c;
+  box-shadow: 0 8px 18px rgba(20,18,14,.5); transform: translateY(-2px); }
+.option__head { display: flex; justify-content: space-between; align-items: baseline; }
+.option__name { font-family: var(--font-head); font-size: 20px; color: var(--bronze-deep);
+  letter-spacing: 3px; text-transform: uppercase; text-shadow: var(--engrave); }
+.option__len { font-family: var(--font-head); font-size: 10px; color: var(--slate-dim);
+  letter-spacing: 2px; text-transform: uppercase; text-shadow: var(--engrave); }
+.effects { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 12px; margin-top: 10px; }
+.effect { display: flex; align-items: center; gap: 9px; padding: 5px 8px;
+  background: linear-gradient(#cdc9be, #bfbbb0); border: 1px solid var(--groove); border-bottom-color: #d9d6cf;
+  box-shadow: inset 0 1px 2px rgba(40,37,31,.28); }
+.effect__label { font-family: var(--font-head); font-size: 8.5px; color: var(--slate-dim);
+  letter-spacing: 1.5px; text-transform: uppercase; text-shadow: var(--engrave); }
+.effect__value { font-size: 12px; color: var(--slate); text-shadow: var(--engrave); margin-top: 1px; line-height: 1.25; }
+.effect__value--num { font-family: var(--font-head); font-size: 14px; letter-spacing: 1px; }
+.effect--warn { grid-column: 1 / -1; border-color: var(--sienna); }
+.effect--warn .effect__label, .effect--warn .effect__value { color: var(--sienna); }
+.effect--warn .boss { color: var(--sienna); }
+.option__foot { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+.option__chev { font-family: var(--font-head); font-size: 20px; line-height: 1; color: var(--slate-dim); text-shadow: var(--engrave); }
+.option--hover .option__chev, .option:hover .option__chev { color: var(--bronze-deep); }
+
+/* ---- orders: raised rows ---- */
+.order { display: flex; align-items: center; gap: 14px; padding: 11px 14px; margin-top: 10px; cursor: pointer;
+  background: linear-gradient(150deg, rgba(255,255,255,.35), rgba(150,145,133,.25));
+  border: 1px solid var(--marble-deep); border-top-color: #efede7; border-bottom-color: var(--groove); }
+.order:hover { border-color: var(--bronze-deep); border-top-color: #cfa94c; }
+.order__name { font-family: var(--font-head); font-size: 16px; letter-spacing: 2.5px;
+  text-transform: uppercase; color: var(--slate); text-shadow: var(--engrave); }
+.order__desc { font-size: 12px; color: var(--slate-dim); margin-top: 2px; line-height: 1.4; text-shadow: var(--engrave); }
+.order__hint { font-family: var(--font-head); font-size: 9px; letter-spacing: 1.5px;
+  text-transform: uppercase; color: var(--bronze-deep); margin-top: 5px; text-shadow: var(--engrave); }
+.order__hint.text-danger { color: var(--oxblood); }
+.order__chev { margin-left: auto; font-family: var(--font-head); font-size: 22px; line-height: 1;
+  color: var(--slate-dim); text-shadow: var(--engrave); }
+.order:hover .order__chev { color: var(--bronze-deep); }
+.order--disabled { cursor: default; background: linear-gradient(#c4c0b5, #b6b2a7);
+  border-color: var(--groove); border-top-color: var(--groove);
+  box-shadow: inset 0 1px 3px rgba(40,37,31,.25); }
+.order--disabled:hover { border-color: var(--groove); border-top-color: var(--groove); }
+.order--disabled .boss { color: var(--slate-faint); }
+.order--disabled .order__name, .order--disabled .order__desc,
+.order--disabled .order__chev, .order--disabled:hover .order__chev { color: var(--slate-faint); }
+
+/* ---- wounded roster: recessed tablet ---- */
+.well { background: linear-gradient(#cdc9be, #c1bdb2); border: 1px solid var(--groove);
+  border-bottom-color: #d9d6cf; box-shadow: inset 0 1px 3px rgba(40,37,31,.28); }
+.wrow { display: grid; grid-template-columns: 14px 1fr 36px 90px 190px; align-items: center; gap: 10px;
+  padding: 6px 10px; border-bottom: 1px solid rgba(59,58,54,.18); box-shadow: 0 1px 0 rgba(255,255,255,.35); }
+.wrow:last-child { border-bottom: 0; box-shadow: none; }
+.wrow__name { font-size: 12px; color: var(--slate); text-shadow: var(--engrave); }
+.wrow__sq { font-family: var(--font-head); font-size: 11px; color: var(--slate-dim); letter-spacing: 2px; text-shadow: var(--engrave); }
+.wrow__cond { font-family: var(--font-head); font-size: 10px; letter-spacing: 2px; text-transform: uppercase; text-shadow: var(--engrave); }
+.wrow__next { display: flex; align-items: center; gap: 6px; justify-content: flex-end;
+  font-family: var(--font-head); font-size: 9px; letter-spacing: 1px; text-transform: uppercase;
+  color: var(--slate-dim); text-shadow: var(--engrave); }
+.wrow__next--on { color: var(--bronze-deep); }
+.tier-disc { width: 10px; height: 10px; border-radius: 50%; flex: 0 0 auto;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.3), 0 1px 0 rgba(255,255,255,.4); }
+.tier-disc--tiro { border: 1px solid var(--slate-faint); background: transparent; box-shadow: 0 1px 0 rgba(255,255,255,.4); }
+.tier-disc--miles { background: var(--slate-dim); }
+.tier-disc--veteranus { background: linear-gradient(#b8933c, var(--bronze-deep)); }
+
+/* ---- buttons ---- */
+.button-ghost { display: inline-flex; align-items: center; justify-content: center; height: 28px; padding: 0 14px;
+  font-family: var(--font-head); font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--slate); text-shadow: var(--engrave);
+  background: linear-gradient(170deg, var(--marble-hi), var(--marble-lo));
+  border: 1px solid var(--groove); border-top-color: #f0eee8; border-bottom-width: 3px; border-radius: 3px; }
+.button-ghost:hover { border-color: var(--bronze-deep); border-top-color: #cfa94c; color: var(--bronze-deep); }
+.button-primary { display: inline-flex; align-items: center; justify-content: center; height: 36px; padding: 0 26px;
+  font-family: var(--font-head); font-size: 13px; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--bronze-deep); text-shadow: var(--engrave);
+  background: linear-gradient(165deg, #e0d3ad, #c2ae79);
+  border: 1px solid var(--bronze-deep); border-top-color: #cfa94c; border-bottom-width: 3px;
+  box-shadow: 0 4px 10px rgba(20,18,14,.4); }
+.button-primary:hover { background: linear-gradient(165deg, #e7dcbb, #cbb886); }
+
+/* ---- footer plinth ---- */
+.camp-footer { position: absolute; left: 0; right: 0; bottom: 0; height: 58px; z-index: 10;
+  display: flex; align-items: center; justify-content: space-between; padding: 0 26px; }
+.camp-footer .laurel-pair { position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%);
+  display: flex; align-items: center; gap: 14px; color: var(--slate-dim); opacity: .6; pointer-events: none; }
+
+.mock-note { display: none; }
+</style>
+</head>
+<body>
+<div class="style-label">Marble &amp; Iron · 03 Camp</div>
+<div id="stage">
+
+<!-- ===== icon glyphs: solid blocky silhouettes, 24×24 ===== -->
+<svg style="display:none" xmlns="http://www.w3.org/2000/svg">
+  <symbol id="i-helmet" viewBox="0 0 24 24"><path d="M12 3c-4 0-7 3-7 7v6h3v-6h8v6h3v-6c0-4-3-7-7-7z"/><path d="M8 2c2-1.6 6-1.6 8 0l-1 2c-1.6-1.2-4.4-1.2-6 0z"/><rect x="10.5" y="16" width="3" height="5"/></symbol>
+  <symbol id="i-wheat" viewBox="0 0 24 24"><path d="M11 12h2v10h-2z"/><path d="M12 1l3.2 3.8L12 9 8.8 4.8z"/><path d="M6.2 6.2l4.2 1.8-.6 4.6-4.2-1.9z"/><path d="M17.8 6.2l-4.2 1.8.6 4.6 4.2-1.9z"/></symbol>
+  <symbol id="i-fire" viewBox="0 0 24 24"><path d="M12 1c1 4 6 6 6 12a6 6 0 0 1-12 0c0-3 1.4-5 3.2-7 .2 2 1.4 3 2.8 3.6C10.8 6.6 10.8 4 12 1z"/><rect x="4" y="20" width="16" height="3"/></symbol>
+  <symbol id="i-bandage" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M3 15 15 3l6 6L9 21zm10.5-6L15 10.5 16.5 9 15 7.5zM9 13.5 10.5 15 12 13.5 10.5 12z"/></symbol>
+  <symbol id="i-coin" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm-1.2 5h2.4v10h-2.4z"/></symbol>
+  <symbol id="i-denarii" viewBox="0 0 24 24"><rect x="3" y="18" width="15" height="3.5"/><rect x="3" y="13.5" width="15" height="3.5"/><rect x="3" y="9" width="15" height="3.5"/><circle cx="18.5" cy="6.5" r="4.5"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 2l8 3v6c0 5-3.4 9.3-8 11-4.6-1.7-8-6-8-11V5z"/></symbol>
+  <symbol id="i-cross" viewBox="0 0 24 24"><path d="M10 3h4v7h7v4h-7v7h-4v-7H3v-4h7z"/></symbol>
+  <symbol id="i-boot" viewBox="0 0 24 24"><path d="M7 3h6v9l6 4v5H7z"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.5"/><path d="M11 1h2v4h-2zM11 19h2v4h-2zM1 11h4v2H1zM19 11h4v2h-4zM4.2 5.6l1.4-1.4 2.8 2.8-1.4 1.4zM15.6 17l1.4-1.4 2.8 2.8-1.4 1.4zM4.2 18.4l2.8-2.8 1.4 1.4-2.8 2.8zM15.6 7l2.8-2.8 1.4 1.4-2.8 2.8z"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M14.5 2A10 10 0 1 0 22 14.5 8 8 0 0 1 14.5 2z"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 5C6.5 5 2.6 9.6 1 12c1.6 2.4 5.5 7 11 7s9.4-4.6 11-7c-1.6-2.4-5.5-7-11-7zm0 10.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z"/></symbol>
+  <symbol id="i-swords" viewBox="0 0 24 24"><path d="M2 3l3.5.7L20 18.2 18.2 20 3.7 5.5z"/><path d="M22 3l-3.5.7L4 18.2 5.8 20 20.3 5.5z"/><rect x="3" y="16.8" width="6" height="2" transform="rotate(45 6 17.8)"/><rect x="15" y="16.8" width="6" height="2" transform="rotate(-45 18 17.8)"/></symbol>
+  <symbol id="i-hound" viewBox="0 0 24 24"><rect x="5" y="9" width="11" height="5"/><rect x="6" y="13" width="2" height="7"/><rect x="13" y="13" width="2" height="7"/><rect x="15" y="5" width="5" height="6"/><rect x="20" y="8" width="3" height="3"/><rect x="15" y="3" width="2" height="3"/><path d="M5 10 2 5l1.6-1L7 8z"/></symbol>
+  <symbol id="i-laurel-line" viewBox="0 0 40 60"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M32 56 C14 46 8 28 14 6"/><path d="M13 9 6 5"/><path d="M13 9 20 4"/><path d="M11.5 18 4.5 15"/><path d="M11.5 18 18.5 14"/><path d="M12 27 5 26"/><path d="M12 27 19 24"/><path d="M14 36 7 37"/><path d="M14 36 21 34"/><path d="M18 44 11.5 47"/><path d="M18 44 24.5 43"/><path d="M24 51 19 55"/><path d="M24 51 30 51"/></g></symbol>
+</svg>
+
+<!-- ===== top bar: marble architrave ===== -->
+<div class="top-bar slab">
+  <div class="unit-identity">
+    <div class="identity__legion">Marching Camp</div>
+    <div class="identity__name">Centuria Valeria</div>
+  </div>
+  <div class="resource-strip">
+    <div class="resource"><div class="boss boss--res"><svg class="ico" width="18" height="18" viewBox="0 0 24 24"><use href="#i-helmet"/></svg></div><div><div class="resource__label">Men</div><div class="resource__value">41</div></div></div>
+    <div class="resource"><div class="boss boss--res"><svg class="ico" width="18" height="18" viewBox="0 0 24 24"><use href="#i-wheat"/></svg></div><div><div class="resource__label">Food</div><div class="resource__value resource__value--low">6 days</div></div></div>
+    <div class="resource"><div class="boss boss--res"><svg class="ico" width="18" height="18" viewBox="0 0 24 24"><use href="#i-fire"/></svg></div><div><div class="resource__label">Firewood</div><div class="resource__value">14</div></div></div>
+    <div class="resource"><div class="boss boss--res"><svg class="ico" width="18" height="18" viewBox="0 0 24 24"><use href="#i-bandage"/></svg></div><div><div class="resource__label">Medicine</div><div class="resource__value">3 doses</div></div></div>
+    <div class="resource"><div class="boss boss--res"><svg class="ico" width="18" height="18" viewBox="0 0 24 24"><use href="#i-coin"/></svg></div><div><div class="resource__label">Coin</div><div class="resource__value">212</div></div></div>
+    <div class="resource"><div class="boss boss--res"><svg class="ico" width="18" height="18" viewBox="0 0 24 24"><use href="#i-denarii"/></svg></div><div><div class="resource__label">Denarii</div><div class="resource__value">38</div></div></div>
+    <div class="resource"><div class="boss boss--res"><svg class="ico" width="18" height="18" viewBox="0 0 24 24"><use href="#i-shield"/></svg></div><div><div class="resource__label">Equipment</div><div class="resource__value">Serviceable</div></div></div>
+  </div>
+  <div class="morale-block">
+    <div class="row between"><span class="metric-label">Morale</span><span class="morale-word text-good">Confident</span></div>
+    <div class="bar bar--thick"><div class="bar__fill bar__fill--morale" style="width:62%"></div></div>
+  </div>
+</div>
+
+<!-- ===== camp tabs: carved tablets ===== -->
+<div class="camp-tabs">
+  <button class="tab">The Century</button>
+  <button class="tab tab--active">Rest &amp; Orders</button>
+  <button class="tab">Crafting</button>
+  <button class="tab">Camp Stations</button>
+</div>
+
+<div class="camp-page">
+  <div class="camp-half">
+
+    <!-- ===== REST THE COLUMN ===== -->
+    <div class="panel slab">
+      <div class="row between">
+        <div><span class="eyebrow">Camp · Day 4 · 2nd watch</span><div class="page-title">Rest the Column</div></div>
+        <div class="status"><span class="status__dot"></span><span class="body">The camp is quiet.</span></div>
+      </div>
+      <div class="micro" style="margin-top:6px">NO HOSTILE PARTY IN SIGHT · CONTUBERNIUM IV STANDS SENTRY · THE TESSERARIUS HAS SET THE WATCHWORD</div>
+      <div class="rule"></div>
+
+      <span class="eyebrow">The day's watches</span>
+      <div class="watch-wrap">
+        <div class="watch-strip">
+          <div class="watch"><svg class="ico" width="13" height="13" viewBox="0 0 24 24"><use href="#i-sun"/></svg><span>1st watch</span></div>
+          <div class="watch watch--now"><div class="watch__fill"></div><div class="watch__now"></div><svg class="ico" width="13" height="13" viewBox="0 0 24 24"><use href="#i-sun"/></svg><span>2nd watch · now</span></div>
+          <div class="watch watch--night"><svg class="ico" width="13" height="13" viewBox="0 0 24 24"><use href="#i-moon"/></svg><span>3rd watch</span></div>
+          <div class="watch watch--night"><svg class="ico" width="13" height="13" viewBox="0 0 24 24"><use href="#i-moon"/></svg><span>4th watch</span></div>
+        </div>
+        <div class="span-bar"><span class="span-bar__label">Until dawn covers this</span></div>
+      </div>
+
+      <!-- option A -->
+      <div class="option">
+        <div class="option__head"><span class="option__name">Rest a Watch</span><span class="option__len">3 hours</span></div>
+        <div class="effects">
+          <div class="effect"><div class="boss boss--fx"><svg class="ico" width="15" height="15" viewBox="0 0 24 24"><use href="#i-fire"/></svg></div><div><div class="effect__label">Firewood</div><div class="effect__value effect__value--num">−1</div></div></div>
+          <div class="effect"><div class="boss boss--fx"><svg class="ico" width="15" height="15" viewBox="0 0 24 24"><use href="#i-cross"/></svg></div><div><div class="effect__label">Wounds</div><div class="effect__value">The medicus tends 2 men</div></div></div>
+          <div class="effect"><div class="boss boss--fx"><svg class="ico" width="15" height="15" viewBox="0 0 24 24"><use href="#i-boot"/></svg></div><div><div class="effect__label">Stamina</div><div class="effect__value">Rested</div></div></div>
+          <div class="effect"><div class="boss boss--fx"><svg class="ico" width="15" height="15" viewBox="0 0 24 24"><use href="#i-wheat"/></svg></div><div><div class="effect__label">Food</div><div class="effect__value effect__value--num">−41</div></div></div>
+        </div>
+        <div class="option__foot"><span class="micro">ENDS AT 17:20 · STILL THE 2ND WATCH · SENTRIES CHANGE ONCE</span><span class="option__chev">›</span></div>
+      </div>
+
+      <!-- option B — hovered -->
+      <div class="option option--hover">
+        <div class="option__head"><span class="option__name">Until Dawn</span><span class="option__len">through the night</span></div>
+        <div class="effects">
+          <div class="effect"><div class="boss boss--fx"><svg class="ico" width="15" height="15" viewBox="0 0 24 24"><use href="#i-fire"/></svg></div><div><div class="effect__label">Firewood</div><div class="effect__value effect__value--num">−3</div></div></div>
+          <div class="effect"><div class="boss boss--fx"><svg class="ico" width="15" height="15" viewBox="0 0 24 24"><use href="#i-cross"/></svg></div><div><div class="effect__label">Wounds</div><div class="effect__value">The medicus tends 5 men</div></div></div>
+          <div class="effect"><div class="boss boss--fx"><svg class="ico" width="15" height="15" viewBox="0 0 24 24"><use href="#i-boot"/></svg></div><div><div class="effect__label">Stamina</div><div class="effect__value">Fully rested</div></div></div>
+          <div class="effect"><div class="boss boss--fx"><svg class="ico" width="15" height="15" viewBox="0 0 24 24"><use href="#i-wheat"/></svg></div><div><div class="effect__label">Food</div><div class="effect__value effect__value--num">−41 · one day</div></div></div>
+          <div class="effect effect--warn"><div class="boss boss--fx"><svg class="ico" width="15" height="15" viewBox="0 0 24 24"><use href="#i-moon"/></svg></div><div><div class="effect__label">Warning</div><div class="effect__value">Night marches nearby: raiders move in the dark</div></div></div>
+        </div>
+        <div class="option__foot"><span class="micro">ENDS AT DAWN · DAY 5 · 1ST WATCH · <span class="text-bronze">THE SCOUT'S REPORT ARRIVES WITH THE LIGHT</span></span><span class="option__chev">›</span></div>
+      </div>
+
+      <div class="grow"></div>
+      <div class="micro text-faint">RESTING ADVANCES THE CLOCK · WARBANDS KEEP MOVING WHILE THE COLUMN SLEEPS · A SENTRY'S SIGHTING WAKES THE CAMP</div>
+    </div>
+
+    <!-- ===== ORDERS ===== -->
+    <div class="panel slab">
+      <div class="row between">
+        <div><span class="eyebrow">Camp · Orders</span><div class="page-title">Orders</div></div>
+        <span class="micro">CARRIED OUT DURING THE NEXT REST · THE MEN NAMED DO NOT REST</span>
+      </div>
+      <div class="rule"></div>
+
+      <div class="order">
+        <div class="boss boss--order"><svg class="ico" width="24" height="24" viewBox="0 0 24 24"><use href="#i-eye"/></svg></div>
+        <div class="grow">
+          <div class="order__name">Send the Scout</div>
+          <div class="order__desc">Sextus Varro rides out at first light; his report arrives after the rest.</div>
+          <div class="order__hint">Awards the Speculator tradition</div>
+        </div>
+        <span class="order__chev">›</span>
+      </div>
+
+      <div class="order order--disabled">
+        <div class="boss boss--order"><svg class="ico" width="24" height="24" viewBox="0 0 24 24"><use href="#i-swords"/></svg></div>
+        <div class="grow">
+          <div class="order__name">Drill the Ranks</div>
+          <div class="order__desc">One contubernium drills for a watch. Tiro rise to Miles; men above Miles gain nothing.</div>
+          <div class="order__hint text-danger">Needs a Training Ground built</div>
+        </div>
+        <span class="order__chev">›</span>
+      </div>
+
+      <div class="order">
+        <div class="boss boss--order"><svg class="ico" width="24" height="24" viewBox="0 0 24 24"><use href="#i-hound"/></svg></div>
+        <div class="grow">
+          <div class="order__name">Send Hunters</div>
+          <div class="order__desc">Four men go out with the hound and miss the rest.</div>
+          <div class="order__hint">Costs a watch · raw game 2–4, sometimes pelts · scaled by the Scout's Fire</div>
+        </div>
+        <span class="order__chev">›</span>
+      </div>
+
+      <div class="rule" style="margin-top:16px"></div>
+      <div class="row between"><span class="heading">The wounded</span><span class="micro">5 MEN · 3 DOSES · THE MEDICUS TENDS 2 A WATCH</span></div>
+      <div class="well" style="margin-top:6px; padding:0">
+        <div class="wrow"><span class="tier-disc tier-disc--miles"></span><span class="wrow__name">Hostus Rullus</span><span class="wrow__sq">I</span><span class="wrow__cond text-danger">Grave</span><span class="wrow__next wrow__next--on"><svg class="ico" width="12" height="12" viewBox="0 0 24 24"><use href="#i-cross"/></svg>Next · spends a dose</span></div>
+        <div class="wrow"><span class="tier-disc tier-disc--miles"></span><span class="wrow__name">Caius Nerva</span><span class="wrow__sq">III</span><span class="wrow__cond text-sienna">Hurt</span><span class="wrow__next wrow__next--on"><svg class="ico" width="12" height="12" viewBox="0 0 24 24"><use href="#i-cross"/></svg>Next · spends a dose</span></div>
+        <div class="wrow"><span class="tier-disc tier-disc--tiro"></span><span class="wrow__name">Spurius Macer</span><span class="wrow__sq">III</span><span class="wrow__cond text-sienna">Hurt</span><span class="wrow__next">Waits · the watch after</span></div>
+        <div class="wrow"><span class="tier-disc tier-disc--veteranus"></span><span class="wrow__name">Marcus Ovidius</span><span class="wrow__sq">I</span><span class="wrow__cond text-bronze">Mending</span><span class="wrow__next">Mends without a dose</span></div>
+        <div class="wrow"><span class="tier-disc tier-disc--miles"></span><span class="wrow__name">Cnaeus Dento</span><span class="wrow__sq">II</span><span class="wrow__cond text-bronze">Mending</span><span class="wrow__next">Mends without a dose</span></div>
+      </div>
+      <div class="micro text-faint" style="margin-top:6px">GRAVE WOUNDS WORSEN EACH WATCH WITHOUT A DOSE · MENDING MEN MARCH BUT FIGHT WORSE · A NIGHT'S REST MENDS ONE STEP</div>
+
+      <div class="grow"></div>
+      <div class="row between">
+        <span class="micro">STANDING · SENTRIES DOUBLED BY THE TESSERARIUS</span>
+        <button class="button-ghost">Change the watch rota</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== footer plinth ===== -->
+<div class="camp-footer slab">
+  <span class="body text-dim">A hollow off the forest track · Day 4 · 2nd watch</span>
+  <div class="laurel-pair">
+    <svg width="18" height="27" viewBox="0 0 40 60"><use href="#i-laurel-line"/></svg>
+    <svg width="18" height="27" viewBox="0 0 40 60" style="transform:scaleX(-1)"><use href="#i-laurel-line"/></svg>
+  </div>
+  <button class="button-primary">Break Camp</button>
+</div>
+
+<!-- ===== mock notes (hidden in this style study) ===== -->
+<div class="mock-note">Watch strip: the lit segment is the current watch, the bright line is "now". The bracket shows what UNTIL DAWN covers. Hours are never printed on the strip — the footer clock does that.</div>
+<div class="mock-note">UNTIL DAWN is the hovered card (gold border, raised ink). Projected effects are recomputed from the sim each time the tab opens; the amber warning row only appears when a hostile party is within a night's march.</div>
+<div class="mock-note">Disabled orders stay visible with the reason in red — the player learns what a station unlocks before building it. The row does not raise on hover.</div>
+<div class="mock-note">Invented for the mock: a wounded roster tied to the rest projection ("tends 2 men" = these two rows). Grave / Hurt / Mending is a proposed three-word wound ladder; no percentages anywhere.</div>
+
+</div>
+<script>const s=document.getElementById('stage');function f(){const k=Math.min(innerWidth/1920,innerHeight/1080);s.style.transform=`translate(-50%,-50%) scale(${k})`;}addEventListener('resize',f);f();</script>
+</body>
+</html>

@@ -1,0 +1,212 @@
+<!-- title: Journal -->
+<!-- desc: A proposed Journal overlay: the march as a day-by-day, watch-by-watch record so the story stays legible in hindsight. -->
+<!-- world: overmap -->
+<style>
+  .map { position: absolute; inset: 0; }
+  .day-list { flex: 0 0 300px; width: 300px; display: flex; flex-direction: column; gap: 6px; }
+  .day { background: rgba(250,244,226,.35); border: var(--rule) solid rgba(74,54,32,.35); padding: 9px 12px; cursor: pointer; transition: border-color .12s, background .12s; }
+  .day:hover { border-color: #9a7b3a; }
+  .day--active { border-color: #9a7b3a; background: rgba(255,250,232,.55); box-shadow: inset 0 0 0 1px rgba(154,123,58,.4); }
+  .day__num { font-size: var(--fs-micro); color: var(--gold); letter-spacing: 3px; text-transform: uppercase; display: flex; justify-content: space-between; }
+  .day--active .day__num { color: var(--gold-bright); }
+  .day__name { font-size: var(--fs-large); color: var(--parchment); letter-spacing: 1px; margin-top: 2px; }
+  .day__counts { display: flex; gap: 12px; margin-top: 5px; font-size: var(--fs-micro); color: var(--parchment-dim); letter-spacing: 1px; text-transform: uppercase; }
+  .day__counts .fell { color: var(--blood); }
+  .day__counts .won { color: var(--olive); }
+  .day-list__foot { margin-top: auto; }
+
+  .journal { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; }
+  .journal__list { flex: 1 1 0; min-height: 0; overflow-y: auto; padding-right: 8px; margin-top: 6px; }
+  .watch-head { display: flex; align-items: center; gap: 10px; margin: 12px 0 4px; font-size: var(--fs-micro); color: var(--gold); letter-spacing: 3px; text-transform: uppercase; }
+  .watch-head::after { content: ""; flex: 1; height: 1px; background: var(--gold-faint); }
+  .watch-head:first-child { margin-top: 0; }
+  .entry { display: flex; flex-direction: row; align-items: flex-start; gap: 12px; padding: 7px 8px; border: var(--rule) solid transparent; cursor: pointer; }
+  .entry:hover, .entry--hover { border-color: #9a7b3a; background: rgba(255,250,232,.55); }
+  .entry__glyph { width: 20px; color: var(--gold); padding-top: 1px; flex: 0 0 auto; }
+  .entry__body { flex: 1 1 0; min-width: 0; }
+  .entry__title { font-size: var(--fs-body); color: var(--parchment); }
+  .entry__detail { font-size: var(--fs-small); color: var(--parchment-dim); line-height: 1.35; margin-top: 2px; }
+  .entry__time { font-size: var(--fs-micro); color: var(--parchment-faint); letter-spacing: 1px; text-transform: uppercase; white-space: nowrap; padding-top: 3px; }
+  .entry--battle .entry__glyph { color: var(--gold-bright); }
+  .entry--loss .entry__glyph { color: var(--blood); }
+  .entry--sight .entry__glyph { color: var(--parchment-dim); }
+  .tally-inline { display: inline-flex; gap: 6px; margin-top: 5px; font-size: var(--fs-micro); letter-spacing: 1px; text-transform: uppercase; }
+  .tally-inline span { padding: 2px 7px; background: rgba(250,244,226,.5); border: var(--rule) solid rgba(74,54,32,.35); color: var(--parchment); }
+  .tally-inline .t-fell { color: var(--blood); } .tally-inline .t-wound { color: var(--amber); } .tally-inline .t-enemy { color: var(--olive); }
+  .running { display: flex; gap: 14px; align-items: baseline; font-size: var(--fs-small); color: var(--parchment); letter-spacing: 2px; text-transform: uppercase; }
+  .running i { font-style: normal; color: var(--gold-dim); }
+</style>
+
+<!-- ===== the overmap behind (paused) ===== -->
+<svg class="map" viewBox="0 0 1920 1080" xmlns="http://www.w3.org/2000/svg">
+  <g fill="#9d9e69" opacity=".5"><ellipse cx="300" cy="260" rx="260" ry="150"/><ellipse cx="1650" cy="220" rx="300" ry="170"/><ellipse cx="1500" cy="900" rx="330" ry="150"/><ellipse cx="520" cy="880" rx="240" ry="120"/></g>
+  <path d="M1180 -20 C 1120 200, 1300 360, 1220 520 S 1080 820, 1180 1100" fill="none" stroke="#7f8b94" stroke-width="26" stroke-linecap="round" opacity=".6"/>
+  <path d="M120 720 C 400 640, 700 700, 960 560 S 1400 380, 1800 440" fill="none" stroke="#6b5230" stroke-width="4" stroke-dasharray="14 10" opacity=".5"/>
+  <g transform="translate(960,560)"><ellipse rx="34" ry="14" fill="rgba(154,123,58,.15)" stroke="#9a7b3a" stroke-width="1.5"/></g>
+</svg>
+
+<!-- ===== overlay frame ===== -->
+<div class="nav-bar">
+  <button class="nav-item nav-item--live">Inventory</button>
+  <button class="nav-item nav-item--live">Army</button>
+  <button class="nav-item nav-item--live">Commander</button>
+  <button class="nav-item nav-item--live">Save</button>
+  <button class="nav-item nav-item--live">Title</button>
+  <button class="nav-item nav-item--live nav-item--active">Journal</button>
+  <span class="nav-item nav-item--inert">Encyclopedia</span>
+</div>
+<div class="time-box"><svg class="ico ico--sm ico--gold"><use href="#i-sun"/></svg><span class="time-box__clock">Day 4 · 2nd Watch</span><span class="text-dim small">14:20</span><span class="time-button time-button--active"><svg class="ico ico--sm"><use href="#i-pause"/></svg></span></div>
+
+<div class="modal">
+  <div class="modal__sheet overlay-sheet">
+    <div class="overlay-head">
+      <div><div class="modal__title">Journal</div><div class="modal__subtitle">The march so far · clock paused</div></div>
+      <button class="button-ghost">Close · Esc</button>
+    </div>
+
+    <div class="overlay-body">
+      <!-- ---------- DAY LIST ---------- -->
+      <div class="day-list">
+        <div class="eyebrow" style="margin-bottom:2px">Days on the march</div>
+        <div class="day">
+          <div class="day__num"><span>Day 1</span><span class="text-faint">Teutoburg</span></div>
+          <div class="day__name">The Aftermath</div>
+          <div class="day__counts"><span>21 men</span><span class="fell">2 fallen</span><span class="won">1 victory</span></div>
+        </div>
+        <div class="day">
+          <div class="day__num"><span>Day 2</span><span class="text-faint">The forest</span></div>
+          <div class="day__name">The Hollow</div>
+          <div class="day__counts"><span>44 men</span><span class="fell">4 fallen</span><span class="won">1 victory</span></div>
+        </div>
+        <div class="day">
+          <div class="day__num"><span>Day 3</span><span class="text-faint">The Weser</span></div>
+          <div class="day__name">The Ford</div>
+          <div class="day__counts"><span>41 men</span><span class="fell">3 fallen</span><span class="won">1 victory</span></div>
+        </div>
+        <div class="day day--active">
+          <div class="day__num"><span>Day 4</span><span>Today</span></div>
+          <div class="day__name">The March West</div>
+          <div class="day__counts"><span>41 men</span><span>5 wounded</span><span class="text-amber">food 6 days</span></div>
+        </div>
+        <div class="well day-list__foot">
+          <div class="micro text-gold caps">Since Teutoburg</div>
+          <div class="row between small" style="margin-top:4px"><span class="text-dim">Fallen</span><span class="text-danger">9</span></div>
+          <div class="row between small"><span class="text-dim">Wounded and recovered</span><span>4</span></div>
+          <div class="row between small"><span class="text-dim">Enemy dead</span><span class="text-good">24</span></div>
+          <div class="row between small"><span class="text-dim">Survivors gathered</span><span>38</span></div>
+        </div>
+      </div>
+
+      <!-- ---------- ENTRIES ---------- -->
+      <div class="journal">
+        <div class="row between">
+          <div class="pill-row">
+            <button class="pill pill--active">All</button>
+            <button class="pill"><svg class="ico ico--sm"><use href="#i-swords"/></svg>Battles</button>
+            <button class="pill"><svg class="ico ico--sm"><use href="#i-tent"/></svg>Camp</button>
+            <button class="pill"><svg class="ico ico--sm"><use href="#i-helmet"/></svg>The men</button>
+            <button class="pill"><svg class="ico ico--sm"><use href="#i-eye"/></svg>The world</button>
+          </div>
+          <span class="micro text-dim">31 ENTRIES · NEWEST FIRST</span>
+        </div>
+
+        <div class="journal__list">
+          <div class="watch-head">Day 4 · 2nd watch</div>
+          <div class="entry entry--sight entry--hover">
+            <svg class="ico entry__glyph"><use href="#i-eye"/></svg>
+            <div class="entry__body"><div class="entry__title">Sighted: the Wolf Brothers</div><div class="entry__detail">Raiders, 12 men, Skirmisher doctrine. They turned toward the column. Pursuing.</div></div>
+            <span class="entry__time">14:12</span>
+          </div>
+          <div class="entry">
+            <svg class="ico entry__glyph"><use href="#i-diamond"/></svg>
+            <div class="entry__body"><div class="entry__title">Discovered: Wayside Shrine</div><div class="entry__detail">At the bend of the track. Not yet visited.</div></div>
+            <span class="entry__time">13:40</span>
+          </div>
+
+          <div class="watch-head">Day 4 · dawn</div>
+          <div class="entry entry--sight">
+            <svg class="ico entry__glyph"><use href="#i-eye"/></svg>
+            <div class="entry__body"><div class="entry__title">The speculator reports: Chieftain's Steading</div><div class="entry__detail">Exact intel — Sextus Varro counted the spears. About 20, three miles east. Marked on the map.</div></div>
+            <span class="entry__time">06:10</span>
+          </div>
+          <div class="entry">
+            <svg class="ico entry__glyph"><use href="#i-helmet"/></svg>
+            <div class="entry__body"><div class="entry__title">Contubernium III drilled</div><div class="entry__detail">Two men reach Miles (Trained): Titus Vibius, Gaius Mallius.</div></div>
+            <span class="entry__time">05:50</span>
+          </div>
+          <div class="entry">
+            <svg class="ico entry__glyph"><use href="#i-tent"/></svg>
+            <div class="entry__body"><div class="entry__title">Broke camp in the hollow off the forest track</div><div class="entry__detail">Rested until dawn. Firewood burned: 3. The medicus tended 5 men. Food: 6 days.</div></div>
+            <span class="entry__time">05:30</span>
+          </div>
+
+          <div class="watch-head">Day 3 · night</div>
+          <div class="entry">
+            <svg class="ico entry__glyph"><use href="#i-tent"/></svg>
+            <div class="entry__body"><div class="entry__title">Camped in a hollow off the forest track</div><div class="entry__detail">Sextus Varro sent out to scout at first light. Watch set: Contubernium IV.</div></div>
+            <span class="entry__time">21:00</span>
+          </div>
+          <div class="entry">
+            <svg class="ico entry__glyph"><use href="#i-helmet"/></svg>
+            <div class="entry__body"><div class="entry__title">Hostus Rullus and Lucius Sabinus under the medicus</div><div class="entry__detail">Both carried off the ford. Fit again in some days if the medicine holds.</div></div>
+            <span class="entry__time">20:20</span>
+          </div>
+
+          <div class="watch-head">Day 3 · dusk</div>
+          <div class="entry entry--battle">
+            <svg class="ico entry__glyph"><use href="#i-swords"/></svg>
+            <div class="entry__body">
+              <div class="entry__title">Battle at the ford on the Weser — Victory</div>
+              <div class="entry__detail">The Cherusci broke at the ford after two minutes and forty seconds. Banner of the Cherusci taken. Two prisoners.</div>
+              <div class="tally-inline"><span class="t-fell">3 fallen</span><span class="t-wound">2 wounded</span><span class="t-enemy">11 enemy dead</span><span>≈ 40 against</span></div>
+            </div>
+            <span class="entry__time">19:05</span>
+          </div>
+          <div class="entry entry--loss">
+            <svg class="ico entry__glyph"><use href="#i-skull"/></svg>
+            <div class="entry__body"><div class="entry__title">The fallen: Spurius Macer (II), Numerius Longus (II), Cnaeus Dento (IV)</div><div class="entry__detail">Buried by the ford. Contubernium II marches at six.</div></div>
+            <span class="entry__time">19:05</span>
+          </div>
+          <div class="entry">
+            <svg class="ico entry__glyph"><use href="#i-helmet"/></svg>
+            <div class="entry__body"><div class="entry__title">Promoted: Aulus Rufus to Miles, Publius Naso to Veteranus</div><div class="entry__detail">On the field. Naso now eligible for any office.</div></div>
+            <span class="entry__time">19:05</span>
+          </div>
+
+          <div class="watch-head">Day 3 · 3rd watch</div>
+          <div class="entry entry--sight">
+            <svg class="ico entry__glyph"><use href="#i-eye"/></svg>
+            <div class="entry__body"><div class="entry__title">Sighted: a Cherusci warband at the ford</div><div class="entry__detail">About 40 spears holding the west bank. No way round before dark.</div></div>
+            <span class="entry__time">17:30</span>
+          </div>
+
+          <div class="watch-head">Day 2 · dusk</div>
+          <div class="entry">
+            <svg class="ico entry__glyph"><use href="#i-diamond"/></svg>
+            <div class="entry__body"><div class="entry__title">Found: survivors under Optio Gaius Aurelius</div><div class="entry__detail">23 men join the column at the Hounds' Ground. The Optio takes his post. Morale rises one step.</div></div>
+            <span class="entry__time">18:40</span>
+          </div>
+          <div class="entry entry--battle">
+            <svg class="ico entry__glyph"><use href="#i-swords"/></svg>
+            <div class="entry__body">
+              <div class="entry__title">Fight at the Hounds' Ground — Victory</div>
+              <div class="entry__detail">Looters with dogs, driven off before the survivors were reached.</div>
+              <div class="tally-inline"><span class="t-fell">4 fallen</span><span class="t-wound">1 wounded</span><span class="t-enemy">8 enemy dead</span></div>
+            </div>
+            <span class="entry__time">17:55</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="overlay-foot">
+      <div class="running"><span>Day 4</span><i>·</i><span>41 men</span><i>·</i><span class="text-danger">9 fallen since Teutoburg</span><i>·</i><span class="text-good">3 victories</span></div>
+      <div class="row gap-tight"><button class="button-ghost">Oldest first</button><button class="button-ghost">Today</button></div>
+    </div>
+  </div>
+</div>
+
+<div class="mock-note" style="left:346px;top:150px">Why a journal: the publisher demo needs the story legible in hindsight. A reviewer who missed the ford should be able to read what happened, who died and what it cost.</div>
+<div class="mock-note" style="left:1000px;top:150px">Entries are the existing event log, persisted with a category and a day/watch stamp. Nothing new is simulated — the journal only remembers.</div>
+<div class="mock-note" style="left:1400px;top:236px">Filters map to the log's categories: BATTLES = battle + fallen, CAMP = rest/orders/stations, THE MEN = promotions/wounds/bonds, THE WORLD = sightings/discoveries/POI outcomes.</div>
+<div class="mock-note" style="left:1400px;top:640px">A battle entry click reopens its summary sheet read-only. A day card click scrolls the list to that day.</div>

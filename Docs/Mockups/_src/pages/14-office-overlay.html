@@ -1,0 +1,193 @@
+<!-- title: The Office -->
+<!-- desc: THE OFFICE overlay on THE CENTURY tab: two office cards side by side — the Optio with points to invest on a vertical tradition track, and the vacant Signifer whose track learns nothing. -->
+<!-- world: camp -->
+<style>
+  /* ---- simplified org chart behind the modal ---- */
+  .org__tier { display: flex; justify-content: center; gap: 14px; margin-top: 10px; }
+  .org__link { width: 1px; height: 16px; background: var(--gold-dim); margin: 0 auto; }
+  .node { display: flex; align-items: center; gap: 10px; width: 236px; background: var(--ink); border: 1px solid var(--gold-dim); padding: 8px 12px; }
+  .node--commander { border-color: var(--gold); width: 300px; }
+  .node--vacant { border-style: dashed; border-color: var(--blood-dim); }
+  .node--open { border-color: var(--gold-bright); background: var(--ink-raised); }
+  .node__office { font-size: var(--fs-micro); color: var(--gold); letter-spacing: 2px; text-transform: uppercase; }
+  .node__name { font-size: var(--fs-body); color: var(--parchment); margin-top: 1px; }
+  .node__sub { font-size: var(--fs-micro); color: var(--parchment-dim); letter-spacing: 1px; text-transform: uppercase; margin-top: 2px; }
+  .node .tier-disc { margin-left: auto; }
+  .squad { flex: 1 1 0; background: rgba(250,244,226,.35); border: 1px solid rgba(74,54,32,.35); padding: 10px 12px; }
+  .squad--thin { border-color: rgba(176,132,48,.5); }
+  .squad__head { display: flex; align-items: center; gap: 10px; }
+  .squad__numeral { font-family: var(--font-display); font-size: var(--fs-title); color: var(--gold-bright); letter-spacing: 2px; width: 34px; }
+  .squad__decanus { font-size: var(--fs-micro); color: var(--parchment-dim); letter-spacing: 1px; text-transform: uppercase; }
+  .squad__pips { margin-left: auto; }
+  .squad__collapsed { font-size: var(--fs-micro); color: var(--parchment-faint); letter-spacing: 1px; text-transform: uppercase; margin-top: 10px; }
+  .node__name.text-danger { color: var(--blood); }
+  .node__sub.text-gold { color: var(--gold); }
+  .squad__collapsed.text-amber { color: var(--amber); }
+
+  /* ---- the office overlay ---- */
+  .office-sheet { width: 1000px; padding: 22px 26px; }
+  .office-cols { display: flex; gap: 18px; margin-top: 14px; }
+  .office { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; background: rgba(250,244,226,.35); border: 1px solid rgba(74,54,32,.4); padding: 16px 18px; }
+  .office--vacant { border-color: var(--blood-dim); }
+  .office__head { display: flex; align-items: center; gap: 12px; }
+  .office__name { font-family: var(--font-display); font-size: 22px; color: var(--gold-bright); letter-spacing: 4px; text-transform: uppercase; font-weight: 700; }
+  .office__holder { display: flex; align-items: center; gap: 8px; margin-top: 4px; font-size: var(--fs-body); color: var(--parchment); }
+  .office__charge { font-size: var(--fs-body); color: var(--parchment); line-height: 1.45; margin-top: 10px; }
+  .office__penalty { font-size: var(--fs-small); color: var(--blood); letter-spacing: 1px; text-transform: uppercase; margin-top: 10px; }
+  .points { margin-top: 12px; padding: 8px 12px; border: 1px solid var(--blood); background: rgba(142,47,34,.08); display: flex; justify-content: space-between; align-items: baseline; }
+  .points__big { font-family: var(--font-display); font-size: var(--fs-large); color: var(--blood); letter-spacing: 3px; text-transform: uppercase; font-weight: 700; }
+  .points--none { border-color: var(--gold-faint); background: rgba(250,244,226,.18); }
+  .points--none .points__big { color: var(--parchment-faint); }
+  .lost { margin-top: 12px; padding: 10px 12px; border: 1px solid var(--blood-dim); background: rgba(142,47,34,.10); text-align: center; }
+  .lost__line { font-family: var(--font-display); font-size: var(--fs-large); color: var(--blood); letter-spacing: 5px; text-transform: uppercase; font-weight: 700; }
+
+  /* vertical tradition track */
+  .track { position: relative; margin-top: 16px; padding-left: 34px; flex: 1 1 auto; }
+  .track::before { content: ""; position: absolute; left: 10px; top: 12px; bottom: 12px; width: 2px; background: var(--gold-dim); }
+  .track--dead::before { background: var(--gold-faint); }
+  .tnode { position: relative; display: flex; align-items: flex-start; gap: 10px; padding: 8px 10px; margin-bottom: 8px; background: rgba(250,244,226,.35); border: 1px solid rgba(74,54,32,.35); }
+  .tnode__mark { position: absolute; left: -31px; top: 12px; width: 16px; height: 16px; border-radius: 50%; border: 1px solid var(--parchment-faint); background: var(--ink-solid); }
+  .tnode--held { border-color: var(--gold-dim); }
+  .tnode--held .tnode__mark { background: radial-gradient(circle at 35% 30%, var(--wax-hi), var(--blood) 60%, var(--wax-lo)); border-color: var(--wax-lo); }
+  .tnode--ready { border-color: #9a7b3a; background: rgba(255,250,232,.55); box-shadow: inset 0 0 0 1px rgba(154,123,58,.35); }
+  .tnode--ready .tnode__mark { border: 2px solid #9a7b3a; box-shadow: 0 0 10px rgba(176,132,48,.55); }
+  .tnode--locked .tnode__name, .tnode--locked .tnode__effect, .tnode--locked .tnode__rank { color: var(--parchment-faint); }
+  .tnode--dead .tnode__mark { border-color: var(--parchment-faint); opacity: .6; }
+  .tnode__rank { width: 82px; flex: 0 0 auto; font-family: var(--font-display); font-size: var(--fs-small); color: var(--gold); letter-spacing: 2px; text-transform: uppercase; padding-top: 2px; }
+  .tnode__name { font-size: var(--fs-body); color: var(--parchment); letter-spacing: 1px; }
+  .tnode--held .tnode__name { color: var(--gold-bright); }
+  .tnode__effect { font-size: var(--fs-small); color: var(--parchment-dim); margin-top: 2px; line-height: 1.4; }
+  .tnode__state { margin-left: auto; flex: 0 0 auto; font-size: var(--fs-micro); letter-spacing: 2px; text-transform: uppercase; color: var(--parchment-faint); padding-top: 3px; }
+  .tnode--held .tnode__state { color: var(--gold); }
+  .tnode--cap { border-style: double; border-width: 3px; }
+  .dead-note { font-size: var(--fs-micro); color: var(--blood); letter-spacing: 2px; text-transform: uppercase; margin-top: 14px; }
+  .office__foot { display: flex; align-items: flex-start; gap: 12px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--gold-faint); }
+  .office__hint { font-size: var(--fs-micro); letter-spacing: 1px; text-transform: uppercase; color: var(--parchment-dim); line-height: 1.5; }
+  .button-primary--hover { background: var(--ink-hover); }
+</style>
+
+<!-- ===== camp frame ===== -->
+<div class="top-bar">
+  <div class="unit-identity"><div class="identity__legion">Marching Camp</div><div class="identity__name">Centuria Valeria</div></div>
+  <div class="resource-strip">
+    <div class="resource"><svg class="ico resource__icon"><use href="#i-helmet"/></svg><div><div class="resource__label">Men</div><div class="resource__value">41</div></div></div>
+    <div class="resource"><svg class="ico resource__icon"><use href="#i-wheat"/></svg><div><div class="resource__label">Food</div><div class="resource__value resource__value--low">6 days</div></div></div>
+    <div class="resource"><svg class="ico resource__icon"><use href="#i-fire"/></svg><div><div class="resource__label">Firewood</div><div class="resource__value">14</div></div></div>
+    <div class="resource"><svg class="ico resource__icon"><use href="#i-bandage"/></svg><div><div class="resource__label">Medicine</div><div class="resource__value">3 doses</div></div></div>
+    <div class="resource"><svg class="ico resource__icon"><use href="#i-coin"/></svg><div><div class="resource__label">Coin</div><div class="resource__value">212</div></div></div>
+    <div class="resource"><svg class="ico resource__icon"><use href="#i-denarii"/></svg><div><div class="resource__label">Denarii</div><div class="resource__value">38</div></div></div>
+    <div class="resource"><svg class="ico resource__icon"><use href="#i-shield"/></svg><div><div class="resource__label">Equipment</div><div class="resource__value">Serviceable</div></div></div>
+  </div>
+  <div class="morale-block"><div class="row between"><span class="metric-label">Morale</span><span class="text-good caps small">Confident</span></div><div class="bar bar--thick"><div class="bar__fill bar__fill--morale" style="width:62%"></div></div></div>
+</div>
+<div class="camp-tabs pill-row" data-tabs>
+  <button class="pill pill--active" data-tab="century">The Century</button>
+  <button class="pill" data-tab="rest">Rest &amp; Orders</button>
+  <button class="pill" data-tab="craft">Crafting</button>
+  <button class="pill" data-tab="stations">Camp Stations</button>
+</div>
+
+<!-- ===== THE CENTURY — simplified org chart (behind the overlay) ===== -->
+<div class="camp-page" data-page="century">
+  <div class="panel col" style="height:100%">
+    <div class="row between">
+      <div><div class="eyebrow">Camp · The Century · 41 men</div><div class="page-title">The Century</div></div>
+      <span class="micro text-dim">CLICK A MAN FOR HIS SHEET · CLICK AN OFFICE TO APPOINT OR INVEST</span>
+    </div>
+    <div class="rule"></div>
+    <div class="org__tier">
+      <div class="node node--commander"><svg class="ico ico--lg ico--gold"><use href="#i-helmet"/></svg><div><div class="node__office">Centurion</div><div class="node__name">Marcus Cornelius</div><div class="node__sub">Level 3 · a True Roman with a Survivor's caution</div></div><span class="tier-disc tier-disc--officer"></span></div>
+    </div>
+    <div class="org__link"></div>
+    <div class="org__tier">
+      <div class="node node--open"><svg class="ico ico--gold"><use href="#i-crest"/></svg><div><div class="node__office">Optio</div><div class="node__name">Gaius Aurelius</div><div class="node__sub text-gold">Evocatus · 2 pts to invest</div></div><span class="tier-disc tier-disc--officer"></span></div>
+      <div class="node"><svg class="ico ico--gold"><use href="#i-scroll"/></svg><div><div class="node__office">Tesserarius</div><div class="node__name">Lucius Pedo</div><div class="node__sub">Veteranus</div></div><span class="tier-disc tier-disc--officer"></span></div>
+      <div class="node"><svg class="ico ico--gold"><use href="#i-cross"/></svg><div><div class="node__office">Medicus</div><div class="node__name">Quintus Fabius</div><div class="node__sub">Miles</div></div><span class="tier-disc tier-disc--officer"></span></div>
+      <div class="node node--vacant node--open"><svg class="ico ico--dim"><use href="#i-banner"/></svg><div><div class="node__office">Signifer</div><div class="node__name text-danger">Vacant</div><div class="node__sub">the signum was lost at Teutoburg</div></div><span class="tier-disc tier-disc--vacant"></span></div>
+      <div class="node"><svg class="ico ico--gold"><use href="#i-eye"/></svg><div><div class="node__office">Speculator</div><div class="node__name">Sextus Varro</div><div class="node__sub">Veteranus · lead scout</div></div><span class="tier-disc tier-disc--officer"></span></div>
+    </div>
+    <div class="org__link"></div>
+    <div class="org__tier">
+      <div class="squad"><div class="squad__head"><span class="squad__numeral">I</span><div><div class="squad__decanus">Decanus</div><div class="body">Titus Valerius</div></div><span class="pips squad__pips"><span class="pip pip--fit"></span><span class="pip pip--fit"></span><span class="pip pip--fit"></span><span class="pip pip--fit"></span><span class="pip pip--fit"></span><span class="pip pip--fit"></span><span class="pip pip--wounded"></span><span class="pip pip--wounded"></span></span></div><div class="squad__collapsed">8 men · 2 wounded · expand ›</div></div>
+      <div class="squad"><div class="squad__head"><span class="squad__numeral">II</span><div><div class="squad__decanus">Decanus</div><div class="body">Aulus Rufus</div></div><span class="pips squad__pips"><span class="pip pip--fit"></span><span class="pip pip--fit"></span><span class="pip pip--fit"></span><span class="pip pip--fit"></span><span class="pip pip--fit"></span><span class="pip pip--fit"></span><span class="pip pip--fit"></span><span class="pip pip--wounded"></span></span></div><div class="squad__collapsed">8 men · 1 wounded · expand ›</div></div>
+      <div class="squad"><div class="squad__head"><span class="squad__numeral">III</span><div><div class="squad__decanus">Decanus</div><div class="body">Decimus Silo</div></div><span class="pips squad__pips"><span class="pip pip--fit"></span><span class="pip pip--fit"></span><span class="pip pip--fit"></span><span class="pip pip--fit"></span><span class="pip pip--fit"></span><span class="pip pip--fit"></span><span class="pip pip--wounded"></span><span class="pip pip--wounded"></span></span></div><div class="squad__collapsed">8 men · 2 wounded · expand ›</div></div>
+      <div class="squad"><div class="squad__head"><span class="squad__numeral">IV</span><div><div class="squad__decanus">Decanus</div><div class="body">Manius Cotta</div></div><span class="pips squad__pips"><span class="pip pip--fit"></span><span class="pip pip--fit"></span><span class="pip pip--fit"></span><span class="pip pip--fit"></span><span class="pip pip--fit"></span><span class="pip pip--fit"></span><span class="pip pip--fit"></span><span class="pip pip--fit"></span></span></div><div class="squad__collapsed">8 men · all fit · expand ›</div></div>
+      <div class="squad squad--thin"><div class="squad__head"><span class="squad__numeral">V</span><div><div class="squad__decanus">Decanus</div><div class="body">Gnaeus Piso</div></div><span class="pips squad__pips"><span class="pip pip--fit"></span><span class="pip pip--fit"></span><span class="pip pip--fit"></span><span class="pip pip--fit"></span><span class="pip"></span><span class="pip"></span><span class="pip"></span><span class="pip"></span></span></div><div class="squad__collapsed text-amber">4 men · thin · expand ›</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== THE OFFICE overlay ===== -->
+<div class="modal">
+  <div class="modal__sheet office-sheet">
+    <button class="button-ghost modal__close">Close · Esc</button>
+    <div>
+      <div class="eyebrow">The Century · Offices · the post keeps what it learns</div>
+      <div class="modal__title" style="text-align:left">The Office</div>
+      <div class="modal__subtitle">Optio · Signifer — appoint, replace, invest</div>
+    </div>
+
+    <div class="office-cols">
+      <!-- ===== OPTIO ===== -->
+      <div class="office">
+        <div class="office__head">
+          <svg class="ico ico--xl ico--gold"><use href="#i-crest"/></svg>
+          <div>
+            <div class="eyebrow">Office · second in command</div>
+            <div class="office__name">Optio</div>
+            <div class="office__holder"><span class="tier-disc tier-disc--officer"></span>Gaius Aurelius<span class="text-dim small caps">· Evocatus (Elite)</span></div>
+          </div>
+        </div>
+        <div class="office__charge">Takes command if you fall. Steadies the line: men break later.</div>
+        <div class="points"><span class="points__big">2 points to invest</span><span class="micro text-dim">EARNED BY THE OFFICE · 3 BATTLES</span></div>
+
+        <div class="track">
+          <div class="tnode tnode--held"><span class="tnode__mark"></span><span class="tnode__rank">I</span><div><div class="tnode__name">Second Voice</div><div class="tnode__effect">Orders reach squads sooner.</div></div><span class="tnode__state">Held</span></div>
+          <div class="tnode tnode--ready"><span class="tnode__mark"></span><span class="tnode__rank">II</span><div><div class="tnode__name">Steady Hand</div><div class="tnode__effect">Cohesion recovers faster after a shock.</div></div><button class="button-primary" style="margin-left:auto">Invest · 2</button></div>
+          <div class="tnode tnode--locked"><span class="tnode__mark"></span><span class="tnode__rank">III</span><div><div class="tnode__name">The Long Window</div><div class="tnode__effect">The succession window lasts longer.</div></div><button class="button-ghost" style="margin-left:auto" disabled>Invest · 3 · needs II</button></div>
+          <div class="tnode tnode--locked tnode--cap"><span class="tnode__mark"></span><span class="tnode__rank">Capstone</span><div><div class="tnode__name">Centurio in Waiting</div><div class="tnode__effect">If you fall, the Optio fights the battle to its end.</div></div><span class="tnode__state">Needs III</span></div>
+        </div>
+
+        <div class="office__foot">
+          <button class="button-ghost">Replace</button>
+          <span class="office__hint">The office keeps Second Voice · Aurelius keeps his rank and returns to a contubernium · <span class="text-danger">a grudge is likely</span></span>
+        </div>
+      </div>
+
+      <!-- ===== SIGNIFER ===== -->
+      <div class="office office--vacant">
+        <div class="office__head">
+          <svg class="ico ico--xl ico--dim"><use href="#i-banner"/></svg>
+          <div>
+            <div class="eyebrow">Office · bearer of the standard</div>
+            <div class="office__name">Signifer</div>
+            <div class="office__holder"><span class="tier-disc tier-disc--vacant"></span><span class="text-danger caps">Vacant</span><span class="text-dim small">· since Teutoburg</span></div>
+          </div>
+        </div>
+        <div class="office__charge">Plants the signum: men within sight of it break later and rally to it when they run.</div>
+        <div class="office__penalty">Standard aura halved · morale checks harder</div>
+        <div class="lost"><div class="lost__line">The signum is lost</div><div class="micro text-dim" style="margin-top:4px">A BEARER RESTORES THE OFFICE · THE FULL AURA RETURNS ONLY WITH A STANDARD, RECOVERED OR FORGED</div></div>
+        <div class="points points--none"><span class="points__big">No points</span><span class="micro text-faint">AN EMPTY OFFICE EARNS NONE</span></div>
+
+        <div class="dead-note">An empty office learns nothing</div>
+        <div class="track track--dead" style="margin-top:8px">
+          <div class="tnode tnode--locked tnode--dead"><span class="tnode__mark"></span><span class="tnode__rank">I</span><div><div class="tnode__name">Bearer's Voice</div><div class="tnode__effect">The signum's aura reaches farther.</div></div><span class="tnode__state">Locked</span></div>
+          <div class="tnode tnode--locked tnode--dead"><span class="tnode__mark"></span><span class="tnode__rank">II</span><div><div class="tnode__name">Planted Firm</div><div class="tnode__effect">The standard stays up a while after its bearer falls.</div></div><span class="tnode__state">Locked</span></div>
+          <div class="tnode tnode--locked tnode--dead"><span class="tnode__mark"></span><span class="tnode__rank">III</span><div><div class="tnode__name">Rallying Point</div><div class="tnode__effect">Routed men return to the signum sooner.</div></div><span class="tnode__state">Locked</span></div>
+          <div class="tnode tnode--locked tnode--dead tnode--cap"><span class="tnode__mark"></span><span class="tnode__rank">Capstone</span><div><div class="tnode__name">The Line Holds</div><div class="tnode__effect">While the signum stands, the front rank does not break.</div></div><span class="tnode__state">Locked</span></div>
+        </div>
+
+        <div class="office__foot">
+          <button class="button-primary button-primary--hover">Appoint a Man</button>
+          <span class="office__hint">6 eligible · Veteranus or above · the man leaves his contubernium · the office starts at rank I with the next battle</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== mock notes (N) ===== -->
+<div class="mock-note" style="left:1470px;top:250px">Post experience survives its holder (Consuetudo): the traditions belong to the office, not the man. Replace the Optio and Second Voice stays; the new man inherits it.</div>
+<div class="mock-note" style="left:200px;top:470px">Rail: solid disc = held, lit ring = affordable now (the INVEST button lives on the node), dim = locked behind the previous rank. Costs are the rank numeral (I=1, II=2, III=3), which is why the banner says 2 points and the button says 2.</div>
+<div class="mock-note" style="left:1470px;top:560px">The vacant card shows its penalty in red and keeps its track visible (dim) so the player can read what the office would learn — the cost of not appointing is always legible.</div>
+<div class="mock-note" style="left:1470px;top:860px">APPOINT A MAN is the hovered button. Both cards keep their action on the same footer line so the two states (held / vacant) compare at a glance.</div>

@@ -1,0 +1,456 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>CENTURY — HUD style: Imperial Marble</title>
+<style>
+/* ============ CENTURY · HUD art-style exploration 02 — IMPERIAL MARBLE / CARVED RELIEF ============ */
+:root {
+  --marble-hi:   #e4e1da;
+  --marble:      #d9d6cf;
+  --marble-lo:   #b9b5ab;
+  --marble-deep: #a6a297;
+  --groove:      #8f8b80;
+  --slate:       #3b3a36;
+  --slate-dim:   #6b6960;
+  --slate-faint: #8d8a80;
+  --purple:      #5c2a4d;
+  --purple-soft: rgba(92,42,77,.28);
+  --bronze:      #a8842c;
+  --bronze-deep: #7c6120;
+  --oxblood:     #7e2a20;
+  --laurel:      #6d7a5c;
+  --sienna:      #8c531d;
+  --engrave: 0 1px 0 rgba(255,255,255,.6);
+  --font-body: "Palatino Linotype", "Book Antiqua", Georgia, serif;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; background: #7f7b71; overflow: hidden; }
+body { font-family: var(--font-body); font-size: 13px; color: var(--slate); }
+button { font: inherit; color: inherit; cursor: pointer; }
+#stage { position: absolute; left: 50%; top: 50%; width: 1920px; height: 1080px;
+         transform-origin: center; overflow: hidden; background: #c9c4b8; }
+/* stone ground: faint veining + weathering + vignette */
+#stage::before { content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 0;
+  background:
+    repeating-linear-gradient(113deg, transparent 0 26px, rgba(120,114,102,.10) 26px 28px, transparent 28px 74px),
+    repeating-linear-gradient(67deg, transparent 0 41px, rgba(255,255,255,.10) 41px 42px, transparent 42px 90px),
+    radial-gradient(ellipse 90% 80% at 50% 45%, transparent 55%, rgba(72,68,60,.30) 100%); }
+.style-label { position: fixed; left: 10px; top: 8px; z-index: 999; font-family: var(--font-body);
+  font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: #efece5;
+  background: rgba(59,58,54,.75); padding: 4px 10px; border: 1px solid rgba(255,255,255,.25); }
+
+/* ---- chiseled type ---- */
+.eyebrow { font-size: 10px; color: var(--slate); letter-spacing: 4px; font-weight: 700;
+           text-transform: uppercase; text-shadow: var(--engrave);
+           padding-bottom: 5px; background: var(--meander) left bottom repeat-x; }
+.micro { font-size: 9px; letter-spacing: 1px; text-shadow: var(--engrave); }
+.caps { text-transform: uppercase; letter-spacing: 2px; }
+.body-copy { font-size: 13px; line-height: 1.45; text-shadow: var(--engrave); }
+.text-good { color: var(--laurel); } .text-danger { color: var(--oxblood); }
+.text-bronze { color: var(--bronze-deep); } .text-dim { color: var(--slate-dim); }
+.text-purple { color: var(--purple); } .text-sienna { color: var(--sienna); }
+.row { display: flex; align-items: center; } .between { justify-content: space-between; }
+.grow { flex: 1 1 0; }
+:root { --meander: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='8'><path d='M1 7 V1 H9 V5 H5 V3 H13 V7' fill='none' stroke='%236b6960' stroke-width='1' opacity='.6'/></svg>"); }
+
+/* ---- marble slab panels ---- */
+.slab { position: relative;
+  background:
+    repeating-linear-gradient(112deg, transparent 0 18px, rgba(122,116,104,.10) 18px 19px, transparent 19px 47px),
+    repeating-linear-gradient(64deg, transparent 0 30px, rgba(255,255,255,.14) 30px 31px, transparent 31px 66px),
+    linear-gradient(160deg, var(--marble-hi) 0%, var(--marble) 45%, var(--marble-lo) 100%);
+  border-top: 1px solid #efede7; border-left: 1px solid #eae7e0;
+  border-bottom: 2px solid var(--groove); border-right: 1px solid #9c988d;
+  box-shadow: 0 6px 14px rgba(40,37,31,.35); padding: 12px; }
+.slab::before { content: ""; position: absolute; inset: 4px; pointer-events: none;
+  border: 1px solid rgba(59,58,54,.28); box-shadow: inset 0 1px 0 rgba(255,255,255,.45); }
+.slab > * { position: relative; }
+
+/* ---- inlaid stone bars ---- */
+.bar { height: 5px; margin-top: 3px; background: linear-gradient(#a29d91, #b4afa3);
+  border: 1px solid var(--groove); border-bottom-color: #d9d6cf;
+  box-shadow: inset 0 1px 2px rgba(40,37,31,.45); overflow: hidden; }
+.bar--hair { height: 4px; } .bar--thick { height: 8px; }
+.bar__fill { height: 100%; box-shadow: inset 0 1px 0 rgba(255,255,255,.30), inset 0 -1px 0 rgba(0,0,0,.25); }
+.bar__fill--health { background: linear-gradient(var(--oxblood), #64211a); }
+.bar__fill--stamina { background: linear-gradient(#b8933c, var(--bronze-deep)); }
+.bar__fill--morale { background: linear-gradient(#7c8a6a, #5c684d); }
+
+/* ---- carved key tablets ---- */
+.keycap { display: inline-flex; align-items: center; justify-content: center; min-width: 22px; height: 20px;
+  padding: 0 5px; font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--slate);
+  text-shadow: var(--engrave); background: linear-gradient(170deg, var(--marble-hi), var(--marble-lo));
+  border: 1px solid var(--groove); border-top-color: #f0eee8; border-bottom-width: 3px; border-radius: 3px; }
+.keycap--wide { min-width: 62px; }
+.keycap--gold { border-color: var(--bronze-deep); border-top-color: #cfa94c; color: var(--bronze-deep); }
+
+/* ---- timer, flanked by laurels ---- */
+.timer { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); z-index: 5;
+  display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.timer__slab { display: flex; align-items: center; gap: 10px; }
+.timer__clock { font-size: 26px; letter-spacing: 4px; color: var(--slate); text-shadow: var(--engrave);
+  background: linear-gradient(165deg, var(--marble-hi), var(--marble-lo));
+  border: 1px solid var(--groove); border-top-color: #efede7; border-bottom-width: 3px;
+  padding: 3px 24px; box-shadow: 0 4px 10px rgba(40,37,31,.35); }
+.timer__controls { display: flex; gap: 5px; }
+.time-button { width: 28px; height: 24px; display: inline-flex; align-items: center; justify-content: center;
+  background: linear-gradient(170deg, var(--marble-hi), var(--marble-lo)); color: var(--slate-dim);
+  border: 1px solid var(--groove); border-top-color: #efede7; border-bottom-width: 2px; }
+.time-button--active { color: var(--bronze-deep); border-color: var(--bronze-deep);
+  background: linear-gradient(170deg, #ded4b6, #c2b48b); box-shadow: inset 0 1px 3px rgba(60,45,10,.35); }
+.timer__hint { display: flex; align-items: center; gap: 8px; font-size: 9px; letter-spacing: 2px;
+  color: var(--slate-dim); text-transform: uppercase; text-shadow: var(--engrave); }
+.laurel { color: var(--laurel); opacity: .9; }
+
+/* ---- left column ---- */
+.battle-left { position: absolute; left: 16px; top: 40px; bottom: 150px; width: 250px; z-index: 5;
+  display: flex; flex-direction: column; gap: 10px; }
+.battle-left .slab { flex: 0 0 auto; }
+.battle-left__grow { flex: 1 1 auto !important; min-height: 120px; overflow: hidden; }
+.stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 12px; margin-top: 8px; }
+.stat__label { font-size: 9px; color: var(--slate-dim); letter-spacing: 1px; text-transform: uppercase; text-shadow: var(--engrave); }
+.stat__value { font-size: 17px; color: var(--slate); text-shadow: var(--engrave); }
+.officer { display: flex; align-items: center; gap: 8px; padding: 5px 6px; margin-top: 6px;
+  background: linear-gradient(150deg, rgba(255,255,255,.35), rgba(150,145,133,.25));
+  border: 1px solid var(--marble-deep); border-top-color: #efede7; border-bottom-color: var(--groove); }
+.officer--commander { border-color: var(--bronze-deep); border-top-color: #cfa94c; }
+.officer--wounded { border-color: var(--sienna); }
+.officer__icon { width: 26px; height: 26px; flex: 0 0 auto; display: flex; align-items: center; justify-content: center;
+  color: var(--bronze-deep); background: linear-gradient(#c6c2b8, #aeaa9f);
+  border: 1px solid var(--groove); box-shadow: inset 0 1px 2px rgba(40,37,31,.30); }
+.officer__name { font-size: 11px; color: var(--slate); text-shadow: var(--engrave); }
+.officer__role { font-size: 9px; color: var(--slate-dim); letter-spacing: 1px; text-transform: uppercase; text-shadow: var(--engrave); }
+.officer .bar { margin-top: 3px; }
+.event { display: flex; align-items: flex-start; gap: 6px; margin-top: 6px; }
+.event__glyph { width: 12px; color: var(--bronze-deep); font-size: 13px; line-height: 1.2; text-align: center; text-shadow: var(--engrave); }
+.event__text { flex: 1; font-size: 11px; color: var(--slate-dim); line-height: 1.35; text-shadow: var(--engrave); }
+.event__time { font-size: 9px; color: var(--slate-faint); letter-spacing: 1px; white-space: nowrap; text-shadow: var(--engrave); }
+.event--good .event__glyph, .event--good .event__text { color: #55613f; }
+.event--warning .event__glyph { color: var(--sienna); } .event--warning .event__text { color: var(--slate); }
+.event--critical .event__glyph, .event--critical .event__text { color: var(--oxblood); }
+
+/* ---- roster ---- */
+.roster { position: absolute; right: 16px; top: 40px; width: 250px; z-index: 5; }
+.contub { margin-top: 8px; padding: 6px 8px;
+  background: linear-gradient(150deg, rgba(255,255,255,.35), rgba(150,145,133,.25));
+  border: 1px solid var(--marble-deep); border-top-color: #efede7; border-bottom-color: var(--groove); }
+.contub--selected { border-color: var(--purple); box-shadow: 0 0 0 1px var(--purple-soft), inset 0 0 12px rgba(92,42,77,.14);
+  background: linear-gradient(150deg, rgba(255,255,255,.5), rgba(178,158,172,.22)); }
+.contub--withdrawn { opacity: .5; filter: grayscale(.4); }
+.contub__head { display: flex; justify-content: space-between; align-items: baseline; }
+.contub__name { font-size: 11px; color: var(--slate); letter-spacing: 2px; text-transform: uppercase; text-shadow: var(--engrave); }
+.contub__order { font-size: 9px; color: var(--bronze-deep); letter-spacing: 2px; text-transform: uppercase; text-shadow: var(--engrave); }
+.contub__order--danger { color: var(--oxblood); }
+.dots { display: flex; gap: 4px; margin-top: 6px; align-items: center; }
+.dot { width: 10px; height: 10px; background: linear-gradient(var(--laurel), #59654a);
+  border: 1px solid var(--groove); box-shadow: inset 0 1px 0 rgba(255,255,255,.3); }
+.dot--wounded { background: linear-gradient(#a5661f, var(--sienna)); animation: blink 1s steps(2) infinite; }
+.dot--dead { background: linear-gradient(#93382c, var(--oxblood)); position: relative; }
+.dot--dead::after { content: "×"; position: absolute; inset: -4px 0 0 0; color: #efe9e2;
+  font-size: 11px; line-height: 11px; text-align: center; }
+.dot--empty { background: #b0ab9f; box-shadow: inset 0 1px 2px rgba(40,37,31,.4); }
+.flag { margin-left: auto; font-size: 9px; color: var(--slate); letter-spacing: 1px; text-transform: uppercase; text-shadow: var(--engrave); }
+.flag--danger { color: var(--oxblood); }
+.cohesion { display: flex; gap: 2px; margin-top: 5px; }
+.cohesion span { flex: 1; height: 4px; background: linear-gradient(#b8933c, var(--bronze-deep));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.3); }
+.cohesion span.off { background: #aca79b; box-shadow: inset 0 1px 2px rgba(40,37,31,.4); }
+.cohesion--amber span:not(.off) { background: linear-gradient(#a5661f, var(--sienna)); }
+.cohesion--red span:not(.off) { background: linear-gradient(#93382c, var(--oxblood)); animation: blink .6s steps(2) infinite; }
+@keyframes blink { 50% { opacity: .35; } }
+
+/* ---- inspect (hover) ---- */
+.inspect { position: absolute; left: 1180px; top: 430px; width: 220px; z-index: 6;
+  box-shadow: 0 10px 26px rgba(40,37,31,.5); }
+.inspect .heading { font-size: 11px; letter-spacing: 2px; font-weight: 700; text-transform: uppercase;
+  color: var(--purple); text-shadow: var(--engrave); }
+.inspect__row { display: flex; justify-content: space-between; align-items: baseline; margin-top: 7px; }
+.inspect__word { font-size: 9px; letter-spacing: 2px; text-transform: uppercase; text-shadow: var(--engrave); }
+.metric-label { font-size: 11px; color: var(--slate-dim); letter-spacing: 1px; text-transform: uppercase; text-shadow: var(--engrave); }
+
+/* ---- centurion ---- */
+.centurion { position: absolute; left: 16px; bottom: 18px; width: 250px; z-index: 5; }
+.centurion__name { font-size: 16px; color: var(--purple); letter-spacing: 3px; text-transform: uppercase;
+  font-weight: 700; text-shadow: var(--engrave); }
+.centurion__row { display: flex; justify-content: space-between; align-items: baseline; margin-top: 8px; }
+.pila { display: flex; gap: 3px; }
+.pila span { width: 4px; height: 16px; background: linear-gradient(#c19a3f, var(--bronze-deep));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.4); }
+.pila span.spent { background: #aca79b; box-shadow: inset 0 1px 2px rgba(40,37,31,.4); }
+.centurion__keys { display: flex; align-items: center; gap: 6px; margin-top: 10px; font-size: 9px;
+  letter-spacing: 1px; color: var(--slate-dim); text-transform: uppercase; text-shadow: var(--engrave); }
+
+/* ---- command tablets ---- */
+.selection-hint { position: absolute; left: 50%; bottom: 142px; transform: translateX(-50%); z-index: 5;
+  font-size: 9px; letter-spacing: 2px; color: var(--slate-dim); text-transform: uppercase;
+  text-shadow: var(--engrave); display: flex; gap: 10px; align-items: center; }
+.selection-hint b { color: var(--purple); font-weight: 700; }
+.command-bar { position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%); display: flex; gap: 7px; z-index: 5; }
+.command { width: 92px; height: 78px; display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 4px; padding: 4px;
+  background: linear-gradient(165deg, var(--marble-hi), var(--marble) 55%, var(--marble-lo));
+  border: 1px solid var(--groove); border-top-color: #efede7; border-bottom-width: 3px;
+  box-shadow: 0 4px 10px rgba(40,37,31,.35); }
+.command:hover { border-color: var(--bronze-deep); border-top-color: #cfa94c; }
+.command--active { background: linear-gradient(165deg, var(--marble-lo), var(--marble-deep));
+  border-color: var(--purple); border-top-color: var(--purple); border-bottom-width: 1px;
+  box-shadow: inset 0 2px 6px rgba(40,30,38,.45); transform: translateY(2px); }
+.command--summon { width: 110px; border-color: var(--bronze-deep); border-top-color: #cfa94c;
+  background: linear-gradient(165deg, #e0d3ad, #c2ae79); }
+.command__label { font-size: 9px; color: var(--slate); letter-spacing: 1px; text-align: center;
+  text-transform: uppercase; line-height: 1.2; text-shadow: var(--engrave); }
+.command--active .command__label { color: var(--purple); font-weight: 700; }
+.command--summon .command__label { color: var(--bronze-deep); font-weight: 700; }
+.command .ico { color: var(--bronze-deep); width: 24px; height: 24px; }
+.command--active .ico { color: var(--purple); }
+.ico { fill: currentColor; flex: 0 0 auto; }
+.ico--sm { width: 14px; height: 14px; }
+.formation-menu { position: absolute; left: 50%; bottom: 104px; transform: translateX(-50%); z-index: 5;
+  display: flex; gap: 6px; padding: 8px;
+  background: linear-gradient(160deg, var(--marble), var(--marble-lo));
+  border: 1px solid var(--groove); border-top-color: #efede7; border-bottom-width: 3px;
+  box-shadow: 0 8px 20px rgba(40,37,31,.45); }
+.formation-menu::before { content: "Choose formation"; position: absolute; top: -18px; left: 8px;
+  font-size: 9px; letter-spacing: 3px; color: var(--bronze-deep); text-transform: uppercase; text-shadow: var(--engrave); }
+.formation-menu .command { width: 84px; height: 66px; box-shadow: none; }
+.form-diagram { width: 30px; height: 16px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; }
+.form-diagram i { display: block; background: var(--bronze-deep); width: 5px; height: 5px; }
+.command--active .form-diagram i { background: var(--purple); }
+
+/* ---- field engraving text ---- */
+.field { position: absolute; inset: 0; z-index: 1; }
+.lbl { font-family: var(--font-body); font-size: 11px; letter-spacing: 2px; fill: var(--slate); }
+.lbl--gold { fill: var(--bronze-deep); font-weight: 700; }
+.tag { fill: #ddd9d1; stroke: var(--groove); }
+.tag--sel { stroke: var(--purple); stroke-width: 1.5; }
+
+.mock-note { display: none; }
+</style>
+</head>
+<body>
+<div class="style-label">Style 02 · Imperial Marble</div>
+<div id="stage">
+
+<!-- ===== icon glyphs (carved line style) ===== -->
+<svg style="display:none" xmlns="http://www.w3.org/2000/svg">
+  <symbol id="i-pause" viewBox="0 0 16 16"><rect x="3" y="2" width="4" height="12"/><rect x="9" y="2" width="4" height="12"/></symbol>
+  <symbol id="i-play" viewBox="0 0 16 16"><path d="M4 2 L13 8 L4 14 Z"/></symbol>
+  <symbol id="i-fast" viewBox="0 0 16 16"><path d="M1 2 L8 8 L1 14 Z"/><path d="M8 2 L15 8 L8 14 Z"/></symbol>
+  <symbol id="i-helmet" viewBox="0 0 24 24"><path d="M12 3c-4 0-7 3-7 7v6h3v-6h8v6h3v-6c0-4-3-7-7-7z"/><path d="M8 2c2 -1.6 6 -1.6 8 0l-1 2c-1.6-1.2-4.4-1.2-6 0z"/><rect x="10.5" y="16" width="3" height="5"/></symbol>
+  <symbol id="i-crest" viewBox="0 0 24 24"><path d="M12 2l2.5 5 5.5.8-4 3.9.9 5.5L12 14.6 7.1 17.2 8 11.7 4 7.8 9.5 7z"/></symbol>
+  <symbol id="i-scroll" viewBox="0 0 24 24"><path d="M5 4h12v3h3v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2zM8 8h8v2H8zm0 4h8v2H8z"/></symbol>
+  <symbol id="i-cross" viewBox="0 0 24 24"><path d="M10 3h4v7h7v4h-7v7h-4v-7H3v-4h7z"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 2l8 3v6c0 5-3.4 9.3-8 11-4.6-1.7-8-6-8-11V5z"/></symbol>
+  <symbol id="i-boot" viewBox="0 0 24 24"><path d="M7 3h6v9l6 4v5H7z"/></symbol>
+  <symbol id="i-pila" viewBox="0 0 24 24"><path d="M4 20 L18 6 l2-4-4 2L2 18z"/><path d="M14 20 L21 13 l1 3-5 5z"/></symbol>
+  <symbol id="i-stealth" viewBox="0 0 24 24"><path d="M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6zm9 3a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><rect x="2" y="11" width="20" height="2" transform="rotate(-20 12 12)"/></symbol>
+  <symbol id="i-passage" viewBox="0 0 24 24"><path d="M4 21V5a8 8 0 0 1 16 0v16h-4v-8H8v8z"/></symbol>
+  <symbol id="i-banner" viewBox="0 0 24 24"><path d="M11 2h2v20h-2z"/><path d="M13 3h8l-3 4 3 4h-8z"/><circle cx="12" cy="2.5" r="2"/></symbol>
+  <symbol id="i-laurel" viewBox="0 0 40 60"><path d="M32 56 C14 46 8 28 14 6" fill="none" stroke="currentColor" stroke-width="2"/><g fill="currentColor"><ellipse cx="12" cy="10" rx="7" ry="2.6" transform="rotate(-62 12 10)"/><ellipse cx="10.5" cy="20" rx="7" ry="2.6" transform="rotate(-40 10.5 20)"/><ellipse cx="12.5" cy="30" rx="7" ry="2.6" transform="rotate(-22 12.5 30)"/><ellipse cx="17" cy="40" rx="7" ry="2.6" transform="rotate(-4 17 40)"/><ellipse cx="24" cy="49" rx="7" ry="2.6" transform="rotate(16 24 49)"/><ellipse cx="20" cy="8" rx="6" ry="2.4" transform="rotate(-88 20 8)"/><ellipse cx="19" cy="19" rx="6" ry="2.4" transform="rotate(-70 19 19)"/><ellipse cx="21.5" cy="30" rx="6" ry="2.4" transform="rotate(-52 21.5 30)"/><ellipse cx="26" cy="41" rx="6" ry="2.4" transform="rotate(-34 26 41)"/></g></symbol>
+</svg>
+
+<!-- ===== the field: incised marble relief map ===== -->
+<svg class="field" viewBox="0 0 1920 1080" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <pattern id="stipple" width="9" height="9" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1.1" fill="#7b766b"/><circle cx="6.5" cy="6" r="1.1" fill="#87816f"/>
+    </pattern>
+  </defs>
+  <!-- river to the north: a polished darker groove; ford -->
+  <path d="M-20 300 C 300 260, 600 340, 960 300 S 1600 260, 1940 320" fill="none" stroke="#8f8a7d" stroke-width="44" opacity=".9"/>
+  <path d="M-20 300 C 300 260, 600 340, 960 300 S 1600 260, 1940 320" fill="none" stroke="#726d61" stroke-width="30"/>
+  <path d="M-20 297 C 300 257, 600 337, 960 297 S 1600 257, 1940 317" fill="none" stroke="#e6e3db" stroke-width="2" opacity=".7"/>
+  <path d="M-20 300 C 300 260, 600 340, 960 300 S 1600 260, 1940 320" fill="none" stroke="#9c968a" stroke-width="6" opacity=".55" stroke-dasharray="26 34"/>
+  <rect x="880" y="270" width="160" height="70" fill="#b4ad9c" opacity=".85"/>
+  <rect x="880" y="270" width="160" height="70" fill="none" stroke="#6b6960" stroke-dasharray="4 4" opacity=".5"/>
+  <!-- forests: stippled incisions -->
+  <g><ellipse cx="180" cy="700" rx="220" ry="180" fill="#bcb7aa"/><ellipse cx="180" cy="700" rx="220" ry="180" fill="url(#stipple)"/><ellipse cx="180" cy="700" rx="220" ry="180" fill="none" stroke="#7b766b" stroke-width="1.5" opacity=".6"/>
+     <ellipse cx="1760" cy="160" rx="200" ry="120" fill="#bcb7aa"/><ellipse cx="1760" cy="160" rx="200" ry="120" fill="url(#stipple)"/><ellipse cx="1760" cy="160" rx="200" ry="120" fill="none" stroke="#7b766b" stroke-width="1.5" opacity=".6"/></g>
+  <!-- field boundary: incised dashed line -->
+  <rect x="120" y="80" width="1680" height="940" fill="none" stroke="#6b6960" stroke-dasharray="6 10" opacity=".5"/>
+  <rect x="121" y="81" width="1680" height="940" fill="none" stroke="#efede7" stroke-dasharray="6 10" opacity=".5"/>
+
+  <!-- enemy warband: oxblood inlay, loose knots -->
+  <g fill="#7e2a20" stroke="#5a1d15" stroke-width=".6">
+    <g transform="translate(700,380)"><rect x="0" y="0" width="7" height="7"/><rect x="12" y="4" width="7" height="7"/><rect x="24" y="-2" width="7" height="7"/><rect x="6" y="14" width="7" height="7"/><rect x="20" y="12" width="7" height="7"/><rect x="34" y="8" width="7" height="7"/><rect x="-8" y="10" width="7" height="7"/></g>
+    <g transform="translate(900,360)"><rect x="0" y="0" width="7" height="7"/><rect x="12" y="4" width="7" height="7"/><rect x="24" y="-2" width="7" height="7"/><rect x="6" y="14" width="7" height="7"/><rect x="20" y="12" width="7" height="7"/><rect x="34" y="8" width="7" height="7"/><rect x="-8" y="10" width="7" height="7"/><rect x="40" y="-6" width="7" height="7"/></g>
+    <g transform="translate(1110,400)"><rect x="0" y="0" width="7" height="7"/><rect x="12" y="4" width="7" height="7"/><rect x="24" y="-2" width="7" height="7"/><rect x="6" y="14" width="7" height="7"/><rect x="20" y="12" width="7" height="7"/></g>
+    <!-- routing men -->
+    <g opacity=".55"><rect x="1300" y="250" width="7" height="7"/><rect x="1340" y="230" width="7" height="7"/><rect x="1370" y="205" width="7" height="7"/></g>
+  </g>
+  <!-- corpses: worn hollows in the stone -->
+  <g fill="#8a8477" stroke="#6b6960" stroke-width=".6"><ellipse cx="830" cy="470" rx="9" ry="4"/><ellipse cx="960" cy="455" rx="9" ry="4"/><ellipse cx="1010" cy="480" rx="9" ry="4"/><ellipse cx="760" cy="500" rx="9" ry="4"/></g>
+
+  <!-- our line: gilded bronze inlay, four squads in LINE -->
+  <g fill="#a8842c" stroke="#6e5518" stroke-width=".6">
+    <!-- I -->
+    <g transform="translate(640,560)"><rect x="0" y="0" width="7" height="7"/><rect x="14" y="0" width="7" height="7"/><rect x="28" y="0" width="7" height="7"/><rect x="42" y="0" width="7" height="7"/><rect x="0" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="28" y="14" width="7" height="7"/><rect x="42" y="14" width="7" height="7"/></g>
+    <!-- II -->
+    <g transform="translate(790,560)"><rect x="0" y="0" width="7" height="7"/><rect x="14" y="0" width="7" height="7"/><rect x="28" y="0" width="7" height="7"/><rect x="42" y="0" width="7" height="7"/><rect x="0" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="28" y="14" width="7" height="7"/></g>
+    <!-- III (selected) -->
+    <g transform="translate(940,556)"><rect x="0" y="0" width="7" height="7"/><rect x="14" y="0" width="7" height="7"/><rect x="28" y="0" width="7" height="7"/><rect x="42" y="0" width="7" height="7"/><rect x="0" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="28" y="14" width="7" height="7"/><rect x="42" y="14" width="7" height="7"/></g>
+    <!-- IV -->
+    <g transform="translate(1090,562)"><rect x="0" y="0" width="7" height="7"/><rect x="14" y="0" width="7" height="7"/><rect x="28" y="0" width="7" height="7"/><rect x="0" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="28" y="14" width="7" height="7"/></g>
+  </g>
+  <!-- selection ring under III: imperial purple inlay -->
+  <ellipse cx="965" cy="570" rx="46" ry="18" fill="none" stroke="#5c2a4d" stroke-width="2" stroke-dasharray="4 4"/>
+  <!-- the Centurion, behind the line -->
+  <g transform="translate(962,640)"><circle r="7" fill="#a8842c" stroke="#5c2a4d" stroke-width="1.5"/><path d="M0 -16 l5 6 -5 -2 -5 2z" fill="#a8842c" stroke="#6e5518" stroke-width=".5"/></g>
+  <!-- the signum, carried -->
+  <g transform="translate(1000,600)"><rect x="-1" y="-22" width="2" height="22" fill="#7c6120"/><path d="M1 -22 h10 v8 h-10z" fill="#7e2a20" stroke="#5a1d15" stroke-width=".5"/></g>
+
+  <!-- squad tags: small marble tablets, numeral + three inlaid bars -->
+  <g>
+    <g transform="translate(646,520)"><rect class="tag" x="0" y="0" width="52" height="22"/><text x="8" y="15" class="lbl">I</text><rect x="20" y="6" width="26" height="2" fill="#7e2a20"/><rect x="20" y="10" width="22" height="2" fill="#a8842c"/><rect x="20" y="14" width="24" height="2" fill="#6d7a5c"/></g>
+    <g transform="translate(796,520)"><rect class="tag" x="0" y="0" width="52" height="22"/><text x="8" y="15" class="lbl">II</text><rect x="20" y="6" width="18" height="2" fill="#7e2a20"/><rect x="20" y="10" width="14" height="2" fill="#a8842c"/><rect x="20" y="14" width="12" height="2" fill="#8c531d"/></g>
+    <g transform="translate(946,516)"><rect class="tag tag--sel" x="0" y="0" width="56" height="22"/><text x="8" y="15" class="lbl lbl--gold">III</text><rect x="26" y="6" width="24" height="2" fill="#7e2a20"/><rect x="26" y="10" width="20" height="2" fill="#a8842c"/><rect x="26" y="14" width="24" height="2" fill="#6d7a5c"/></g>
+    <g transform="translate(1096,522)"><rect class="tag" x="0" y="0" width="52" height="22"/><text x="8" y="15" class="lbl">IV</text><rect x="22" y="6" width="16" height="2" fill="#7e2a20"/><rect x="22" y="10" width="20" height="2" fill="#a8842c"/><rect x="22" y="14" width="18" height="2" fill="#6d7a5c"/></g>
+  </g>
+
+  <!-- cursor reticle over III -->
+  <g transform="translate(1000,590)">
+    <circle r="26" fill="none" stroke="#5c2a4d" stroke-width="2"/>
+    <circle r="3" fill="#5c2a4d"/>
+    <text x="34" y="-6" class="lbl lbl--gold">III · HOLD</text>
+    <text x="34" y="10" class="lbl" style="fill:#6b6960">TAB · SELECT</text>
+  </g>
+
+  <!-- pila in flight: engraved bronze arcs -->
+  <g stroke="#7c6120" stroke-width="1.5" opacity=".7" fill="none"><path d="M700 545 q40 -60 80 -110"/><path d="M712 548 q40 -60 84 -114"/><path d="M960 540 q30 -70 60 -120"/></g>
+  <!-- order ping ring -->
+  <ellipse cx="800" cy="470" rx="30" ry="12" fill="none" stroke="#a8842c" stroke-width="2" opacity=".7"/>
+</svg>
+
+<!-- ===== timer ===== -->
+<div class="timer">
+  <div class="timer__slab">
+    <svg class="laurel" width="26" height="40" viewBox="0 0 40 60"><use href="#i-laurel"/></svg>
+    <div class="timer__clock">1:42</div>
+    <svg class="laurel" width="26" height="40" viewBox="0 0 40 60" style="transform:scaleX(-1)"><use href="#i-laurel"/></svg>
+  </div>
+  <div class="timer__controls">
+    <span class="time-button"><svg class="ico ico--sm" viewBox="0 0 16 16"><use href="#i-pause"/></svg></span>
+    <span class="time-button time-button--active"><svg class="ico ico--sm" viewBox="0 0 16 16"><use href="#i-play"/></svg></span>
+    <span class="time-button"><svg class="ico ico--sm" viewBox="0 0 16 16"><use href="#i-fast"/></svg></span>
+  </div>
+  <div class="timer__hint"><span class="keycap keycap--wide">Space</span> Tactical time</div>
+</div>
+
+<!-- ===== left column ===== -->
+<div class="battle-left">
+  <div class="slab">
+    <div class="row between"><span class="eyebrow">Engagement</span><span class="micro text-good caps">The Signum · carried</span></div>
+    <div class="body-copy" style="margin-top:6px">The warband closes on the ford.</div>
+    <div class="stat-grid">
+      <div><div class="stat__label">Survivors</div><div class="stat__value">33</div></div>
+      <div><div class="stat__label">Enemies killed</div><div class="stat__value">11</div></div>
+      <div><div class="stat__label">In reserve</div><div class="stat__value text-dim">8</div></div>
+      <div><div class="stat__label">Enemy standing</div><div class="stat__value text-danger">29</div></div>
+    </div>
+  </div>
+  <div class="slab">
+    <div class="eyebrow" style="display:inline-block">Officers</div>
+    <div class="officer officer--commander"><div class="officer__icon"><svg class="ico" width="18" height="18" viewBox="0 0 24 24"><use href="#i-helmet"/></svg></div><div class="grow"><div class="officer__name">M. Cornelius</div><div class="officer__role">Centurion</div><div class="bar bar--hair"><div class="bar__fill bar__fill--health" style="width:78%"></div></div></div></div>
+    <div class="officer"><div class="officer__icon"><svg class="ico" width="18" height="18" viewBox="0 0 24 24"><use href="#i-crest"/></svg></div><div class="grow"><div class="officer__name">G. Aurelius</div><div class="officer__role">Optio · II</div><div class="bar bar--hair"><div class="bar__fill bar__fill--health" style="width:92%"></div></div></div></div>
+    <div class="officer officer--wounded"><div class="officer__icon" style="color:var(--sienna)"><svg class="ico" width="18" height="18" viewBox="0 0 24 24"><use href="#i-scroll"/></svg></div><div class="grow"><div class="officer__name">L. Pedo</div><div class="officer__role text-sienna">Tesserarius · wounded</div><div class="bar bar--hair"><div class="bar__fill bar__fill--health" style="width:31%"></div></div></div></div>
+    <div class="officer"><div class="officer__icon"><svg class="ico" width="18" height="18" viewBox="0 0 24 24"><use href="#i-cross"/></svg></div><div class="grow"><div class="officer__name">Q. Fabius</div><div class="officer__role">Medicus · rear</div><div class="bar bar--hair"><div class="bar__fill bar__fill--health" style="width:100%"></div></div></div></div>
+  </div>
+  <div class="slab battle-left__grow">
+    <div class="eyebrow" style="display:inline-block">Combat log</div>
+    <div style="margin-top:2px">
+      <div class="event event--good"><span class="event__glyph">+</span><span class="event__text">Contubernium I loose their pila. Four fall.</span><span class="event__time">1:38</span></div>
+      <div class="event event--warning"><span class="event__glyph">◆</span><span class="event__text">II is wavering — the Optio steadies them.</span><span class="event__time">1:31</span></div>
+      <div class="event event--critical"><span class="event__glyph">!</span><span class="event__text">Lucius Pedo is down, wounded.</span><span class="event__time">1:20</span></div>
+      <div class="event"><span class="event__glyph">·</span><span class="event__text">The line holds at the ford.</span><span class="event__time">1:04</span></div>
+      <div class="event"><span class="event__glyph">·</span><span class="event__text">Enemy skirmishers pull back beyond the river.</span><span class="event__time">0:52</span></div>
+      <div class="event event--good"><span class="event__glyph">+</span><span class="event__text">Three of the enemy break and run.</span><span class="event__time">0:40</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== roster ===== -->
+<div class="roster slab">
+  <div class="row between"><span class="eyebrow">The Century</span><span class="micro text-dim">33 standing</span></div>
+  <div class="contub">
+    <div class="contub__head"><span class="contub__name">I · Valerius</span><span class="contub__order">Hold</span></div>
+    <div class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot dot--wounded"></span><span class="dot"></span><span class="dot"></span></div>
+    <div class="cohesion"><span></span><span></span><span></span><span></span><span class="off"></span></div>
+  </div>
+  <div class="contub">
+    <div class="contub__head"><span class="contub__name">II · Rufus</span><span class="contub__order contub__order--danger">Hold</span></div>
+    <div class="dots"><span class="dot"></span><span class="dot dot--wounded"></span><span class="dot"></span><span class="dot dot--dead"></span><span class="dot"></span><span class="dot dot--wounded"></span><span class="dot"></span><span class="dot dot--dead"></span><span class="flag flag--danger">Wavering</span></div>
+    <div class="cohesion cohesion--amber"><span></span><span></span><span class="off"></span><span class="off"></span><span class="off"></span></div>
+  </div>
+  <div class="contub contub--selected">
+    <div class="contub__head"><span class="contub__name">III · Silo</span><span class="contub__order">Hold · Line</span></div>
+    <div class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+    <div class="cohesion"><span></span><span></span><span></span><span></span><span></span></div>
+  </div>
+  <div class="contub">
+    <div class="contub__head"><span class="contub__name">IV · Cotta</span><span class="contub__order">Advance</span></div>
+    <div class="dots"><span class="dot"></span><span class="dot"></span><span class="dot dot--dead"></span><span class="dot"></span><span class="dot"></span><span class="dot dot--dead"></span><span class="dot"></span><span class="dot dot--empty"></span></div>
+    <div class="cohesion"><span></span><span></span><span></span><span class="off"></span><span class="off"></span></div>
+  </div>
+  <div class="contub contub--withdrawn">
+    <div class="contub__head"><span class="contub__name">V · Piso</span><span class="contub__order">Reserve</span></div>
+    <div class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot dot--empty"></span><span class="dot dot--empty"></span><span class="dot dot--empty"></span><span class="dot dot--empty"></span><span class="flag">Off field</span></div>
+  </div>
+</div>
+
+<!-- ===== squad inspect (hover) ===== -->
+<div class="inspect slab">
+  <div class="row between"><span class="heading">Contubernium III</span><span class="micro text-bronze caps">Hold · Line</span></div>
+  <div class="inspect__row"><span class="metric-label">Health</span><span class="inspect__word text-good">Steady</span></div>
+  <div class="bar"><div class="bar__fill bar__fill--health" style="width:88%"></div></div>
+  <div class="inspect__row"><span class="metric-label">Stamina</span><span class="inspect__word text-bronze">Fresh</span></div>
+  <div class="bar"><div class="bar__fill bar__fill--stamina" style="width:74%"></div></div>
+  <div class="inspect__row"><span class="metric-label">Morale</span><span class="inspect__word text-good">Confident</span></div>
+  <div class="bar"><div class="bar__fill bar__fill--morale" style="width:70%"></div></div>
+  <div class="micro text-dim" style="margin-top:8px">Decanus Decimus Silo · 8 of 8 · shields up</div>
+</div>
+
+<!-- ===== centurion ===== -->
+<div class="centurion slab">
+  <div class="row between"><span class="centurion__name">Centurion</span><span class="micro text-dim">M. Cornelius</span></div>
+  <div class="centurion__row"><span class="metric-label">Health</span><span class="micro text-good caps">Bloodied</span></div>
+  <div class="bar bar--thick"><div class="bar__fill bar__fill--health" style="width:78%"></div></div>
+  <div class="centurion__row"><span class="metric-label">Stamina</span><span class="micro text-bronze caps">Winded</span></div>
+  <div class="bar bar--thick"><div class="bar__fill bar__fill--stamina" style="width:46%"></div></div>
+  <div class="centurion__row"><span class="metric-label">Pila</span><div class="pila"><span></span><span></span><span></span><span class="spent"></span></div></div>
+  <div class="centurion__keys">
+    <span class="keycap">R</span> Rally <span style="margin-left:8px" class="keycap">Ctrl</span> Shield <span style="margin-left:8px" class="keycap">RMB</span> Pilum
+  </div>
+</div>
+
+<!-- ===== selection hint + formation picker + order bar ===== -->
+<div class="selection-hint"><b>Contubernium III selected</b> · <span class="keycap">Tab</span> toggle · <span class="keycap">0</span> all</div>
+
+<div class="formation-menu">
+  <button class="command command--active"><div class="form-diagram"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><span class="command__label">Line</span></button>
+  <button class="command"><div class="form-diagram" style="grid-template-columns:repeat(3,1fr);width:22px"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><span class="command__label">Testudo</span></button>
+  <button class="command"><div class="form-diagram" style="gap:2px 6px"><i></i><i></i><i></i><i></i><i style="margin-left:3px"></i><i></i><i></i><i></i></div><span class="command__label">Double line</span></button>
+  <button class="command"><div class="form-diagram" style="gap:5px 9px;width:40px"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><span class="command__label">Loose</span></button>
+  <button class="command"><div class="form-diagram" style="grid-template-columns:repeat(2,1fr);width:12px;height:30px"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><span class="command__label">Column</span></button>
+</div>
+
+<div class="command-bar">
+  <button class="command command--active"><svg class="ico" viewBox="0 0 24 24"><use href="#i-shield"/></svg><span class="command__label">Line</span><span class="keycap">1</span></button>
+  <button class="command"><svg class="ico" viewBox="0 0 24 24"><use href="#i-boot"/></svg><span class="command__label">Advance</span><span class="keycap">2</span></button>
+  <button class="command command--active"><svg class="ico" viewBox="0 0 24 24"><use href="#i-shield"/></svg><span class="command__label">Hold</span><span class="keycap">3</span></button>
+  <button class="command"><svg class="ico" viewBox="0 0 24 24"><use href="#i-helmet"/></svg><span class="command__label">Follow me</span><span class="keycap">4</span></button>
+  <button class="command"><svg class="ico" viewBox="0 0 24 24"><use href="#i-pila"/></svg><span class="command__label">Skirmish</span><span class="keycap">5</span></button>
+  <button class="command"><svg class="ico" viewBox="0 0 24 24"><use href="#i-stealth"/></svg><span class="command__label">Fall back</span><span class="keycap">6</span></button>
+  <button class="command"><svg class="ico" viewBox="0 0 24 24"><use href="#i-passage"/></svg><span class="command__label">Retreat</span><span class="keycap">7</span></button>
+  <button class="command command--summon"><svg class="ico" viewBox="0 0 24 24"><use href="#i-banner"/></svg><span class="command__label">Summon reserves</span><span class="keycap keycap--gold">8</span></button>
+</div>
+
+<div class="mock-note" style="left:280px;top:60px">Left column: only the log shrinks; the engagement block and officers never get crushed. Immunis specialists don't appear here (not command).</div>
+<div class="mock-note" style="left:1400px;top:60px">One dot per man: olive fit, amber blinking wounded, red × dead, faint = empty bunk. The thin gold strip beneath is cohesion (gold / amber / red-blinking when breaking).</div>
+<div class="mock-note" style="left:1180px;top:640px">Squad inspect appears on hover over a squad; words not numbers. The ground reticle shows the hovered squad's order and the TAB hint.</div>
+<div class="mock-note" style="left:1300px;top:900px">Picker opens above the FORMATION button (key 1 cycles). SUMMON RESERVES is gold because reserves exist; it disappears once they're all fielded.</div>
+
+</div>
+<script>const s=document.getElementById('stage');function f(){const k=Math.min(innerWidth/1920,innerHeight/1080);s.style.transform=`translate(-50%,-50%) scale(${k})`;}addEventListener('resize',f);f();</script>
+</body>
+</html>

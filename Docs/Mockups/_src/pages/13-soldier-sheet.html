@@ -1,0 +1,231 @@
+<!-- title: Soldier Sheet -->
+<!-- desc: The soldier detail modal for Publius Naso (Contubernium III) over a faint org chart on THE CENTURY tab: tier strip, attitude, bars as words, record, bonds and grudges. -->
+<!-- world: camp -->
+<style>
+  /* ---- simplified org chart behind the modal ---- */
+  .org__tier { display: flex; justify-content: center; gap: 14px; margin-top: 10px; }
+  .org__link { width: 1px; height: 16px; background: var(--gold-dim); margin: 0 auto; }
+  .node { display: flex; align-items: center; gap: 10px; width: 236px; background: var(--ink); border: 1px solid var(--gold-dim); padding: 8px 12px; }
+  .node--commander { border-color: var(--gold); width: 300px; }
+  .node--vacant { border-style: dashed; border-color: var(--blood-dim); }
+  .node__office { font-size: var(--fs-micro); color: var(--gold); letter-spacing: 2px; text-transform: uppercase; }
+  .node__name { font-size: var(--fs-body); color: var(--parchment); margin-top: 1px; }
+  .node__sub { font-size: var(--fs-micro); color: var(--parchment-dim); letter-spacing: 1px; text-transform: uppercase; margin-top: 2px; }
+  .node .tier-disc { margin-left: auto; }
+  .squad { flex: 1 1 0; background: rgba(250,244,226,.35); border: 1px solid rgba(74,54,32,.35); padding: 10px 12px; min-height: 120px; }
+  .squad--open { border-color: var(--gold-dim); }
+  .squad--thin { border-color: rgba(176,132,48,.5); }
+  .squad__head { display: flex; align-items: center; gap: 10px; }
+  .squad__numeral { font-family: var(--font-display); font-size: var(--fs-title); color: var(--gold-bright); letter-spacing: 2px; width: 34px; }
+  .squad__decanus { font-size: var(--fs-micro); color: var(--parchment-dim); letter-spacing: 1px; text-transform: uppercase; }
+  .squad__pips { margin-left: auto; }
+  .man { display: flex; align-items: center; gap: 8px; padding: 4px 6px; border: 1px solid transparent; font-size: var(--fs-small); color: var(--parchment); }
+  .man--selected { border-color: var(--gold-bright); background: var(--ink-raised); color: var(--gold-bright); }
+  .man__tag { margin-left: auto; font-size: var(--fs-micro); letter-spacing: 1px; text-transform: uppercase; color: var(--parchment-dim); }
+  .squad__collapsed { font-size: var(--fs-micro); color: var(--parchment-faint); letter-spacing: 1px; text-transform: uppercase; margin-top: 10px; }
+  .node__name.text-danger { color: var(--blood); }
+  .squad__collapsed.text-amber { color: var(--amber); }
+  .man__tag.text-gold { color: var(--gold); } .man__tag.text-amber { color: var(--amber); }
+
+  /* ---- the soldier modal ---- */
+  .soldier { width: 880px; padding: 22px 26px; }
+  .soldier__head { display: flex; align-items: center; gap: 18px; padding-right: 130px; }
+  .disc-hero { width: 46px; height: 46px; border-radius: 50%; flex: 0 0 auto; border: 2px solid var(--ink-solid); box-shadow: 0 0 0 1px var(--gold-dim); }
+  .disc-hero--veteranus { background: var(--brass); }
+  .soldier__name { font-family: var(--font-display); font-size: 28px; color: var(--gold-bright); letter-spacing: 5px; font-weight: 700; text-transform: uppercase; margin-top: 2px; }
+  .soldier__sub { font-size: var(--fs-small); color: var(--parchment-dim); letter-spacing: 2px; text-transform: uppercase; margin-top: 4px; }
+
+  .tier-strip { display: flex; align-items: center; margin-top: 16px; padding: 12px 14px; background: rgba(250,244,226,.35); border: 1px solid rgba(74,54,32,.35); }
+  .tstep { display: flex; flex-direction: column; align-items: center; width: 118px; }
+  .tstep__mark { width: 14px; height: 14px; border-radius: 50%; border: 1px solid var(--parchment-faint); }
+  .tstep--done .tstep__mark { background: var(--parchment-dim); border-color: var(--parchment-dim); }
+  .tstep--now .tstep__mark { background: var(--brass); border-color: var(--umber); box-shadow: 0 0 10px rgba(176,132,48,.55); }
+  .tstep__name { font-size: var(--fs-small); letter-spacing: 2px; text-transform: uppercase; color: var(--parchment-dim); margin-top: 6px; }
+  .tstep__en { font-size: var(--fs-micro); letter-spacing: 1px; text-transform: uppercase; color: var(--parchment-faint); margin-top: 2px; }
+  .tstep--now .tstep__name { color: var(--gold-bright); } .tstep--now .tstep__en { color: var(--gold); }
+  .tstep--next .tstep__name, .tstep--next .tstep__en { color: var(--parchment-faint); }
+  .tstep__rail { flex: 1 1 0; height: 1px; background: var(--gold-faint); margin-bottom: 30px; }
+  .tstep__rail--done { background: var(--gold-dim); }
+  .tier-strip__side { margin-left: auto; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+  .tier-desc { font-size: var(--fs-body); color: var(--parchment); line-height: 1.45; margin-top: 8px; }
+
+  .soldier__cols { display: flex; gap: 18px; margin-top: 14px; }
+  .soldier__col { flex: 1 1 0; min-width: 0; }
+  .attitude { display: flex; align-items: center; gap: 14px; }
+  .attitude__word { font-family: var(--font-display); font-size: 24px; letter-spacing: 4px; text-transform: uppercase; font-weight: 700; }
+  .stat { margin-top: 10px; }
+  .stat__row { display: flex; justify-content: space-between; align-items: baseline; }
+  .stat__word { font-size: var(--fs-small); letter-spacing: 2px; text-transform: uppercase; }
+
+  .tie { display: grid; grid-template-columns: 12px 1fr auto; align-items: center; gap: 10px; padding: 7px 10px; background: rgba(250,244,226,.35); border: 1px solid rgba(74,54,32,.35); margin-bottom: 6px; transition: border-color .12s, background .12s; }
+  .tie:hover, .tie--hover { border-color: #9a7b3a; background: rgba(255,250,232,.55); }
+  .tie__name { font-size: var(--fs-body); color: var(--parchment); }
+  .tie__name .text-dim { font-size: var(--fs-micro); letter-spacing: 1px; text-transform: uppercase; }
+  .tie__why { font-size: var(--fs-micro); color: var(--parchment-dim); letter-spacing: 1px; text-transform: uppercase; margin-top: 2px; }
+  .tie__band { font-size: var(--fs-small); letter-spacing: 2px; text-transform: uppercase; text-align: right; }
+  .tie--fallen .tie__name { color: var(--parchment-dim); }
+
+  .soldier__foot { display: flex; align-items: flex-start; gap: 14px; margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--gold-faint); }
+  .action { display: flex; flex-direction: column; gap: 4px; }
+  .action__hint { font-size: var(--fs-micro); letter-spacing: 1px; text-transform: uppercase; color: var(--parchment-dim); }
+</style>
+
+<!-- ===== camp frame ===== -->
+<div class="top-bar">
+  <div class="unit-identity"><div class="identity__legion">Marching Camp</div><div class="identity__name">Centuria Valeria</div></div>
+  <div class="resource-strip">
+    <div class="resource"><svg class="ico resource__icon"><use href="#i-helmet"/></svg><div><div class="resource__label">Men</div><div class="resource__value">41</div></div></div>
+    <div class="resource"><svg class="ico resource__icon"><use href="#i-wheat"/></svg><div><div class="resource__label">Food</div><div class="resource__value resource__value--low">6 days</div></div></div>
+    <div class="resource"><svg class="ico resource__icon"><use href="#i-fire"/></svg><div><div class="resource__label">Firewood</div><div class="resource__value">14</div></div></div>
+    <div class="resource"><svg class="ico resource__icon"><use href="#i-bandage"/></svg><div><div class="resource__label">Medicine</div><div class="resource__value">3 doses</div></div></div>
+    <div class="resource"><svg class="ico resource__icon"><use href="#i-coin"/></svg><div><div class="resource__label">Coin</div><div class="resource__value">212</div></div></div>
+    <div class="resource"><svg class="ico resource__icon"><use href="#i-denarii"/></svg><div><div class="resource__label">Denarii</div><div class="resource__value">38</div></div></div>
+    <div class="resource"><svg class="ico resource__icon"><use href="#i-shield"/></svg><div><div class="resource__label">Equipment</div><div class="resource__value">Serviceable</div></div></div>
+  </div>
+  <div class="morale-block"><div class="row between"><span class="metric-label">Morale</span><span class="text-good caps small">Confident</span></div><div class="bar bar--thick"><div class="bar__fill bar__fill--morale" style="width:62%"></div></div></div>
+</div>
+<div class="camp-tabs pill-row" data-tabs>
+  <button class="pill pill--active" data-tab="century">The Century</button>
+  <button class="pill" data-tab="rest">Rest &amp; Orders</button>
+  <button class="pill" data-tab="craft">Crafting</button>
+  <button class="pill" data-tab="stations">Camp Stations</button>
+</div>
+
+<!-- ===== THE CENTURY — simplified org chart (behind the modal) ===== -->
+<div class="camp-page" data-page="century">
+  <div class="panel col" style="height:100%">
+    <div class="row between">
+      <div><div class="eyebrow">Camp · The Century · 41 men</div><div class="page-title">The Century</div></div>
+      <span class="micro text-dim">CLICK A MAN FOR HIS SHEET · CLICK AN OFFICE TO APPOINT OR INVEST</span>
+    </div>
+    <div class="rule"></div>
+
+    <div class="org__tier">
+      <div class="node node--commander"><svg class="ico ico--lg ico--gold"><use href="#i-helmet"/></svg><div><div class="node__office">Centurion</div><div class="node__name">Marcus Cornelius</div><div class="node__sub">Level 3 · a True Roman with a Survivor's caution</div></div><span class="tier-disc tier-disc--officer"></span></div>
+    </div>
+    <div class="org__link"></div>
+    <div class="org__tier">
+      <div class="node"><svg class="ico ico--gold"><use href="#i-crest"/></svg><div><div class="node__office">Optio</div><div class="node__name">Gaius Aurelius</div><div class="node__sub">Evocatus · 2 pts to invest</div></div><span class="tier-disc tier-disc--officer"></span></div>
+      <div class="node"><svg class="ico ico--gold"><use href="#i-scroll"/></svg><div><div class="node__office">Tesserarius</div><div class="node__name">Lucius Pedo</div><div class="node__sub">Veteranus</div></div><span class="tier-disc tier-disc--officer"></span></div>
+      <div class="node"><svg class="ico ico--gold"><use href="#i-cross"/></svg><div><div class="node__office">Medicus</div><div class="node__name">Quintus Fabius</div><div class="node__sub">Miles</div></div><span class="tier-disc tier-disc--officer"></span></div>
+      <div class="node node--vacant"><svg class="ico ico--dim"><use href="#i-banner"/></svg><div><div class="node__office">Signifer</div><div class="node__name text-danger">Vacant</div><div class="node__sub">the signum was lost at Teutoburg</div></div><span class="tier-disc tier-disc--vacant"></span></div>
+      <div class="node"><svg class="ico ico--gold"><use href="#i-eye"/></svg><div><div class="node__office">Speculator</div><div class="node__name">Sextus Varro</div><div class="node__sub">Veteranus · lead scout</div></div><span class="tier-disc tier-disc--officer"></span></div>
+    </div>
+    <div class="org__link"></div>
+    <div class="org__tier">
+      <div class="squad">
+        <div class="squad__head"><span class="squad__numeral">I</span><div><div class="squad__decanus">Decanus</div><div class="body">Titus Valerius</div></div>
+          <span class="pips squad__pips"><span class="pip pip--fit"></span><span class="pip pip--fit"></span><span class="pip pip--fit"></span><span class="pip pip--fit"></span><span class="pip pip--fit"></span><span class="pip pip--fit"></span><span class="pip pip--wounded"></span><span class="pip pip--wounded"></span></span></div>
+        <div class="squad__collapsed">8 men · 2 wounded · stood the line at the ford · expand ›</div>
+      </div>
+      <div class="squad">
+        <div class="squad__head"><span class="squad__numeral">II</span><div><div class="squad__decanus">Decanus</div><div class="body">Aulus Rufus</div></div>
+          <span class="pips squad__pips"><span class="pip pip--fit"></span><span class="pip pip--fit"></span><span class="pip pip--fit"></span><span class="pip pip--fit"></span><span class="pip pip--fit"></span><span class="pip pip--fit"></span><span class="pip pip--fit"></span><span class="pip pip--wounded"></span></span></div>
+        <div class="squad__collapsed">8 men · 1 wounded · mauled at the ford · expand ›</div>
+      </div>
+      <div class="squad squad--open">
+        <div class="squad__head"><span class="squad__numeral">III</span><div><div class="squad__decanus">Decanus</div><div class="body">Decimus Silo</div></div>
+          <span class="pips squad__pips"><span class="pip pip--fit"></span><span class="pip pip--fit"></span><span class="pip pip--fit"></span><span class="pip pip--fit"></span><span class="pip pip--fit"></span><span class="pip pip--fit"></span><span class="pip pip--wounded"></span><span class="pip pip--wounded"></span></span></div>
+        <div style="margin-top:8px">
+          <div class="man"><span class="tier-disc tier-disc--veteranus"></span>Decimus Silo<span class="man__tag">Decanus</span></div>
+          <div class="man man--selected"><span class="tier-disc tier-disc--veteranus"></span>Publius Naso<span class="man__tag text-gold">Open</span></div>
+          <div class="man"><span class="tier-disc tier-disc--miles"></span>Titus Vibius</div>
+          <div class="man"><span class="tier-disc tier-disc--miles"></span>Servius Balbus</div>
+          <div class="man"><span class="tier-disc tier-disc--miles"></span>Caius Nerva<span class="man__tag text-amber">Hurt</span></div>
+          <div class="man"><span class="tier-disc tier-disc--tiro"></span>Spurius Macer<span class="man__tag text-amber">Hurt</span></div>
+          <div class="man"><span class="tier-disc tier-disc--tiro"></span>Vibius Crassus</div>
+          <div class="man"><span class="tier-disc tier-disc--miles"></span>Numerius Longus</div>
+        </div>
+      </div>
+      <div class="squad">
+        <div class="squad__head"><span class="squad__numeral">IV</span><div><div class="squad__decanus">Decanus</div><div class="body">Manius Cotta</div></div>
+          <span class="pips squad__pips"><span class="pip pip--fit"></span><span class="pip pip--fit"></span><span class="pip pip--fit"></span><span class="pip pip--fit"></span><span class="pip pip--fit"></span><span class="pip pip--fit"></span><span class="pip pip--fit"></span><span class="pip pip--fit"></span></span></div>
+        <div class="squad__collapsed">8 men · all fit · on sentry this watch · expand ›</div>
+      </div>
+      <div class="squad squad--thin">
+        <div class="squad__head"><span class="squad__numeral">V</span><div><div class="squad__decanus">Decanus</div><div class="body">Gnaeus Piso</div></div>
+          <span class="pips squad__pips"><span class="pip pip--fit"></span><span class="pip pip--fit"></span><span class="pip pip--fit"></span><span class="pip pip--fit"></span><span class="pip"></span><span class="pip"></span><span class="pip"></span><span class="pip"></span></span></div>
+        <div class="squad__collapsed text-amber">4 men · thin · fills from survivors met on the road · expand ›</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SOLDIER SHEET ===== -->
+<div class="modal">
+  <div class="modal__sheet soldier">
+    <button class="button-ghost modal__close">Close · Esc</button>
+
+    <div class="soldier__head">
+      <div class="disc-hero disc-hero--veteranus"></div>
+      <div>
+        <div class="eyebrow">Soldier · rank and file · 3 battles with the Century</div>
+        <div class="soldier__name">Publius Naso</div>
+        <div class="soldier__sub">Veteranus (Veteran) · Contubernium III · Joined Day 1</div>
+      </div>
+    </div>
+
+    <div class="tier-strip">
+      <div class="tstep tstep--done"><div class="tstep__mark"></div><div class="tstep__name">Tiro</div><div class="tstep__en">Recruit</div></div>
+      <div class="tstep__rail tstep__rail--done"></div>
+      <div class="tstep tstep--done"><div class="tstep__mark"></div><div class="tstep__name">Miles</div><div class="tstep__en">Trained</div></div>
+      <div class="tstep__rail tstep__rail--done"></div>
+      <div class="tstep tstep--now"><div class="tstep__mark"></div><div class="tstep__name">Veteranus</div><div class="tstep__en">Veteran</div></div>
+      <div class="tstep__rail"></div>
+      <div class="tstep tstep--next"><div class="tstep__mark"></div><div class="tstep__name">Evocatus</div><div class="tstep__en">Elite</div></div>
+      <div class="tier-strip__side">
+        <button class="pill" disabled><svg class="ico ico--sm"><use href="#i-swords"/></svg>Drill</button>
+        <span class="micro text-faint">EVOCATUS IS EARNED IN BATTLE ONLY</span>
+      </div>
+    </div>
+    <div class="tier-desc">Eligible for any office. Holds the line longer before breaking. Training no longer raises him.</div>
+
+    <div class="soldier__cols">
+      <!-- left: attitude, bars, record -->
+      <div class="soldier__col">
+        <div class="well attitude">
+          <div><div class="eyebrow">Attitude to you</div><div class="attitude__word text-good">Loyal</div></div>
+          <div class="micro text-dim" style="margin-left:auto; text-align:right">YOU PROMOTED HIM<br>AT THE FORD</div>
+        </div>
+
+        <div class="stat"><div class="stat__row"><span class="metric-label">Morale</span><span class="stat__word text-good">Confident</span></div><div class="bar bar--thick"><div class="bar__fill bar__fill--morale" style="width:62%"></div></div></div>
+        <div class="stat"><div class="stat__row"><span class="metric-label">Fitness</span><span class="stat__word text-brass">Fit</span></div><div class="bar bar--thick"><div class="bar__fill bar__fill--stamina" style="width:88%"></div></div></div>
+        <div class="stat"><div class="stat__row"><span class="metric-label">Equipment</span><span class="stat__word text-gold-bright">Serviceable</span></div><div class="bar bar--thick"><div class="bar__fill bar__fill--gold" style="width:78%"></div></div></div>
+
+        <div class="heading" style="margin-top:16px">Record</div>
+        <div class="tally-row">
+          <div class="tally"><div class="tally__label">Battles</div><div class="tally__value">3</div></div>
+          <div class="tally"><div class="tally__label">Kills</div><div class="tally__value">4</div></div>
+          <div class="tally"><div class="tally__label">Wounds</div><div class="tally__value tally__value--muted">1</div></div>
+          <div class="tally"><div class="tally__label">Orders obeyed</div><div class="tally__value" style="font-size:16px; padding-top:6px">All</div></div>
+        </div>
+        <div class="micro text-faint">SCUTUM · GLADIUS · 4 PILA · A CHERUSCAN TORC TAKEN AT THE FORD</div>
+      </div>
+
+      <!-- right: bonds and grudges -->
+      <div class="soldier__col">
+        <div class="row between"><span class="heading">Bonds and grudges</span><span class="micro text-dim">STRONGEST FIRST</span></div>
+        <div style="margin-top:8px">
+          <div class="tie tie--hover"><span class="tier-disc tier-disc--miles"></span><div><div class="tie__name">Titus Vibius <span class="text-dim">· III</span></div><div class="tie__why">Stood the line together at the ford</div></div><span class="tie__band text-good">Brother in arms</span></div>
+          <div class="tie tie--fallen"><span class="tier-disc tier-disc--miles"></span><div><div class="tie__name">Aulus Fimbria <span class="text-dim">· II · (fallen)</span></div><div class="tie__why">Fell beside him at the ford</div></div><span class="tie__band text-good">Brother in arms</span></div>
+          <div class="tie"><span class="tier-disc tier-disc--veteranus"></span><div><div class="tie__name">Decimus Silo <span class="text-dim">· III · Decanus</span></div><div class="tie__why">His decanus since Teutoburg</div></div><span class="tie__band text-dim">Comrade</span></div>
+          <div class="tie"><span class="tier-disc tier-disc--veteranus"></span><div><div class="tie__name">Manius Cotta <span class="text-dim">· IV · Decanus</span></div><div class="tie__why">Passed over for decanus when Cotta was raised</div></div><span class="tie__band text-danger">A grudge</span></div>
+        </div>
+        <div class="micro text-faint" style="margin-top:6px">A BROTHER IN ARMS BREAKING NEARBY PULLS HIS MORALE DOWN A STEP · A GRUDGE'S SQUAD WILL NOT COVER HIS FLANK</div>
+      </div>
+    </div>
+
+    <div class="soldier__foot">
+      <div class="action"><button class="button-primary">Appoint Decanus</button><span class="action__hint">Replaces Decimus Silo · <span class="text-danger">Silo takes a grudge</span></span></div>
+      <div class="action"><button class="button-ghost">Stand Easy</button><span class="action__hint">Excused from drill and sentry until dawn · fitness recovers</span></div>
+      <div class="grow"></div>
+      <div class="action"><button class="button-ghost">Close</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== mock notes (N) ===== -->
+<div class="mock-note" style="left:1414px;top:262px">Tier strip: climbed steps carry a solid marker, the current step is lit and glows, the next is an empty ring. There is no bar and no number — the step names are the readout. DRILL is disabled here because training cannot raise a Veteranus.</div>
+<div class="mock-note" style="left:1414px;top:470px">Attitude to you is one word from a five-word ladder (Hostile / Sullen / Content / Loyal / Devoted, proposed); the why-line names the single strongest driver from the relationship layer.</div>
+<div class="mock-note" style="left:1414px;top:640px">Bond rows sort strongest first. A fallen man's bond stays listed for the rest of the campaign because it still drives his morale. The hovered row opens the other man's sheet.</div>
+<div class="mock-note" style="left:270px;top:800px">APPOINT DECANUS from here replaces Decimus Silo — the hint under the button warns of the grudge before you click, so the cost is legible without a confirm box.</div>

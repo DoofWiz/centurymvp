@@ -1,0 +1,160 @@
+<!-- title: Commander -->
+<!-- desc: The COMMANDER screen: identity line and level bar for Marcus Cornelius, a three-card doctrine offer tinted by philosophy, and the doctrines already held in three columns. -->
+<!-- world: overmap -->
+<style>
+  .map { position: absolute; inset: 0; }
+  .cmd { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; }
+  .section-head { display: flex; justify-content: space-between; align-items: baseline; margin: 16px 0 8px; }
+
+  /* header block */
+  .cmd-head { display: flex; align-items: center; gap: 22px; padding: 14px 18px; background: rgba(250,244,226,.35); border: 1px solid var(--gold-dim); }
+  .portrait { width: 96px; height: 96px; border: 1px solid #9a7b3a; background: rgba(250,244,226,.45); display: flex; align-items: center; justify-content: center;
+              color: var(--gold); position: relative; flex: 0 0 auto; }
+  .portrait .tier-disc { position: absolute; right: -7px; bottom: -7px; border: 1px solid var(--ink-solid); }
+  .identity-line { font-size: 24px; color: var(--parchment); letter-spacing: 1px; line-height: 1.25; margin-top: 6px; }
+  .identity-line em { font-style: normal; }
+  .level { width: 300px; flex: 0 0 auto; border-left: 1px solid var(--gold-faint); padding-left: 22px; }
+  .level__num { font-family: var(--font-display); font-size: 22px; color: var(--gold-bright); letter-spacing: 3px; text-transform: uppercase; }
+
+  /* the offer */
+  .offer { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .doctrine { --tint: #9a7b3a; --tint-faint: rgba(154,123,58,.12); position: relative; display: flex; flex-direction: column; align-items: center; text-align: center;
+              gap: 8px; padding: 16px 18px; background: linear-gradient(180deg, var(--tint-faint), transparent 45%), rgba(250,244,226,.35); border: 1px solid var(--tint);
+              transition: background .12s; cursor: pointer; }
+  .doctrine--roman { --tint: #9a7b3a; --tint-faint: rgba(154,123,58,.12); }
+  .doctrine--survivor { --tint: #6d7a3c; --tint-faint: rgba(109,122,60,.12); }
+  .doctrine--barbarian { --tint: #8e2f22; --tint-faint: rgba(142,47,34,.12); }
+  .doctrine:hover, .doctrine--hover { background: linear-gradient(180deg, var(--tint-faint), transparent 45%), var(--ink-raised); box-shadow: inset 0 0 0 1px var(--tint); }
+  .doctrine__phil { font-size: var(--fs-micro); letter-spacing: 3px; font-weight: 700; text-transform: uppercase; color: var(--tint); }
+  .doctrine__icon { color: var(--tint); margin-top: 6px; }
+  .doctrine__name { font-family: var(--font-display); font-size: var(--fs-title); color: var(--parchment); letter-spacing: 2px; text-transform: uppercase; }
+  .doctrine__effect { font-size: var(--fs-body); color: var(--parchment); line-height: 1.45; min-height: 58px; }
+  .doctrine__lean { font-size: var(--fs-micro); color: var(--parchment-dim); letter-spacing: 1px; text-transform: uppercase; }
+  .doctrine .button-primary { margin-top: auto; width: 100%; border-color: var(--tint); color: var(--tint); }
+  .doctrine--roman .button-primary { color: var(--gold-bright); }
+
+  /* doctrines held */
+  .held { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .held__col { background: rgba(250,244,226,.35); border: 1px solid rgba(74,54,32,.35); padding: 10px 12px; }
+  .held__head { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid var(--gold-faint); padding-bottom: 6px; margin-bottom: 4px; }
+  .held__title { font-size: var(--fs-micro); letter-spacing: 3px; font-weight: 700; text-transform: uppercase; }
+  .held-row { display: flex; gap: 10px; align-items: flex-start; padding: 8px 0; border-bottom: 1px solid rgba(74,54,32,.15); }
+  .held-row:last-child { border-bottom: 0; }
+  .held-row__name { font-size: var(--fs-body); color: var(--parchment); letter-spacing: 1px; text-transform: uppercase; }
+  .held-row__effect { font-size: var(--fs-small); color: var(--parchment-dim); line-height: 1.35; margin-top: 2px; }
+  .held__none { font-size: var(--fs-body); color: var(--parchment-faint); padding: 10px 0 6px; }
+</style>
+
+<!-- ===== the world behind the sheet (stand-in for the 3D overmap, paused) ===== -->
+<svg class="map" viewBox="0 0 1920 1080" xmlns="http://www.w3.org/2000/svg">
+  <g fill="#9d9e69" opacity=".5"><ellipse cx="300" cy="260" rx="260" ry="150"/><ellipse cx="1650" cy="220" rx="300" ry="170"/><ellipse cx="1500" cy="900" rx="330" ry="150"/><ellipse cx="520" cy="880" rx="240" ry="120"/></g>
+  <g fill="#a69e6e" opacity=".45"><ellipse cx="760" cy="420" rx="140" ry="80"/><ellipse cx="1350" cy="640" rx="160" ry="90"/></g>
+  <path d="M1180 -20 C 1120 200, 1300 360, 1220 520 S 1080 820, 1180 1100" fill="none" stroke="#7f8b94" stroke-width="26" stroke-linecap="round" opacity=".6"/>
+  <path d="M120 720 C 400 640, 700 700, 960 560 S 1400 380, 1800 440" fill="none" stroke="#6b5230" stroke-width="4" stroke-dasharray="14 10" opacity=".5"/>
+  <g transform="translate(960,560)">
+    <ellipse rx="34" ry="14" fill="rgba(154,123,58,.15)" stroke="#9a7b3a" stroke-width="1.5"/>
+    <g fill="#8a6a34"><rect x="-22" y="-6" width="6" height="6"/><rect x="-13" y="-6" width="6" height="6"/><rect x="-4" y="-6" width="6" height="6"/><rect x="5" y="-6" width="6" height="6"/><rect x="14" y="-6" width="6" height="6"/><rect x="-18" y="2" width="6" height="6"/><rect x="-9" y="2" width="6" height="6"/><rect x="0" y="2" width="6" height="6"/><rect x="9" y="2" width="6" height="6"/></g>
+  </g>
+</svg>
+
+<!-- ===== overmap chrome ===== -->
+<div class="nav-bar">
+  <button class="nav-item nav-item--live">Inventory</button>
+  <button class="nav-item nav-item--live">Army</button>
+  <button class="nav-item nav-item--live nav-item--active">Commander</button>
+  <button class="nav-item nav-item--live">Save</button>
+  <button class="nav-item nav-item--live">Title</button>
+  <span class="nav-item nav-item--inert">Journal</span>
+  <span class="nav-item nav-item--inert">Encyclopedia</span>
+</div>
+<div class="time-box"><svg class="ico ico--sm ico--gold"><use href="#i-sun"/></svg><span class="time-box__clock">Day 4 · 2nd Watch</span><span class="text-dim small">14:20</span><span class="time-button time-button--active"><svg class="ico ico--sm"><use href="#i-pause"/></svg></span></div>
+
+<!-- ===== the sheet ===== -->
+<div class="modal">
+  <div class="modal__sheet overlay-sheet">
+    <div class="overlay-head">
+      <div><div class="modal__title">Commander</div><div class="modal__subtitle">Marcus Cornelius · Centurion · clock paused</div></div>
+      <button class="button-ghost">Close · Esc</button>
+    </div>
+
+    <div class="overlay-body">
+      <div class="cmd">
+        <!-- ===== header block ===== -->
+        <div class="cmd-head">
+          <div class="portrait"><svg class="ico ico--xl"><use href="#i-helmet"/></svg><span class="tier-disc tier-disc--officer tier-disc--lg"></span></div>
+          <div class="grow">
+            <div class="row gap" style="align-items:baseline"><span class="title">Marcus Cornelius</span><span class="eyebrow">Centurion · LEG · XVII · Centuria Valeria</span></div>
+            <div class="identity-line">The men see a <em class="text-gold-bright">True Roman</em> with a <em class="text-good">Survivor's</em> caution.</div>
+            <div class="row gap-loose" style="margin-top:8px">
+              <span class="small text-dim caps">3 battles · 2 victories · 1 withdrawal</span>
+              <span class="small text-faint caps">In command since Day 1 · 41 men follow</span>
+            </div>
+          </div>
+          <div class="level">
+            <div class="row between" style="align-items:baseline"><span class="level__num">Level 3</span><span class="micro text-dim">TO LEVEL 4</span></div>
+            <div class="bar bar--fat" style="margin-top:8px"><div class="bar__fill bar__fill--gold" style="width:58%"></div></div>
+            <div class="micro text-faint" style="margin-top:7px">EXPERIENCE COMES FROM BATTLE · EACH LEVEL BRINGS ONE OFFER</div>
+          </div>
+        </div>
+
+        <!-- ===== the offer ===== -->
+        <div class="section-head"><span class="heading">The offer</span><span class="micro text-faint">ONE DOCTRINE FROM THREE · IT KEEPS UNTIL YOU CHOOSE · THE NEXT OFFER COMES AT LEVEL 4</span></div>
+        <div class="offer">
+          <div class="doctrine doctrine--roman doctrine--hover">
+            <div class="doctrine__phil">True Roman</div>
+            <svg class="ico ico--xl doctrine__icon"><use href="#i-banner"/></svg>
+            <div class="doctrine__name">Roman Order</div>
+            <div class="doctrine__effect">Orders reach every squad sooner. Stacks with the Optio's Second Voice.</div>
+            <div class="doctrine__lean">Taking it moves the men's view toward the Roman</div>
+            <button class="button-primary">Take this doctrine</button>
+          </div>
+          <div class="doctrine doctrine--survivor">
+            <div class="doctrine__phil">Survivor</div>
+            <svg class="ico ico--xl doctrine__icon"><use href="#i-map"/></svg>
+            <div class="doctrine__name">Know the Land</div>
+            <div class="doctrine__effect">The column marches faster on the overmap. Forest and marsh slow it less; stamina drains as before.</div>
+            <div class="doctrine__lean">Taking it moves the men's view toward the Survivor</div>
+            <button class="button-primary">Take this doctrine</button>
+          </div>
+          <div class="doctrine doctrine--barbarian">
+            <div class="doctrine__phil">Barbarian</div>
+            <svg class="ico ico--xl doctrine__icon"><use href="#i-swords"/></svg>
+            <div class="doctrine__name">War Cry</div>
+            <div class="doctrine__effect">The first charge of a battle hits harder. The enemy checks morale on contact.</div>
+            <div class="doctrine__lean">Taking it moves the men's view toward the Barbarian</div>
+            <button class="button-primary">Take this doctrine</button>
+          </div>
+        </div>
+
+        <!-- ===== doctrines held ===== -->
+        <div class="section-head"><span class="heading">Doctrines held</span><span class="micro text-faint">3 HELD · NOTHING IS UNLEARNED</span></div>
+        <div class="held">
+          <div class="held__col">
+            <div class="held__head"><span class="held__title text-gold">True Roman</span><span class="micro text-dim">2 HELD</span></div>
+            <div class="held-row"><svg class="ico ico--gold"><use href="#i-shield"/></svg><div><div class="held-row__name">Close Order</div><div class="held-row__effect">In Line, each man's shield covers the man beside him. More frontal blows are blocked.</div></div></div>
+            <div class="held-row"><svg class="ico ico--gold"><use href="#i-helmet"/></svg><div><div class="held-row__name">Iron Discipline</div><div class="held-row__effect">Men break one morale step later while an officer stands in the line.</div></div></div>
+          </div>
+          <div class="held__col">
+            <div class="held__head"><span class="held__title text-good">Survivor</span><span class="micro text-dim">1 HELD</span></div>
+            <div class="held-row"><svg class="ico text-good"><use href="#i-hound"/></svg><div><div class="held-row__name">Forager's Eye</div><div class="held-row__effect">Hunters return with more game for the same watch. Pelts come more often.</div></div></div>
+          </div>
+          <div class="held__col">
+            <div class="held__head"><span class="held__title text-danger">Barbarian</span><span class="micro text-dim">NONE</span></div>
+            <div class="held__none">None held.</div>
+            <div class="micro text-faint">A FIRST BARBARIAN DOCTRINE REWRITES THE IDENTITY LINE AT ONCE.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="overlay-foot">
+      <span class="body body--dim">Doctrines are the only lever on how the men see you. What they see decides which offers come and how officers react at points of interest.</span>
+      <div class="row gap-tight"><button class="button-ghost">Decide later</button><button class="button-ghost">Close · Esc</button></div>
+    </div>
+  </div>
+</div>
+
+<div class="mock-note" style="left:1592px;top:150px">The XP bar carries no number; TO LEVEL 4 is the whole readout. The coloured words in the identity line reuse the card tints (gold Roman, olive Survivor, blood Barbarian).</div>
+<div class="mock-note" style="left:1592px;top:236px">Percentages are never shown in-game. The identity line is the only readout of the three hidden philosophy scores; it rewrites itself when the lead changes or a second philosophy pulls close ("...with a Survivor's caution").</div>
+<div class="mock-note" style="left:1592px;top:440px">Offers are weighted by the hidden scores: a Roman-leaning commander draws Roman cards more often. One of each is the neutral draw shown here; two Roman and one other is the common case at this state. Effects state mechanics only, no numbers.</div>
+<div class="mock-note" style="left:1592px;top:740px">DOCTRINES HELD is a permanent record; nothing is unlearned. Empty columns still render (NONE) so the block never reflows when a first Barbarian doctrine arrives.</div>

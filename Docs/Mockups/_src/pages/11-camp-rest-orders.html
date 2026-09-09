@@ -1,0 +1,201 @@
+<!-- title: Camp — Rest & Orders -->
+<!-- desc: The camp's REST & ORDERS tab: two rest options with their projected effects, the day's watch strip, and the orders a camp can issue. -->
+<!-- world: camp -->
+<style>
+  /* status + watch strip */
+  .status { display: flex; align-items: center; gap: 8px; }
+  .status__dot { width: 8px; height: 8px; background: var(--olive); box-shadow: 0 0 8px rgba(109,122,60,.5); }
+  .watch-wrap { position: relative; padding-bottom: 24px; margin-top: 6px; }
+  .watch-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
+  .watch { position: relative; height: 34px; background: rgba(250,244,226,.35); border: 1px solid rgba(74,54,32,.35); display: flex; align-items: center;
+           justify-content: center; gap: 8px; font-size: var(--fs-micro); letter-spacing: 2px; text-transform: uppercase; color: var(--parchment-faint); overflow: hidden; }
+  .watch > svg, .watch > span { position: relative; }
+  .watch--night { color: var(--parchment-dim); }
+  .watch--now { border-color: var(--gold); color: var(--gold-bright); }
+  .watch__fill { position: absolute; left: 0; top: 0; bottom: 0; width: 40%; background: rgba(154,123,58,.18); }
+  .watch__now { position: absolute; left: 40%; top: 0; bottom: 0; width: 2px; background: var(--gold-bright); }
+  .span-bar { position: absolute; left: 35%; right: 0; bottom: 8px; height: 7px; border: 1px solid var(--gold); border-top: 0; }
+  .span-bar__label { position: absolute; left: 50%; bottom: -13px; transform: translateX(-50%); font-size: var(--fs-micro); letter-spacing: 2px;
+                     color: var(--gold); text-transform: uppercase; background: var(--ink-solid); padding: 0 8px; white-space: nowrap; }
+
+  /* rest option cards */
+  .option { display: flex; flex-direction: column; background: rgba(250,244,226,.35); border: 1px solid rgba(74,54,32,.35); padding: 14px 16px; margin-top: 14px;
+            cursor: pointer; transition: border-color .12s, background .12s; }
+  .option:hover, .option--hover { border-color: #9a7b3a; background: rgba(255,250,232,.55); box-shadow: inset 0 0 0 1px rgba(154,123,58,.35); }
+  .option__head { display: flex; justify-content: space-between; align-items: baseline; }
+  .option__name { font-family: var(--font-display); font-size: var(--fs-title); color: var(--gold-bright); letter-spacing: 4px; text-transform: uppercase; font-weight: 700; }
+  .option__len { font-size: var(--fs-small); color: var(--parchment-dim); letter-spacing: 2px; text-transform: uppercase; }
+  .effects { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 14px; margin-top: 12px; }
+  .effect { display: flex; align-items: center; gap: 10px; padding: 7px 10px; background: rgba(250,244,226,.35); border: 1px solid rgba(74,54,32,.35); }
+  .effect__label { font-size: var(--fs-micro); color: var(--parchment-dim); letter-spacing: 2px; text-transform: uppercase; }
+  .effect__value { font-size: var(--fs-body); color: var(--parchment); margin-top: 1px; }
+  .effect--warn { grid-column: 1 / -1; border-color: rgba(176,132,48,.55); }
+  .effect--warn .effect__label, .effect--warn .effect__value, .effect--warn .ico { color: var(--amber); }
+  .option__foot { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; }
+  .option__chev { font-size: 22px; line-height: 1; color: var(--gold); }
+  .option--hover .option__chev { color: var(--gold-bright); }
+
+  /* orders */
+  .order { display: flex; align-items: center; gap: 16px; padding: 14px 16px; background: rgba(250,244,226,.35); border: 1px solid rgba(74,54,32,.4); margin-top: 10px;
+           cursor: pointer; transition: border-color .12s, background .12s; }
+  .order:hover { border-color: #9a7b3a; background: rgba(255,250,232,.55); }
+  .order__name { font-size: var(--fs-large); letter-spacing: 3px; text-transform: uppercase; color: var(--parchment); }
+  .order__desc { font-size: var(--fs-body); color: var(--parchment-dim); margin-top: 3px; line-height: 1.4; }
+  .order__hint { font-size: var(--fs-micro); letter-spacing: 1px; text-transform: uppercase; color: var(--gold); margin-top: 6px; }
+  .order__hint.text-danger { color: var(--blood); }
+  .order__chev { margin-left: auto; font-size: 24px; line-height: 1; color: var(--gold); }
+  .order--disabled { cursor: default; border-color: var(--gold-faint); background: rgba(250,244,226,.18); }
+  .order--disabled:hover { border-color: var(--gold-faint); background: rgba(250,244,226,.18); }
+  .order--disabled .ico, .order--disabled .order__chev { color: var(--parchment-faint); }
+  .order--disabled .order__name { color: var(--parchment-faint); }
+  .order--disabled .order__desc { color: var(--parchment-faint); }
+
+  /* wounded roster */
+  .wrow { display: grid; grid-template-columns: 14px 1fr 36px 90px 190px; align-items: center; gap: 10px; padding: 6px 10px; border-bottom: 1px solid var(--gold-faint); }
+  .wrow:last-child { border-bottom: 0; }
+  .wrow__name { font-size: var(--fs-body); color: var(--parchment); }
+  .wrow__sq { font-size: var(--fs-small); color: var(--parchment-dim); letter-spacing: 2px; }
+  .wrow__cond { font-size: var(--fs-small); letter-spacing: 2px; text-transform: uppercase; }
+  .wrow__next { display: flex; align-items: center; gap: 6px; font-size: var(--fs-micro); letter-spacing: 1px; text-transform: uppercase; color: var(--parchment-dim); justify-content: flex-end; }
+  .wrow__next--on { color: var(--gold-bright); }
+</style>
+
+<!-- ===== camp frame ===== -->
+<div class="top-bar">
+  <div class="unit-identity"><div class="identity__legion">Marching Camp</div><div class="identity__name">Centuria Valeria</div></div>
+  <div class="resource-strip">
+    <div class="resource"><svg class="ico resource__icon"><use href="#i-helmet"/></svg><div><div class="resource__label">Men</div><div class="resource__value">41</div></div></div>
+    <div class="resource"><svg class="ico resource__icon"><use href="#i-wheat"/></svg><div><div class="resource__label">Food</div><div class="resource__value resource__value--low">6 days</div></div></div>
+    <div class="resource"><svg class="ico resource__icon"><use href="#i-fire"/></svg><div><div class="resource__label">Firewood</div><div class="resource__value">14</div></div></div>
+    <div class="resource"><svg class="ico resource__icon"><use href="#i-bandage"/></svg><div><div class="resource__label">Medicine</div><div class="resource__value">3 doses</div></div></div>
+    <div class="resource"><svg class="ico resource__icon"><use href="#i-coin"/></svg><div><div class="resource__label">Coin</div><div class="resource__value">212</div></div></div>
+    <div class="resource"><svg class="ico resource__icon"><use href="#i-denarii"/></svg><div><div class="resource__label">Denarii</div><div class="resource__value">38</div></div></div>
+    <div class="resource"><svg class="ico resource__icon"><use href="#i-shield"/></svg><div><div class="resource__label">Equipment</div><div class="resource__value">Serviceable</div></div></div>
+  </div>
+  <div class="morale-block"><div class="row between"><span class="metric-label">Morale</span><span class="text-good caps small">Confident</span></div><div class="bar bar--thick"><div class="bar__fill bar__fill--morale" style="width:62%"></div></div></div>
+</div>
+<div class="camp-tabs pill-row" data-tabs>
+  <button class="pill" data-tab="century">The Century</button>
+  <button class="pill pill--active" data-tab="rest">Rest &amp; Orders</button>
+  <button class="pill" data-tab="craft">Crafting</button>
+  <button class="pill" data-tab="stations">Camp Stations</button>
+</div>
+
+<div class="camp-page" data-page="rest">
+  <div class="camp-half">
+
+    <!-- ===== REST THE COLUMN ===== -->
+    <div class="panel col">
+      <div class="row between">
+        <div><div class="eyebrow">Camp · Day 4 · 2nd watch</div><div class="page-title">Rest the Column</div></div>
+        <div class="status"><span class="status__dot"></span><span class="body">The camp is quiet.</span></div>
+      </div>
+      <div class="micro text-dim" style="margin-top:6px">NO HOSTILE PARTY IN SIGHT · CONTUBERNIUM IV STANDS SENTRY · THE TESSERARIUS HAS SET THE WATCHWORD</div>
+      <div class="rule"></div>
+
+      <div class="eyebrow">The day's watches</div>
+      <div class="watch-wrap">
+        <div class="watch-strip">
+          <div class="watch"><svg class="ico ico--sm"><use href="#i-sun"/></svg><span>1st watch</span></div>
+          <div class="watch watch--now"><div class="watch__fill"></div><div class="watch__now"></div><svg class="ico ico--sm"><use href="#i-sun"/></svg><span>2nd watch · now</span></div>
+          <div class="watch watch--night"><svg class="ico ico--sm"><use href="#i-moon"/></svg><span>3rd watch</span></div>
+          <div class="watch watch--night"><svg class="ico ico--sm"><use href="#i-moon"/></svg><span>4th watch</span></div>
+        </div>
+        <div class="span-bar"><span class="span-bar__label">Until dawn covers this</span></div>
+      </div>
+
+      <!-- option A -->
+      <div class="option">
+        <div class="option__head"><span class="option__name">Rest a Watch</span><span class="option__len">3 hours</span></div>
+        <div class="effects">
+          <div class="effect"><svg class="ico ico--gold"><use href="#i-fire"/></svg><div><div class="effect__label">Firewood</div><div class="effect__value">−1</div></div></div>
+          <div class="effect"><svg class="ico ico--gold"><use href="#i-cross"/></svg><div><div class="effect__label">Wounds</div><div class="effect__value">The medicus tends 2 men</div></div></div>
+          <div class="effect"><svg class="ico ico--gold"><use href="#i-boot"/></svg><div><div class="effect__label">Stamina</div><div class="effect__value">Rested</div></div></div>
+          <div class="effect"><svg class="ico ico--gold"><use href="#i-wheat"/></svg><div><div class="effect__label">Food</div><div class="effect__value">−41</div></div></div>
+        </div>
+        <div class="option__foot"><span class="micro text-dim">ENDS AT 17:20 · STILL THE 2ND WATCH · SENTRIES CHANGE ONCE</span><span class="option__chev">›</span></div>
+      </div>
+
+      <!-- option B — hovered -->
+      <div class="option option--hover">
+        <div class="option__head"><span class="option__name">Until Dawn</span><span class="option__len">through the night</span></div>
+        <div class="effects">
+          <div class="effect"><svg class="ico ico--gold"><use href="#i-fire"/></svg><div><div class="effect__label">Firewood</div><div class="effect__value">−3</div></div></div>
+          <div class="effect"><svg class="ico ico--gold"><use href="#i-cross"/></svg><div><div class="effect__label">Wounds</div><div class="effect__value">The medicus tends 5 men</div></div></div>
+          <div class="effect"><svg class="ico ico--gold"><use href="#i-boot"/></svg><div><div class="effect__label">Stamina</div><div class="effect__value">Fully rested</div></div></div>
+          <div class="effect"><svg class="ico ico--gold"><use href="#i-wheat"/></svg><div><div class="effect__label">Food</div><div class="effect__value">−41 · one day</div></div></div>
+          <div class="effect effect--warn"><svg class="ico"><use href="#i-moon"/></svg><div><div class="effect__label">Warning</div><div class="effect__value">Night marches nearby: raiders move in the dark</div></div></div>
+        </div>
+        <div class="option__foot"><span class="micro text-dim">ENDS AT DAWN · DAY 5 · 1ST WATCH · <span class="text-gold">THE SCOUT'S REPORT ARRIVES WITH THE LIGHT</span></span><span class="option__chev">›</span></div>
+      </div>
+
+      <div class="grow"></div>
+      <div class="micro text-faint">RESTING ADVANCES THE CLOCK · WARBANDS KEEP MOVING WHILE THE COLUMN SLEEPS · A SENTRY'S SIGHTING WAKES THE CAMP</div>
+    </div>
+
+    <!-- ===== ORDERS ===== -->
+    <div class="panel col">
+      <div class="row between">
+        <div><div class="eyebrow">Camp · Orders</div><div class="page-title">Orders</div></div>
+        <span class="micro text-dim">CARRIED OUT DURING THE NEXT REST · THE MEN NAMED DO NOT REST</span>
+      </div>
+      <div class="rule"></div>
+
+      <div class="order">
+        <svg class="ico ico--lg ico--gold"><use href="#i-eye"/></svg>
+        <div class="grow">
+          <div class="order__name">Send the Scout</div>
+          <div class="order__desc">Sextus Varro rides out at first light; his report arrives after the rest.</div>
+          <div class="order__hint">Awards the Speculator tradition</div>
+        </div>
+        <span class="order__chev">›</span>
+      </div>
+
+      <div class="order order--disabled">
+        <svg class="ico ico--lg"><use href="#i-swords"/></svg>
+        <div class="grow">
+          <div class="order__name">Drill the Ranks</div>
+          <div class="order__desc">One contubernium drills for a watch. Tiro rise to Miles; men above Miles gain nothing.</div>
+          <div class="order__hint text-danger">Needs a Training Ground built</div>
+        </div>
+        <span class="order__chev">›</span>
+      </div>
+
+      <div class="order">
+        <svg class="ico ico--lg ico--gold"><use href="#i-hound"/></svg>
+        <div class="grow">
+          <div class="order__name">Send Hunters</div>
+          <div class="order__desc">Four men go out with the hound and miss the rest.</div>
+          <div class="order__hint">Costs a watch · raw game 2–4, sometimes pelts · scaled by the Scout's Fire</div>
+        </div>
+        <span class="order__chev">›</span>
+      </div>
+
+      <div class="rule" style="margin-top:16px"></div>
+      <div class="row between"><span class="heading">The wounded</span><span class="micro text-dim">5 MEN · 3 DOSES · THE MEDICUS TENDS 2 A WATCH</span></div>
+      <div class="well" style="margin-top:6px; padding:0">
+        <div class="wrow"><span class="tier-disc tier-disc--miles"></span><span class="wrow__name">Hostus Rullus</span><span class="wrow__sq">I</span><span class="wrow__cond text-danger">Grave</span><span class="wrow__next wrow__next--on"><svg class="ico ico--sm"><use href="#i-cross"/></svg>Next · spends a dose</span></div>
+        <div class="wrow"><span class="tier-disc tier-disc--miles"></span><span class="wrow__name">Caius Nerva</span><span class="wrow__sq">III</span><span class="wrow__cond text-amber">Hurt</span><span class="wrow__next wrow__next--on"><svg class="ico ico--sm"><use href="#i-cross"/></svg>Next · spends a dose</span></div>
+        <div class="wrow"><span class="tier-disc tier-disc--tiro"></span><span class="wrow__name">Spurius Macer</span><span class="wrow__sq">III</span><span class="wrow__cond text-amber">Hurt</span><span class="wrow__next">Waits · the watch after</span></div>
+        <div class="wrow"><span class="tier-disc tier-disc--veteranus"></span><span class="wrow__name">Marcus Ovidius</span><span class="wrow__sq">I</span><span class="wrow__cond text-brass">Mending</span><span class="wrow__next">Mends without a dose</span></div>
+        <div class="wrow"><span class="tier-disc tier-disc--miles"></span><span class="wrow__name">Cnaeus Dento</span><span class="wrow__sq">II</span><span class="wrow__cond text-brass">Mending</span><span class="wrow__next">Mends without a dose</span></div>
+      </div>
+      <div class="micro text-faint" style="margin-top:6px">GRAVE WOUNDS WORSEN EACH WATCH WITHOUT A DOSE · MENDING MEN MARCH BUT FIGHT WORSE · A NIGHT'S REST MENDS ONE STEP</div>
+
+      <div class="grow"></div>
+      <div class="row between">
+        <span class="micro text-dim">STANDING · SENTRIES DOUBLED BY THE TESSERARIUS</span>
+        <button class="button-ghost">Change the watch rota</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="camp-footer"><span class="body body--dim">A hollow off the forest track · Day 4 · 2nd watch</span><button class="button-primary">Break Camp</button></div>
+
+<!-- ===== mock notes (N) ===== -->
+<div class="mock-note" style="left:330px;top:250px">Watch strip: the lit segment is the current watch, the bright line is "now". The bracket shows what UNTIL DAWN covers. Hours are never printed on the strip — the footer clock does that.</div>
+<div class="mock-note" style="left:700px;top:600px">UNTIL DAWN is the hovered card (gold border, raised ink). Projected effects are recomputed from the sim each time the tab opens; the amber warning row only appears when a hostile party is within a night's march.</div>
+<div class="mock-note" style="left:1560px;top:330px">Disabled orders stay visible with the reason in red — the player learns what a station unlocks before building it. The row does not raise on hover.</div>
+<div class="mock-note" style="left:1560px;top:560px">Invented for the mock: a wounded roster tied to the rest projection ("tends 2 men" = these two rows). Grave / Hurt / Mending is a proposed three-word wound ladder; no percentages anywhere.</div>

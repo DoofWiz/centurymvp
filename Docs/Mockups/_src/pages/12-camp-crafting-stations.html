@@ -1,0 +1,306 @@
+<!-- title: Camp — Crafting & Stations -->
+<!-- desc: The camp's CRAFTING tab (recipe cards with inputs, stock and CRAFT ALL) and its CAMP STATIONS tab (six station cards with level pips, effects and build costs). -->
+<!-- world: camp -->
+<style>
+  .craft-layout { display: flex; gap: var(--pad-loose); height: 100%; }
+  .ledger { flex: 0 0 340px; }
+
+  /* recipe cards */
+  .recipes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 8px; }
+  .recipe { display: flex; flex-direction: column; background: rgba(250,244,226,.35); border: 1px solid rgba(74,54,32,.4); padding: 12px 14px; transition: border-color .12s, background .12s; }
+  .recipe:hover, .recipe--hover { border-color: #9a7b3a; background: rgba(255,250,232,.55); box-shadow: inset 0 0 0 1px rgba(154,123,58,.35); }
+  .recipe--blocked { border-color: var(--gold-faint); }
+  .recipe__station { display: flex; align-items: center; gap: 6px; font-size: var(--fs-micro); color: var(--gold); letter-spacing: 2px; text-transform: uppercase; }
+  .recipe__name { font-size: var(--fs-large); color: var(--parchment); letter-spacing: 1px; margin-top: 4px; }
+  .recipe__name em { font-style: normal; color: var(--parchment-dim); font-size: var(--fs-body); }
+  .io { display: grid; grid-template-columns: 1fr 24px 1fr; align-items: center; gap: 6px; margin-top: 10px; }
+  .io__box { background: rgba(250,244,226,.35); border: 1px solid rgba(74,54,32,.35); padding: 6px 8px; min-height: 58px; }
+  .io__label { font-size: var(--fs-micro); color: var(--parchment-faint); letter-spacing: 2px; text-transform: uppercase; }
+  .io__line { font-size: var(--fs-body); color: var(--parchment); margin-top: 2px; }
+  .io__stock { font-size: var(--fs-micro); color: var(--parchment-dim); letter-spacing: 1px; margin-top: 3px; text-transform: uppercase; }
+  .io__stock--short { color: var(--amber); }
+  .io__stock--none { color: var(--blood); }
+  .io__stock.text-gold { color: var(--gold); }
+  .io__arrow { text-align: center; font-size: 22px; color: var(--gold); }
+  .io__box--out { border-color: var(--gold-dim); }
+  .io__box--out .io__line { color: var(--gold-bright); }
+  .recipe__mech { font-size: var(--fs-small); color: var(--parchment-dim); margin-top: 8px; line-height: 1.4; flex: 1 1 auto; }
+  .recipe__foot { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+  .recipe__why { margin-left: auto; font-size: var(--fs-micro); letter-spacing: 1px; text-transform: uppercase; color: var(--blood); }
+
+  /* queue strip */
+  .queue { display: flex; align-items: center; gap: 10px; margin-top: 12px; padding: 8px 12px; background: rgba(250,244,226,.35); border: 1px solid rgba(74,54,32,.35); }
+  .queue__item { display: inline-flex; align-items: center; gap: 8px; background: var(--ink); border: 1px solid var(--gold-dim); padding: 4px 8px; font-size: var(--fs-micro); letter-spacing: 2px; text-transform: uppercase; color: var(--parchment); }
+  .queue__x { color: var(--parchment-dim); }
+
+  /* ledger column */
+  .ledger__big { font-family: var(--font-display); font-size: 30px; letter-spacing: 3px; color: var(--amber); font-weight: 700; margin-top: 2px; }
+  .ledger__row { display: flex; justify-content: space-between; gap: 8px; font-size: var(--fs-small); padding: 4px 0; border-bottom: 1px solid var(--gold-faint); }
+  .ledger__row:last-child { border-bottom: 0; }
+  .ledger__k { color: var(--parchment-dim); letter-spacing: 1px; text-transform: uppercase; font-size: var(--fs-micro); }
+  .ledger__v { color: var(--parchment); text-align: right; }
+  .ledger__v.text-gold { color: var(--gold); }
+
+  /* station cards */
+  .stations { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 8px; }
+  .station { display: flex; flex-direction: column; background: rgba(250,244,226,.35); border: 1px solid rgba(74,54,32,.4); padding: 14px 16px; min-height: 300px; transition: border-color .12s, background .12s; }
+  .station:hover, .station--hover { border-color: #9a7b3a; background: rgba(255,250,232,.55); box-shadow: inset 0 0 0 1px rgba(154,123,58,.35); }
+  .station--unbuilt { border-style: dashed; }
+  .station__head { display: flex; align-items: center; gap: 12px; }
+  .station__name { font-family: var(--font-display); font-size: var(--fs-title); color: var(--gold-bright); letter-spacing: 3px; text-transform: uppercase; font-weight: 700; }
+  .station__level { font-size: var(--fs-micro); color: var(--parchment-dim); letter-spacing: 2px; text-transform: uppercase; margin-top: 2px; }
+  .station__level--none { color: var(--blood); }
+  .station__pips { margin-left: auto; }
+  .station__effect { font-size: var(--fs-body); color: var(--parchment); line-height: 1.45; margin-top: 4px; }
+  .station__next { font-size: var(--fs-small); color: var(--parchment-dim); margin-top: 8px; line-height: 1.4; }
+  .station__next b { font-weight: 700; color: var(--gold); letter-spacing: 2px; text-transform: uppercase; font-size: var(--fs-micro); }
+  .station__foot { display: flex; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 12px; }
+  .cost { font-size: var(--fs-small); color: var(--parchment); letter-spacing: 1px; text-transform: uppercase; }
+  .cost--short { color: var(--blood); }
+  .stock-strip { display: flex; align-items: center; gap: 26px; margin-top: 8px; }
+</style>
+
+<!-- ===== camp frame ===== -->
+<div class="top-bar">
+  <div class="unit-identity"><div class="identity__legion">Marching Camp</div><div class="identity__name">Centuria Valeria</div></div>
+  <div class="resource-strip">
+    <div class="resource"><svg class="ico resource__icon"><use href="#i-helmet"/></svg><div><div class="resource__label">Men</div><div class="resource__value">41</div></div></div>
+    <div class="resource"><svg class="ico resource__icon"><use href="#i-wheat"/></svg><div><div class="resource__label">Food</div><div class="resource__value resource__value--low">6 days</div></div></div>
+    <div class="resource"><svg class="ico resource__icon"><use href="#i-fire"/></svg><div><div class="resource__label">Firewood</div><div class="resource__value">14</div></div></div>
+    <div class="resource"><svg class="ico resource__icon"><use href="#i-bandage"/></svg><div><div class="resource__label">Medicine</div><div class="resource__value">3 doses</div></div></div>
+    <div class="resource"><svg class="ico resource__icon"><use href="#i-coin"/></svg><div><div class="resource__label">Coin</div><div class="resource__value">212</div></div></div>
+    <div class="resource"><svg class="ico resource__icon"><use href="#i-denarii"/></svg><div><div class="resource__label">Denarii</div><div class="resource__value">38</div></div></div>
+    <div class="resource"><svg class="ico resource__icon"><use href="#i-shield"/></svg><div><div class="resource__label">Equipment</div><div class="resource__value">Serviceable</div></div></div>
+  </div>
+  <div class="morale-block"><div class="row between"><span class="metric-label">Morale</span><span class="text-good caps small">Confident</span></div><div class="bar bar--thick"><div class="bar__fill bar__fill--morale" style="width:62%"></div></div></div>
+</div>
+<div class="camp-tabs pill-row" data-tabs>
+  <button class="pill" data-tab="century">The Century</button>
+  <button class="pill" data-tab="rest">Rest &amp; Orders</button>
+  <button class="pill pill--active" data-tab="craft">Crafting</button>
+  <button class="pill" data-tab="stations">Camp Stations</button>
+</div>
+
+<!-- ===================================================================== CRAFTING ===== -->
+<div class="camp-page" data-page="craft">
+  <div class="craft-layout">
+
+    <div class="panel col grow">
+      <div class="row between">
+        <div><div class="eyebrow">Camp · Crafting</div><div class="page-title">Crafting</div></div>
+        <span class="micro text-dim">RECIPES RUN AT THEIR STATION DURING THE NEXT REST · A WATCH FINISHES TWO · THE NIGHT FINISHES ALL</span>
+      </div>
+      <div class="rule"></div>
+
+      <div class="recipes">
+        <!-- 1 flatbread — hovered -->
+        <div class="recipe recipe--hover">
+          <div class="recipe__station"><svg class="ico ico--sm"><use href="#i-cauldron"/></svg>Culina · Lv 2</div>
+          <div class="recipe__name">Bake flatbread <em>(grain)</em></div>
+          <div class="io">
+            <div class="io__box"><div class="io__label">Inputs</div><div class="io__line">grain 2 · firewood 1</div><div class="io__stock">grain 6 in store · firewood 14</div></div>
+            <span class="io__arrow">›</span>
+            <div class="io__box io__box--out"><div class="io__label">Output</div><div class="io__line">4 rations</div><div class="io__stock text-gold">Culina Lv 2 yield</div></div>
+          </div>
+          <div class="recipe__mech">Flatbread keeps 6 days on the march. Eaten cold; no fire needed once baked.</div>
+          <div class="recipe__foot"><button class="button-primary">Craft</button><button class="button-ghost">Craft all × 3</button></div>
+        </div>
+
+        <!-- 2 bread -->
+        <div class="recipe">
+          <div class="recipe__station"><svg class="ico ico--sm"><use href="#i-cauldron"/></svg>Culina · Lv 2</div>
+          <div class="recipe__name">Bake bread <em>(flour)</em></div>
+          <div class="io">
+            <div class="io__box"><div class="io__label">Inputs</div><div class="io__line">flour 2 · firewood 1</div><div class="io__stock io__stock--short">flour 2 in store · firewood 14</div></div>
+            <span class="io__arrow">›</span>
+            <div class="io__box io__box--out"><div class="io__label">Output</div><div class="io__line">6 rations</div><div class="io__stock text-gold">Culina Lv 2 yield</div></div>
+          </div>
+          <div class="recipe__mech">Bread keeps 3 days. The most rations for the least fuel while flour lasts.</div>
+          <div class="recipe__foot"><button class="button-primary">Craft</button><button class="button-ghost">Craft all × 1</button></div>
+        </div>
+
+        <!-- 3 roast game -->
+        <div class="recipe">
+          <div class="recipe__station"><svg class="ico ico--sm"><use href="#i-cauldron"/></svg>Culina · Lv 2</div>
+          <div class="recipe__name">Roast game</div>
+          <div class="io">
+            <div class="io__box"><div class="io__label">Inputs</div><div class="io__line">raw game 1 · firewood 1</div><div class="io__stock">raw game 3 in store · firewood 14</div></div>
+            <span class="io__arrow">›</span>
+            <div class="io__box io__box--out"><div class="io__label">Output</div><div class="io__line">3 rations</div><div class="io__stock text-gold">Culina Lv 2 yield</div></div>
+          </div>
+          <div class="recipe__mech">Raw game spoils after 2 days; roast keeps 4. Roasting men eat hot: stamina recovers faster that night.</div>
+          <div class="recipe__foot"><button class="button-primary">Craft</button><button class="button-ghost">Craft all × 3</button></div>
+        </div>
+
+        <!-- 4 trail mix -->
+        <div class="recipe">
+          <div class="recipe__station"><svg class="ico ico--sm"><use href="#i-cauldron"/></svg>Culina · Lv 2</div>
+          <div class="recipe__name">Pack trail mix</div>
+          <div class="io">
+            <div class="io__box"><div class="io__label">Inputs</div><div class="io__line">grain 1 · dried fruit 1</div><div class="io__stock io__stock--short">grain 6 in store · dried fruit 2</div></div>
+            <span class="io__arrow">›</span>
+            <div class="io__box io__box--out"><div class="io__label">Output</div><div class="io__line">3 rations</div><div class="io__stock">No fire · no smoke</div></div>
+          </div>
+          <div class="recipe__mech">Keeps 10 days. Can be eaten on the march without halting; the only ration a cold camp can make.</div>
+          <div class="recipe__foot"><button class="button-primary">Craft</button><button class="button-ghost">Craft all × 2</button></div>
+        </div>
+
+        <!-- 5 field dressings -->
+        <div class="recipe">
+          <div class="recipe__station"><svg class="ico ico--sm"><use href="#i-cross"/></svg>Medical Tent · Lv 1</div>
+          <div class="recipe__name">Roll field dressings <em>(wool + vinegar)</em></div>
+          <div class="io">
+            <div class="io__box"><div class="io__label">Inputs</div><div class="io__line">wool 2 · vinegar 1</div><div class="io__stock">wool 5 in store · vinegar 2</div></div>
+            <span class="io__arrow">›</span>
+            <div class="io__box io__box--out"><div class="io__label">Output</div><div class="io__line">2 doses</div><div class="io__stock">Medicine</div></div>
+          </div>
+          <div class="recipe__mech">A dose lets the medicus tend one man in a watch. Without doses, grave wounds worsen each watch.</div>
+          <div class="recipe__foot"><button class="button-primary">Craft</button><button class="button-ghost">Craft all × 2</button></div>
+        </div>
+
+        <!-- 6 healing salve — blocked -->
+        <div class="recipe recipe--blocked">
+          <div class="recipe__station"><svg class="ico ico--sm"><use href="#i-cross"/></svg>Medical Tent · Lv 1</div>
+          <div class="recipe__name">Healing salve <em>(herbs + honey)</em></div>
+          <div class="io">
+            <div class="io__box"><div class="io__label">Inputs</div><div class="io__line">herbs 2 · honey 1</div><div class="io__stock io__stock--none">herbs 2 in store · honey 0</div></div>
+            <span class="io__arrow">›</span>
+            <div class="io__box io__box--out"><div class="io__label">Output</div><div class="io__line">1 salve</div><div class="io__stock">Medicine · strong</div></div>
+          </div>
+          <div class="recipe__mech">A salve mends a wound one full step in a single watch (Grave to Hurt, Hurt to Mending). Honey comes from steadings and trade.</div>
+          <div class="recipe__foot"><button class="button-primary" disabled>Craft</button><button class="button-ghost" disabled>Craft all × 0</button><span class="recipe__why">No honey</span></div>
+        </div>
+      </div>
+
+      <div class="queue">
+        <span class="heading">Queued for the next rest</span>
+        <span class="queue__item">Bake flatbread × 3<span class="queue__x">×</span></span>
+        <span class="queue__item">Roll field dressings × 2<span class="queue__x">×</span></span>
+        <span class="micro text-dim" style="margin-left:auto">USES GRAIN 6 · FIREWOOD 3 · WOOL 4 · VINEGAR 2 · YIELDS <span class="text-gold">+12 RATIONS · +4 DOSES</span> · A WATCH FINISHES 2 OF 5 BATCHES</span>
+      </div>
+      <div class="grow"></div>
+      <div class="micro text-faint">RAW STORES SPOIL · COOKED RATIONS COUNT TOWARD FOOD DAYS THE MOMENT THEY ARE MADE</div>
+    </div>
+
+    <!-- ===== ledger column ===== -->
+    <div class="panel col ledger">
+      <div class="eyebrow">Food</div>
+      <div class="ledger__big">6 days</div>
+      <div class="micro text-dim">41 MEN · 41 RATIONS A DAY · RATIONS THIN AFTER DAY 10</div>
+      <div class="rule"></div>
+      <div class="ledger__row"><span class="ledger__k">In store</span><span class="ledger__v">246 rations</span></div>
+      <div class="ledger__row"><span class="ledger__k">Raw, uncooked</span><span class="ledger__v">grain 6 · flour 2 · raw game 3 · dried fruit 2</span></div>
+      <div class="ledger__row"><span class="ledger__k">Queue runs</span><span class="ledger__v text-gold">+12 rations · still 6 days</span></div>
+      <div class="ledger__row"><span class="ledger__k">Everything cooked</span><span class="ledger__v text-gold">+33 rations · 7 days</span></div>
+
+      <div class="rule" style="margin-top:14px"></div>
+      <div class="row between"><span class="heading"><svg class="ico ico--sm ico--gold" style="vertical-align:-2px"><use href="#i-cauldron"/></svg> Culina</span><span class="pips"><span class="pip pip--lvl pip--on"></span><span class="pip pip--lvl pip--on"></span><span class="pip pip--lvl"></span></span></div>
+      <div class="body" style="margin-top:6px">Lv 2 · +30% yield on every Culina recipe.</div>
+      <div class="micro text-dim" style="margin-top:4px">LV 3 · TWO RECIPES A WATCH · 6 TIMBER · 20 DENARII</div>
+
+      <div class="rule" style="margin-top:14px"></div>
+      <div class="row between"><span class="heading"><svg class="ico ico--sm ico--gold" style="vertical-align:-2px"><use href="#i-cross"/></svg> Medical Tent</span><span class="pips"><span class="pip pip--lvl pip--on"></span><span class="pip pip--lvl"></span><span class="pip pip--lvl"></span></span></div>
+      <div class="body" style="margin-top:6px">Lv 1 · 3 doses in hand · the medicus tends 2 men a watch.</div>
+      <div class="micro text-dim" style="margin-top:4px">WOOL 5 · VINEGAR 2 · HERBS 2 · <span class="text-amber">HONEY 0</span></div>
+
+      <div class="rule" style="margin-top:14px"></div>
+      <div class="row between"><span class="heading"><svg class="ico ico--sm ico--gold" style="vertical-align:-2px"><use href="#i-fire"/></svg> Fuel</span><span class="body">14 firewood</span></div>
+      <div class="micro text-dim" style="margin-top:4px">EACH BATCH BURNS 1 · A NIGHT'S REST BURNS 3 · THE QUEUE LEAVES 11</div>
+
+      <div class="grow"></div>
+      <button class="button-ghost button-primary--wide">Camp Stations ›</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================================================================== STATIONS ===== -->
+<div class="camp-page" data-page="stations" hidden>
+  <div class="panel col" style="height:100%">
+    <div class="row between">
+      <div><div class="eyebrow">Camp · Stations</div><div class="page-title">Camp Stations</div></div>
+      <span class="micro text-dim">ONE BUILD OR UPGRADE PER REST · THE BUILDERS DO NOT REST · STATIONS TRAVEL WITH THE COLUMN</span>
+    </div>
+    <div class="stock-strip">
+      <div class="resource"><svg class="ico resource__icon"><use href="#i-hammer"/></svg><div><div class="resource__label">Timber</div><div class="resource__value">7</div></div></div>
+      <div class="resource"><svg class="ico resource__icon"><use href="#i-anvil"/></svg><div><div class="resource__label">Iron</div><div class="resource__value">3</div></div></div>
+      <div class="resource"><svg class="ico resource__icon"><use href="#i-denarii"/></svg><div><div class="resource__label">Denarii</div><div class="resource__value">38</div></div></div>
+      <div class="resource"><svg class="ico resource__icon"><use href="#i-helmet"/></svg><div><div class="resource__label">Builders</div><div class="resource__value">Contubernium IV · 8 men</div></div></div>
+    </div>
+    <div class="rule"></div>
+
+    <div class="stations">
+      <!-- Culina -->
+      <div class="station">
+        <div class="station__head"><svg class="ico ico--lg ico--gold"><use href="#i-cauldron"/></svg><div><div class="station__name">Culina</div><div class="station__level">Built · Lv 2</div></div>
+          <span class="pips station__pips"><span class="pip pip--lvl pip--on"></span><span class="pip pip--lvl pip--on"></span><span class="pip pip--lvl"></span></span></div>
+        <div class="rule"></div>
+        <div class="station__effect">Cooks raw stores into rations. Lv 2: +30% yield on every recipe.</div>
+        <div class="station__next"><b>Lv 3</b> · Two recipes finish per watch instead of one.</div>
+        <div class="station__foot"><span class="cost">6 timber · 20 denarii</span><button class="button-primary">Upgrade</button></div>
+      </div>
+
+      <!-- Medical Tent -->
+      <div class="station">
+        <div class="station__head"><svg class="ico ico--lg ico--gold"><use href="#i-cross"/></svg><div><div class="station__name">Medical Tent</div><div class="station__level">Built · Lv 1</div></div>
+          <span class="pips station__pips"><span class="pip pip--lvl pip--on"></span><span class="pip pip--lvl"></span><span class="pip pip--lvl"></span></span></div>
+        <div class="rule"></div>
+        <div class="station__effect">The medicus tends 2 men a watch. A dose stops a grave wound worsening.</div>
+        <div class="station__next"><b>Lv 2</b> · 3 men a watch. Wounds mend one step faster through a night's rest.</div>
+        <div class="station__foot"><span class="cost">5 timber · 12 denarii</span><button class="button-primary">Upgrade</button></div>
+      </div>
+
+      <!-- Fabrica — disabled upgrade -->
+      <div class="station">
+        <div class="station__head"><svg class="ico ico--lg ico--gold"><use href="#i-anvil"/></svg><div><div class="station__name">Fabrica</div><div class="station__level">Built · Lv 1</div></div>
+          <span class="pips station__pips"><span class="pip pip--lvl pip--on"></span><span class="pip pip--lvl"></span><span class="pip pip--lvl"></span></span></div>
+        <div class="rule"></div>
+        <div class="station__effect">Repairs equipment one step per rest: Failing › Worn › Serviceable.</div>
+        <div class="station__next"><b>Lv 2</b> · Forges pila from iron, 3 iron per bundle. Repairs two steps per night.</div>
+        <div class="station__foot"><span class="cost cost--short">9 timber · 18 denarii · needs 2 more timber</span><button class="button-primary" disabled>Upgrade</button></div>
+      </div>
+
+      <!-- Training Ground — not built, hovered -->
+      <div class="station station--unbuilt station--hover">
+        <div class="station__head"><svg class="ico ico--lg ico--dim"><use href="#i-swords"/></svg><div><div class="station__name">Training Ground</div><div class="station__level station__level--none">Not built</div></div>
+          <span class="pips station__pips"><span class="pip pip--lvl"></span><span class="pip pip--lvl"></span><span class="pip pip--lvl"></span></span></div>
+        <div class="rule"></div>
+        <div class="station__effect">Unlocks <span class="text-gold caps small">Drill the Ranks</span>. A drill costs a watch and raises the drilled contubernium's Tiro to Miles.</div>
+        <div class="station__next"><b>Lv 2</b> · Drilled squads change formation faster in battle.</div>
+        <div class="station__foot"><span class="cost">4 timber · 12 denarii</span><button class="button-primary">Build</button></div>
+      </div>
+
+      <!-- Watch Post -->
+      <div class="station">
+        <div class="station__head"><svg class="ico ico--lg ico--gold"><use href="#i-tower"/></svg><div><div class="station__name">Watch Post</div><div class="station__level">Built · Lv 1</div></div>
+          <span class="pips station__pips"><span class="pip pip--lvl pip--on"></span><span class="pip pip--lvl"></span><span class="pip pip--lvl"></span></span></div>
+        <div class="rule"></div>
+        <div class="station__effect">Sentries see a third farther at night. A sighted party wakes the camp before it closes.</div>
+        <div class="station__next"><b>Lv 2</b> · The camp cannot be surprised during the first watch of any rest.</div>
+        <div class="station__foot"><span class="cost">6 timber · 10 denarii</span><button class="button-primary">Upgrade</button></div>
+      </div>
+
+      <!-- Scout's Fire -->
+      <div class="station">
+        <div class="station__head"><svg class="ico ico--lg ico--gold"><use href="#i-fire"/></svg><div><div class="station__name">Scout's Fire</div><div class="station__level">Built · Lv 1</div></div>
+          <span class="pips station__pips"><span class="pip pip--lvl pip--on"></span><span class="pip pip--lvl"></span><span class="pip pip--lvl"></span></span></div>
+        <div class="rule"></div>
+        <div class="station__effect">Hunters bring back one more game per outing and pelts more often.</div>
+        <div class="station__next"><b>Lv 2</b> · The Speculator's report arrives one watch sooner and names the enemy doctrine.</div>
+        <div class="station__foot"><span class="cost">3 timber · 8 denarii</span><button class="button-primary">Upgrade</button></div>
+      </div>
+    </div>
+
+    <div class="grow"></div>
+    <div class="micro text-faint">TIMBER IS CUT AT FORESTS ON THE OVERMAP · IRON AND DENARII COME FROM STEADINGS AND THE DEAD · A STATION LOST TO A NIGHT RAID FALLS ONE LEVEL</div>
+  </div>
+
+  <div class="mock-note" style="left:1050px;top:560px">NOT BUILT stations use the same card with a dashed border and a red state; the unlock it grants is the first line of the effect. Costs and level effects are invented numbers for the mock.</div>
+  <div class="mock-note" style="left:1300px;top:330px">One build per rest. The Fabrica upgrade is disabled by timber (7 in store, 9 needed) — the shortfall is named on the cost line rather than hidden in a tooltip.</div>
+</div>
+
+<div class="camp-footer"><span class="body body--dim">A hollow off the forest track · Day 4 · 2nd watch</span><button class="button-primary">Break Camp</button></div>
+
+<!-- ===== mock notes (N) ===== -->
+<div class="mock-note" style="left:1290px;top:600px">CRAFT ALL × N: N is what the scarcest input allows. Both buttons disable when an input is at zero and the red word names it. Short inputs read amber on the stock line.</div>
+<div class="mock-note" style="left:1600px;top:300px">The ledger is the only place food is shown as rations; everywhere else it is days. Percentages appear only in station effect text (Culina +30%), never on a readout.</div>
+<div class="mock-note" style="left:600px;top:760px">Invented: a queue strip. Recipes are not instant — they run at the station during the next rest, so the player can see what a single watch versus the night will finish.</div>

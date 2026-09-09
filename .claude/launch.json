@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "mockups",
+      "runtimeExecutable": "py",
+      "runtimeArgs": ["-3", "-m", "http.server", "8797", "--directory", "D:/Unity/Century Prototype/Docs/Mockups"],
+      "port": 8797
+    }
+  ]
+}

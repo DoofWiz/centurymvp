@@ -1,0 +1,199 @@
+<!-- title: POI Event -->
+<!-- desc: The event pop-up at a point of interest: an art band, prose, three choice rows with mechanics lines (one hovered) and the WHO IS WATCHING officer strip. -->
+<!-- world: overmap -->
+<style>
+  .map { position: absolute; inset: 0; }
+  .poi-label { font-family: var(--font-body); font-size: 12px; letter-spacing: 2px; fill: var(--parchment); text-transform: uppercase; }
+  .poi-kind { font-size: 9px; letter-spacing: 2px; fill: var(--parchment-dim); }
+  .poi-tag { font-size: 9px; letter-spacing: 2px; fill: var(--gold); }
+  .poi-obj { fill: var(--gold-bright); }
+  .objective__count { margin-left: auto; font-size: var(--fs-small); color: var(--gold-bright); letter-spacing: 1px; }
+  .events { position: absolute; right: 16px; bottom: 104px; width: 340px; }
+  .bottom-bar--compact { height: 84px; }
+  .bottom-bar--compact .bottom-bar__section { padding: 8px 18px; }
+  .identity { min-width: 230px; }
+  .metric-val { font-size: var(--fs-body); color: var(--parchment); }
+  /* the event sheet */
+  .modal__sheet.event-sheet { width: 820px; padding: 0 0 22px; }
+  .event-sheet__art { display: block; width: 100%; height: 120px; border-bottom: var(--rule) solid var(--gold-dim); }
+  .event-sheet__body { padding: 16px 26px 0; }
+  .event-sheet__title { font-family: var(--font-display); font-size: 26px; color: var(--gold-bright); letter-spacing: 5px; font-weight: 700; text-transform: uppercase; margin-top: 4px; }
+  .event-sheet__p { font-size: 14px; line-height: 1.55; color: var(--parchment); margin: 10px 0 0; }
+  .choices { margin-top: 16px; }
+  .choice { display: flex; align-items: center; gap: 14px; width: 100%; text-align: left; background: rgba(250,244,226,.35); border: var(--rule) solid rgba(74,54,32,.35);
+    padding: 10px 14px; margin-top: 8px; transition: border-color .12s, background .12s; }
+  .choice:hover, .choice--hover { border-color: var(--gold-bright); background: var(--ink-raised); }
+  .choice__line { font-size: var(--fs-large); color: var(--parchment); font-weight: 700; letter-spacing: 1px; }
+  .choice--hover .choice__line { color: var(--gold-bright); }
+  .choice__mech { font-size: var(--fs-small); color: var(--parchment-dim); margin-top: 3px; }
+  .choice__cost { margin-left: auto; font-size: var(--fs-micro); color: var(--parchment-faint); letter-spacing: 2px; text-transform: uppercase; white-space: nowrap; }
+  .watching { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 20px; margin-top: 16px; padding: 8px 12px; background: rgba(250,244,226,.35); border: var(--rule) solid rgba(74,54,32,.35); }
+  .watching__item { display: flex; align-items: center; gap: 6px; font-size: var(--fs-small); color: var(--parchment); }
+  .watching__word { font-size: var(--fs-micro); letter-spacing: 1px; text-transform: uppercase; }
+</style>
+
+<!-- ===== the world: the column stands on the marker ===== -->
+<svg class="map" viewBox="0 0 1920 1080" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="beam" cx="50%" cy="100%" r="100%"><stop offset="0" stop-color="rgb(176,132,48)" stop-opacity=".35"/><stop offset="1" stop-color="rgb(176,132,48)" stop-opacity="0"/></radialGradient>
+    <radialGradient id="beamdim" cx="50%" cy="100%" r="100%"><stop offset="0" stop-color="rgb(107,82,48)" stop-opacity=".16"/><stop offset="1" stop-color="rgb(107,82,48)" stop-opacity="0"/></radialGradient>
+  </defs>
+  <g fill="#a89c6e" stroke="#4a3e28" stroke-width="2" opacity=".85">
+    <ellipse cx="260" cy="220" rx="300" ry="170"/><ellipse cx="1700" cy="260" rx="320" ry="190"/><ellipse cx="1560" cy="920" rx="340" ry="150"/>
+    <ellipse cx="420" cy="900" rx="280" ry="130"/><ellipse cx="1000" cy="110" rx="260" ry="90"/><ellipse cx="110" cy="560" rx="160" ry="200"/>
+  </g>
+  <ellipse cx="960" cy="600" rx="290" ry="140" fill="rgb(92,74,50)" opacity=".35"/>
+  <path d="M-20 780 C 300 740, 520 820, 820 760 S 1300 700, 1940 790" fill="none" stroke="#7f8b94" stroke-width="14" stroke-linecap="round" opacity=".55"/>
+  <g fill="#5c4a32" opacity=".85">
+    <ellipse cx="800" cy="560" rx="7" ry="3"/><ellipse cx="840" cy="600" rx="7" ry="3"/><ellipse cx="870" cy="540" rx="6" ry="3"/><ellipse cx="900" cy="640" rx="7" ry="3"/>
+    <ellipse cx="1020" cy="540" rx="7" ry="3"/><ellipse cx="1060" cy="620" rx="6" ry="3"/><ellipse cx="1100" cy="570" rx="7" ry="3"/><ellipse cx="1140" cy="630" rx="7" ry="3"/>
+    <ellipse cx="760" cy="620" rx="6" ry="3"/><ellipse cx="1180" cy="590" rx="6" ry="3"/><ellipse cx="980" cy="680" rx="7" ry="3"/><ellipse cx="920" cy="520" rx="6" ry="3"/>
+  </g>
+  <!-- the objective POI, with the column standing on it -->
+  <g transform="translate(960,600)">
+    <rect x="-16" y="-116" width="32" height="116" fill="url(#beam)"/>
+    <ellipse rx="44" ry="17" fill="none" stroke="#9a7b3a" stroke-width="2"/>
+    <ellipse rx="26" ry="11" fill="rgba(154,123,58,.12)" stroke="#9a7b3a" stroke-width="1.5"/>
+    <g fill="#8a6a34">
+      <rect x="-17" y="-6" width="6" height="6"/><rect x="-8" y="-6" width="6" height="6"/><rect x="1" y="-6" width="6" height="6"/><rect x="10" y="-6" width="6" height="6"/>
+      <rect x="-13" y="2" width="6" height="6"/><rect x="-4" y="2" width="6" height="6"/><rect x="5" y="2" width="6" height="6"/><rect x="-22" y="2" width="6" height="6"/>
+    </g>
+    <path d="M0 -74 l10 10 -10 10 -10 -10z" class="poi-obj"/>
+    <text y="-92" text-anchor="middle" class="poi-label" style="fill:#6e5215">A Wasteland of Corpses</text>
+    <text y="-110" text-anchor="middle" class="poi-kind">Battle site</text>
+    <text y="-126" text-anchor="middle" class="poi-tag">◆ OBJECTIVE</text>
+  </g>
+  <g transform="translate(1300,720)">
+    <rect x="-16" y="-110" width="32" height="110" fill="url(#beamdim)"/>
+    <ellipse rx="26" ry="10" fill="none" stroke="#9a7b3a" stroke-width="1.5"/>
+    <path d="M0 -70 l10 10 -10 10 -10 -10z" fill="#9a7b3a"/>
+    <text y="-88" text-anchor="middle" class="poi-label">The Hounds' Ground</text>
+    <text y="-106" text-anchor="middle" class="poi-kind">Battle site</text>
+  </g>
+</svg>
+
+<!-- ===== HUD ===== -->
+<div class="nav-bar">
+  <button class="nav-item nav-item--live">Inventory</button>
+  <button class="nav-item nav-item--live">Army</button>
+  <button class="nav-item nav-item--live">Commander</button>
+  <button class="nav-item nav-item--live">Save</button>
+  <button class="nav-item nav-item--live">Title</button>
+  <span class="nav-item nav-item--inert">Journal</span>
+  <span class="nav-item nav-item--inert">Encyclopedia</span>
+</div>
+
+<div class="time-box">
+  <svg class="ico ico--sm ico--gold"><use href="#i-sun"/></svg>
+  <span class="time-box__clock">Day 1 · 2nd Watch</span>
+  <span class="text-dim small">10:50</span>
+  <span class="time-button time-button--active"><svg class="ico ico--sm"><use href="#i-pause"/></svg></span>
+  <span class="time-button"><svg class="ico ico--sm"><use href="#i-play"/></svg></span>
+  <span class="time-button"><svg class="ico ico--sm"><use href="#i-fast"/></svg></span>
+</div>
+
+<div class="objective panel">
+  <div class="eyebrow">Objective</div>
+  <div class="body" style="margin-top:4px">Gather what is left of the Century.</div>
+  <div class="objective__marker"><span class="objective__diamond">◆</span><span class="objective__text">Gather more survivors</span><span class="objective__count">8 / 12</span></div>
+  <div class="objective__marker"><span class="objective__diamond text-dim">◆</span><span class="objective__text text-dim">Find a safe place and camp</span></div>
+  <div class="objective__marker"><span class="objective__diamond text-faint">◆</span><span class="objective__text text-faint">Make your way to the passage</span></div>
+</div>
+
+<div class="events panel">
+  <div class="row between"><span class="eyebrow">Events</span><span class="micro text-faint">Day 1</span></div>
+  <div class="rule"></div>
+  <div class="event event--warning"><span class="event__glyph">◆</span><span class="event__text">Reached: A Wasteland of Corpses.</span><span class="event__time">10:50</span></div>
+  <div class="event event--good"><span class="event__glyph">+</span><span class="event__text">Two men found in the bracken: Servius Balbus, Caius Nerva.</span><span class="event__time">09:40</span></div>
+  <div class="event event--critical"><span class="event__glyph">!</span><span class="event__text">Looters are on the field. Unseen men move among the dead.</span><span class="event__time">08:10</span></div>
+</div>
+
+<div class="bottom-bar bottom-bar--compact">
+  <div class="bottom-bar__section bottom-bar__section--first identity">
+    <div class="identity__legion">LEG · XVII</div>
+    <div class="identity__name">Centuria Valeria</div>
+  </div>
+  <div class="bottom-bar__section" style="flex:1">
+    <div class="resource-strip">
+      <div class="resource"><svg class="ico resource__icon"><use href="#i-helmet"/></svg><div><div class="resource__label">Men</div><div class="resource__value">8</div></div></div>
+      <div class="resource"><svg class="ico resource__icon"><use href="#i-wheat"/></svg><div><div class="resource__label">Food</div><div class="resource__value resource__value--danger">1 day</div></div></div>
+      <div class="resource"><svg class="ico resource__icon"><use href="#i-fire"/></svg><div><div class="resource__label">Firewood</div><div class="resource__value">2</div></div></div>
+      <div class="resource"><svg class="ico resource__icon"><use href="#i-shield"/></svg><div><div class="resource__label">Equipment</div><div class="resource__value resource__value--low">Worn</div></div></div>
+      <div class="resource"><svg class="ico resource__icon"><use href="#i-bandage"/></svg><div><div class="resource__label">Medicine</div><div class="resource__value">1 dose</div></div></div>
+      <div class="resource"><svg class="ico resource__icon"><use href="#i-coin"/></svg><div><div class="resource__label">Coin</div><div class="resource__value">0</div></div></div>
+      <div class="resource"><svg class="ico resource__icon"><use href="#i-denarii"/></svg><div><div class="resource__label">Denarii</div><div class="resource__value">3</div></div></div>
+    </div>
+  </div>
+  <div class="bottom-bar__section" style="min-width:220px">
+    <div class="row between"><span class="metric-label">Morale</span><span class="text-amber caps small">Wavering</span></div>
+    <div class="bar bar--thick"><div class="bar__fill" style="width:38%; background:var(--amber)"></div></div>
+  </div>
+  <div class="bottom-bar__section">
+    <div class="metric-cols">
+      <div class="metric-col"><span class="metric-label">Pace</span><span class="metric-val">Slow</span></div>
+      <div class="metric-col"><span class="metric-label">Wounded</span><span class="metric-val text-amber">2</span></div>
+    </div>
+  </div>
+  <div class="bottom-bar__section bottom-bar__actions">
+    <button class="pill" disabled><svg class="ico ico--sm"><use href="#i-tent"/></svg>Camp</button>
+    <button class="pill"><svg class="ico ico--sm"><use href="#i-stealth"/></svg>Stealth</button>
+  </div>
+</div>
+
+<!-- ===== the event ===== -->
+<div class="modal">
+  <div class="modal__sheet event-sheet">
+    <!-- art band: one painted strip per POI kind -->
+    <svg class="event-sheet__art" viewBox="0 0 820 120" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="rgb(199,186,148)"/><stop offset="1" stop-color="rgb(172,152,108)"/></linearGradient>
+      </defs>
+      <rect width="820" height="120" fill="url(#sky)"/>
+      <ellipse cx="410" cy="150" rx="600" ry="70" fill="rgb(150,132,90)"/>
+      <g fill="#5c4a32">
+        <ellipse cx="140" cy="102" rx="48" ry="9"/><ellipse cx="300" cy="108" rx="60" ry="10"/><ellipse cx="520" cy="100" rx="52" ry="9"/><ellipse cx="690" cy="106" rx="58" ry="10"/><ellipse cx="420" cy="112" rx="40" ry="8"/>
+      </g>
+      <line x1="600" y1="30" x2="580" y2="104" stroke="#43392c" stroke-width="3"/>
+      <path d="M600 30 l-6 22 l18 2z" fill="rgba(142,47,34,.75)"/>
+      <g fill="rgba(67,57,44,.6)"><circle cx="120" cy="30" r="2"/><circle cx="160" cy="24" r="2"/><circle cx="700" cy="36" r="2"/><circle cx="740" cy="28" r="2"/><circle cx="760" cy="40" r="2"/></g>
+      <rect width="820" height="120" fill="rgba(40,28,14,.14)"/>
+    </svg>
+    <div class="event-sheet__body">
+      <div class="eyebrow">Point of interest · Battle site</div>
+      <div class="event-sheet__title">A Wasteland of Corpses</div>
+      <p class="event-sheet__p">The column halts at the edge of the trees and nobody speaks. What was the marching camp of three legions lies open along the track for a mile: mail-shirts turned inside out, the wagons burnt to the axles, and the dead lying where the line broke, three deep in places. The crows have had two days of it.</p>
+      <p class="event-sheet__p">Balbus finds the stump of a signum with the cloth cut away. Somewhere in this there is kit worth carrying and coin sewn into belts, and somewhere in this there are the men who are stripping it, and they are not far off.</p>
+
+      <div class="choices">
+        <button class="choice">
+          <span class="keycap">1</span>
+          <div><div class="choice__line">Search the dead</div><div class="choice__mech">Takes a watch. Chance of kit and denarii. Looters may find you.</div></div>
+          <span class="choice__cost">1 watch</span>
+        </button>
+        <button class="choice choice--hover">
+          <span class="keycap keycap--gold">2</span>
+          <div><div class="choice__line">Bury what you can</div><div class="choice__mech">Takes two watches. Morale rises one step. The Signifer approves.</div></div>
+          <span class="choice__cost">2 watches</span>
+        </button>
+        <button class="choice">
+          <span class="keycap">3</span>
+          <div><div class="choice__line">Move on</div><div class="choice__mech">No cost.</div></div>
+          <span class="choice__cost">Esc</span>
+        </button>
+      </div>
+
+      <div class="watching">
+        <span class="eyebrow">Who is watching</span>
+        <div class="watching__item"><svg class="ico ico--sm ico--gold"><use href="#i-banner"/></svg><span>Signifer</span><span class="watching__word text-good">— would approve</span></div>
+        <div class="watching__item"><svg class="ico ico--sm ico--dim"><use href="#i-crest"/></svg><span>Optio</span><span class="watching__word text-dim">— indifferent</span></div>
+        <div class="watching__item"><svg class="ico ico--sm ico--dim"><use href="#i-scroll"/></svg><span>Tesserarius</span><span class="watching__word text-danger">— would disapprove</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== design notes (press N) ===== -->
+<div class="mock-note" style="left:1380px; top:560px">Hover state: gold-bright border on ink-raised, choice line lit. Keys 1 to 3 pick a row; Esc is always MOVE ON. Clicking the dim does nothing: an event is a decision, not a window.</div>
+<div class="mock-note" style="left:1380px; top:730px">Reactions follow the hovered choice and are words, never numbers. In this save the Signifer is VACANT: the row then reads "SIGNIFER — VACANT" in red and the approval in row 2 is struck through.</div>
+<div class="mock-note" style="left:1380px; top:260px">Art band: one painted 820x120 strip per POI KIND (battle site, shrine, steading, watchtower), never per POI. Drop it entirely if the art budget is tight; the sheet works without it.</div>
+<div class="mock-note" style="left:300px; top:640px">Behind the sheet the column stands on the marker's outer ring; the clock is paused so no move ring is drawn. The event fires on arrival, before the player can click again.</div>

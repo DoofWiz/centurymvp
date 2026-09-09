@@ -1,0 +1,190 @@
+<!-- title: Overmap HUD -->
+<!-- desc: The v2 overmap layout: top nav strip, boxed clock, objective, EVENTS + CONTACT, single bottom bar with identity, resources, morale, column metrics and CAMP/STEALTH pills. -->
+<!-- world: overmap -->
+<style>
+  .map { position: absolute; inset: 0; }
+  .poi-label { font-family: var(--font-body); font-size: 12px; letter-spacing: 2px; fill: var(--parchment); text-transform: uppercase; }
+  .poi-kind { font-size: 9px; letter-spacing: 2px; fill: var(--parchment-dim); }
+  .poi-obj { fill: var(--gold-bright); }
+  .marker-ring { fill: none; stroke: var(--gold); stroke-width: 2; }
+  .marker-ring--red { stroke: var(--blood); }
+  .pulse { transform-origin: center; transform-box: fill-box; animation: ringPulse 1.6s ease-out infinite; }
+  @keyframes ringPulse { 0% { transform: scale(.6); opacity: .9; } 100% { transform: scale(1.4); opacity: 0; } }
+  .identity { min-width: 250px; }
+  .identity__legion { font-size: var(--fs-micro); color: var(--gold); letter-spacing: 3px; }
+  .identity__name { font-size: var(--fs-large); color: var(--parchment); letter-spacing: 2px; margin-top: 2px; }
+  .portraits { display: flex; gap: 6px; margin-top: 8px; }
+  .portrait { width: 30px; height: 30px; border: 1px solid var(--gold-dim); background: rgba(250,244,226,.35); display: flex; align-items: center; justify-content: center; color: var(--gold); position: relative; }
+  .portrait--vacant { border-style: dashed; color: var(--parchment-faint); }
+  .portrait .tier-disc { position: absolute; right: -4px; bottom: -4px; width: 8px; height: 8px; border: 1px solid var(--ink-solid); }
+  .morale-row { display: flex; justify-content: space-between; align-items: baseline; margin-top: 10px; }
+  .events { position: absolute; right: 16px; bottom: 150px; width: 360px; max-height: 360px; }
+  .contact { position: absolute; right: 16px; bottom: 524px; width: 200px; }
+  .metric-cols .metric-label { margin-top: 0; }
+  .metric-val { font-size: var(--fs-body); color: var(--parchment); }
+  .surprise { position: absolute; left: 1215px; top: 385px; width: 42px; height: 42px; }
+</style>
+
+<!-- ===== the world (stand-in for the 3D overmap) ===== -->
+<svg class="map" viewBox="0 0 1920 1080" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="beam" cx="50%" cy="100%" r="100%"><stop offset="0" stop-color="rgb(176,132,48)" stop-opacity=".35"/><stop offset="1" stop-color="rgb(176,132,48)" stop-opacity="0"/></radialGradient>
+    <radialGradient id="beamdim" cx="50%" cy="100%" r="100%"><stop offset="0" stop-color="rgb(107,82,48)" stop-opacity=".16"/><stop offset="1" stop-color="rgb(107,82,48)" stop-opacity="0"/></radialGradient>
+  </defs>
+  <!-- forests: ink-hatched tan blobs -->
+  <g fill="#a89c6e" stroke="#4a3e28" stroke-width="2" opacity=".85">
+    <ellipse cx="300" cy="260" rx="260" ry="150"/><ellipse cx="1650" cy="220" rx="300" ry="170"/><ellipse cx="1500" cy="900" rx="330" ry="150"/>
+    <ellipse cx="520" cy="880" rx="240" ry="120"/><ellipse cx="1120" cy="180" rx="180" ry="90"/>
+  </g>
+  <!-- hills -->
+  <g fill="rgb(150,145,95)" opacity=".4"><ellipse cx="760" cy="420" rx="140" ry="80"/><ellipse cx="1350" cy="640" rx="160" ry="90"/></g>
+  <!-- river -->
+  <path d="M1180 -20 C 1120 200, 1300 360, 1220 520 S 1080 820, 1180 1100" fill="none" stroke="#7f8b94" stroke-width="26" stroke-linecap="round" opacity=".55"/>
+  <path d="M1180 -20 C 1120 200, 1300 360, 1220 520 S 1080 820, 1180 1100" fill="none" stroke="#4c5a66" stroke-width="2" opacity=".7"/>
+  <!-- track -->
+  <path d="M120 720 C 400 640, 700 700, 960 560 S 1400 380, 1800 440" fill="none" stroke="#6b5230" stroke-width="4" stroke-dasharray="14 10" opacity=".55"/>
+
+  <!-- POI: shrine (discovered, in sight) -->
+  <g transform="translate(700,470)">
+    <rect x="-16" y="-110" width="32" height="110" fill="url(#beam)"/>
+    <ellipse rx="26" ry="10" fill="none" stroke="#9a7b3a" stroke-width="1.5"/>
+    <path d="M0 -70 l10 10 -10 10 -10 -10z" class="poi-obj"/>
+    <text y="-88" text-anchor="middle" class="poi-label">Wayside Shrine</text>
+    <text y="-118" text-anchor="middle" class="poi-kind">SHRINE</text>
+  </g>
+  <!-- POI: opportunity (always visible) -->
+  <g transform="translate(1560,560)">
+    <rect x="-16" y="-110" width="32" height="110" fill="url(#beam)"/>
+    <ellipse rx="26" ry="10" fill="none" stroke="#9a7b3a" stroke-width="2"/>
+    <path d="M0 -70 l10 10 -10 10 -10 -10z" class="poi-obj"/>
+    <text y="-88" text-anchor="middle" class="poi-label" style="fill:#6e5215">Chieftain's Steading</text>
+    <text y="-118" text-anchor="middle" class="poi-kind" style="fill:#6e5215">◆ OPPORTUNITY</text>
+  </g>
+  <!-- POI: remembered, out of sight -->
+  <g transform="translate(330,640)" opacity=".4">
+    <rect x="-16" y="-110" width="32" height="110" fill="url(#beamdim)"/>
+    <ellipse rx="26" ry="10" fill="none" stroke="#6b5230" stroke-width="1.5"/>
+    <text y="-88" text-anchor="middle" class="poi-label">Burnt Watchtower</text>
+    <text y="-118" text-anchor="middle" class="poi-kind">WATCHTOWER</text>
+  </g>
+
+  <!-- move marker (gold destination ring) -->
+  <g transform="translate(1100,470)">
+    <ellipse rx="22" ry="9" class="marker-ring pulse"/>
+    <ellipse rx="10" ry="4" class="marker-ring"/>
+  </g>
+  <!-- the column -->
+  <g transform="translate(960,560)">
+    <ellipse rx="34" ry="14" fill="rgba(154,123,58,.12)" stroke="#9a7b3a" stroke-width="1.5"/>
+    <g fill="#8a6a34">
+      <rect x="-22" y="-6" width="6" height="6"/><rect x="-13" y="-6" width="6" height="6"/><rect x="-4" y="-6" width="6" height="6"/><rect x="5" y="-6" width="6" height="6"/><rect x="14" y="-6" width="6" height="6"/>
+      <rect x="-18" y="2" width="6" height="6"/><rect x="-9" y="2" width="6" height="6"/><rect x="0" y="2" width="6" height="6"/><rect x="9" y="2" width="6" height="6"/>
+    </g>
+    <path d="M0 -30 l6 -8 -6 -6 -6 6z" fill="#9a7b3a"/>
+  </g>
+  <!-- hostile warband in sight, pursuing -->
+  <g transform="translate(1236,406)">
+    <ellipse rx="30" ry="12" class="marker-ring marker-ring--red pulse"/>
+    <ellipse rx="22" ry="9" fill="rgba(142,47,34,.1)" stroke="#8e2f22" stroke-width="1.5"/>
+    <g fill="#43392c"><rect x="-14" y="-5" width="5" height="5"/><rect x="-6" y="-5" width="5" height="5"/><rect x="2" y="-5" width="5" height="5"/><rect x="10" y="-5" width="5" height="5"/><rect x="-10" y="2" width="5" height="5"/><rect x="-2" y="2" width="5" height="5"/><rect x="6" y="2" width="5" height="5"/></g>
+  </g>
+  <!-- distant warband, fading at the edge of sight -->
+  <g transform="translate(560,300)" opacity=".28">
+    <ellipse rx="22" ry="9" fill="none" stroke="#8e2f22" stroke-width="1.5"/>
+    <g fill="#43392c"><rect x="-10" y="-4" width="5" height="5"/><rect x="-2" y="-4" width="5" height="5"/><rect x="6" y="-4" width="5" height="5"/></g>
+  </g>
+</svg>
+
+<!-- ===== HUD ===== -->
+<div class="nav-bar">
+  <button class="nav-item nav-item--live">Inventory</button>
+  <button class="nav-item nav-item--live">Army</button>
+  <button class="nav-item nav-item--live">Commander</button>
+  <button class="nav-item nav-item--live">Save</button>
+  <button class="nav-item nav-item--live">Title</button>
+  <span class="nav-item nav-item--inert">Journal</span>
+  <span class="nav-item nav-item--inert">Encyclopedia</span>
+</div>
+
+<div class="time-box">
+  <svg class="ico ico--sm ico--gold"><use href="#i-sun"/></svg>
+  <span class="time-box__clock">Day 4 · 2nd Watch</span>
+  <span class="text-dim small">14:20</span>
+  <span class="time-button"><svg class="ico ico--sm"><use href="#i-pause"/></svg></span>
+  <span class="time-button time-button--active"><svg class="ico ico--sm"><use href="#i-play"/></svg></span>
+  <span class="time-button"><svg class="ico ico--sm"><use href="#i-fast"/></svg></span>
+</div>
+
+<div class="objective panel">
+  <div class="eyebrow">Objective</div>
+  <div class="body" style="margin-top:4px">Make your way out of Germania and return to Italia.</div>
+  <div class="objective__marker"><span class="objective__diamond">◆</span><span class="objective__text">Reach the Rhine crossing</span></div>
+  <div class="objective__marker"><span class="objective__diamond text-faint">◆</span><span class="objective__text objective__done">Find a safe place and camp</span></div>
+</div>
+
+<div class="contact panel">
+  <div class="eyebrow text-danger">Contact</div>
+  <div class="row between" style="margin-top:4px"><span class="body">Wolf Brothers</span><span class="text-danger caps small">Pursuing</span></div>
+</div>
+
+<div class="hover-tip" style="left:1262px; top:352px">
+  <div class="hover-tip__title">Wolf Brothers</div>
+  <div class="hover-tip__detail">Raiders · 12 men · <span class="text-danger">Hostile</span></div>
+</div>
+
+<div class="events panel">
+  <div class="row between"><span class="eyebrow">Events</span><span class="micro text-faint">Day 4</span></div>
+  <div class="rule"></div>
+  <div class="event event--critical"><span class="event__glyph">!</span><span class="event__text">Sighted: Wolf Brothers. They turn toward the column.</span><span class="event__time">14:12</span></div>
+  <div class="event event--warning"><span class="event__glyph">◆</span><span class="event__text">The scout marks a chieftain's steading to the east.</span><span class="event__time">Dawn</span></div>
+  <div class="event event--good"><span class="event__glyph">+</span><span class="event__text">Aulus Rufus reaches Miles (Trained) after the ford.</span><span class="event__time">Dawn</span></div>
+  <div class="event"><span class="event__glyph">·</span><span class="event__text">The column rests through the night. Firewood burned: 3.</span><span class="event__time">Day 3</span></div>
+  <div class="event"><span class="event__glyph">·</span><span class="event__text">Discovered: Wayside Shrine.</span><span class="event__time">Day 3</span></div>
+  <div class="event event--warning"><span class="event__glyph">◆</span><span class="event__text">Food for six days. Rations will thin after that.</span><span class="event__time">Day 3</span></div>
+</div>
+
+<div class="bottom-bar">
+  <div class="bottom-bar__section bottom-bar__section--first identity">
+    <div class="identity__legion">LEG · XVII</div>
+    <div class="identity__name">Centuria Valeria</div>
+    <div class="portraits">
+      <div class="portrait" title="Centurion"><svg class="ico"><use href="#i-helmet"/></svg><span class="tier-disc tier-disc--officer"></span></div>
+      <div class="portrait" title="Optio"><svg class="ico"><use href="#i-crest"/></svg><span class="tier-disc tier-disc--evocatus"></span></div>
+      <div class="portrait" title="Tesserarius"><svg class="ico"><use href="#i-scroll"/></svg><span class="tier-disc tier-disc--veteranus"></span></div>
+      <div class="portrait" title="Medicus"><svg class="ico"><use href="#i-cross"/></svg><span class="tier-disc tier-disc--miles"></span></div>
+      <div class="portrait portrait--vacant" title="Signifer — vacant"><svg class="ico"><use href="#i-banner"/></svg><span class="tier-disc tier-disc--vacant"></span></div>
+      <div class="portrait" title="Speculator"><svg class="ico"><use href="#i-eye"/></svg><span class="tier-disc tier-disc--veteranus"></span></div>
+    </div>
+  </div>
+
+  <div class="bottom-bar__section" style="flex:1">
+    <div class="resource-strip">
+      <div class="resource"><svg class="ico resource__icon"><use href="#i-helmet"/></svg><div><div class="resource__label">Men</div><div class="resource__value">41</div></div></div>
+      <div class="resource"><svg class="ico resource__icon"><use href="#i-wheat"/></svg><div><div class="resource__label">Food</div><div class="resource__value resource__value--low">6 days</div></div></div>
+      <div class="resource"><svg class="ico resource__icon"><use href="#i-fire"/></svg><div><div class="resource__label">Firewood</div><div class="resource__value">14</div></div></div>
+      <div class="resource"><svg class="ico resource__icon"><use href="#i-shield"/></svg><div><div class="resource__label">Equipment</div><div class="resource__value">Serviceable</div></div></div>
+      <div class="resource"><svg class="ico resource__icon"><use href="#i-bandage"/></svg><div><div class="resource__label">Medicine</div><div class="resource__value">3 doses</div></div></div>
+      <div class="resource"><svg class="ico resource__icon"><use href="#i-coin"/></svg><div><div class="resource__label">Coin</div><div class="resource__value">212</div></div></div>
+      <div class="resource"><svg class="ico resource__icon"><use href="#i-denarii"/></svg><div><div class="resource__label">Denarii</div><div class="resource__value">38</div></div></div>
+    </div>
+    <div class="morale-row"><span class="metric-label">Morale</span><span class="text-good caps small">Confident</span></div>
+    <div class="bar bar--thick"><div class="bar__fill bar__fill--morale" style="width:62%"></div></div>
+  </div>
+
+  <div class="bottom-bar__section">
+    <div class="metric-cols">
+      <div class="metric-col"><span class="metric-label">Pace</span><span class="metric-val">Normal</span></div>
+      <div class="metric-col"><span class="metric-label">Orders</span><span class="metric-val text-dim">Marching</span></div>
+      <div class="metric-col"><span class="metric-label">Wounded</span><span class="metric-val text-amber">5</span></div>
+      <div class="metric-col"><span class="metric-label">Veterans</span><span class="metric-val">9</span></div>
+    </div>
+  </div>
+
+  <div class="bottom-bar__section bottom-bar__actions">
+    <button class="pill pill--pulse"><svg class="ico ico--sm"><use href="#i-tent"/></svg>Camp</button>
+    <button class="pill"><svg class="ico ico--sm"><use href="#i-stealth"/></svg>Stealth</button>
+  </div>
+</div>
+
+<div class="mock-note" style="left:1290px;top:300px">Hover tip only appears when the party's visibility is above 0.85. Between 0.05 and 0.85 it reads "A WARBAND ON THE MOVE".</div>
+<div class="mock-note" style="left:1760px;top:940px">CAMP pulses during the walkthrough beat only.</div>

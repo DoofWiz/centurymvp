@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CENTURY — HUD art-style explorations</title>
+<style>
+  :root { color-scheme: dark; }
+  body { margin: 0; min-height: 100vh; background: #0b0b09; color: #d8d2c4;
+         font-family: "Palatino Linotype", "Book Antiqua", Georgia, serif; }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 48px 24px 80px; }
+  .eyebrow { font-size: 11px; letter-spacing: 4px; text-transform: uppercase; color: rgb(201,162,39); }
+  h1 { font-size: 30px; letter-spacing: 4px; text-transform: uppercase; margin: 6px 0 4px; font-weight: 400; }
+  .sub { color: #969082; margin: 0 0 36px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+  a.card { display: block; text-decoration: none; color: inherit; border: 1px solid rgba(201,162,39,.34);
+           background: rgba(8,8,7,.86); padding: 18px 18px 16px; transition: border-color .12s, background .12s; }
+  a.card:hover { border-color: rgb(224,192,104); background: rgba(50,42,26,.5); }
+  .swatches { display: flex; gap: 4px; margin-bottom: 12px; }
+  .swatches i { display: block; width: 34px; height: 10px; }
+  .card h2 { font-size: 15px; letter-spacing: 2px; text-transform: uppercase; margin: 0 0 6px; font-weight: 700; color: rgb(224,192,104); }
+  .card p { font-size: 13px; line-height: 1.45; color: #969082; margin: 0; }
+  .note { margin-top: 40px; font-size: 12px; color: #686359; }
+  .note a { color: #969082; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">Century · throwaway explorations</div>
+  <h1>Battle HUD — five art styles</h1>
+  <p class="sub">Same screen, same data, five visual identities. Pure HTML/CSS, no build step — open any card.</p>
+  <div class="grid">
+    <a class="card" href="01-parchment-wax.html">
+      <div class="swatches"><i style="background:#e6dcc3"></i><i style="background:#8e2f22"></i><i style="background:#9a7b3a"></i><i style="background:#3a2c1a"></i></div>
+      <h2>01 · Parchment &amp; Wax</h2>
+      <p>Campaign-ledger look: aged parchment panels, sepia ink, wax-seal accents, hand-drawn map field. Total War energy.</p>
+    </a>
+    <a class="card" href="02-imperial-marble.html">
+      <div class="swatches"><i style="background:#d9d6cf"></i><i style="background:#5c2a4d"></i><i style="background:#a8842c"></i><i style="background:#3b3a36"></i></div>
+      <h2>02 · Imperial Marble</h2>
+      <p>Monumental Rome: pale carved-stone slabs, chiseled lettering, laurel and meander motifs, purple-and-bronze inlay.</p>
+    </a>
+    <a class="card" href="03-modern-minimal.html">
+      <div class="swatches"><i style="background:#0e1114"></i><i style="background:#aeb6bd"></i><i style="background:#e0453a"></i><i style="background:#e8b64c"></i></div>
+      <h2>03 · Modern Minimal</h2>
+      <p>Frameless contemporary restraint: translucent smoke panels, hairline bars, two accent colours, diagrammatic field.</p>
+    </a>
+    <a class="card" href="04-iron-and-blood.html">
+      <div class="swatches"><i style="background:#17181a"></i><i style="background:#a51f14"></i><i style="background:#8c6d33"></i><i style="background:#cfc9bd"></i></div>
+      <h2>04 · Iron &amp; Blood</h2>
+      <p>Grimdark weight: riveted gunmetal plates, cut corners, arterial red, ember glows, mud-and-dusk battlefield.</p>
+    </a>
+    <a class="card" href="05-pompeii-fresco.html">
+      <div class="swatches"><i style="background:#8e3b2f"></i><i style="background:#c8963e"></i><i style="background:#221c18"></i><i style="background:#4f7a6d"></i></div>
+      <h2>05 · Pompeii Fresco</h2>
+      <p>Flat painted plaster: Pompeiian red, ochre and charcoal fields, Greek-key borders, mural-style illustrated field.</p>
+    </a>
+  </div>
+  <div class="eyebrow" style="margin-top:48px">Iteration 2 · the pick</div>
+  <h1 style="font-size:22px">Marble &amp; Iron — five screens</h1>
+  <p class="sub">Imperial Marble's theme with Iron &amp; Blood's condensed type grafted in, plus a unified icon language. See <a href="marble-iron/SPEC.md" style="color:#969082">the spec</a>.</p>
+  <div class="grid">
+    <a class="card" href="marble-iron/01-battle-hud.html">
+      <div class="swatches"><i style="background:#d9d6cf"></i><i style="background:#5c2a4d"></i><i style="background:#a8842c"></i><i style="background:#3b3a36"></i></div>
+      <h2>M&amp;I · 01 Battle HUD</h2>
+      <p>The style-02 battle HUD re-cut with condensed carved type and icon bosses.</p>
+    </a>
+    <a class="card" href="marble-iron/02-overmap-hud.html">
+      <div class="swatches"><i style="background:#23281a"></i><i style="background:#d9d6cf"></i><i style="background:#a8842c"></i><i style="background:#5c2a4d"></i></div>
+      <h2>M&amp;I · 02 Overmap HUD</h2>
+      <p>Light marble slabs floating over the dark overmap world; tablet map markers.</p>
+    </a>
+    <a class="card" href="marble-iron/03-camp-rest-orders.html">
+      <div class="swatches"><i style="background:#14120d"></i><i style="background:#d9d6cf"></i><i style="background:#8c531d"></i><i style="background:#7c6120"></i></div>
+      <h2>M&amp;I · 03 Camp</h2>
+      <p>Rest &amp; Orders under a marble architrave; resource strip as the icon-boss showcase.</p>
+    </a>
+    <a class="card" href="marble-iron/04-battle-summary.html">
+      <div class="swatches"><i style="background:#d9d6cf"></i><i style="background:#7e2a20"></i><i style="background:#6d7a5c"></i><i style="background:#a8842c"></i></div>
+      <h2>M&amp;I · 04 Battle Summary</h2>
+      <p>Triumphal stele: the display-type showcase — "THE FIELD IS OURS" carved huge.</p>
+    </a>
+    <a class="card" href="marble-iron/05-inventory.html">
+      <div class="swatches"><i style="background:#d9d6cf"></i><i style="background:#a8842c"></i><i style="background:#5c2a4d"></i><i style="background:#8f8b80"></i></div>
+      <h2>M&amp;I · 05 Inventory</h2>
+      <p>The iconography showcase: ~22 blocky silhouette glyphs in recessed marble cells.</p>
+    </a>
+  </div>
+  <p class="note">Reference layout &amp; copy: <a href="../07-battle-hud.html">the shipped Battle HUD mockup</a>. These files are style studies only — nothing here feeds the build pipeline or production code.</p>
+</div>
+</body>
+</html>

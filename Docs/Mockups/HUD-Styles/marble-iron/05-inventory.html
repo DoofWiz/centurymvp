@@ -1,0 +1,438 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>CENTURY — Marble &amp; Iron: Inventory</title>
+<style>
+/* ===== CENTURY · Marble & Iron 05 — INVENTORY (iconography showcase) ===== */
+:root {
+  --marble-hi:   #e4e1da;
+  --marble:      #d9d6cf;
+  --marble-lo:   #b9b5ab;
+  --marble-deep: #a6a297;
+  --groove:      #8f8b80;
+  --slate:       #3b3a36;
+  --slate-dim:   #6b6960;
+  --slate-faint: #8d8a80;
+  --purple:      #5c2a4d;
+  --purple-soft: rgba(92,42,77,.28);
+  --bronze:      #a8842c;
+  --bronze-deep: #7c6120;
+  --oxblood:     #7e2a20;
+  --laurel:      #6d7a5c;
+  --sienna:      #8c531d;
+  --engrave: 0 1px 0 rgba(255,255,255,.6);
+  --font-head: Impact, "Arial Narrow", "Franklin Gothic Medium", sans-serif;
+  --font-body: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --meander: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='8'><path d='M1 7 V1 H9 V5 H5 V3 H13 V7' fill='none' stroke='%236b6960' stroke-width='1' opacity='.6'/></svg>");
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; background: #12140f; overflow: hidden; }
+body { font-family: var(--font-body); font-size: 13px; color: var(--slate); }
+button { font: inherit; color: inherit; cursor: pointer; }
+
+#stage { position: absolute; left: 50%; top: 50%; width: 1920px; height: 1080px;
+         transform-origin: center; overflow: hidden;
+  /* the real game's dark overmap world (from _src/common.css .world--overmap) */
+  background:
+    radial-gradient(ellipse 60% 45% at 62% 40%, rgba(70,84,44,.55), transparent 70%),
+    radial-gradient(ellipse 40% 35% at 20% 70%, rgba(58,64,38,.5), transparent 70%),
+    radial-gradient(ellipse 35% 30% at 80% 78%, rgba(48,52,34,.55), transparent 70%),
+    linear-gradient(180deg, #23281a 0%, #1c2016 45%, #171a12 100%); }
+/* line-of-sight veil: clear hole around the column, dark to the corners */
+#stage::after { content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 1;
+  background: radial-gradient(circle 300px at 50% 52%, transparent 62%, rgba(2,2,1,.62) 100%); }
+
+.style-label { position: fixed; left: 10px; top: 8px; z-index: 999; font-family: var(--font-head);
+  font-weight: 400; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: #efece5;
+  background: rgba(59,58,54,.75); padding: 4px 10px; border: 1px solid rgba(255,255,255,.25); }
+
+/* ---- carved condensed type ---- */
+.h, .heading, .eyebrow, .micro-head, .metric-label { font-family: var(--font-head); font-weight: 400; text-transform: uppercase; }
+.heading { display: inline-block; font-size: 14px; letter-spacing: 2.5px; color: var(--slate);
+  text-shadow: var(--engrave); padding-bottom: 5px; background: var(--meander) left bottom repeat-x; }
+.eyebrow { font-size: 9px; letter-spacing: 2px; color: var(--bronze-deep); text-shadow: var(--engrave); }
+.micro-head { font-size: 9px; letter-spacing: 1.5px; color: var(--slate-dim); text-shadow: var(--engrave); }
+.metric-label { font-size: 11px; letter-spacing: 1.5px; color: var(--slate-dim); text-shadow: var(--engrave); }
+.body-copy { font-family: var(--font-body); font-size: 12px; line-height: 1.4; color: var(--slate-dim); text-shadow: var(--engrave); }
+.row { display: flex; align-items: center; } .between { justify-content: space-between; }
+.text-dim { color: var(--slate-dim); }
+
+.ico { fill: currentColor; flex: 0 0 auto; }
+.ico--sm { width: 14px; height: 14px; }
+.ico--tile { width: 26px; height: 26px; }
+.ico--coin { width: 11px; height: 11px; vertical-align: -2px; }
+.laurel { color: var(--laurel); opacity: .9; }
+
+/* ---- world map (paused, behind the sheet) ---- */
+.map { position: absolute; inset: 0; z-index: 0; }
+
+/* ---- marble nav architrave ---- */
+.nav-bar { position: absolute; left: 0; right: 0; top: 0; height: 42px; z-index: 10;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  background:
+    repeating-linear-gradient(112deg, transparent 0 18px, rgba(122,116,104,.10) 18px 19px, transparent 19px 47px),
+    linear-gradient(180deg, var(--marble-hi) 0%, var(--marble) 55%, var(--marble-lo) 100%);
+  border-bottom: 2px solid var(--groove); box-shadow: 0 6px 18px rgba(8,8,5,.6); }
+.nav-item { font-family: var(--font-head); font-weight: 400; font-size: 12px; letter-spacing: 2.5px;
+  text-transform: uppercase; color: var(--slate); text-shadow: var(--engrave);
+  background: none; border: 1px solid transparent; padding: 5px 14px; }
+.nav-item--live:hover { color: var(--bronze-deep); }
+.nav-item--active { color: var(--purple); border-color: var(--purple);
+  background: linear-gradient(165deg, var(--marble-lo), var(--marble-deep));
+  box-shadow: inset 0 2px 5px rgba(40,30,38,.45); transform: translateY(1px); }
+.nav-item--inert { color: var(--slate-faint); }
+
+/* ---- time slab (paused) ---- */
+.time-box { position: absolute; top: 48px; left: 50%; transform: translateX(-50%); z-index: 10;
+  display: flex; align-items: center; gap: 10px; padding: 5px 14px;
+  background: linear-gradient(165deg, var(--marble-hi), var(--marble-lo));
+  border: 1px solid var(--groove); border-top-color: #efede7; border-bottom-width: 3px;
+  box-shadow: 0 6px 16px rgba(8,8,5,.6); }
+.time-box__clock { font-family: var(--font-head); font-weight: 400; font-size: 14px; letter-spacing: 2.5px;
+  text-transform: uppercase; color: var(--slate); text-shadow: var(--engrave); }
+.time-box__hour { font-family: var(--font-head); font-weight: 400; font-size: 12px; letter-spacing: 2px;
+  color: var(--slate-dim); text-shadow: var(--engrave); }
+.time-button { width: 26px; height: 22px; display: inline-flex; align-items: center; justify-content: center;
+  background: linear-gradient(170deg, var(--marble-hi), var(--marble-lo)); color: var(--slate-dim);
+  border: 1px solid var(--groove); border-top-color: #efede7; border-bottom-width: 2px; }
+.time-button--active { color: var(--bronze-deep); border-color: var(--bronze-deep);
+  background: linear-gradient(170deg, #ded4b6, #c2b48b); box-shadow: inset 0 1px 3px rgba(60,45,10,.35); }
+
+/* ---- the sheet: one grand marble slab over the dark world ---- */
+.modal { position: absolute; inset: 0; z-index: 6; background: rgba(8,8,6,.45);
+  display: flex; justify-content: center; align-items: flex-start; padding-top: 94px; }
+.slab { position: relative;
+  background:
+    repeating-linear-gradient(112deg, transparent 0 18px, rgba(122,116,104,.10) 18px 19px, transparent 19px 47px),
+    repeating-linear-gradient(64deg, transparent 0 30px, rgba(255,255,255,.14) 30px 31px, transparent 31px 66px),
+    linear-gradient(160deg, var(--marble-hi) 0%, var(--marble) 45%, var(--marble-lo) 100%);
+  border-top: 1px solid #efede7; border-left: 1px solid #eae7e0;
+  border-bottom: 2px solid var(--groove); border-right: 1px solid #9c988d;
+  box-shadow: 0 10px 26px rgba(20,18,14,.55); padding: 14px; }
+.slab::before { content: ""; position: absolute; inset: 4px; pointer-events: none;
+  border: 1px solid rgba(59,58,54,.28); box-shadow: inset 0 1px 0 rgba(255,255,255,.45); }
+.slab > * { position: relative; }
+.overlay-sheet { width: 1240px; height: 968px; display: flex; flex-direction: column; }
+
+.overlay-head { display: flex; justify-content: space-between; align-items: flex-start; flex: 0 0 auto; }
+.title-block { display: flex; align-items: center; gap: 12px; }
+.modal__title { font-family: var(--font-head); font-weight: 400; font-size: 27px; letter-spacing: 5px;
+  text-transform: uppercase; color: var(--slate); text-shadow: var(--engrave); line-height: 1; }
+.modal__subtitle { font-family: var(--font-head); font-weight: 400; font-size: 10px; letter-spacing: 2.5px;
+  text-transform: uppercase; color: var(--slate-dim); text-shadow: var(--engrave); margin-top: 5px; }
+.overlay-body { flex: 1 1 0; min-height: 0; display: flex; margin-top: 10px; }
+.overlay-foot { flex: 0 0 auto; border-top: 1px solid rgba(143,139,128,.55); padding-top: 8px; margin-top: 8px;
+  display: flex; align-items: center; justify-content: space-between; }
+
+/* ---- carved buttons ---- */
+.button-ghost { display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  font-family: var(--font-head); font-weight: 400; font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--slate); text-shadow: var(--engrave); padding: 7px 14px;
+  background: linear-gradient(170deg, var(--marble-hi), var(--marble-lo));
+  border: 1px solid var(--groove); border-top-color: #f0eee8; border-bottom-width: 3px; }
+.button-ghost:hover { border-color: var(--bronze-deep); border-top-color: #cfa94c; color: var(--bronze-deep); }
+.button-danger { border-color: var(--oxblood); color: var(--oxblood); }
+.button-danger:hover { border-color: var(--oxblood); color: var(--oxblood); }
+[disabled] { opacity: .45; cursor: default; pointer-events: none; }
+
+/* ---- tab pills: marble tablets, active pressed IN ---- */
+.inv-col { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+.inv-tabs { flex: 0 0 auto; display: flex; align-items: center; justify-content: space-between; }
+.pill-row { display: flex; gap: 6px; }
+.pill { font-family: var(--font-head); font-weight: 400; font-size: 10px; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--slate); text-shadow: var(--engrave); padding: 5px 12px;
+  background: linear-gradient(170deg, var(--marble-hi), var(--marble-lo));
+  border: 1px solid var(--groove); border-top-color: #f0eee8; border-bottom-width: 2px; }
+.pill:hover { border-color: var(--bronze-deep); border-top-color: #cfa94c; }
+.pill--active { color: var(--purple); border-color: var(--purple); border-top-color: var(--purple);
+  background: linear-gradient(165deg, var(--marble-lo), var(--marble-deep));
+  box-shadow: inset 0 2px 5px rgba(40,30,38,.45); transform: translateY(1px); border-bottom-width: 1px; }
+
+/* ---- sections ---- */
+.inv-list { flex: 1 1 0; min-height: 0; overflow: hidden; }
+.inv-section { display: flex; gap: 14px; padding: 5px 0; border-bottom: 1px solid rgba(143,139,128,.45); }
+.inv-section:last-child { border-bottom: 0; }
+.inv-section__label { width: 180px; flex: 0 0 auto; padding-top: 4px; }
+.inv-section__count { font-family: var(--font-head); font-weight: 400; font-size: 8.5px; letter-spacing: 1.5px;
+  text-transform: uppercase; color: var(--slate-dim); text-shadow: var(--engrave); margin-top: 4px; }
+.inv-grid { display: grid; grid-template-columns: repeat(8, 112px); grid-auto-rows: 70px; gap: 8px; }
+
+/* ---- tiles: recessed marble cells, bronze glyphs ---- */
+.tile { position: relative; display: flex; align-items: center; justify-content: center; padding-bottom: 16px;
+  background: linear-gradient(#c6c2b8, #aeaa9f); border: 1px solid var(--groove);
+  box-shadow: inset 0 1px 3px rgba(40,37,31,.30); color: var(--bronze-deep); cursor: pointer; }
+.tile:hover, .tile--hover { border-color: var(--bronze-deep); border-top-color: #cfa94c; }
+.tile--selected, .tile--selected:hover { border-color: var(--purple); color: var(--purple);
+  background: linear-gradient(#c8c1c6, #aca2a8);
+  box-shadow: inset 0 2px 6px rgba(40,30,38,.45), 0 0 0 1px var(--purple-soft); }
+.tile--gold { border-color: var(--bronze-deep); border-top-color: #cfa94c; }
+.tile--warm, .tile--warm:hover { border-color: var(--bronze-deep); border-top-color: #cfa94c;
+  background: linear-gradient(#e0d3ad, #c2ae79); box-shadow: inset 0 1px 3px rgba(60,45,10,.30); }
+.tile--empty, .tile--empty:hover { background: #b6b1a6; border-color: #a49f94;
+  box-shadow: inset 0 2px 5px rgba(40,37,31,.35); cursor: default; }
+.tile__badge { position: absolute; left: -1px; top: -1px; min-width: 16px; text-align: center;
+  font-family: var(--font-head); font-weight: 400; font-size: 10px; letter-spacing: 1px;
+  color: var(--slate); text-shadow: var(--engrave); padding: 1px 5px; line-height: 1.35;
+  background: linear-gradient(170deg, var(--marble-hi), var(--marble-lo));
+  border: 1px solid var(--groove); border-top-color: #f0eee8; }
+.tile__cond { position: absolute; right: -1px; top: -1px;
+  font-family: var(--font-head); font-weight: 400; font-size: 8px; letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--sienna); text-shadow: var(--engrave); padding: 1px 5px; line-height: 1.4;
+  background: linear-gradient(170deg, var(--marble-hi), var(--marble-lo)); border: 1px solid var(--sienna); }
+.tile__name { position: absolute; left: 0; right: 0; bottom: 0; text-align: center;
+  font-family: var(--font-head); font-weight: 400; font-size: 9px; letter-spacing: 1px; text-transform: uppercase;
+  color: var(--slate-dim); text-shadow: var(--engrave); line-height: 1.2; padding: 2px 4px;
+  background: linear-gradient(rgba(233,230,223,.9), rgba(203,199,190,.9));
+  border-top: 1px solid rgba(143,139,128,.6); }
+.tile:hover .tile__name, .tile--hover .tile__name { color: var(--slate); }
+.tile--selected .tile__name { color: var(--purple); }
+
+/* ---- ledger tiles: stores, not items — bronze frame, condensed numerals ---- */
+.ledger { flex-direction: column; gap: 2px; padding-bottom: 0; cursor: default; }
+.ledger:hover { border-color: var(--bronze-deep); border-top-color: #cfa94c; }
+.ledger__value { font-family: var(--font-head); font-weight: 400; font-size: 19px; letter-spacing: 1.5px;
+  text-transform: uppercase; line-height: 1; color: var(--slate); text-shadow: var(--engrave); }
+.ledger__value--low { color: var(--sienna); }
+.ledger .micro-head { font-size: 7.5px; }
+
+/* ---- recessed stone bars ---- */
+.bar { height: 5px; margin-top: 3px; background: linear-gradient(#a29d91, #b4afa3);
+  border: 1px solid var(--groove); border-bottom-color: #d9d6cf;
+  box-shadow: inset 0 1px 2px rgba(40,37,31,.45); overflow: hidden; }
+.bar--thick { height: 8px; }
+.bar__fill { height: 100%; box-shadow: inset 0 1px 0 rgba(255,255,255,.30), inset 0 -1px 0 rgba(0,0,0,.25); }
+.bar__fill--gold { background: linear-gradient(#b8933c, var(--bronze-deep)); }
+
+/* ---- footer inspect ---- */
+.inspect { display: flex; align-items: center; gap: 14px; }
+.inspect__art { width: 52px; height: 52px; flex: 0 0 auto; display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(#c6c2b8, #aeaa9f); border: 1px solid var(--bronze-deep); border-top-color: #cfa94c;
+  box-shadow: inset 0 1px 3px rgba(40,37,31,.30); color: var(--bronze-deep); }
+.inspect__text { width: 500px; }
+.inspect__name { font-family: var(--font-head); font-weight: 400; font-size: 17px; letter-spacing: 2.5px;
+  text-transform: uppercase; color: var(--slate); text-shadow: var(--engrave); line-height: 1.1; }
+.inspect__meta { font-family: var(--font-head); font-weight: 400; font-size: 10px; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--bronze-deep); text-shadow: var(--engrave); margin-top: 3px; }
+.storage { width: 300px; }
+.storage__loads { font-family: var(--font-head); font-weight: 400; font-size: 12px; letter-spacing: 1.5px;
+  color: var(--slate); text-shadow: var(--engrave); }
+</style>
+</head>
+<body>
+<div class="style-label">Marble &amp; Iron · 05 Inventory</div>
+<div id="stage">
+
+<!-- ===== icon set: solid blocky silhouettes, 24×24, 1–2 interior cuts ===== -->
+<svg style="display:none" xmlns="http://www.w3.org/2000/svg">
+  <symbol id="i-pause" viewBox="0 0 16 16"><rect x="3" y="2" width="4" height="12"/><rect x="9" y="2" width="4" height="12"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.5"/><path d="M11 1h2v4h-2zM11 19h2v4h-2zM1 11h4v2H1zM19 11h4v2h-4zM4.2 5.6l1.4-1.4 2.8 2.8-1.4 1.4zM15.6 17l1.4-1.4 2.8 2.8-1.4 1.4zM18.4 4.2l1.4 1.4-2.8 2.8-1.4-1.4zM4.2 18.4l2.8-2.8 1.4 1.4-2.8 2.8z"/></symbol>
+  <symbol id="i-laurel" viewBox="0 0 40 60"><path d="M32 56 C14 46 8 28 14 6" fill="none" stroke="currentColor" stroke-width="2"/><g fill="currentColor"><ellipse cx="12" cy="10" rx="7" ry="2.6" transform="rotate(-62 12 10)"/><ellipse cx="10.5" cy="20" rx="7" ry="2.6" transform="rotate(-40 10.5 20)"/><ellipse cx="12.5" cy="30" rx="7" ry="2.6" transform="rotate(-22 12.5 30)"/><ellipse cx="17" cy="40" rx="7" ry="2.6" transform="rotate(-4 17 40)"/><ellipse cx="24" cy="49" rx="7" ry="2.6" transform="rotate(16 24 49)"/><ellipse cx="20" cy="8" rx="6" ry="2.4" transform="rotate(-88 20 8)"/><ellipse cx="19" cy="19" rx="6" ry="2.4" transform="rotate(-70 19 19)"/><ellipse cx="21.5" cy="30" rx="6" ry="2.4" transform="rotate(-52 21.5 30)"/><ellipse cx="26" cy="41" rx="6" ry="2.4" transform="rotate(-34 26 41)"/></g></symbol>
+
+  <symbol id="i-wheat" viewBox="0 0 24 24"><path d="M11 8h2v14h-2z"/><path d="M12 2l3 4-3 2-3-2z"/><path d="M10 8L4 6l1 5 5 1z"/><path d="M14 8l6-2-1 5-5 1z"/><path d="M10 14l-6-2 1 5 5 1z"/><path d="M14 14l6-2-1 5-5 1z"/></symbol>
+  <symbol id="i-bread" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M3 13c0-5 4-8 9-8s9 3 9 8v6H3zm5-3h2v6H8zm6 0h2v6h-2z"/></symbol>
+  <symbol id="i-meat" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M2 13C2 8 7 4 13 4c5 0 9 3 9 7 0 3-3 5-7 5-3 0-4 3-7 3-3 0-6-2-6-6zm3 1a2 2 0 1 0 4 0 2 2 0 0 0-4 0z"/></symbol>
+  <symbol id="i-sack" viewBox="0 0 24 24"><path d="M9 2h6v3H9z"/><path d="M8 6h8c3 2 4 5 4 8 0 5-3 8-8 8s-8-3-8-8c0-3 1-6 4-8z"/></symbol>
+  <symbol id="i-timber" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 2.7a4.3 4.3 0 1 0 0 8.6 4.3 4.3 0 0 0 0-8.6zm0 2.9a1.4 1.4 0 1 1 0 2.8 1.4 1.4 0 0 1 0-2.8zM7 12.7a4.3 4.3 0 1 0 0 8.6 4.3 4.3 0 0 0 0-8.6zm0 2.9a1.4 1.4 0 1 1 0 2.8 1.4 1.4 0 0 1 0-2.8zM17 12.7a4.3 4.3 0 1 0 0 8.6 4.3 4.3 0 0 0 0-8.6zm0 2.9a1.4 1.4 0 1 1 0 2.8 1.4 1.4 0 0 1 0-2.8z"/></symbol>
+  <symbol id="i-ingot" viewBox="0 0 24 24"><path d="M7 4h10l3 6H4z"/><path d="M4 12h16l3 7H1z"/></symbol>
+  <symbol id="i-wool" viewBox="0 0 24 24"><circle cx="7.5" cy="13" r="4.5"/><circle cx="12" cy="9" r="5"/><circle cx="16.5" cy="13" r="4.5"/><rect x="4" y="13" width="16" height="5"/></symbol>
+  <symbol id="i-flame" viewBox="0 0 24 24"><path d="M12 2c1 4 5 6 5 11a5 5 0 0 1-10 0c0-3 2-4 2-7 2 1 2 2 3 4 1-3-1-5 0-8z"/></symbol>
+  <symbol id="i-bandage" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M9 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zm0 4a3 3 0 1 1 0 6 3 3 0 0 1 0-6z"/><path d="M9 18h13v-4h-6a7 7 0 0 1-7 4z"/></symbol>
+  <symbol id="i-herbs" viewBox="0 0 24 24"><path d="M11 13h2v9h-2z"/><path d="M12 13C7 13 3.5 9.5 3.5 4 9 4 12 7.5 12 13z"/><path d="M12 13c5 0 8.5-3.5 8.5-9C15 4 12 7.5 12 13z"/></symbol>
+  <symbol id="i-amber" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M7 3h10l5 7-10 12L2 10zm5 4l-3.5 3 3.5 8 3.5-8z"/></symbol>
+  <symbol id="i-salt" viewBox="0 0 24 24"><path d="M12 3l6 8H6z"/><path d="M4 13h16l-2.5 6h-11z"/></symbol>
+  <symbol id="i-pelt" viewBox="0 0 24 24"><path d="M12 2l3 2 4-1-1 4 3 3-3 2 1 5-4-1-3 4-3-4-4 1 1-5-3-2 3-3-1-4 4 1z"/></symbol>
+  <symbol id="i-pila" viewBox="0 0 24 24"><path d="M5 22V10H3l3-7 3 7H7v12z"/><path d="M11 22V9H9l3-7 3 7h-2v13z"/><path d="M17 22V10h-2l3-7 3 7h-2v12z"/></symbol>
+  <symbol id="i-framea" viewBox="0 0 24 24"><path d="M2 22l10-10 2 2L4 24z"/><path d="M11 11l4-8 7-1-1 7-8 4z"/></symbol>
+  <symbol id="i-gladius" viewBox="0 0 24 24"><path d="M10.5 2h3l1.5 4v9h-6V6z"/><rect x="7" y="15" width="10" height="2.5"/><rect x="10.5" y="17.5" width="3" height="3.5"/><circle cx="12" cy="22" r="1.6"/></symbol>
+  <symbol id="i-scutum" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M6 2h12a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm6 8a2.2 2.2 0 1 0 0 4.4 2.2 2.2 0 0 0 0-4.4z"/></symbol>
+  <symbol id="i-roundshield" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 6.5a3.5 3.5 0 1 1 0 7 3.5 3.5 0 0 1 0-7z"/></symbol>
+  <symbol id="i-helmet" viewBox="0 0 24 24"><path d="M12 3c-4 0-7 3-7 7v6h3v-6h8v6h3v-6c0-4-3-7-7-7z"/><path d="M8 2c2-1.6 6-1.6 8 0l-1 2c-1.6-1.2-4.4-1.2-6 0z"/><rect x="10.5" y="16" width="3" height="5"/></symbol>
+  <symbol id="i-scroll" viewBox="0 0 24 24"><path d="M5 4h12v3h3v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2zM8 8h8v2H8zm0 4h8v2H8z"/></symbol>
+  <symbol id="i-map" viewBox="0 0 24 24"><path d="M2 5l6-2v16l-6 2z"/><path d="M9 3l6 2v16l-6-2z"/><path d="M16 5l6-2v16l-6 2z"/></symbol>
+  <symbol id="i-vexillum" viewBox="0 0 24 24"><circle cx="12" cy="2.5" r="1.8"/><rect x="11" y="3" width="2" height="4"/><rect x="4" y="5" width="16" height="2"/><path d="M6 7h12v9l-2-2-2 2-2-2-2 2-2-2-2 2z"/></symbol>
+  <symbol id="i-banner" viewBox="0 0 24 24"><path d="M11 2h2v20h-2z"/><path d="M13 3h8l-3 4 3 4h-8z"/><circle cx="12" cy="2.5" r="2"/></symbol>
+  <symbol id="i-horse" viewBox="0 0 24 24"><path d="M16 3l2-2 3 3-2 2 1 3-2 1v2h1l1 9h-3l-1-7h-6l-1 7H6l1-8c-2-1-3-2-3-5l2 1c0-3 3-5 6-5h3z"/></symbol>
+  <symbol id="i-mule" viewBox="0 0 24 24"><path d="M15 6l1-5 2 4 3-3v5l1 2-2 1v2l2 9h-3l-1-7H8l-1 7H4l2-9v-3c0-2 2-4 5-4h4z"/></symbol>
+  <symbol id="i-horsecarv" viewBox="0 0 24 24"><g transform="translate(2.5,-1) scale(.8)"><use href="#i-horse"/></g><rect x="3" y="19" width="18" height="3"/></symbol>
+  <symbol id="i-wagon" viewBox="0 0 24 24"><path d="M2 7h15l5 4v4H2z"/><path fill-rule="evenodd" d="M7 14a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7zm0 2.3a1.2 1.2 0 1 1 0 2.4 1.2 1.2 0 0 1 0-2.4zM17 14a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7zm0 2.3a1.2 1.2 0 1 1 0 2.4 1.2 1.2 0 0 1 0-2.4z"/></symbol>
+  <symbol id="i-coin" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 2.5a9.5 9.5 0 1 0 0 19 9.5 9.5 0 0 0 0-19zM9 8h6v2h-2v7h-2v-7H9z"/></symbol>
+</svg>
+
+<!-- ===== the world behind the sheet (stand-in for the 3D overmap, paused) ===== -->
+<svg class="map" viewBox="0 0 1920 1080" xmlns="http://www.w3.org/2000/svg">
+  <g fill="rgb(26,38,22)" opacity=".85"><ellipse cx="300" cy="260" rx="260" ry="150"/><ellipse cx="1650" cy="220" rx="300" ry="170"/><ellipse cx="1500" cy="900" rx="330" ry="150"/><ellipse cx="520" cy="880" rx="240" ry="120"/></g>
+  <g fill="rgb(78,84,52)" opacity=".35"><ellipse cx="760" cy="420" rx="140" ry="80"/><ellipse cx="1350" cy="640" rx="160" ry="90"/></g>
+  <path d="M1180 -20 C 1120 200, 1300 360, 1220 520 S 1080 820, 1180 1100" fill="none" stroke="rgb(56,72,84)" stroke-width="26" stroke-linecap="round" opacity=".95"/>
+  <path d="M120 720 C 400 640, 700 700, 960 560 S 1400 380, 1800 440" fill="none" stroke="rgb(96,84,60)" stroke-width="4" stroke-dasharray="14 10" opacity=".55"/>
+  <g transform="translate(960,560)">
+    <ellipse rx="34" ry="14" fill="rgba(168,132,44,.14)" stroke="rgb(168,132,44)" stroke-width="1.5"/>
+    <g fill="rgb(193,154,63)"><rect x="-22" y="-6" width="6" height="6"/><rect x="-13" y="-6" width="6" height="6"/><rect x="-4" y="-6" width="6" height="6"/><rect x="5" y="-6" width="6" height="6"/><rect x="14" y="-6" width="6" height="6"/><rect x="-18" y="2" width="6" height="6"/><rect x="-9" y="2" width="6" height="6"/><rect x="0" y="2" width="6" height="6"/><rect x="9" y="2" width="6" height="6"/></g>
+  </g>
+</svg>
+
+<!-- ===== overmap chrome ===== -->
+<div class="nav-bar">
+  <button class="nav-item nav-item--live nav-item--active">Inventory</button>
+  <button class="nav-item nav-item--live">Army</button>
+  <button class="nav-item nav-item--live">Commander</button>
+  <button class="nav-item nav-item--live">Save</button>
+  <button class="nav-item nav-item--live">Title</button>
+  <span class="nav-item nav-item--inert">Journal</span>
+  <span class="nav-item nav-item--inert">Encyclopedia</span>
+</div>
+<div class="time-box"><svg class="ico ico--sm" viewBox="0 0 24 24" style="color:var(--bronze-deep)"><use href="#i-sun"/></svg><span class="time-box__clock">Day 4 · 2nd Watch</span><span class="time-box__hour">14:20</span><span class="time-button time-button--active"><svg class="ico ico--sm" viewBox="0 0 16 16"><use href="#i-pause"/></svg></span></div>
+
+<!-- ===== the sheet ===== -->
+<div class="modal">
+  <div class="slab overlay-sheet">
+    <div class="overlay-head">
+      <div>
+        <div class="title-block">
+          <svg class="laurel" width="18" height="27" viewBox="0 0 40 60"><use href="#i-laurel"/></svg>
+          <div class="modal__title">Inventory</div>
+          <svg class="laurel" width="18" height="27" viewBox="0 0 40 60" style="transform:scaleX(-1)"><use href="#i-laurel"/></svg>
+        </div>
+        <div class="modal__subtitle">What the column carries · clock paused</div>
+      </div>
+      <button class="button-ghost">Close · Esc</button>
+    </div>
+
+    <div class="overlay-body">
+      <div class="inv-col">
+        <div class="inv-tabs">
+          <div class="pill-row">
+            <button class="pill pill--active">All</button>
+            <button class="pill">Resources</button>
+            <button class="pill">Currency &amp; Valuables</button>
+            <button class="pill">Equipment</button>
+            <button class="pill">Documents</button>
+            <button class="pill">Trophies</button>
+            <button class="pill">Transport</button>
+          </div>
+          <span class="micro-head">31 kinds · 64 loads · click a tile to inspect</span>
+        </div>
+
+        <div class="inv-list">
+          <!-- FOODSTUFFS -->
+          <div class="inv-section">
+            <div class="inv-section__label"><div class="heading">Foodstuffs</div><div class="inv-section__count">4 kinds · 14 loads</div></div>
+            <div class="inv-grid">
+              <div class="tile tile--gold ledger"><span class="eyebrow">Food</span><span class="ledger__value ledger__value--low">6 days</span><span class="micro-head">For 41 men</span></div>
+              <div class="tile"><span class="tile__badge">6</span><svg class="ico ico--tile" viewBox="0 0 24 24"><use href="#i-wheat"/></svg><span class="tile__name">Grain</span></div>
+              <div class="tile"><span class="tile__badge">14</span><svg class="ico ico--tile" viewBox="0 0 24 24"><use href="#i-bread"/></svg><span class="tile__name">Flatbread</span></div>
+              <div class="tile"><span class="tile__badge">2</span><svg class="ico ico--tile" viewBox="0 0 24 24"><use href="#i-meat"/></svg><span class="tile__name">Raw game</span></div>
+              <div class="tile"><span class="tile__badge">3</span><svg class="ico ico--tile" viewBox="0 0 24 24"><use href="#i-sack"/></svg><span class="tile__name">Trail mix</span></div>
+              <div class="tile tile--empty"></div><div class="tile tile--empty"></div><div class="tile tile--empty"></div>
+            </div>
+          </div>
+          <!-- MATERIALS -->
+          <div class="inv-section">
+            <div class="inv-section__label"><div class="heading">Materials</div><div class="inv-section__count">4 kinds · 17 loads</div></div>
+            <div class="inv-grid">
+              <div class="tile"><span class="tile__badge">7</span><svg class="ico ico--tile" viewBox="0 0 24 24"><use href="#i-timber"/></svg><span class="tile__name">Timber</span></div>
+              <div class="tile"><span class="tile__badge">3</span><svg class="ico ico--tile" viewBox="0 0 24 24"><use href="#i-ingot"/></svg><span class="tile__name">Iron</span></div>
+              <div class="tile"><span class="tile__badge">5</span><svg class="ico ico--tile" viewBox="0 0 24 24"><use href="#i-wool"/></svg><span class="tile__name">Wool</span></div>
+              <div class="tile"><span class="tile__badge">14</span><svg class="ico ico--tile" viewBox="0 0 24 24"><use href="#i-flame"/></svg><span class="tile__name">Firewood</span></div>
+              <div class="tile tile--empty"></div><div class="tile tile--empty"></div><div class="tile tile--empty"></div><div class="tile tile--empty"></div>
+            </div>
+          </div>
+          <!-- MEDICAL SUPPLIES -->
+          <div class="inv-section">
+            <div class="inv-section__label"><div class="heading">Medical supplies</div><div class="inv-section__count">2 kinds · 2 loads</div></div>
+            <div class="inv-grid">
+              <div class="tile"><span class="tile__badge">3</span><svg class="ico ico--tile" viewBox="0 0 24 24"><use href="#i-bandage"/></svg><span class="tile__name">Bandages</span></div>
+              <div class="tile"><span class="tile__badge">2</span><svg class="ico ico--tile" viewBox="0 0 24 24"><use href="#i-herbs"/></svg><span class="tile__name">Herbs</span></div>
+              <div class="tile tile--empty"></div><div class="tile tile--empty"></div><div class="tile tile--empty"></div><div class="tile tile--empty"></div><div class="tile tile--empty"></div><div class="tile tile--empty"></div>
+            </div>
+          </div>
+          <!-- CURRENCY & VALUABLES -->
+          <div class="inv-section">
+            <div class="inv-section__label"><div class="heading">Currency &amp; valuables</div><div class="inv-section__count">5 kinds · 4 loads</div></div>
+            <div class="inv-grid">
+              <div class="tile tile--gold ledger"><span class="eyebrow">Coin</span><span class="ledger__value">212</span><span class="micro-head">Bronze</span></div>
+              <div class="tile tile--gold ledger"><span class="eyebrow">Denarii</span><span class="ledger__value">38</span><span class="micro-head">Silver</span></div>
+              <div class="tile"><span class="tile__badge">2</span><svg class="ico ico--tile" viewBox="0 0 24 24"><use href="#i-amber"/></svg><span class="tile__name">Amber</span></div>
+              <div class="tile"><span class="tile__badge">4</span><svg class="ico ico--tile" viewBox="0 0 24 24"><use href="#i-salt"/></svg><span class="tile__name">Salt</span></div>
+              <div class="tile"><span class="tile__badge">2</span><svg class="ico ico--tile" viewBox="0 0 24 24"><use href="#i-pelt"/></svg><span class="tile__name">Pelts</span></div>
+              <div class="tile tile--empty"></div><div class="tile tile--empty"></div><div class="tile tile--empty"></div>
+            </div>
+          </div>
+          <!-- WEAPONS -->
+          <div class="inv-section">
+            <div class="inv-section__label"><div class="heading">Weapons</div><div class="inv-section__count">3 kinds · 16 loads</div></div>
+            <div class="inv-grid">
+              <div class="tile tile--selected"><span class="tile__badge">6</span><svg class="ico ico--tile" viewBox="0 0 24 24"><use href="#i-pila"/></svg><span class="tile__name">Pila bundle</span></div>
+              <div class="tile tile--hover"><span class="tile__badge">4</span><svg class="ico ico--tile" viewBox="0 0 24 24"><use href="#i-framea"/></svg><span class="tile__name">Frameae</span></div>
+              <div class="tile"><span class="tile__badge">3</span><svg class="ico ico--tile" viewBox="0 0 24 24"><use href="#i-gladius"/></svg><span class="tile__name">Gladii</span></div>
+              <div class="tile tile--empty"></div><div class="tile tile--empty"></div><div class="tile tile--empty"></div><div class="tile tile--empty"></div><div class="tile tile--empty"></div>
+            </div>
+          </div>
+          <!-- ARMOUR -->
+          <div class="inv-section">
+            <div class="inv-section__label"><div class="heading">Armour</div><div class="inv-section__count">3 kinds · 8 loads</div></div>
+            <div class="inv-grid">
+              <div class="tile"><span class="tile__badge">5</span><svg class="ico ico--tile" viewBox="0 0 24 24"><use href="#i-scutum"/></svg><span class="tile__name">Scuta</span></div>
+              <div class="tile"><span class="tile__badge">2</span><svg class="ico ico--tile" viewBox="0 0 24 24"><use href="#i-helmet"/></svg><span class="tile__name">Helmets</span></div>
+              <div class="tile"><span class="tile__badge">3</span><span class="tile__cond">Worn</span><svg class="ico ico--tile" viewBox="0 0 24 24"><use href="#i-roundshield"/></svg><span class="tile__name">Round shields</span></div>
+              <div class="tile tile--empty"></div><div class="tile tile--empty"></div><div class="tile tile--empty"></div><div class="tile tile--empty"></div><div class="tile tile--empty"></div>
+            </div>
+          </div>
+          <!-- DOCUMENTS -->
+          <div class="inv-section">
+            <div class="inv-section__label"><div class="heading">Documents</div><div class="inv-section__count">2 kinds · no weight</div></div>
+            <div class="inv-grid">
+              <div class="tile"><svg class="ico ico--tile" viewBox="0 0 24 24"><use href="#i-map"/></svg><span class="tile__name">Map of the marsh paths</span></div>
+              <div class="tile"><svg class="ico ico--tile" viewBox="0 0 24 24"><use href="#i-scroll"/></svg><span class="tile__name">Orders of Varus</span></div>
+              <div class="tile tile--empty"></div><div class="tile tile--empty"></div><div class="tile tile--empty"></div><div class="tile tile--empty"></div><div class="tile tile--empty"></div><div class="tile tile--empty"></div>
+            </div>
+          </div>
+          <!-- TROPHIES -->
+          <div class="inv-section">
+            <div class="inv-section__label"><div class="heading">Trophies</div><div class="inv-section__count">3 kinds · 3 loads</div></div>
+            <div class="inv-grid">
+              <div class="tile tile--warm"><svg class="ico ico--tile" viewBox="0 0 24 24"><use href="#i-vexillum"/></svg><span class="tile__name">Vexillum XIX</span></div>
+              <div class="tile"><svg class="ico ico--tile" viewBox="0 0 24 24"><use href="#i-banner"/></svg><span class="tile__name">Banner of the Cherusci</span></div>
+              <div class="tile"><svg class="ico ico--tile" viewBox="0 0 24 24"><use href="#i-horsecarv"/></svg><span class="tile__name">Carved horse</span></div>
+              <div class="tile tile--empty"></div><div class="tile tile--empty"></div><div class="tile tile--empty"></div><div class="tile tile--empty"></div><div class="tile tile--empty"></div>
+            </div>
+          </div>
+          <!-- TRANSPORT -->
+          <div class="inv-section">
+            <div class="inv-section__label"><div class="heading">Transport</div><div class="inv-section__count">4 kinds · carries 74 loads</div></div>
+            <div class="inv-grid">
+              <div class="tile"><svg class="ico ico--tile" viewBox="0 0 24 24"><use href="#i-wagon"/></svg><span class="tile__name">Ox wagon</span></div>
+              <div class="tile"><span class="tile__badge">3</span><svg class="ico ico--tile" viewBox="0 0 24 24"><use href="#i-mule"/></svg><span class="tile__name">Mules</span></div>
+              <div class="tile"><svg class="ico ico--tile" viewBox="0 0 24 24"><use href="#i-horse"/></svg><span class="tile__name">Pack horse</span></div>
+              <div class="tile"><span class="tile__badge">2</span><svg class="ico ico--tile" viewBox="0 0 24 24"><use href="#i-horse"/></svg><span class="tile__name">Riding horses</span></div>
+              <div class="tile tile--empty"></div><div class="tile tile--empty"></div><div class="tile tile--empty"></div><div class="tile tile--empty"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="overlay-foot">
+      <div class="inspect">
+        <div class="inspect__art"><svg class="ico" width="30" height="30" viewBox="0 0 24 24"><use href="#i-pila"/></svg></div>
+        <div class="inspect__text">
+          <div class="inspect__name">Pila bundle</div>
+          <div class="body-copy">Ten pila. Each man carries four into battle; squads loose one volley at 14 m.</div>
+          <div class="inspect__meta">× 6 · 2 loads each · <svg class="ico ico--coin" viewBox="0 0 24 24"><use href="#i-coin"/></svg> 8 denarii</div>
+        </div>
+        <button class="button-ghost" disabled>Use · in camp</button>
+        <button class="button-ghost button-danger">Discard</button>
+      </div>
+      <div class="storage">
+        <div class="row between"><span class="metric-label">Storage</span><span class="storage__loads">64 / 110 loads</span></div>
+        <div class="bar bar--thick"><div class="bar__fill bar__fill--gold" style="width:58%"></div></div>
+        <div class="micro-head" style="margin-top:5px">Wagon &amp; beasts 74 · on the men's backs 36</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+<script>const s=document.getElementById('stage');function f(){const k=Math.min(innerWidth/1920,innerHeight/1080);s.style.transform=`translate(-50%,-50%) scale(${k})`;}addEventListener('resize',f);f();</script>
+</body>
+</html>

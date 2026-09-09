@@ -1,0 +1,423 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CENTURY — HUD style: Iron &amp; Blood</title>
+<style>
+  /* ============ IRON & BLOOD — grimdark battle HUD ============ */
+  :root {
+    --iron-hi:   #17181a;  --iron-lo:  #101113;  --iron-deep: #0b0c0d;
+    --bevel-hi:  #2e3134;  --bevel-lo: #050606;
+    --bone:      #cfc9bd;  --ash:      #7c7a74;  --ash-dark:  #55534e;
+    --blood:     #a51f14;  --blood-hi: #d0392b;  --blood-dim: rgba(165,31,20,.45);
+    --brass:     #8c6d33;  --brass-hi: #b08c45;
+    --steel:     #5a7284;
+    --fs-micro: 9px; --fs-small: 11px; --fs-body: 13px; --fs-large: 16px;
+    --font-head: Impact, "Arial Narrow", "Franklin Gothic Medium", sans-serif;
+    --font-body: "Segoe UI", Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; background: #060606; overflow: hidden; }
+  body { font-family: var(--font-body); font-size: var(--fs-body); color: var(--bone); -webkit-font-smoothing: antialiased; }
+  #stage { position: absolute; left: 50%; top: 50%; width: 1920px; height: 1080px; transform-origin: center; overflow: hidden; background: #0a0908; }
+  button { font: inherit; color: inherit; cursor: pointer; }
+
+  .style-label { position: fixed; left: 10px; top: 8px; z-index: 999; font-family: var(--font-head); font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--blood-hi); text-shadow: 0 0 8px rgba(0,0,0,.9); opacity: .85; }
+  .style-label span { color: var(--ash); }
+
+  /* ---- atmosphere ---- */
+  .field { position: absolute; inset: 0; }
+  .smoke { position: absolute; inset: 0; pointer-events: none; z-index: 2;
+    background:
+      linear-gradient(104deg, transparent 30%, rgba(120,116,108,.05) 34%, transparent 40%),
+      linear-gradient(97deg, transparent 55%, rgba(120,116,108,.06) 60%, transparent 68%),
+      linear-gradient(110deg, transparent 74%, rgba(90,88,84,.05) 79%, transparent 86%); }
+  .vignette { position: absolute; inset: 0; pointer-events: none; z-index: 2;
+    background: radial-gradient(ellipse 72% 62% at 50% 48%, transparent 45%, rgba(0,0,0,.55) 82%, rgba(0,0,0,.82) 100%); }
+
+  /* ---- iron plate panels ---- */
+  .plate { position: relative; background: linear-gradient(180deg, var(--iron-hi) 0%, var(--iron-lo) 100%);
+    border: 2px solid; border-color: var(--bevel-hi) var(--bevel-lo) var(--bevel-lo) #232629; padding: 10px; z-index: 3;
+    box-shadow: 0 6px 18px rgba(0,0,0,.65); }
+  .plate--cut { clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px)); }
+  .plate::after { content: ""; position: absolute; inset: 0; pointer-events: none;
+    background:
+      radial-gradient(circle 3px at 8px 8px, #3a3d40 0 1.4px, #0a0b0c 1.8px, transparent 3px),
+      radial-gradient(circle 3px at calc(100% - 8px) 8px, #3a3d40 0 1.4px, #0a0b0c 1.8px, transparent 3px),
+      radial-gradient(circle 3px at 8px calc(100% - 8px), #3a3d40 0 1.4px, #0a0b0c 1.8px, transparent 3px),
+      radial-gradient(circle 3px at calc(100% - 8px) calc(100% - 8px), #3a3d40 0 1.4px, #0a0b0c 1.8px, transparent 3px); }
+  .plate--cut::after {
+    background:
+      radial-gradient(circle 3px at 8px 8px, #3a3d40 0 1.4px, #0a0b0c 1.8px, transparent 3px),
+      radial-gradient(circle 3px at calc(100% - 20px) 8px, #3a3d40 0 1.4px, #0a0b0c 1.8px, transparent 3px),
+      radial-gradient(circle 3px at 20px calc(100% - 8px), #3a3d40 0 1.4px, #0a0b0c 1.8px, transparent 3px),
+      radial-gradient(circle 3px at calc(100% - 8px) calc(100% - 8px), #3a3d40 0 1.4px, #0a0b0c 1.8px, transparent 3px); }
+
+  /* ---- type ---- */
+  .head { font-family: var(--font-head); font-size: 12px; font-weight: 400; color: var(--bone); letter-spacing: 4px; text-transform: uppercase; text-shadow: 0 0 6px rgba(0,0,0,.9), 0 1px 0 #000; }
+  .head--red { color: var(--blood-hi); }
+  .micro { font-size: var(--fs-micro); letter-spacing: 1px; }
+  .caps { text-transform: uppercase; letter-spacing: 2px; }
+  .row { display: flex; align-items: center; } .between { justify-content: space-between; } .grow { flex: 1 1 0; }
+  .t-ash { color: var(--ash); } .t-blood { color: var(--blood-hi); } .t-brass { color: var(--brass-hi); } .t-steel { color: var(--steel); } .t-bone { color: var(--bone); }
+
+  /* ---- bars: thick iron troughs w/ hazard notching on the empty run ---- */
+  .bar { height: 8px; margin-top: 3px; border: 1px solid #000; background:
+    repeating-linear-gradient(-45deg, #0c0d0e 0 5px, #15161a 5px 10px); overflow: hidden; box-shadow: inset 0 2px 3px rgba(0,0,0,.8); }
+  .bar--hair { height: 5px; }
+  .bar__fill { height: 100%; box-shadow: inset 0 -2px 2px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.12); }
+  .fill-health { background: linear-gradient(180deg, var(--blood-hi), var(--blood)); }
+  .fill-stamina { background: linear-gradient(180deg, var(--brass-hi), var(--brass)); }
+  .fill-morale { background: linear-gradient(180deg, #6d8598, var(--steel)); }
+
+  /* ---- keycaps: stamped iron ---- */
+  .keycap { display: inline-flex; align-items: center; justify-content: center; min-width: 22px; height: 22px; padding: 0 5px;
+    background: linear-gradient(180deg, #202225, #121315); border: 1px solid #000; border-top-color: #383b3f; border-bottom: 3px solid #050606;
+    font-size: var(--fs-micro); color: var(--brass-hi); letter-spacing: 1px; text-transform: uppercase; font-family: var(--font-head); }
+  .keycap--wide { min-width: 64px; }
+  .keycap--brand { color: #ffb9a6; border-color: var(--blood); border-top-color: var(--blood-hi); text-shadow: 0 0 6px rgba(208,57,43,.8); }
+
+  /* ---- timer ---- */
+  .timer { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 6px; z-index: 4; }
+  .timer__clock { font-family: var(--font-head); font-size: 27px; letter-spacing: 4px; color: var(--bone); text-shadow: 0 0 10px rgba(0,0,0,.9); padding: 3px 24px; }
+  .time-button { width: 28px; height: 24px; display: inline-flex; align-items: center; justify-content: center; padding: 0;
+    background: linear-gradient(180deg, #1b1d1f, #0f1012); border: 1px solid #000; border-top-color: #33363a; color: var(--ash); }
+  .time-button--active { color: var(--blood-hi); border-color: var(--blood-dim); box-shadow: inset 0 -6px 10px rgba(165,31,20,.28), 0 0 8px rgba(165,31,20,.25); }
+  .timer__controls { display: flex; gap: 4px; }
+  .timer__hint { display: flex; align-items: center; gap: 8px; font-size: var(--fs-micro); letter-spacing: 2px; color: var(--ash); text-transform: uppercase; }
+
+  /* ---- left column ---- */
+  .battle-left { position: absolute; left: 16px; top: 40px; bottom: 150px; width: 250px; display: flex; flex-direction: column; gap: 8px; z-index: 3; }
+  .battle-left .plate { flex: 0 0 auto; }
+  .battle-left__grow { flex: 1 1 auto !important; min-height: 120px; overflow: hidden; }
+  .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 12px; margin-top: 8px; }
+  .stat__label { font-size: var(--fs-micro); color: var(--ash); letter-spacing: 1px; text-transform: uppercase; }
+  .stat__value { font-family: var(--font-head); font-size: 18px; letter-spacing: 1px; color: var(--bone); }
+  .body-line { font-size: var(--fs-body); color: var(--bone); line-height: 1.4; margin-top: 5px; }
+
+  .officer { display: flex; align-items: center; gap: 8px; padding: 5px 6px; margin-top: 5px;
+    background: linear-gradient(180deg, #121315, #0c0d0e); border: 1px solid #000; border-left: 3px solid var(--ash-dark); }
+  .officer--commander { border-left-color: var(--blood-hi); }
+  .officer--wounded { border-left-color: var(--brass-hi); }
+  .officer__icon { width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; color: var(--bone); background: #08090a; border: 1px solid #26282b; flex: 0 0 auto; }
+  .officer__name { font-size: var(--fs-small); color: var(--bone); }
+  .officer__role { font-size: var(--fs-micro); color: var(--ash); letter-spacing: 1px; text-transform: uppercase; }
+  .officer .bar { height: 5px; margin-top: 3px; }
+
+  .event { display: flex; align-items: flex-start; gap: 6px; margin-top: 6px; }
+  .event__glyph { width: 12px; color: var(--ash); font-size: var(--fs-body); line-height: 1.2; text-align: center; font-family: var(--font-head); }
+  .event__text { flex: 1; font-size: var(--fs-small); color: var(--ash); line-height: 1.35; }
+  .event__time { font-size: var(--fs-micro); color: var(--ash-dark); letter-spacing: 1px; white-space: nowrap; }
+  .event--good .event__glyph, .event--good .event__text { color: var(--steel); }
+  .event--warning .event__glyph { color: var(--brass-hi); } .event--warning .event__text { color: var(--bone); }
+  .event--critical .event__glyph, .event--critical .event__text { color: var(--blood-hi); }
+  .event--critical .event__glyph { text-shadow: 0 0 6px rgba(208,57,43,.7); }
+
+  /* ---- roster ---- */
+  .roster { position: absolute; right: 16px; top: 40px; width: 250px; z-index: 3; }
+  .contub { margin-top: 8px; padding: 6px 8px; background: linear-gradient(180deg, #121315, #0c0d0e); border: 1px solid #000; border-top-color: #26282b; }
+  .contub--selected { border: 1px solid var(--blood); box-shadow: inset 0 0 14px rgba(165,31,20,.22), 0 0 10px rgba(165,31,20,.2); background: linear-gradient(180deg, #191214, #100d0e); }
+  .contub--withdrawn { opacity: .4; filter: grayscale(.6); }
+  .contub__head { display: flex; justify-content: space-between; align-items: baseline; }
+  .contub__name { font-family: var(--font-head); font-size: 11px; color: var(--bone); letter-spacing: 2.5px; text-transform: uppercase; }
+  .contub--selected .contub__name { color: var(--blood-hi); text-shadow: 0 0 8px rgba(208,57,43,.5); }
+  .contub__order { font-size: var(--fs-micro); color: var(--brass-hi); letter-spacing: 2px; text-transform: uppercase; }
+  .contub__order--danger { color: var(--blood-hi); }
+  .dots { display: flex; gap: 4px; margin-top: 6px; align-items: center; }
+  .dot { width: 10px; height: 10px; background: linear-gradient(180deg, #d8d2c4, #b0aa9c); border: 1px solid #000; box-shadow: inset 0 1px 0 rgba(255,255,255,.25); }
+  .dot--wounded { background: linear-gradient(180deg, var(--blood-hi), var(--blood)); animation: pulse 1s ease-in-out infinite; }
+  .dot--dead { background: #35110d; position: relative; box-shadow: none; }
+  .dot--dead::after { content: "×"; position: absolute; inset: -4px 0 0 0; color: var(--blood); font-size: 12px; line-height: 12px; text-align: center; }
+  .dot--empty { background: #1a1b1d; box-shadow: inset 0 1px 3px rgba(0,0,0,.9); }
+  @keyframes pulse { 50% { opacity: .35; box-shadow: 0 0 8px rgba(208,57,43,.8); } }
+  .flag { margin-left: auto; font-size: var(--fs-micro); color: var(--ash); letter-spacing: 1px; text-transform: uppercase; font-family: var(--font-head); }
+  .flag--danger { color: var(--blood-hi); text-shadow: 0 0 7px rgba(208,57,43,.65); }
+  .cohesion { display: flex; gap: 2px; margin-top: 5px; }
+  .cohesion span { flex: 1; height: 4px; background: var(--steel); box-shadow: inset 0 -1px 0 rgba(0,0,0,.5); }
+  .cohesion span.off { background: repeating-linear-gradient(-45deg, #0c0d0e 0 3px, #16171a 3px 6px); }
+  .cohesion--amber span:not(.off) { background: var(--brass-hi); }
+  .cohesion--red span:not(.off) { background: var(--blood-hi); animation: pulse .6s steps(2) infinite; }
+
+  /* ---- centurion ---- */
+  .centurion { position: absolute; left: 16px; bottom: 18px; width: 250px; z-index: 3; }
+  .centurion__name { font-family: var(--font-head); font-size: 17px; color: var(--blood-hi); letter-spacing: 4px; text-transform: uppercase; text-shadow: 0 0 10px rgba(165,31,20,.5); }
+  .centurion__row { display: flex; justify-content: space-between; align-items: baseline; margin-top: 8px; }
+  .metric-label { font-size: var(--fs-small); color: var(--ash); letter-spacing: 1px; text-transform: uppercase; }
+  .pila { display: flex; gap: 3px; }
+  .pila span { width: 4px; height: 16px; background: linear-gradient(180deg, var(--brass-hi), var(--brass)); box-shadow: 0 0 3px rgba(0,0,0,.8); }
+  .pila span.spent { background: #232426; }
+  .centurion__keys { display: flex; align-items: center; gap: 6px; margin-top: 10px; font-size: var(--fs-micro); letter-spacing: 1px; color: var(--ash); text-transform: uppercase; }
+
+  /* ---- command bar ---- */
+  .command-bar { position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%); display: flex; gap: 6px; z-index: 4; }
+  .command { width: 92px; height: 78px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 4px;
+    background: linear-gradient(180deg, var(--iron-hi), var(--iron-lo)); border: 2px solid; border-color: var(--bevel-hi) var(--bevel-lo) var(--bevel-lo) #232629;
+    clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px)); box-shadow: 0 4px 10px rgba(0,0,0,.6); }
+  .command:hover, .command--hovered { border-color: #4a4e53 var(--bevel-lo) var(--bevel-lo) #3a3e42; background: linear-gradient(180deg, #1e2023, #141517); }
+  .command--active { border-color: var(--blood) var(--bevel-lo) var(--blood-dim) #3a1a15;
+    box-shadow: inset 0 -16px 22px rgba(165,31,20,.4), 0 0 12px rgba(165,31,20,.25); background: linear-gradient(180deg, #191214, #140e0f); }
+  .command--summon { width: 110px; border-color: var(--blood-hi) #2a0803 #2a0803 var(--blood);
+    background: linear-gradient(180deg, #2a0f0a, #180705); box-shadow: inset 0 -18px 26px rgba(208,57,43,.5), 0 0 18px rgba(165,31,20,.45); }
+  .command__label { font-family: var(--font-head); font-size: 9px; color: var(--ash); letter-spacing: 1.5px; text-align: center; text-transform: uppercase; line-height: 1.25; }
+  .command:hover .command__label, .command--hovered .command__label { color: var(--bone); }
+  .command--active .command__label { color: var(--blood-hi); text-shadow: 0 0 8px rgba(208,57,43,.55); }
+  .command--summon .command__label { color: #f0a08e; text-shadow: 0 0 8px rgba(208,57,43,.7); }
+  .command .ico { color: var(--bone); width: 24px; height: 24px; }
+  .command--active .ico { color: var(--blood-hi); } .command--summon .ico { color: var(--blood-hi); }
+  .ico { width: 20px; height: 20px; fill: currentColor; flex: 0 0 auto; }
+  .ico--sm { width: 14px; height: 14px; }
+
+  .selection-hint { position: absolute; left: 50%; bottom: 142px; transform: translateX(-50%); font-size: var(--fs-micro); letter-spacing: 2px; color: var(--ash); text-transform: uppercase; display: flex; gap: 10px; align-items: center; z-index: 4; text-shadow: 0 1px 4px #000; }
+  .selection-hint b { color: var(--blood-hi); font-weight: 400; font-family: var(--font-head); letter-spacing: 2.5px; }
+
+  .formation-menu { position: absolute; left: 50%; bottom: 104px; transform: translateX(-50%); display: flex; gap: 6px; padding: 8px; z-index: 4; }
+  .formation-menu::before { content: "Choose formation"; position: absolute; top: -18px; left: 8px; font-family: var(--font-head); font-size: var(--fs-micro); letter-spacing: 3px; color: var(--blood-hi); text-transform: uppercase; text-shadow: 0 0 8px rgba(0,0,0,.9); }
+  .formation-menu .command { width: 84px; height: 66px; }
+  .form-diagram { width: 30px; height: 16px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; }
+  .form-diagram i { display: block; background: var(--bone); width: 5px; height: 5px; box-shadow: 0 1px 0 #000; }
+  .command--active .form-diagram i { background: var(--blood-hi); }
+
+  /* ---- squad inspect (hover) ---- */
+  .inspect { position: absolute; left: 1180px; top: 430px; width: 220px; z-index: 4; }
+  .inspect__row { display: flex; justify-content: space-between; align-items: baseline; margin-top: 6px; }
+  .inspect__word { font-size: var(--fs-micro); letter-spacing: 2px; text-transform: uppercase; font-family: var(--font-head); }
+</style>
+</head>
+<body>
+<div class="style-label">Iron &amp; Blood <span>· battle HUD style 04</span></div>
+<div id="stage">
+
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="i-pause" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></symbol>
+      <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4 L20 12 L7 20 Z"/></symbol>
+      <symbol id="i-fast" viewBox="0 0 24 24"><path d="M3 5 L12 12 L3 19 Z"/><path d="M12 5 L21 12 L12 19 Z"/></symbol>
+      <symbol id="i-helmet" viewBox="0 0 24 24"><path d="M12 3 C7 3 5 7 5 11 L5 15 L8 15 L8 11 C8 8 9 6 12 6 C15 6 16 8 16 11 L16 15 L19 15 L19 11 C19 7 17 3 12 3 Z"/><rect x="10" y="8" width="4" height="12"/></symbol>
+      <symbol id="i-crest" viewBox="0 0 24 24"><path d="M4 10 C8 4 16 4 20 10 L18 12 C15 8 9 8 6 12 Z"/><rect x="10" y="11" width="4" height="9"/></symbol>
+      <symbol id="i-scroll" viewBox="0 0 24 24"><rect x="6" y="4" width="12" height="16"/><rect x="4" y="4" width="2" height="4"/><rect x="18" y="16" width="2" height="4"/><rect x="8" y="8" width="8" height="1.5" opacity=".5"/><rect x="8" y="11" width="8" height="1.5" opacity=".5"/><rect x="8" y="14" width="6" height="1.5" opacity=".5"/></symbol>
+      <symbol id="i-cross" viewBox="0 0 24 24"><rect x="10" y="4" width="4" height="16"/><rect x="4" y="10" width="16" height="4"/></symbol>
+      <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 2 L20 5 L20 12 C20 17 16 21 12 22 C8 21 4 17 4 12 L4 5 Z"/></symbol>
+      <symbol id="i-boot" viewBox="0 0 24 24"><path d="M8 3 L14 3 L14 13 L20 16 L20 20 L4 20 L4 16 L8 14 Z"/></symbol>
+      <symbol id="i-pila" viewBox="0 0 24 24"><path d="M4 20 L16 4 L18 6 L6 22 Z"/><path d="M15 3 L20 3 L20 8 L17 5 Z"/><path d="M9 21 L20 10 L21 12 L11 22 Z" opacity=".55"/></symbol>
+      <symbol id="i-stealth" viewBox="0 0 24 24"><path d="M18 3 C11 4 6 9 6 15 C6 18 8 21 12 21 C7 19 8 8 18 3 Z"/></symbol>
+      <symbol id="i-passage" viewBox="0 0 24 24"><rect x="4" y="4" width="8" height="16"/><path d="M13 10 L18 10 L18 7 L23 12 L18 17 L18 14 L13 14 Z"/></symbol>
+      <symbol id="i-banner" viewBox="0 0 24 24"><rect x="5" y="2" width="2" height="20"/><path d="M8 3 L20 3 L17 7 L20 11 L8 11 Z"/></symbol>
+    </defs>
+  </svg>
+
+  <!-- ===== the field: mud and dusk ===== -->
+  <svg class="field" viewBox="0 0 1920 1080" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="ground" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#0c0a08"/><stop offset=".5" stop-color="#12100c"/><stop offset="1" stop-color="#0a0807"/>
+      </linearGradient>
+      <linearGradient id="river" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#0d1114"/><stop offset=".55" stop-color="#181d22"/><stop offset="1" stop-color="#0a0d10"/>
+      </linearGradient>
+    </defs>
+    <rect x="0" y="0" width="1920" height="1080" fill="url(#ground)"/>
+    <!-- dark umber mud patches -->
+    <g fill="#1c140c" opacity=".55">
+      <ellipse cx="520" cy="640" rx="260" ry="90"/><ellipse cx="1240" cy="720" rx="320" ry="110"/>
+      <ellipse cx="900" cy="480" rx="380" ry="120"/><ellipse cx="1520" cy="520" rx="200" ry="80"/>
+    </g>
+    <g fill="#231a10" opacity=".35">
+      <ellipse cx="760" cy="820" rx="300" ry="90"/><ellipse cx="1100" cy="600" rx="180" ry="60"/>
+    </g>
+    <!-- river to the north, ford: black steel with a faint red reflection -->
+    <path d="M-20 300 C 300 260, 600 340, 960 300 S 1600 260, 1940 320" fill="none" stroke="url(#river)" stroke-width="44"/>
+    <path d="M-20 300 C 300 260, 600 340, 960 300 S 1600 260, 1940 320" fill="none" stroke="#2b3238" stroke-width="8" opacity=".4"/>
+    <path d="M-20 306 C 300 266, 600 346, 960 306 S 1600 266, 1940 326" fill="none" stroke="#a51f14" stroke-width="2.5" opacity=".22"/>
+    <rect x="880" y="270" width="160" height="70" fill="#2a2015" opacity=".55"/>
+    <!-- forests: jagged black silhouettes -->
+    <g fill="#050604">
+      <path d="M-40 860 L40 640 L90 760 L150 560 L210 720 L280 590 L340 780 L420 660 L470 830 L420 1080 L-40 1080 Z" opacity=".95"/>
+      <path d="M1520 40 L1580 160 L1640 60 L1700 200 L1760 90 L1830 230 L1900 120 L1960 260 L1960 -20 L1520 -20 Z" opacity=".95"/>
+    </g>
+    <!-- field boundary: rusted dashed line -->
+    <rect x="120" y="80" width="1680" height="940" fill="none" stroke="rgba(140,70,35,.4)" stroke-width="1.5" stroke-dasharray="6 10"/>
+
+    <!-- enemy warband: loose knots, arterial red -->
+    <g fill="#d0392b">
+      <g transform="translate(700,380)"><rect x="0" y="0" width="7" height="7"/><rect x="12" y="4" width="7" height="7"/><rect x="24" y="-2" width="7" height="7"/><rect x="6" y="14" width="7" height="7"/><rect x="20" y="12" width="7" height="7"/><rect x="34" y="8" width="7" height="7"/><rect x="-8" y="10" width="7" height="7"/></g>
+      <g transform="translate(900,360)"><rect x="0" y="0" width="7" height="7"/><rect x="12" y="4" width="7" height="7"/><rect x="24" y="-2" width="7" height="7"/><rect x="6" y="14" width="7" height="7"/><rect x="20" y="12" width="7" height="7"/><rect x="34" y="8" width="7" height="7"/><rect x="-8" y="10" width="7" height="7"/><rect x="40" y="-6" width="7" height="7"/></g>
+      <g transform="translate(1110,400)"><rect x="0" y="0" width="7" height="7"/><rect x="12" y="4" width="7" height="7"/><rect x="24" y="-2" width="7" height="7"/><rect x="6" y="14" width="7" height="7"/><rect x="20" y="12" width="7" height="7"/></g>
+      <!-- routing men -->
+      <g opacity=".55"><rect x="1300" y="250" width="7" height="7"/><rect x="1340" y="230" width="7" height="7"/><rect x="1370" y="205" width="7" height="7"/></g>
+    </g>
+    <!-- corpses: darker, more numerous-feeling -->
+    <g fill="#170f0a">
+      <ellipse cx="830" cy="470" rx="9" ry="4"/><ellipse cx="960" cy="455" rx="9" ry="4"/><ellipse cx="1010" cy="480" rx="9" ry="4"/><ellipse cx="760" cy="500" rx="9" ry="4"/>
+      <ellipse cx="880" cy="505" rx="8" ry="4"/><ellipse cx="935" cy="490" rx="8" ry="3"/><ellipse cx="1060" cy="465" rx="9" ry="4"/><ellipse cx="805" cy="445" rx="7" ry="3"/>
+    </g>
+    <g fill="#3a0e08" opacity=".4">
+      <ellipse cx="832" cy="473" rx="14" ry="6"/><ellipse cx="1012" cy="483" rx="13" ry="5"/><ellipse cx="882" cy="508" rx="12" ry="5"/>
+    </g>
+
+    <!-- our line: four squads in LINE, bone-white blocks with brass edge -->
+    <g fill="#d8d2c4" stroke="#8c6d33" stroke-width="1">
+      <!-- I -->
+      <g transform="translate(640,560)"><rect x="0" y="0" width="7" height="7"/><rect x="14" y="0" width="7" height="7"/><rect x="28" y="0" width="7" height="7"/><rect x="42" y="0" width="7" height="7"/><rect x="0" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="28" y="14" width="7" height="7"/><rect x="42" y="14" width="7" height="7"/></g>
+      <!-- II -->
+      <g transform="translate(790,560)"><rect x="0" y="0" width="7" height="7"/><rect x="14" y="0" width="7" height="7"/><rect x="28" y="0" width="7" height="7"/><rect x="42" y="0" width="7" height="7"/><rect x="0" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="28" y="14" width="7" height="7"/></g>
+      <!-- III (selected) -->
+      <g transform="translate(940,556)"><rect x="0" y="0" width="7" height="7"/><rect x="14" y="0" width="7" height="7"/><rect x="28" y="0" width="7" height="7"/><rect x="42" y="0" width="7" height="7"/><rect x="0" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="28" y="14" width="7" height="7"/><rect x="42" y="14" width="7" height="7"/></g>
+      <!-- IV -->
+      <g transform="translate(1090,562)"><rect x="0" y="0" width="7" height="7"/><rect x="14" y="0" width="7" height="7"/><rect x="28" y="0" width="7" height="7"/><rect x="0" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="28" y="14" width="7" height="7"/></g>
+    </g>
+    <!-- selection ring under III: arterial red -->
+    <ellipse cx="965" cy="570" rx="46" ry="18" fill="none" stroke="#d0392b" stroke-width="1.5" stroke-dasharray="4 4" opacity=".9"/>
+    <!-- the Centurion, behind the line -->
+    <g transform="translate(962,640)"><circle r="7" fill="#d8d2c4" stroke="#050505" stroke-width="1.5"/><path d="M0 -16 l5 6 -5 -2 -5 2z" fill="#d0392b"/></g>
+    <!-- the signum, carried -->
+    <g transform="translate(1000,600)"><rect x="-1" y="-22" width="2" height="22" fill="#8c6d33"/><path d="M1 -22 h10 v8 h-10z" fill="#a51f14"/></g>
+
+    <!-- squad tags: numeral + three bars (health / stamina / morale) -->
+    <g font-family="Impact, 'Arial Narrow', sans-serif" font-size="12" letter-spacing="2">
+      <g transform="translate(646,520)"><rect x="0" y="0" width="52" height="22" fill="rgba(8,9,10,.88)" stroke="#26282b"/><text x="8" y="16" fill="#cfc9bd">I</text><rect x="20" y="6" width="26" height="2" fill="#d0392b"/><rect x="20" y="10" width="22" height="2" fill="#b08c45"/><rect x="20" y="14" width="24" height="2" fill="#5a7284"/></g>
+      <g transform="translate(796,520)"><rect x="0" y="0" width="52" height="22" fill="rgba(8,9,10,.88)" stroke="#26282b"/><text x="8" y="16" fill="#cfc9bd">II</text><rect x="20" y="6" width="18" height="2" fill="#d0392b"/><rect x="20" y="10" width="14" height="2" fill="#b08c45"/><rect x="20" y="14" width="12" height="2" fill="#a51f14"/></g>
+      <g transform="translate(946,516)"><rect x="0" y="0" width="56" height="22" fill="rgba(20,10,9,.92)" stroke="#a51f14"/><text x="8" y="16" fill="#d0392b">III</text><rect x="26" y="6" width="24" height="2" fill="#d0392b"/><rect x="26" y="10" width="20" height="2" fill="#b08c45"/><rect x="26" y="14" width="24" height="2" fill="#5a7284"/></g>
+      <g transform="translate(1096,522)"><rect x="0" y="0" width="52" height="22" fill="rgba(8,9,10,.88)" stroke="#26282b"/><text x="8" y="16" fill="#cfc9bd">IV</text><rect x="22" y="6" width="16" height="2" fill="#d0392b"/><rect x="22" y="10" width="20" height="2" fill="#b08c45"/><rect x="22" y="14" width="18" height="2" fill="#5a7284"/></g>
+    </g>
+
+    <!-- cursor reticle over III -->
+    <g transform="translate(1000,590)" font-family="Impact, 'Arial Narrow', sans-serif" font-size="11" letter-spacing="2">
+      <circle r="26" fill="none" stroke="#d0392b" stroke-width="1.5"/>
+      <path d="M-32 0 h8 M24 0 h8 M0 -32 v8 M0 24 v8" stroke="#d0392b" stroke-width="1.5"/>
+      <circle r="3" fill="#d0392b"/>
+      <text x="38" y="-6" fill="#d0392b">III · HOLD</text>
+      <text x="38" y="10" fill="#7c7a74">TAB · SELECT</text>
+    </g>
+
+    <!-- pila in flight -->
+    <g stroke="#b08c45" stroke-width="1.5" opacity=".65" fill="none"><path d="M700 545 q40 -60 80 -110"/><path d="M712 548 q40 -60 84 -114"/><path d="M960 540 q30 -70 60 -120"/></g>
+    <!-- order ping ring -->
+    <ellipse cx="800" cy="470" rx="30" ry="12" fill="none" stroke="#a51f14" stroke-width="1.5" opacity=".55"/>
+  </svg>
+  <div class="smoke"></div>
+  <div class="vignette"></div>
+
+  <!-- ===== timer ===== -->
+  <div class="timer">
+    <div class="timer__clock plate plate--cut" style="padding:2px 22px">1:42</div>
+    <div class="timer__controls">
+      <button class="time-button"><svg class="ico ico--sm"><use href="#i-pause"/></svg></button>
+      <button class="time-button time-button--active"><svg class="ico ico--sm"><use href="#i-play"/></svg></button>
+      <button class="time-button"><svg class="ico ico--sm"><use href="#i-fast"/></svg></button>
+    </div>
+    <div class="timer__hint"><span class="keycap keycap--wide">Space</span> Tactical time</div>
+  </div>
+
+  <!-- ===== left column ===== -->
+  <div class="battle-left">
+    <div class="plate plate--cut">
+      <div class="row between"><span class="head head--red">Engagement</span><span class="micro t-steel caps">The Signum · carried</span></div>
+      <div class="body-line">The warband closes on the ford.</div>
+      <div class="stat-grid">
+        <div><div class="stat__label">Survivors</div><div class="stat__value">33</div></div>
+        <div><div class="stat__label">Enemies killed</div><div class="stat__value">11</div></div>
+        <div><div class="stat__label">In reserve</div><div class="stat__value t-ash">8</div></div>
+        <div><div class="stat__label">Enemy standing</div><div class="stat__value t-blood">29</div></div>
+      </div>
+    </div>
+    <div class="plate">
+      <div class="head">Officers</div>
+      <div class="officer officer--commander"><div class="officer__icon" style="color:var(--blood-hi)"><svg class="ico"><use href="#i-helmet"/></svg></div><div class="grow"><div class="officer__name">M. Cornelius</div><div class="officer__role">Centurion</div><div class="bar bar--hair"><div class="bar__fill fill-health" style="width:78%"></div></div></div></div>
+      <div class="officer"><div class="officer__icon"><svg class="ico"><use href="#i-crest"/></svg></div><div class="grow"><div class="officer__name">G. Aurelius</div><div class="officer__role">Optio · II</div><div class="bar bar--hair"><div class="bar__fill fill-health" style="width:92%"></div></div></div></div>
+      <div class="officer officer--wounded"><div class="officer__icon" style="color:var(--brass-hi)"><svg class="ico"><use href="#i-scroll"/></svg></div><div class="grow"><div class="officer__name">L. Pedo</div><div class="officer__role t-brass">Tesserarius · wounded</div><div class="bar bar--hair"><div class="bar__fill fill-health" style="width:31%"></div></div></div></div>
+      <div class="officer"><div class="officer__icon"><svg class="ico"><use href="#i-cross"/></svg></div><div class="grow"><div class="officer__name">Q. Fabius</div><div class="officer__role">Medicus · rear</div><div class="bar bar--hair"><div class="bar__fill fill-health" style="width:100%"></div></div></div></div>
+    </div>
+    <div class="plate battle-left__grow">
+      <div class="head">Combat log</div>
+      <div style="margin-top:2px">
+        <div class="event event--good"><span class="event__glyph">+</span><span class="event__text">Contubernium I loose their pila. Four fall.</span><span class="event__time">1:38</span></div>
+        <div class="event event--warning"><span class="event__glyph">◆</span><span class="event__text">II is wavering — the Optio steadies them.</span><span class="event__time">1:31</span></div>
+        <div class="event event--critical"><span class="event__glyph">!</span><span class="event__text">Lucius Pedo is down, wounded.</span><span class="event__time">1:20</span></div>
+        <div class="event"><span class="event__glyph">·</span><span class="event__text">The line holds at the ford.</span><span class="event__time">1:04</span></div>
+        <div class="event"><span class="event__glyph">·</span><span class="event__text">Enemy skirmishers pull back beyond the river.</span><span class="event__time">0:52</span></div>
+        <div class="event event--good"><span class="event__glyph">+</span><span class="event__text">Three of the enemy break and run.</span><span class="event__time">0:40</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== roster ===== -->
+  <div class="roster plate plate--cut">
+    <div class="row between"><span class="head head--red">The Century</span><span class="micro t-ash">33 standing</span></div>
+    <div class="contub">
+      <div class="contub__head"><span class="contub__name">I · Valerius</span><span class="contub__order">Hold</span></div>
+      <div class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot dot--wounded"></span><span class="dot"></span><span class="dot"></span></div>
+      <div class="cohesion"><span></span><span></span><span></span><span></span><span class="off"></span></div>
+    </div>
+    <div class="contub">
+      <div class="contub__head"><span class="contub__name">II · Rufus</span><span class="contub__order contub__order--danger">Hold</span></div>
+      <div class="dots"><span class="dot"></span><span class="dot dot--wounded"></span><span class="dot"></span><span class="dot dot--dead"></span><span class="dot"></span><span class="dot dot--wounded"></span><span class="dot"></span><span class="dot dot--dead"></span><span class="flag flag--danger">Wavering</span></div>
+      <div class="cohesion cohesion--amber"><span></span><span></span><span class="off"></span><span class="off"></span><span class="off"></span></div>
+    </div>
+    <div class="contub contub--selected">
+      <div class="contub__head"><span class="contub__name">III · Silo</span><span class="contub__order">Hold · Line</span></div>
+      <div class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+      <div class="cohesion"><span></span><span></span><span></span><span></span><span></span></div>
+    </div>
+    <div class="contub">
+      <div class="contub__head"><span class="contub__name">IV · Cotta</span><span class="contub__order">Advance</span></div>
+      <div class="dots"><span class="dot"></span><span class="dot"></span><span class="dot dot--dead"></span><span class="dot"></span><span class="dot"></span><span class="dot dot--dead"></span><span class="dot"></span><span class="dot dot--empty"></span></div>
+      <div class="cohesion"><span></span><span></span><span></span><span class="off"></span><span class="off"></span></div>
+    </div>
+    <div class="contub contub--withdrawn">
+      <div class="contub__head"><span class="contub__name">V · Piso</span><span class="contub__order">Reserve</span></div>
+      <div class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot dot--empty"></span><span class="dot dot--empty"></span><span class="dot dot--empty"></span><span class="dot dot--empty"></span><span class="flag">Off field</span></div>
+    </div>
+  </div>
+
+  <!-- ===== squad inspect (hover) ===== -->
+  <div class="inspect plate plate--cut">
+    <div class="row between"><span class="head head--red" style="font-size:11px">Contubernium III</span><span class="micro t-brass caps">Hold · Line</span></div>
+    <div class="inspect__row"><span class="metric-label">Health</span><span class="inspect__word t-steel">Steady</span></div>
+    <div class="bar"><div class="bar__fill fill-health" style="width:88%"></div></div>
+    <div class="inspect__row"><span class="metric-label">Stamina</span><span class="inspect__word t-brass">Fresh</span></div>
+    <div class="bar"><div class="bar__fill fill-stamina" style="width:74%"></div></div>
+    <div class="inspect__row"><span class="metric-label">Morale</span><span class="inspect__word t-steel">Confident</span></div>
+    <div class="bar"><div class="bar__fill fill-morale" style="width:70%"></div></div>
+    <div class="micro t-ash" style="margin-top:8px">Decanus Decimus Silo · 8 of 8 · shields up</div>
+  </div>
+
+  <!-- ===== centurion ===== -->
+  <div class="centurion plate plate--cut">
+    <div class="row between"><span class="centurion__name">Centurion</span><span class="micro t-ash">M. Cornelius</span></div>
+    <div class="centurion__row"><span class="metric-label">Health</span><span class="micro t-steel caps">Bloodied</span></div>
+    <div class="bar"><div class="bar__fill fill-health" style="width:78%"></div></div>
+    <div class="centurion__row"><span class="metric-label">Stamina</span><span class="micro t-brass caps">Winded</span></div>
+    <div class="bar"><div class="bar__fill fill-stamina" style="width:46%"></div></div>
+    <div class="centurion__row"><span class="metric-label">Pila</span><div class="pila"><span></span><span></span><span></span><span class="spent"></span></div></div>
+    <div class="centurion__keys">
+      <span class="keycap">R</span> Rally <span style="margin-left:8px" class="keycap">Ctrl</span> Shield <span style="margin-left:8px" class="keycap">RMB</span> Pilum
+    </div>
+  </div>
+
+  <!-- ===== selection hint + formation picker + order bar ===== -->
+  <div class="selection-hint"><b>Contubernium III selected</b> · <span class="keycap">Tab</span> toggle · <span class="keycap">0</span> all</div>
+
+  <div class="formation-menu plate">
+    <button class="command command--active"><div class="form-diagram"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><span class="command__label">Line</span></button>
+    <button class="command"><div class="form-diagram" style="grid-template-columns:repeat(3,1fr);width:22px"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><span class="command__label">Testudo</span></button>
+    <button class="command"><div class="form-diagram" style="gap:2px 6px"><i></i><i></i><i></i><i></i><i style="margin-left:3px"></i><i></i><i></i><i></i></div><span class="command__label">Double line</span></button>
+    <button class="command"><div class="form-diagram" style="gap:5px 9px;width:40px"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><span class="command__label">Loose</span></button>
+    <button class="command"><div class="form-diagram" style="grid-template-columns:repeat(2,1fr);width:12px;height:30px"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><span class="command__label">Column</span></button>
+  </div>
+
+  <div class="command-bar">
+    <button class="command command--active"><svg class="ico"><use href="#i-shield"/></svg><span class="command__label">Line</span><span class="keycap">1</span></button>
+    <button class="command command--hovered"><svg class="ico"><use href="#i-boot"/></svg><span class="command__label">Advance</span><span class="keycap">2</span></button>
+    <button class="command command--active"><svg class="ico"><use href="#i-shield"/></svg><span class="command__label">Hold</span><span class="keycap">3</span></button>
+    <button class="command"><svg class="ico"><use href="#i-helmet"/></svg><span class="command__label">Follow me</span><span class="keycap">4</span></button>
+    <button class="command"><svg class="ico"><use href="#i-pila"/></svg><span class="command__label">Skirmish</span><span class="keycap">5</span></button>
+    <button class="command"><svg class="ico"><use href="#i-stealth"/></svg><span class="command__label">Fall back</span><span class="keycap">6</span></button>
+    <button class="command"><svg class="ico"><use href="#i-passage"/></svg><span class="command__label">Retreat</span><span class="keycap">7</span></button>
+    <button class="command command--summon"><svg class="ico"><use href="#i-banner"/></svg><span class="command__label">Summon reserves</span><span class="keycap keycap--brand">8</span></button>
+  </div>
+
+</div>
+<script>const s=document.getElementById('stage');function f(){const k=Math.min(innerWidth/1920,innerHeight/1080);s.style.transform=`translate(-50%,-50%) scale(${k})`;}addEventListener('resize',f);f();</script>
+</body>
+</html>

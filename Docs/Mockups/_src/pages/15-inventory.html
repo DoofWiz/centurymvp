@@ -1,0 +1,208 @@
+<!-- title: Inventory -->
+<!-- desc: The INVENTORY overlay: subtype sections as 8-column tile grids led by a food ledger tile, count badges, one tile selected and inspected in the footer beside the STORAGE readout. -->
+<!-- world: overmap -->
+<style>
+  .map { position: absolute; inset: 0; }
+  .inv-col { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 10px; }
+  .inv-tabs { flex: 0 0 auto; display: flex; align-items: center; justify-content: space-between; }
+  .inv-list { flex: 1 1 0; min-height: 0; overflow-y: auto; padding-right: 8px; }
+  .inv-section { display: flex; flex-direction: row; gap: 16px; padding: 8px 0; border-bottom: 1px solid var(--gold-faint); }
+  .inv-section:last-child { border-bottom: 0; }
+  .inv-section__label { width: 190px; flex: 0 0 auto; padding-top: 6px; }
+  .inv-section__count { font-size: var(--fs-micro); color: var(--parchment-faint); letter-spacing: 1px; text-transform: uppercase; margin-top: 5px; }
+  .inv-grid { display: grid; grid-template-columns: repeat(8, 112px); grid-auto-rows: 112px; gap: 8px; }
+  .tile { position: relative; background: rgba(250,244,226,.35); border: 1px solid rgba(74,54,32,.35); display: flex; align-items: center; justify-content: center;
+          padding-bottom: 22px; color: var(--gold); cursor: pointer; transition: border-color .12s, background .12s; }
+  .tile:hover, .tile--hover { border-color: #9a7b3a; background: rgba(255,250,232,.55); }
+  .tile--selected, .tile--selected:hover { border-color: #9a7b3a; background: rgba(255,250,232,.55); box-shadow: inset 0 0 0 1px rgba(154,123,58,.4); color: var(--gold-bright); }
+  .tile--gold { border-color: #9a7b3a; background: linear-gradient(170deg,#eee0bb,#dcc890); }
+  .tile--empty, .tile--empty:hover { border-color: rgba(74,54,32,.18); background: rgba(74,54,32,.08); cursor: default; }
+  .tile__badge { position: absolute; left: -1px; top: -1px; background: var(--ink-deep); border: 1px solid var(--gold-dim); padding: 1px 6px;
+                 font-size: var(--fs-small); color: var(--gold-bright); letter-spacing: 1px; line-height: 1.3; }
+  .tile__cond { position: absolute; right: -1px; top: -1px; background: var(--ink-deep); border: 1px solid var(--amber); padding: 1px 5px;
+                font-size: var(--fs-micro); color: var(--amber); letter-spacing: 1px; text-transform: uppercase; }
+  .tile__name { position: absolute; left: 0; right: 0; bottom: 0; background: rgba(250,244,226,.7); border-top: 1px solid rgba(74,54,32,.2); padding: 3px 5px;
+                font-size: var(--fs-micro); letter-spacing: 1px; line-height: 1.25; color: var(--parchment-dim); text-transform: uppercase; text-align: center; }
+  .tile:hover .tile__name, .tile--hover .tile__name, .tile--selected .tile__name { color: var(--parchment); }
+  .ledger { flex-direction: column; gap: 4px; padding-bottom: 0; cursor: default; }
+  .ledger:hover { border-color: #9a7b3a; background: linear-gradient(170deg,#eee0bb,#dcc890); }
+  .ledger__value { font-size: 22px; color: var(--gold-bright); letter-spacing: 1px; line-height: 1; }
+  .ledger__value--low { color: var(--amber); }
+  .inspect { display: flex; flex-direction: row; align-items: center; gap: 14px; }
+  .inspect__art { width: 56px; height: 56px; border: 1px solid #9a7b3a; background: rgba(250,244,226,.35); display: flex; align-items: center; justify-content: center; color: var(--gold-bright); flex: 0 0 auto; }
+  .inspect__text { width: 560px; }
+  .inspect__name { font-size: var(--fs-large); color: var(--parchment); letter-spacing: 1px; }
+  .inspect__meta { font-size: var(--fs-micro); color: var(--gold); letter-spacing: 2px; text-transform: uppercase; margin-top: 4px; }
+  .storage { width: 300px; }
+</style>
+
+<!-- ===== the world behind the sheet (stand-in for the 3D overmap, paused) ===== -->
+<svg class="map" viewBox="0 0 1920 1080" xmlns="http://www.w3.org/2000/svg">
+  <g fill="#9d9e69" opacity=".5"><ellipse cx="300" cy="260" rx="260" ry="150"/><ellipse cx="1650" cy="220" rx="300" ry="170"/><ellipse cx="1500" cy="900" rx="330" ry="150"/><ellipse cx="520" cy="880" rx="240" ry="120"/></g>
+  <g fill="#a69e6e" opacity=".45"><ellipse cx="760" cy="420" rx="140" ry="80"/><ellipse cx="1350" cy="640" rx="160" ry="90"/></g>
+  <path d="M1180 -20 C 1120 200, 1300 360, 1220 520 S 1080 820, 1180 1100" fill="none" stroke="#7f8b94" stroke-width="26" stroke-linecap="round" opacity=".6"/>
+  <path d="M120 720 C 400 640, 700 700, 960 560 S 1400 380, 1800 440" fill="none" stroke="#6b5230" stroke-width="4" stroke-dasharray="14 10" opacity=".5"/>
+  <g transform="translate(960,560)">
+    <ellipse rx="34" ry="14" fill="rgba(154,123,58,.15)" stroke="#9a7b3a" stroke-width="1.5"/>
+    <g fill="#8a6a34"><rect x="-22" y="-6" width="6" height="6"/><rect x="-13" y="-6" width="6" height="6"/><rect x="-4" y="-6" width="6" height="6"/><rect x="5" y="-6" width="6" height="6"/><rect x="14" y="-6" width="6" height="6"/><rect x="-18" y="2" width="6" height="6"/><rect x="-9" y="2" width="6" height="6"/><rect x="0" y="2" width="6" height="6"/><rect x="9" y="2" width="6" height="6"/></g>
+  </g>
+</svg>
+
+<!-- ===== overmap chrome ===== -->
+<div class="nav-bar">
+  <button class="nav-item nav-item--live nav-item--active">Inventory</button>
+  <button class="nav-item nav-item--live">Army</button>
+  <button class="nav-item nav-item--live">Commander</button>
+  <button class="nav-item nav-item--live">Save</button>
+  <button class="nav-item nav-item--live">Title</button>
+  <span class="nav-item nav-item--inert">Journal</span>
+  <span class="nav-item nav-item--inert">Encyclopedia</span>
+</div>
+<div class="time-box"><svg class="ico ico--sm ico--gold"><use href="#i-sun"/></svg><span class="time-box__clock">Day 4 · 2nd Watch</span><span class="text-dim small">14:20</span><span class="time-button time-button--active"><svg class="ico ico--sm"><use href="#i-pause"/></svg></span></div>
+
+<!-- ===== the sheet ===== -->
+<div class="modal">
+  <div class="modal__sheet overlay-sheet">
+    <div class="overlay-head">
+      <div><div class="modal__title">Inventory</div><div class="modal__subtitle">What the column carries · clock paused</div></div>
+      <button class="button-ghost">Close · Esc</button>
+    </div>
+
+    <div class="overlay-body">
+      <div class="inv-col">
+        <div class="inv-tabs">
+          <div class="pill-row">
+            <button class="pill pill--active">All</button>
+            <button class="pill">Resources</button>
+            <button class="pill">Currency &amp; Valuables</button>
+            <button class="pill">Equipment</button>
+            <button class="pill">Documents</button>
+            <button class="pill">Trophies</button>
+            <button class="pill">Transport</button>
+          </div>
+          <span class="micro text-faint">31 KINDS · 64 LOADS · CLICK A TILE TO INSPECT</span>
+        </div>
+
+        <div class="inv-list">
+          <!-- FOODSTUFFS -->
+          <div class="inv-section">
+            <div class="inv-section__label"><div class="heading">Foodstuffs</div><div class="inv-section__count">4 kinds · 14 loads</div></div>
+            <div class="inv-grid">
+              <div class="tile tile--gold ledger"><span class="eyebrow">Food</span><span class="ledger__value ledger__value--low">6 days</span><span class="micro text-dim">FOR 41 MEN</span></div>
+              <div class="tile"><span class="tile__badge">6</span><svg class="ico ico--xl"><use href="#i-wheat"/></svg><span class="tile__name">Grain</span></div>
+              <div class="tile"><span class="tile__badge">14</span><svg class="ico ico--xl"><use href="#i-cauldron"/></svg><span class="tile__name">Flatbread</span></div>
+              <div class="tile"><span class="tile__badge">2</span><svg class="ico ico--xl"><use href="#i-hound"/></svg><span class="tile__name">Raw game</span></div>
+              <div class="tile"><span class="tile__badge">3</span><svg class="ico ico--xl"><use href="#i-toolbox"/></svg><span class="tile__name">Trail mix</span></div>
+              <div class="tile tile--empty"></div><div class="tile tile--empty"></div><div class="tile tile--empty"></div>
+            </div>
+          </div>
+          <!-- MATERIALS -->
+          <div class="inv-section">
+            <div class="inv-section__label"><div class="heading">Materials</div><div class="inv-section__count">4 kinds · 17 loads</div></div>
+            <div class="inv-grid">
+              <div class="tile"><span class="tile__badge">7</span><svg class="ico ico--xl"><use href="#i-hammer"/></svg><span class="tile__name">Timber</span></div>
+              <div class="tile"><span class="tile__badge">3</span><svg class="ico ico--xl"><use href="#i-anvil"/></svg><span class="tile__name">Iron</span></div>
+              <div class="tile"><span class="tile__badge">5</span><svg class="ico ico--xl"><use href="#i-tent"/></svg><span class="tile__name">Wool</span></div>
+              <div class="tile"><span class="tile__badge">14</span><svg class="ico ico--xl"><use href="#i-fire"/></svg><span class="tile__name">Firewood</span></div>
+              <div class="tile tile--empty"></div><div class="tile tile--empty"></div><div class="tile tile--empty"></div><div class="tile tile--empty"></div>
+            </div>
+          </div>
+          <!-- MEDICAL SUPPLIES -->
+          <div class="inv-section">
+            <div class="inv-section__label"><div class="heading">Medical supplies</div><div class="inv-section__count">2 kinds · 2 loads</div></div>
+            <div class="inv-grid">
+              <div class="tile"><span class="tile__badge">3</span><svg class="ico ico--xl"><use href="#i-bandage"/></svg><span class="tile__name">Bandages</span></div>
+              <div class="tile"><span class="tile__badge">2</span><svg class="ico ico--xl"><use href="#i-cross"/></svg><span class="tile__name">Herbs</span></div>
+              <div class="tile tile--empty"></div><div class="tile tile--empty"></div><div class="tile tile--empty"></div><div class="tile tile--empty"></div><div class="tile tile--empty"></div><div class="tile tile--empty"></div>
+            </div>
+          </div>
+          <!-- CURRENCY & VALUABLES -->
+          <div class="inv-section">
+            <div class="inv-section__label"><div class="heading">Currency &amp; valuables</div><div class="inv-section__count">5 kinds · 4 loads</div></div>
+            <div class="inv-grid">
+              <div class="tile tile--gold ledger"><span class="eyebrow">Coin</span><span class="ledger__value">212</span><span class="micro text-dim">BRONZE</span></div>
+              <div class="tile tile--gold ledger"><span class="eyebrow">Denarii</span><span class="ledger__value">38</span><span class="micro text-dim">SILVER</span></div>
+              <div class="tile"><span class="tile__badge">2</span><svg class="ico ico--xl"><use href="#i-diamond"/></svg><span class="tile__name">Amber</span></div>
+              <div class="tile"><span class="tile__badge">4</span><svg class="ico ico--xl"><use href="#i-denarii"/></svg><span class="tile__name">Salt</span></div>
+              <div class="tile"><span class="tile__badge">2</span><svg class="ico ico--xl"><use href="#i-hound"/></svg><span class="tile__name">Pelts</span></div>
+              <div class="tile tile--empty"></div><div class="tile tile--empty"></div><div class="tile tile--empty"></div>
+            </div>
+          </div>
+          <!-- WEAPONS -->
+          <div class="inv-section">
+            <div class="inv-section__label"><div class="heading">Weapons</div><div class="inv-section__count">3 kinds · 16 loads</div></div>
+            <div class="inv-grid">
+              <div class="tile tile--selected"><span class="tile__badge">6</span><svg class="ico ico--xl"><use href="#i-pila"/></svg><span class="tile__name">Pila bundle</span></div>
+              <div class="tile tile--hover"><span class="tile__badge">4</span><svg class="ico ico--xl"><use href="#i-spear"/></svg><span class="tile__name">Frameae</span></div>
+              <div class="tile"><span class="tile__badge">3</span><svg class="ico ico--xl"><use href="#i-sword"/></svg><span class="tile__name">Gladii</span></div>
+              <div class="tile tile--empty"></div><div class="tile tile--empty"></div><div class="tile tile--empty"></div><div class="tile tile--empty"></div><div class="tile tile--empty"></div>
+            </div>
+          </div>
+          <!-- ARMOUR -->
+          <div class="inv-section">
+            <div class="inv-section__label"><div class="heading">Armour</div><div class="inv-section__count">3 kinds · 8 loads</div></div>
+            <div class="inv-grid">
+              <div class="tile"><span class="tile__badge">5</span><svg class="ico ico--xl"><use href="#i-shield"/></svg><span class="tile__name">Scuta</span></div>
+              <div class="tile"><span class="tile__badge">2</span><svg class="ico ico--xl"><use href="#i-helmet"/></svg><span class="tile__name">Helmets</span></div>
+              <div class="tile"><span class="tile__badge">3</span><span class="tile__cond">Worn</span><svg class="ico ico--xl"><use href="#i-shield"/></svg><span class="tile__name">Round shields</span></div>
+              <div class="tile tile--empty"></div><div class="tile tile--empty"></div><div class="tile tile--empty"></div><div class="tile tile--empty"></div><div class="tile tile--empty"></div>
+            </div>
+          </div>
+          <!-- DOCUMENTS -->
+          <div class="inv-section">
+            <div class="inv-section__label"><div class="heading">Documents</div><div class="inv-section__count">2 kinds · no weight</div></div>
+            <div class="inv-grid">
+              <div class="tile"><svg class="ico ico--xl"><use href="#i-map"/></svg><span class="tile__name">Map of the marsh paths</span></div>
+              <div class="tile"><svg class="ico ico--xl"><use href="#i-scroll"/></svg><span class="tile__name">Orders of Varus</span></div>
+              <div class="tile tile--empty"></div><div class="tile tile--empty"></div><div class="tile tile--empty"></div><div class="tile tile--empty"></div><div class="tile tile--empty"></div><div class="tile tile--empty"></div>
+            </div>
+          </div>
+          <!-- TROPHIES -->
+          <div class="inv-section">
+            <div class="inv-section__label"><div class="heading">Trophies</div><div class="inv-section__count">3 kinds · 3 loads</div></div>
+            <div class="inv-grid">
+              <div class="tile tile--gold"><svg class="ico ico--xl"><use href="#i-banner"/></svg><span class="tile__name">Vexillum XIX</span></div>
+              <div class="tile"><svg class="ico ico--xl"><use href="#i-banner"/></svg><span class="tile__name">Banner of the Cherusci</span></div>
+              <div class="tile"><svg class="ico ico--xl"><use href="#i-horse"/></svg><span class="tile__name">Carved horse</span></div>
+              <div class="tile tile--empty"></div><div class="tile tile--empty"></div><div class="tile tile--empty"></div><div class="tile tile--empty"></div><div class="tile tile--empty"></div>
+            </div>
+          </div>
+          <!-- TRANSPORT -->
+          <div class="inv-section">
+            <div class="inv-section__label"><div class="heading">Transport</div><div class="inv-section__count">4 kinds · carries 74 loads</div></div>
+            <div class="inv-grid">
+              <div class="tile"><svg class="ico ico--xl"><use href="#i-wagon"/></svg><span class="tile__name">Ox wagon</span></div>
+              <div class="tile"><span class="tile__badge">3</span><svg class="ico ico--xl"><use href="#i-horse"/></svg><span class="tile__name">Mules</span></div>
+              <div class="tile"><svg class="ico ico--xl"><use href="#i-horse"/></svg><span class="tile__name">Pack horse</span></div>
+              <div class="tile"><span class="tile__badge">2</span><svg class="ico ico--xl"><use href="#i-horse"/></svg><span class="tile__name">Riding horses</span></div>
+              <div class="tile tile--empty"></div><div class="tile tile--empty"></div><div class="tile tile--empty"></div><div class="tile tile--empty"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="overlay-foot">
+      <div class="inspect">
+        <div class="inspect__art"><svg class="ico ico--lg"><use href="#i-pila"/></svg></div>
+        <div class="inspect__text">
+          <div class="inspect__name">Pila bundle</div>
+          <div class="body body--dim">Ten pila. Each man carries four into battle; squads loose one volley at 14 m.</div>
+          <div class="inspect__meta">× 6 · 2 loads each · 8 denarii</div>
+        </div>
+        <button class="button-ghost" disabled>Use · in camp</button>
+        <button class="button-ghost button-danger">Discard</button>
+      </div>
+      <div class="storage">
+        <div class="row between"><span class="metric-label">Storage</span><span class="small">64 / 110 loads</span></div>
+        <div class="bar bar--thick"><div class="bar__fill bar__fill--gold" style="width:58%"></div></div>
+        <div class="micro text-faint" style="margin-top:5px">WAGON &amp; BEASTS 74 · ON THE MEN'S BACKS 36</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="mock-note" style="left:1592px;top:186px">Tabs filter which sections are shown; ALL shows every section and scrolls. Section labels sit left of the grid so eight 112px tiles fill the sheet without a dead right margin.</div>
+<div class="mock-note" style="left:1592px;top:262px">Ledger tiles (FOOD, COIN, DENARII) are stores, not items: gold border, the HUD's number, no art, nothing to inspect. Count badge appears only when a stack is more than one; documents and trophies never stack.</div>
+<div class="mock-note" style="left:1592px;top:600px">Tile art is placeholder from the HUD sprite (hound for game AND pelts, horse for mules). Each item kind wants its own glyph in the real screen. WORN tag = equipment condition word, never a number.</div>
+<div class="mock-note" style="left:1592px;top:900px">Over 110 loads the STORAGE readout and bar turn red (--blood). No sim effect yet; overload as a pace penalty is a designer decision. USE is disabled on the march: consumables are spent in CAMP.</div>

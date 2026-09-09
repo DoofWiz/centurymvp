@@ -1,0 +1,709 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Century · The Aftermath</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+/* =====================================================================================
+ *  CENTURY — mockup design system (mirrors Assets/UI/century.uss tokens)
+ *  PARCHMENT & WAX. A campaign ledger: aged parchment panels, iron-gall ink,
+ *  bronze accents, wax-seal red. Nothing pure white, nothing pure black.
+ *  NOTE: legacy variable names are kept (--ink is now the PANEL PARCHMENT colour,
+ *  --parchment is now the INK text colour) so existing fragments keep working.
+ * ===================================================================================== */
+@font-face {
+  font-family: "CenturyUI";
+  src: url("CenturyUI.ttf") format("truetype"), url("../../Assets/Resources/Fonts/CenturyUI.ttf") format("truetype");
+  font-display: swap;
+}
+:root {
+  /* surfaces (legacy "ink" names — now parchment) */
+  --ink:             #e2d6b6;                    /* standard panel parchment */
+  --ink-solid:       #ece2c9;                    /* modal / sheet parchment (brighter) */
+  --ink-deep:        #d3c49c;                    /* recessed parchment */
+  --ink-raised:      #f0e7cf;                    /* hovered / raised parchment */
+  --ink-hover:       #f4ecd8;
+
+  /* accents (legacy "gold" names — now bronze/umber ink) */
+  --gold:            #8a6a2a;                    /* bronze ink: eyebrows, icons, accents */
+  --gold-bright:     #6e5215;                    /* emphasis bronze (darker = stronger on parchment) */
+  --gold-dim:        #8a7147;                    /* panel edge */
+  --gold-faint:      rgba(74, 54, 32, 0.30);     /* faint ink hairline */
+
+  /* text (legacy "parchment" names — now ink) */
+  --parchment:       #3a2c1a;                    /* body ink */
+  --parchment-dim:   #6b5230;                    /* secondary ink */
+  --parchment-faint: #9a8a68;                    /* faded ink / disabled */
+
+  --blood:           #8e2f22;                    /* wax red — danger / enemy / health */
+  --blood-dim:       rgba(142, 47, 34, 0.45);
+  --olive:           #6d7a3c;                    /* morale / good */
+  --brass:           #9a7b3a;                    /* stamina / wounded pip */
+  --amber:           #b08430;                    /* wounded / low stock */
+
+  /* parchment-native extras (new; safe to use in page styles) */
+  --umber:           #4a3620;                    /* heading umber */
+  --parch-hi:        #e6dcc3;
+  --parch-lo:        #d8c9a3;
+  --edge:            #8a7147;
+  --wax-hi:          #c05a48;                    /* wax seal highlight */
+  --wax-lo:          #5e1d14;                    /* wax seal shadow */
+  --paper-glow:      rgba(250, 244, 226, 0.5);   /* inner sheen on panels */
+  --ink-wash:        rgba(74, 54, 32, 0.16);     /* recessed wash (bar troughs, wells) */
+
+  --fs-micro: 9px;  --fs-small: 11px;  --fs-body: 13px;
+  --fs-large: 16px; --fs-title: 20px;  --fs-alert: 26px;
+
+  --pad: 10px; --pad-tight: 6px; --pad-loose: 16px; --rule: 1px;
+
+  --font-body: "CenturyUI", "Palatino Linotype", "Book Antiqua", "Cormorant Garamond",
+               "Libertinus Serif", Georgia, serif;
+  --font-display: "Palatino Linotype", "Book Antiqua", "Cinzel", Georgia, serif;
+}
+
+/* ---- Stage: a 1920×1080 canvas scaled to fit the browser window (letterboxed) ---------- */
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { height: 100%; margin: 0; overflow: hidden;
+  background: linear-gradient(160deg, #2b2115 0%, #1f1810 60%, #17120b 100%); }
+body { font-family: var(--font-body); font-size: var(--fs-body); color: var(--parchment);
+       -webkit-font-smoothing: antialiased; }
+#stage { position: absolute; left: 50%; top: 50%; width: 1920px; height: 1080px;
+         transform-origin: 0 0; overflow: hidden;
+         background: radial-gradient(ellipse 90% 80% at 50% 45%, #d5c69f 0%, #cabb92 55%, #b3a276 100%); }
+#stage::after { /* burnt map rim */
+  content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 60;
+  box-shadow: inset 0 0 140px rgba(66, 44, 20, 0.5), inset 0 0 22px rgba(66, 44, 20, 0.3); }
+.hud-root { position: absolute; inset: 0; }
+button { font: inherit; color: inherit; cursor: pointer; }
+a { color: inherit; }
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: rgba(74,54,32,.12); }
+::-webkit-scrollbar-thumb { background: rgba(74,54,32,.4); border: 1px solid rgba(250,244,226,.4); }
+
+/* ---- World backdrops (stand-ins for the 3D scene behind the HUD) -----------------------
+ *  All worlds read as a hand-drawn campaign map: mottled parchment ground with soft
+ *  terrain tints. Pages draw ink-hatched detail (forests, rivers, troops) on top in SVG. */
+.world { position: absolute; inset: 0; }
+.world--overmap {
+  background:
+    radial-gradient(ellipse 60% 45% at 62% 40%, rgba(157,158,105,.4), transparent 70%),
+    radial-gradient(ellipse 40% 35% at 20% 70%, rgba(166,158,110,.45), transparent 70%),
+    radial-gradient(ellipse 35% 30% at 80% 78%, rgba(146,140,96,.4), transparent 70%),
+    radial-gradient(ellipse 90% 80% at 50% 45%, #d5c69f 0%, #cabb92 55%, #b3a276 100%);
+}
+.world--overmap::after { /* line-of-sight veil: clear around the column, ink-washed to the corners */
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(circle 300px at 50% 52%, transparent 62%, rgba(58, 42, 20, 0.38) 100%);
+}
+.world--battle {
+  background:
+    radial-gradient(ellipse 70% 40% at 50% 60%, rgba(198,182,140,.5), transparent 70%),
+    radial-gradient(ellipse 30% 25% at 15% 30%, rgba(155,150,100,.5), transparent 70%),
+    radial-gradient(ellipse 30% 25% at 88% 25%, rgba(155,150,100,.5), transparent 70%),
+    radial-gradient(ellipse 90% 80% at 50% 45%, #d5c69f 0%, #c9ba90 55%, #b3a276 100%);
+}
+.world--camp {
+  background:
+    radial-gradient(ellipse 45% 40% at 50% 70%, rgba(176,132,48,.28), transparent 70%),
+    radial-gradient(ellipse 90% 80% at 50% 45%, #cfc09a 0%, #c0b088 55%, #a4936a 100%);
+}
+.world--title {
+  background:
+    radial-gradient(ellipse 50% 40% at 50% 62%, rgba(190,178,132,.5), transparent 70%),
+    radial-gradient(ellipse 90% 80% at 50% 45%, #d0c19a 0%, #c2b28a 55%, #a2916a 100%);
+}
+.grain { position: absolute; inset: 0; pointer-events: none; opacity: .14; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+.vignette { position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(ellipse 80% 70% at 50% 50%, transparent 55%, rgba(66, 44, 20, 0.45) 100%); }
+
+/* ---- Type --------------------------------------------------------------------------- */
+.eyebrow { font-size: var(--fs-micro); color: var(--umber); letter-spacing: 3px; font-weight: 700;
+           text-transform: uppercase; text-shadow: 0 1px 0 rgba(248,241,222,.7); }
+.title   { font-size: var(--fs-title); color: var(--umber); letter-spacing: 2px; text-transform: uppercase;
+           font-weight: 700; text-shadow: 0 1px 0 rgba(248,241,222,.7); }
+.heading { font-size: var(--fs-small); color: var(--umber); letter-spacing: 2px; font-weight: 700;
+           text-transform: uppercase; text-shadow: 0 1px 0 rgba(248,241,222,.7); }
+.body    { font-size: var(--fs-body); color: var(--parchment); line-height: 1.45; }
+.body--dim { color: var(--parchment-dim); }
+.micro   { font-size: var(--fs-micro); letter-spacing: 1px; }
+.small   { font-size: var(--fs-small); }
+.large   { font-size: var(--fs-large); }
+.metric  { font-size: var(--fs-body); color: var(--parchment); }
+.metric-label { font-size: var(--fs-small); color: var(--parchment-dim); letter-spacing: 1px; text-transform: uppercase; }
+.numeral { font-size: var(--fs-large); color: var(--parchment); letter-spacing: 1px; }
+.display { font-family: var(--font-display); font-variant: small-caps; }
+.caps { text-transform: uppercase; letter-spacing: 2px; }
+.text-danger { color: var(--blood); } .text-good { color: var(--olive); } .text-gold { color: var(--gold); }
+.text-gold-bright { color: var(--gold-bright); } .text-brass { color: #7d5f24; }
+.text-dim { color: var(--parchment-dim); } .text-faint { color: var(--parchment-faint); }
+.text-amber { color: var(--amber); }
+.center { text-align: center; }
+.row { display: flex; flex-direction: row; align-items: center; }
+.col { display: flex; flex-direction: column; }
+.grow { flex: 1 1 0; }
+.gap { gap: var(--pad); } .gap-tight { gap: var(--pad-tight); } .gap-loose { gap: var(--pad-loose); }
+.between { justify-content: space-between; }
+
+/* ---- Panel chrome ------------------------------------------------------------------- */
+.panel { position: relative; background: linear-gradient(165deg, var(--parch-hi) 0%, var(--parch-lo) 100%);
+         border: var(--rule) solid var(--edge); border-radius: 2px; padding: var(--pad);
+         box-shadow: inset 0 0 0 1px var(--paper-glow), inset 0 0 22px rgba(112,80,40,.26),
+                     inset 0 0 4px rgba(90,62,30,.3), 0 5px 14px rgba(25,16,7,.45); }
+.panel--bare { border: 0; padding: var(--pad-tight); background: none; box-shadow: none; }
+.panel--deep { background: linear-gradient(165deg, #ede3cb, #dccda6);
+               box-shadow: inset 0 0 0 1px rgba(250,244,226,.6), inset 0 0 26px rgba(112,80,40,.3),
+                           0 9px 22px rgba(25,16,7,.55); }
+.rule { height: 1px; background: linear-gradient(90deg, transparent, rgba(74,54,32,.5), transparent); margin: var(--pad-tight) 0; }
+.rule--short { width: 34px; background: var(--gold); }
+.rule--faint { background: linear-gradient(90deg, transparent, rgba(74,54,32,.28), transparent); }
+.well { background: rgba(250,244,226,.35); border: var(--rule) solid rgba(74,54,32,.35);
+        border-radius: 1px; padding: var(--pad-tight) var(--pad); }
+
+/* ---- Bars --------------------------------------------------------------------------- */
+.bar { height: 4px; background: var(--ink-wash); border: 1px solid rgba(74,54,32,.45);
+       border-radius: 1px; margin-top: 2px; overflow: hidden; }
+.bar--thick { height: 7px; } .bar--hair { height: 3px; } .bar--fat { height: 10px; }
+.bar__fill { height: 100%; width: 50%; background: var(--brass); box-shadow: inset 0 1px 0 rgba(255,255,255,.25); }
+.bar__fill--health { background: var(--blood); } .bar__fill--stamina { background: var(--brass); }
+.bar__fill--morale { background: var(--olive); } .bar__fill--gold { background: var(--brass); }
+.bar__fill--danger { background: var(--blood); } .bar__fill--dim { background: rgba(74,54,32,.35); }
+
+/* ---- Pills / nav / buttons ------------------------------------------------------------- */
+.pill-row { display: flex; flex-direction: row; gap: var(--pad-tight); }
+.pill { display: inline-flex; align-items: center; gap: 6px;
+        background: linear-gradient(180deg, #e3d8bc, #d2c29a); border: var(--rule) solid rgba(74,54,32,.5);
+        border-radius: 2px; padding: 5px var(--pad); font-size: var(--fs-micro); color: var(--parchment-dim);
+        letter-spacing: 2px; text-transform: uppercase; font-weight: 700;
+        box-shadow: 0 2px 5px rgba(25,16,7,.3); transition: border-color .12s, background .12s; }
+.pill:hover { border-color: var(--umber); color: var(--umber); }
+.pill--active { border-color: var(--umber); background: linear-gradient(180deg, #f0e7cf, #e0d3b1);
+                color: var(--umber); box-shadow: inset 0 0 6px rgba(112,80,40,.3), 0 2px 5px rgba(25,16,7,.3); }
+.pill--danger { border-color: var(--blood-dim); color: var(--blood); }
+.pill--pulse { animation: pillPulse 1.4s ease-in-out infinite; }
+@keyframes pillPulse { 0%,100% { border-color: rgba(74,54,32,.5); box-shadow: 0 2px 5px rgba(25,16,7,.3); }
+                       50% { border-color: var(--blood); box-shadow: 0 0 14px rgba(142,47,34,.4), 0 2px 5px rgba(25,16,7,.3); } }
+
+.nav-bar { position: absolute; top: 0; left: 0; right: 0; height: 42px; display: flex; justify-content: center; align-items: center;
+           background: linear-gradient(180deg, #e6dcc3, #d8c9a3); border-bottom: var(--rule) solid var(--edge);
+           box-shadow: inset 0 0 0 1px var(--paper-glow), inset 0 -6px 14px rgba(112,80,40,.16), 0 3px 10px rgba(25,16,7,.35); }
+.nav-item { margin: 0 22px; font-size: var(--fs-body); color: var(--parchment-dim); letter-spacing: 2px; text-transform: uppercase;
+            font-variant: small-caps; font-weight: 700; background: none; border: 0; padding: 0; }
+.nav-item--inert { color: var(--parchment-faint); }
+.nav-item--live:hover, .nav-item--active { color: var(--blood); text-shadow: 0 1px 0 rgba(248,241,222,.7); }
+
+.button-primary { display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+                  background: linear-gradient(170deg, #eee0bb, #dcc890);
+                  border: var(--rule) solid var(--brass); border-radius: 2px; padding: 7px 18px;
+                  font-size: var(--fs-small); color: #5e4515; letter-spacing: 3px; font-weight: 700; text-transform: uppercase;
+                  text-shadow: 0 1px 0 rgba(248,241,222,.7);
+                  box-shadow: inset 0 0 0 1px rgba(255,248,224,.7), inset 0 0 14px rgba(154,123,58,.3), 0 4px 9px rgba(25,16,7,.4);
+                  transition: background .12s; }
+.button-primary:hover { background: linear-gradient(170deg, #f4e8c6, #e4d29c); border-color: var(--umber); }
+.button-primary--wide { width: 100%; }
+.button-ghost { display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+                background: linear-gradient(170deg, var(--parch-hi), var(--parch-lo));
+                border: var(--rule) solid rgba(74,54,32,.5); border-radius: 2px; padding: 6px 14px;
+                font-size: var(--fs-micro); color: var(--parchment-dim); letter-spacing: 2px; text-transform: uppercase; font-weight: 700;
+                box-shadow: inset 0 0 0 1px var(--paper-glow), 0 2px 6px rgba(25,16,7,.3); }
+.button-ghost:hover { border-color: var(--umber); color: var(--umber); }
+.button-danger { border-color: var(--blood-dim); color: var(--blood); }
+.button-disabled, [disabled] { opacity: .45; filter: saturate(.6); cursor: default; pointer-events: none; }
+
+/* ---- Sheets / modals ---------------------------------------------------------------------- */
+.modal { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+         background: rgba(43, 32, 18, 0.5); }
+.modal__sheet { background: linear-gradient(165deg, #ede3cb, #dccda6); border: var(--rule) solid var(--edge);
+                border-radius: 2px; padding: 24px; width: 940px; position: relative;
+                box-shadow: inset 0 0 0 1px rgba(250,244,226,.6), inset 0 0 30px rgba(112,80,40,.28),
+                            0 30px 80px rgba(20, 13, 5, 0.6); }
+.modal__header { text-align: center; margin-bottom: 6px; }
+.modal__title { font-family: var(--font-display); font-variant: small-caps; font-size: 28px; color: var(--umber);
+                letter-spacing: 6px; font-weight: 700; text-shadow: 0 1px 0 rgba(248,241,222,.8); }
+.modal__subtitle { font-size: var(--fs-body); color: var(--parchment-dim); letter-spacing: 2px; margin-top: 4px; text-transform: uppercase; }
+.modal__close { position: absolute; right: 14px; top: 12px; }
+.sheet { background: linear-gradient(165deg, #ede3cb, #dccda6); border: var(--rule) solid var(--edge);
+         border-radius: 2px; padding: 26px; min-width: 660px; max-width: 900px;
+         box-shadow: inset 0 0 0 1px rgba(250,244,226,.6), inset 0 0 30px rgba(112,80,40,.28), 0 30px 80px rgba(20,13,5,.6); }
+.sheet__title { font-family: var(--font-display); font-variant: small-caps; font-size: 30px; color: var(--umber);
+                letter-spacing: 5px; font-weight: 700; text-align: center; text-shadow: 0 1px 0 rgba(248,241,222,.8); }
+.sheet__subtitle { font-size: var(--fs-body); color: var(--parchment-dim); letter-spacing: 2px; text-align: center; margin: 3px 0 14px; text-transform: uppercase; }
+.sheet__columns { display: flex; flex-direction: row; margin-top: 10px; gap: 16px; }
+.sheet__column { flex: 1 1 0; }
+.stage-banner { position: absolute; inset: 0; background: rgba(43, 32, 18, 0.55); display: flex; align-items: center; justify-content: center; }
+
+/* ---- Tallies ---------------------------------------------------------------------------- */
+.tally-row { display: flex; flex-direction: row; gap: var(--pad-tight); margin: var(--pad-tight) 0 var(--pad); }
+.tally { flex: 1 1 0; text-align: center; background: rgba(250,244,226,.35);
+         border: var(--rule) solid rgba(74,54,32,.35); border-radius: 1px; padding: var(--pad-tight); }
+.tally__label { font-size: var(--fs-micro); color: var(--parchment-dim); letter-spacing: 2px; text-transform: uppercase; }
+.tally__value { font-size: 24px; color: var(--umber); font-weight: 700; text-shadow: 0 1px 0 rgba(248,241,222,.7); }
+.tally__value--muted { color: var(--parchment-dim); }
+.tally__value--danger { color: var(--blood); }
+
+/* ---- Cards ------------------------------------------------------------------------------ */
+.card { display: flex; flex-direction: row; align-items: center; gap: 8px;
+        background: rgba(250,244,226,.35); border: var(--rule) solid rgba(74,54,32,.35);
+        border-radius: 1px; padding: var(--pad-tight); margin-bottom: var(--pad-tight); }
+.card--commander { border-color: var(--brass); box-shadow: inset 0 0 0 1px rgba(154,123,58,.35); }
+.card--down { opacity: .4; filter: saturate(.6); }
+.card--wounded { border-color: var(--amber); }
+.card--dead { border-color: var(--blood-dim); opacity: .55; }
+.card--selected { border-color: var(--brass); background: rgba(255,250,232,.55);
+                  box-shadow: inset 0 0 0 1px rgba(154,123,58,.4), 0 2px 8px rgba(25,16,7,.25); }
+.card__name { font-size: var(--fs-body); color: var(--parchment); font-weight: 700; }
+.card__sub { font-size: var(--fs-micro); color: var(--parchment-dim); letter-spacing: 1px; text-transform: uppercase; }
+
+/* ---- Veterancy tier discs (geometry, not glyphs) ---------------------------------------- */
+.tier-disc { width: 10px; height: 10px; border-radius: 50%; flex: 0 0 auto;
+             border: 1px solid rgba(58,44,26,.6); box-shadow: inset 0 1px 1px rgba(255,255,255,.3); }
+.tier-disc--tiro { border: 1px solid var(--parchment-dim); background: none; box-shadow: none; }
+.tier-disc--miles { background: #85704e; }
+.tier-disc--veteranus { background: var(--brass); }
+.tier-disc--evocatus { background: #7d5f24; }
+.tier-disc--officer { background: radial-gradient(circle at 35% 30%, var(--wax-hi), var(--blood) 60%, var(--wax-lo));
+                      border-color: var(--wax-lo); box-shadow: 0 1px 2px rgba(25,16,7,.5); }
+.tier-disc--vacant { border: 1px solid var(--blood-dim); background: none; box-shadow: none; }
+.tier-disc--lg { width: 16px; height: 16px; }
+
+/* ---- Strength pips ---------------------------------------------------------------------- */
+.pips { display: flex; flex-direction: row; gap: 3px; }
+.pip { width: 8px; height: 12px; background: rgba(74,54,32,.14); border: 1px solid rgba(74,54,32,.35); }
+.pip--fit { background: var(--olive); border-color: rgba(58,44,26,.6); box-shadow: inset 0 1px 0 rgba(255,255,255,.3); }
+.pip--wounded { background: var(--amber); border-color: rgba(58,44,26,.6); }
+.pip--dead { background: var(--blood-dim); border-color: rgba(58,44,26,.6); }
+.pip--lvl { width: 14px; height: 6px; }
+.pip--on { background: var(--brass); border-color: rgba(58,44,26,.6); box-shadow: inset 0 1px 0 rgba(255,255,255,.3); }
+
+/* ---- Key caps (CSS stand-in for the Kenney icon pack) ------------------------------------ */
+.keycap { display: inline-flex; align-items: center; justify-content: center; min-width: 22px; height: 22px; padding: 0 5px;
+          border: 1px solid var(--umber); border-bottom-width: 3px; border-radius: 3px; font-size: var(--fs-micro);
+          color: var(--umber); letter-spacing: 1px; font-weight: 700; text-transform: uppercase;
+          background: linear-gradient(180deg, #efe6cd, #dccfa9); box-shadow: inset 0 1px 0 rgba(255,252,240,.8); }
+.keycap--wide { min-width: 64px; }
+.keycap--gold { border-color: var(--blood); color: var(--blood); }
+
+/* ---- Icons (inline SVG sprite, currentColor) ---------------------------------------------- */
+.ico { width: 20px; height: 20px; fill: currentColor; flex: 0 0 auto; }
+.ico--sm { width: 14px; height: 14px; } .ico--lg { width: 28px; height: 28px; } .ico--xl { width: 42px; height: 42px; }
+.ico--gold { color: var(--gold); } .ico--dim { color: var(--parchment-dim); }
+
+/* ---- Event log --------------------------------------------------------------------------- */
+.event { display: flex; flex-direction: row; align-items: flex-start; gap: 6px; margin-bottom: var(--pad-tight); }
+.event__glyph { width: 12px; color: var(--parchment-dim); font-size: var(--fs-body); line-height: 1.2; text-align: center; }
+.event__text { flex: 1; font-size: var(--fs-small); color: var(--parchment-dim); line-height: 1.35; }
+.event__time { font-size: var(--fs-micro); color: var(--parchment-faint); letter-spacing: 1px; white-space: nowrap; }
+.event--warning .event__glyph { color: #7d5f24; } .event--warning .event__text { color: var(--parchment); }
+.event--critical .event__glyph, .event--critical .event__text { color: var(--blood); font-weight: 700; }
+.event--good .event__glyph, .event--good .event__text { color: var(--olive); }
+
+/* ---- Resource strip ----------------------------------------------------------------------- */
+.resource-strip { display: flex; flex-direction: row; align-items: center; gap: 26px; }
+.resource { display: flex; flex-direction: row; align-items: center; gap: 8px; min-width: 62px; }
+.resource__icon { color: var(--gold); }
+.resource__label { font-size: var(--fs-micro); color: var(--parchment-dim); letter-spacing: 1px; text-transform: uppercase; }
+.resource__value { font-size: var(--fs-body); color: var(--parchment); margin-top: 1px; font-weight: 700; }
+.resource__value--low { color: var(--amber); } .resource__value--danger { color: var(--blood); }
+
+/* ---- Overmap chrome ------------------------------------------------------------------------ */
+.time-box { position: absolute; top: 50px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: row; align-items: center; gap: 10px;
+            background: linear-gradient(170deg, var(--parch-hi), var(--parch-lo)); border: var(--rule) solid var(--edge);
+            border-radius: 2px; padding: 6px 14px;
+            box-shadow: inset 0 0 0 1px var(--paper-glow), inset 0 0 14px rgba(112,80,40,.25), 0 4px 10px rgba(25,16,7,.4); }
+.time-box__clock { font-size: var(--fs-large); color: var(--umber); letter-spacing: 2px; text-transform: uppercase; font-weight: 700;
+                   text-shadow: 0 1px 0 rgba(248,241,222,.8); }
+.time-button { width: 26px; height: 22px; display: inline-flex; align-items: center; justify-content: center;
+               background: linear-gradient(180deg, #e3d8bc, #d2c29a); border: 1px solid rgba(74,54,32,.55);
+               border-radius: 2px; color: var(--parchment-faint); box-shadow: 0 2px 5px rgba(25,16,7,.3); }
+.time-button--active { color: var(--blood); border-color: var(--umber);
+                       box-shadow: inset 0 0 6px rgba(112,80,40,.3), 0 2px 5px rgba(25,16,7,.3); }
+.hover-tip { position: absolute; background: linear-gradient(165deg, #ede3cb, #dccda6); border: var(--rule) solid var(--edge);
+             border-radius: 2px; padding: 6px 10px; pointer-events: none;
+             box-shadow: inset 0 0 0 1px rgba(250,244,226,.6), 0 5px 14px rgba(25,16,7,.45); }
+.hover-tip__title { font-size: var(--fs-small); color: var(--umber); letter-spacing: 1px; text-transform: uppercase; font-weight: 700; }
+.hover-tip__detail { font-size: var(--fs-micro); color: var(--parchment-dim); letter-spacing: 1px; margin-top: 2px; text-transform: uppercase; }
+.bottom-bar { position: absolute; left: 0; right: 0; bottom: 0; display: flex; flex-direction: row; align-items: stretch;
+              background: linear-gradient(165deg, var(--parch-hi) 0%, var(--parch-lo) 100%);
+              border-top: var(--rule) solid var(--edge); height: 110px;
+              box-shadow: inset 0 0 0 1px var(--paper-glow), inset 0 8px 18px rgba(112,80,40,.18), 0 -3px 12px rgba(25,16,7,.35); }
+.bottom-bar__section { display: flex; flex-direction: column; justify-content: center; padding: 10px 18px; border-left: var(--rule) solid rgba(74,54,32,.3); }
+.bottom-bar__section--first { border-left: 0; }
+.bottom-bar__actions { justify-content: center; gap: 8px; margin-left: auto; }
+.metric-cols { display: grid; grid-template-columns: auto auto; column-gap: 28px; row-gap: 6px; }
+.metric-col { display: flex; flex-direction: column; }
+
+/* ---- Alerts / banners ------------------------------------------------------------------------ */
+.alert { position: absolute; left: 0; right: 0; top: 160px; display: flex; justify-content: center; pointer-events: none; }
+.alert__frame { background: linear-gradient(165deg, #ead9c2, #dcc4a0); border: var(--rule) solid var(--blood);
+                border-radius: 2px; padding: 12px 40px; text-align: center;
+                box-shadow: inset 0 0 0 1px rgba(250,244,226,.5), inset 0 0 22px rgba(142,47,34,.18), 0 8px 20px rgba(25,16,7,.5); }
+.alert__frame--warning { border-color: var(--edge); background: linear-gradient(165deg, #ede3cb, #dccda6);
+                         box-shadow: inset 0 0 0 1px rgba(250,244,226,.6), inset 0 0 22px rgba(112,80,40,.24), 0 8px 20px rgba(25,16,7,.5); }
+.alert__headline { font-family: var(--font-display); font-variant: small-caps; font-size: var(--fs-alert); color: var(--blood);
+                   letter-spacing: 6px; font-weight: 700; text-shadow: 0 1px 0 rgba(248,241,222,.6); }
+.alert__headline--warning { color: var(--umber); }
+.alert__sub { font-size: var(--fs-small); color: var(--parchment-dim); letter-spacing: 2px; margin-top: 4px; text-transform: uppercase; }
+
+/* ---- Objective panel ------------------------------------------------------------------------- */
+.objective { position: absolute; left: 16px; top: 48px; width: 300px; }
+.objective__marker { display: flex; flex-direction: row; align-items: center; gap: 8px; margin-top: 6px; }
+.objective__diamond { color: var(--blood); font-size: var(--fs-body); }
+.objective__text { font-size: var(--fs-body); color: var(--parchment); }
+.objective__done { color: var(--parchment-faint); text-decoration: line-through; }
+
+/* ---- Steps (deployment / walkthrough) ------------------------------------------------------ */
+.step-row { display: flex; flex-direction: row; gap: var(--pad); margin-top: var(--pad); }
+.step { flex: 1 1 0; display: flex; flex-direction: row; gap: 10px; background: rgba(250,244,226,.3);
+        border: var(--rule) solid rgba(74,54,32,.35); border-radius: 1px; padding: 8px 10px; }
+.step--active { border-color: var(--brass); background: rgba(255,250,232,.55);
+                box-shadow: inset 0 0 0 1px rgba(154,123,58,.35); }
+.step--done { opacity: .5; }
+.step__index { width: 22px; height: 22px; border: 1px solid var(--umber); border-radius: 50%; display: flex; align-items: center; justify-content: center;
+               font-size: var(--fs-micro); color: var(--umber); font-weight: 700; flex: 0 0 auto; }
+.step__title { font-size: var(--fs-small); color: var(--umber); letter-spacing: 2px; text-transform: uppercase; font-weight: 700; }
+.step__hint { font-size: var(--fs-micro); color: var(--parchment-dim); margin-top: 2px; }
+
+/* ---- Mockup chrome (not game UI) ------------------------------------------------------------- */
+.mock-tag { position: fixed; left: 8px; top: 4px; z-index: 999; font-size: 10px; letter-spacing: 2px; color: #cbb98d;
+            text-transform: uppercase; font-family: var(--font-body); display: flex; gap: 14px; align-items: center; padding: 4px 8px 6px 0; opacity: 0; animation: tagFade 4s ease-in forwards; transition: opacity .15s; }
+.mock-tag:hover { opacity: 1 !important; animation: none; }
+@keyframes tagFade { 0%, 60% { opacity: .9; } 100% { opacity: 0; } }
+.mock-tag a { color: rgba(230,220,195,.6); text-decoration: none; }
+.mock-tag a:hover { color: #f0e6cb; }
+.mock-note { position: absolute; z-index: 50; background: rgba(120,40,160,.85); color: #fff; font: 11px/1.3 system-ui, sans-serif; padding: 4px 8px;
+             border-radius: 3px; max-width: 240px; pointer-events: none; letter-spacing: 0; text-transform: none; display: none; }
+body.notes .mock-note { display: block; }
+
+/* ---- Unit identity + camp frame (shared by camp pages) ------------------------------------- */
+.identity__legion { font-size: var(--fs-micro); color: var(--gold); letter-spacing: 3px; text-transform: uppercase; font-weight: 700; }
+.identity__name { font-size: var(--fs-large); color: var(--umber); letter-spacing: 2px; margin-top: 2px; text-transform: uppercase;
+                  font-weight: 700; text-shadow: 0 1px 0 rgba(248,241,222,.7); }
+.top-bar { position: absolute; left: 0; top: 0; right: 0; height: 66px; display: flex; flex-direction: row; align-items: center;
+           background: linear-gradient(165deg, var(--parch-hi) 0%, var(--parch-lo) 100%);
+           border-bottom: var(--rule) solid var(--edge); padding: 0 var(--pad-loose);
+           box-shadow: inset 0 0 0 1px var(--paper-glow), inset 0 -8px 18px rgba(112,80,40,.16), 0 3px 12px rgba(25,16,7,.35); }
+.unit-identity { min-width: 230px; border-right: var(--rule) solid rgba(74,54,32,.3); padding-right: var(--pad-loose); }
+.top-bar .resource-strip { flex: 1 1 0; padding-left: var(--pad-loose); }
+.morale-block { min-width: 200px; border-left: var(--rule) solid rgba(74,54,32,.3); padding-left: var(--pad-loose); }
+.camp-tabs { position: absolute; left: var(--pad-loose); top: 80px; }
+.camp-tabs .pill { padding: 7px 16px; font-size: var(--fs-small); }
+.camp-page { position: absolute; left: var(--pad-loose); right: var(--pad-loose); top: 122px; bottom: 72px; }
+.camp-half { display: flex; flex-direction: row; gap: var(--pad-loose); height: 100%; }
+.camp-half > * { flex: 1 1 0; min-width: 0; }
+.camp-footer { position: absolute; left: 0; right: 0; bottom: 0; height: 58px; display: flex; align-items: center; justify-content: space-between;
+               padding: 0 var(--pad-loose); background: linear-gradient(165deg, var(--parch-hi) 0%, var(--parch-lo) 100%);
+               border-top: var(--rule) solid var(--edge);
+               box-shadow: inset 0 0 0 1px var(--paper-glow), inset 0 8px 18px rgba(112,80,40,.16), 0 -3px 12px rgba(25,16,7,.35); }
+.page-title { font-size: var(--fs-title); color: var(--umber); letter-spacing: 3px; text-transform: uppercase; font-weight: 700;
+              text-shadow: 0 1px 0 rgba(248,241,222,.7); }
+
+/* ---- Overlay screens on the overmap (inventory / army / commander / journal / encyclopedia) ---- */
+.overlay-sheet { width: 1240px; height: 880px; display: flex; flex-direction: column; }
+.overlay-head { display: flex; flex-direction: row; justify-content: space-between; align-items: flex-start; flex: 0 0 auto; }
+.overlay-body { flex: 1 1 0; min-height: 0; display: flex; flex-direction: row; gap: var(--pad-loose); margin-top: 12px; }
+.overlay-foot { flex: 0 0 auto; border-top: var(--rule) solid rgba(74,54,32,.3); padding-top: 10px; margin-top: 10px; display: flex; align-items: center; justify-content: space-between; }
+.scroll { overflow-y: auto; min-height: 0; }
+
+/* ---- Wax seal (decorative; place on a selected chip's corner) ------------------------------- */
+.seal { position: absolute; right: -9px; top: -9px; width: 26px; height: 26px; z-index: 2; }
+
+/* ---- Tab markers (no styling; the builder's tab script toggles these) ------------------------- */
+.tab { }
+.tab--active { }
+
+</style>
+<style>
+  .map { position: absolute; inset: 0; }
+  .poi-label { font-family: var(--font-body); font-size: 12px; letter-spacing: 2px; fill: var(--parchment); text-transform: uppercase; }
+  .poi-kind { font-size: 9px; letter-spacing: 2px; fill: var(--parchment-dim); }
+  .poi-tag { font-size: 9px; letter-spacing: 2px; fill: var(--gold); }
+  .poi-obj { fill: var(--gold-bright); }
+  .leash { fill: none; stroke: rgba(142,47,34,.55); stroke-width: 1.5; stroke-dasharray: 10 8; }
+  .leash-label { font-size: 9px; letter-spacing: 2px; fill: rgba(142,47,34,.85); text-transform: uppercase; }
+  .objective__count { margin-left: auto; font-size: var(--fs-small); color: var(--gold-bright); letter-spacing: 1px; }
+  .events { position: absolute; right: 16px; bottom: 104px; width: 340px; }
+  .bottom-bar--compact { height: 84px; }
+  .bottom-bar--compact .bottom-bar__section { padding: 8px 18px; }
+  .identity { min-width: 230px; }
+  .metric-val { font-size: var(--fs-body); color: var(--parchment); }
+  /* narration modal: narrower sheet, speaker head */
+  .modal__sheet.narration { width: 760px; padding: 22px 26px 20px; }
+  .narration__head { display: flex; flex-direction: row; align-items: center; gap: 16px; }
+  .portrait-slot { width: 64px; height: 64px; border: var(--rule) solid var(--gold-dim); background: rgba(250,244,226,.35); display: flex; align-items: center;
+    justify-content: center; position: relative; flex: 0 0 auto; }
+  .portrait-slot .tier-disc { position: absolute; right: -6px; bottom: -6px; border: 1px solid var(--ink-solid); }
+  .narration__speaker { font-size: var(--fs-small); color: var(--gold); letter-spacing: 3px; font-weight: 700; text-transform: uppercase; }
+  .narration__title { font-family: var(--font-display); font-size: 22px; color: var(--gold-bright); letter-spacing: 4px; font-weight: 700; text-transform: uppercase; margin-top: 2px; }
+  .narration__p { font-size: 15px; line-height: 1.55; color: var(--parchment); margin: 12px 0 0; }
+  .narration__foot { display: flex; align-items: center; justify-content: space-between; margin-top: 20px; }
+  .button-primary.is-hover { background: var(--ink-hover); }
+  /* ghosted tutorial pop-up (the next beat) */
+  .tut { position: absolute; width: 250px; background: var(--ink-deep); border: var(--rule) solid var(--gold-dim); padding: 10px 14px; opacity: .38; }
+  .tut__title { font-family: var(--font-display); font-size: var(--fs-large); color: var(--gold-bright); letter-spacing: 4px; font-weight: 700; text-transform: uppercase; }
+  .mouse { width: 16px; height: 24px; flex: 0 0 auto; }
+</style>
+</head>
+<body>
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+  <!-- helmet: dome + crest + cheek guards -->
+  <symbol id="i-helmet" viewBox="0 0 24 24"><path d="M12 3c-4.4 0-7 3.2-7 7v3h2v-3c0-2.9 2-5 5-5s5 2.1 5 5v3h2v-3c0-3.8-2.6-7-7-7z"/><path d="M4 13h16v2H4z"/><path d="M5 15h4v6H6.5L5 18z"/><path d="M15 15h4l-1.5 3v3H15z"/><path d="M11 2h2v2h-2z"/><path d="M9 4h6l-1 2H10z"/></symbol>
+  <!-- crested helmet (optio) -->
+  <symbol id="i-crest" viewBox="0 0 24 24"><path d="M4 8c2-3 5-4 8-4s6 1 8 4l-2 1c-1.5-2-3.5-3-6-3S7.5 7 6 9z"/><path d="M12 6c-4 0-6 3-6 6v3h12v-3c0-3-2-6-6-6z"/><path d="M5 16h14v2H5z"/><path d="M6 18h4v4H7l-1-2z"/><path d="M14 18h4v2l-1 2h-3z"/></symbol>
+  <!-- vertical banner / signum -->
+  <symbol id="i-banner" viewBox="0 0 24 24"><path d="M11 2h2v20h-2z"/><path d="M7 4h10v2H7z"/><path d="M8 6h8v9l-4-2-4 2z"/><path d="M10 1h4v2h-4z"/></symbol>
+  <!-- scroll and quill (tesserarius) -->
+  <symbol id="i-scroll" viewBox="0 0 24 24"><path d="M5 5h12a2 2 0 0 1 2 2v1H7v9a2 2 0 0 1-4 0V7a2 2 0 0 1 2-2z"/><path d="M8 9h11v8a2 2 0 0 1-2 2H8z"/><path d="M10 11h7v1h-7zm0 3h7v1h-7z" fill="#000" opacity=".5"/></symbol>
+  <!-- healing cross (medicus) -->
+  <symbol id="i-cross" viewBox="0 0 24 24"><path d="M9 3h6v6h6v6h-6v6H9v-6H3V9h6z"/></symbol>
+  <!-- gladius -->
+  <symbol id="i-sword" viewBox="0 0 24 24"><path d="M12 1l2.5 12h-5z"/><path d="M11 13h2v3h-2z"/><path d="M7 16h10v2H7z"/><path d="M11 18h2v5h-2z"/></symbol>
+  <!-- scutum -->
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M7 2h10a1 1 0 0 1 1 1v14c0 2.5-3 5-6 5s-6-2.5-6-5V3a1 1 0 0 1 1-1z"/><circle cx="12" cy="10" r="2" fill="#000" opacity=".5"/></symbol>
+  <!-- wheat / food -->
+  <symbol id="i-wheat" viewBox="0 0 24 24"><path d="M11 22h2V9h-2z"/><path d="M12 2c-2 1.5-3 3.5-3 6 2-.5 3-2.5 3-6zm0 0c2 1.5 3 3.5 3 6-2-.5-3-2.5-3-6z"/><path d="M8 8c-2 1-3 3-3 5.5 2.5-.5 3.5-2.5 3-5.5zm8 0c2 1 3 3 3 5.5-2.5-.5-3.5-2.5-3-5.5z"/><path d="M8 13c-2 1-3 3-3 5.5 2.5-.5 3.5-2.5 3-5.5zm8 0c2 1 3 3 3 5.5-2.5-.5-3.5-2.5-3-5.5z"/></symbol>
+  <!-- fire / firewood -->
+  <symbol id="i-fire" viewBox="0 0 24 24"><path d="M12 2c1 4 5 5 5 11a5 5 0 0 1-10 0c0-2 1-3.5 2-4.5 0 2 1 3 2 3 0-4 1-6 1-9.5z"/><path d="M3 21h18v1.5H3z"/></symbol>
+  <!-- coin -->
+  <symbol id="i-coin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="6" fill="#000" opacity=".45"/><path d="M11 8h2v8h-2z"/></symbol>
+  <!-- denarius (stacked) -->
+  <symbol id="i-denarii" viewBox="0 0 24 24"><ellipse cx="12" cy="7" rx="8" ry="3"/><path d="M4 9c0 1.7 3.6 3 8 3s8-1.3 8-3v3c0 1.7-3.6 3-8 3s-8-1.3-8-3z"/><path d="M4 14c0 1.7 3.6 3 8 3s8-1.3 8-3v3c0 1.7-3.6 3-8 3s-8-1.3-8-3z"/></symbol>
+  <!-- boot / pace -->
+  <symbol id="i-boot" viewBox="0 0 24 24"><path d="M7 3h6v9l6 4v3H5v-4l2-1z"/></symbol>
+  <!-- eye / scout -->
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M12 5C6 5 2 12 2 12s4 7 10 7 10-7 10-7-4-7-10-7zm0 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8z"/><circle cx="12" cy="12" r="2"/></symbol>
+  <!-- tent -->
+  <symbol id="i-tent" viewBox="0 0 24 24"><path d="M12 3L1 20h22zM12 8l6 10h-4l-2-4-2 4H6z"/></symbol>
+  <!-- spear / framea -->
+  <symbol id="i-spear" viewBox="0 0 24 24"><path d="M20 2l-3 7-2-2zM16 8l-1-1L3 19l2 2z"/></symbol>
+  <!-- horse -->
+  <symbol id="i-horse" viewBox="0 0 24 24"><path d="M5 21v-7l3-4 1-5 3 1 2-3 3 3-1 4 4 2v9h-2v-6l-3-1v7h-2v-6H9v6z"/></symbol>
+  <!-- map -->
+  <symbol id="i-map" viewBox="0 0 24 24"><path d="M3 5l6-2 6 2 6-2v16l-6 2-6-2-6 2zM9 5v14M15 5v14" stroke="#000" stroke-width="1.5" stroke-opacity=".45"/></symbol>
+  <!-- sun -->
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M11 2h2v3h-2zm0 17h2v3h-2zM2 11h3v2H2zm17 0h3v2h-3zM4.9 6.3l1.4-1.4 2.1 2.1-1.4 1.4zm10.7 10.7l1.4-1.4 2.1 2.1-1.4 1.4zM4.9 17.7L7 15.6l1.4 1.4-2.1 2.1zm10.7-10.7L17.7 4.9l1.4 1.4-2.1 2.1z"/></symbol>
+  <!-- moon -->
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M14 2a9 9 0 1 0 8 13 8 8 0 0 1-8-13z"/></symbol>
+  <!-- diamond objective -->
+  <symbol id="i-diamond" viewBox="0 0 24 24"><path d="M12 2l10 10-10 10L2 12z"/></symbol>
+  <!-- skull -->
+  <symbol id="i-skull" viewBox="0 0 24 24"><path d="M12 2a8 8 0 0 0-8 8c0 3 1.5 5 3 6v4h10v-4c1.5-1 3-3 3-6a8 8 0 0 0-8-8zm-3 11a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm6 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm-4 3h2v3h-2z"/></symbol>
+  <!-- anvil (fabrica) -->
+  <symbol id="i-anvil" viewBox="0 0 24 24"><path d="M3 7h18v3h-8l-2 4h4v2H9v-2l2-4H8c-2 0-4-1-5-3z"/><path d="M6 18h12v3H6z"/></symbol>
+  <!-- cauldron (culina) -->
+  <symbol id="i-cauldron" viewBox="0 0 24 24"><path d="M4 8h16v2c0 5-3.6 9-8 9s-8-4-8-9zm-2-2h20v2H2z"/><path d="M8 3h2v3H8zm6 0h2v3h-2z"/></symbol>
+  <!-- watchtower -->
+  <symbol id="i-tower" viewBox="0 0 24 24"><path d="M6 3h12v4H6zM8 7h8v13h-3v-5h-2v5H8z"/><path d="M5 20h14v2H5z"/></symbol>
+  <!-- hammer / tools -->
+  <symbol id="i-hammer" viewBox="0 0 24 24"><path d="M14 2l6 6-2 2-1-1-9 9-2-2 9-9-1-1zM4 20l2-2 2 2-2 2z"/></symbol>
+  <!-- crossed swords (training) -->
+  <symbol id="i-swords" viewBox="0 0 24 24"><path d="M3 3l6 6-1.5 1.5L2 5zM21 3l-6 6 1.5 1.5L22 5zM9 9l1.5 1.5L5 16l2 2-1.5 1.5-2-2L2 17l1.5-1.5-1-1zM15 9l-1.5 1.5L19 16l-2 2 1.5 1.5 2-2L22 17l-1.5-1.5 1-1z"/></symbol>
+  <!-- play / pause / fast -->
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M6 3l14 9-14 9z"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><path d="M5 3h5v18H5zm9 0h5v18h-5z"/></symbol>
+  <symbol id="i-fast" viewBox="0 0 24 24"><path d="M3 3l9 9-9 9zm9 0l9 9-9 9z"/></symbol>
+  <!-- bandage / medicine -->
+  <symbol id="i-bandage" viewBox="0 0 24 24"><path d="M4 8h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2z"/><path d="M10 10h4v4h-4z" fill="#000" opacity=".5"/></symbol>
+  <!-- wagon / transport -->
+  <symbol id="i-wagon" viewBox="0 0 24 24"><path d="M2 6h14l2 6h4v3h-2a3 3 0 0 1-6 0H9a3 3 0 0 1-6 0H2zm4 11a1 1 0 1 0 0 2 1 1 0 0 0 0-2zm11 0a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"/></symbol>
+  <!-- footprints / stealth -->
+  <symbol id="i-stealth" viewBox="0 0 24 24"><path d="M8 3c2 0 3 2 3 5s-1 5-3 5-3-2-3-5 1-5 3-5zm0 11c1.5 0 2.5 1 2.5 2.5S9.5 19 8 19s-2.5-1-2.5-2.5S6.5 14 8 14zm8-7c2 0 3 2 3 5s-1 5-3 5-3-2-3-5 1-5 3-5zm0 11c1.5 0 2.5 1 2.5 2.5S17.5 23 16 23s-2.5-1-2.5-2.5S14.5 18 16 18z"/></symbol>
+  <!-- book / journal -->
+  <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 3h7a2 2 0 0 1 1 .5A2 2 0 0 1 13 3h7v16h-7a2 2 0 0 0-1 .5 2 2 0 0 0-1-.5H4zm2 2v12h5V5zm7 0v12h5V5z"/></symbol>
+  <!-- toolbox (immunis) -->
+  <symbol id="i-toolbox" viewBox="0 0 24 24"><path d="M9 4h6v3h6v13H3V7h6zm2 2v1h2V6zM3 12h18v2H3z"/></symbol>
+  <!-- pilum bundle -->
+  <symbol id="i-pila" viewBox="0 0 24 24"><path d="M7 2l1 4-2 16H4L6 6zm5 0l1 4-1 16h-2l1-16zm5 0l1 4 2 16h-2L15 6z"/></symbol>
+  <!-- hound -->
+  <symbol id="i-hound" viewBox="0 0 24 24"><path d="M3 8l4-3 3 3h6l3-2 2 2-2 3v4l-2 6h-2v-4h-5v4H8v-6l-3-1z"/></symbol>
+  <!-- chain / prisoners -->
+  <symbol id="i-chain" viewBox="0 0 24 24"><path d="M7 7a4 4 0 0 1 4 4v2H9v-2a2 2 0 0 0-4 0v2a2 2 0 0 0 2 2h2v2H7a4 4 0 0 1-4-4v-2a4 4 0 0 1 4-4zm10 10a4 4 0 0 1-4-4v-2h2v2a2 2 0 0 0 4 0v-2a2 2 0 0 0-2-2h-2V7h2a4 4 0 0 1 4 4v2a4 4 0 0 1-4 4z"/></symbol>
+  <!-- star / experience -->
+  <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 2l3 7 7 .6-5.3 4.7L18.5 22 12 18l-6.5 4 1.8-7.7L2 9.6 9 9z"/></symbol>
+  <!-- ravine / passage -->
+  <symbol id="i-passage" viewBox="0 0 24 24"><path d="M2 22L8 4h3l-3 18zm20 0L16 4h-3l3 18z"/></symbol>
+</svg>
+
+<div id="stage">
+<div class="world world--overmap"></div><div class="grain"></div>
+<div class="hud-root">
+<!-- ===== the world: the battle ground the morning after ===== -->
+<svg class="map" viewBox="0 0 1920 1080" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="beam" cx="50%" cy="100%" r="100%"><stop offset="0" stop-color="rgb(176,132,48)" stop-opacity=".35"/><stop offset="1" stop-color="rgb(176,132,48)" stop-opacity="0"/></radialGradient>
+    <radialGradient id="beamdim" cx="50%" cy="100%" r="100%"><stop offset="0" stop-color="rgb(107,82,48)" stop-opacity=".16"/><stop offset="1" stop-color="rgb(107,82,48)" stop-opacity="0"/></radialGradient>
+  </defs>
+  <!-- forests hemming the ground: ink-hatched tan -->
+  <g fill="#a89c6e" stroke="#4a3e28" stroke-width="2" opacity=".85">
+    <ellipse cx="260" cy="220" rx="300" ry="170"/><ellipse cx="1700" cy="260" rx="320" ry="190"/><ellipse cx="1560" cy="920" rx="340" ry="150"/>
+    <ellipse cx="420" cy="900" rx="280" ry="130"/><ellipse cx="1000" cy="110" rx="260" ry="90"/><ellipse cx="110" cy="560" rx="160" ry="200"/>
+  </g>
+  <!-- churned ground where the column died -->
+  <ellipse cx="740" cy="460" rx="270" ry="130" fill="rgb(92,74,50)" opacity=".35"/>
+  <!-- the stream -->
+  <path d="M-20 780 C 300 740, 520 820, 820 760 S 1300 700, 1940 790" fill="none" stroke="#7f8b94" stroke-width="14" stroke-linecap="round" opacity=".55"/>
+  <!-- the dead, scattered along the line of march -->
+  <g fill="#5c4a32" opacity=".85">
+    <ellipse cx="640" cy="440" rx="7" ry="3"/><ellipse cx="672" cy="468" rx="7" ry="3"/><ellipse cx="700" cy="426" rx="6" ry="3"/><ellipse cx="742" cy="492" rx="7" ry="3"/>
+    <ellipse cx="776" cy="452" rx="7" ry="3"/><ellipse cx="812" cy="486" rx="6" ry="3"/><ellipse cx="840" cy="430" rx="7" ry="3"/><ellipse cx="884" cy="470" rx="7" ry="3"/>
+    <ellipse cx="920" cy="440" rx="6" ry="3"/><ellipse cx="610" cy="500" rx="6" ry="3"/><ellipse cx="960" cy="500" rx="7" ry="3"/><ellipse cx="1240" cy="660" rx="6" ry="3"/>
+    <ellipse cx="1280" cy="690" rx="7" ry="3"/><ellipse cx="1320" cy="660" rx="6" ry="3"/><ellipse cx="1350" cy="700" rx="7" ry="3"/>
+  </g>
+  <!-- the leash: outside is darker, the edge is a faint red dashed line -->
+  <path d="M0 0 H1920 V1080 H0 Z M380 200 L1100 130 L1520 240 L1640 560 L1460 900 L560 960 L300 640 Z" fill="rgba(40,28,14,.38)" fill-rule="evenodd"/>
+  <path class="leash" d="M380 200 L1100 130 L1520 240 L1640 560 L1460 900 L560 960 L300 640 Z"/>
+  <text x="1010" y="952" text-anchor="middle" class="leash-label">The column will not leave the Aftermath yet</text>
+
+  <!-- story POI: the objective -->
+  <g transform="translate(700,440)">
+    <rect x="-16" y="-110" width="32" height="110" fill="url(#beam)"/>
+    <ellipse rx="26" ry="10" fill="none" stroke="#9a7b3a" stroke-width="2"/>
+    <path d="M0 -70 l10 10 -10 10 -10 -10z" class="poi-obj"/>
+    <text y="-88" text-anchor="middle" class="poi-label" style="fill:#6e5215">A Wasteland of Corpses</text>
+    <text y="-106" text-anchor="middle" class="poi-kind">Battle site</text>
+    <text y="-122" text-anchor="middle" class="poi-tag">◆ OBJECTIVE</text>
+  </g>
+  <!-- story POI: discovered, not the objective -->
+  <g transform="translate(1290,700)">
+    <rect x="-16" y="-110" width="32" height="110" fill="url(#beamdim)"/>
+    <ellipse rx="26" ry="10" fill="none" stroke="#9a7b3a" stroke-width="1.5"/>
+    <path d="M0 -70 l10 10 -10 10 -10 -10z" fill="#9a7b3a"/>
+    <text y="-88" text-anchor="middle" class="poi-label">The Hounds' Ground</text>
+    <text y="-106" text-anchor="middle" class="poi-kind">Battle site</text>
+  </g>
+  <!-- the column: six men -->
+  <g transform="translate(960,600)">
+    <ellipse rx="26" ry="11" fill="rgba(154,123,58,.12)" stroke="#9a7b3a" stroke-width="1.5"/>
+    <g fill="#8a6a34">
+      <rect x="-13" y="-6" width="6" height="6"/><rect x="-4" y="-6" width="6" height="6"/><rect x="5" y="-6" width="6" height="6"/>
+      <rect x="-13" y="2" width="6" height="6"/><rect x="-4" y="2" width="6" height="6"/><rect x="5" y="2" width="6" height="6"/>
+    </g>
+    <path d="M0 -28 l6 -8 -6 -6 -6 6z" fill="#9a7b3a"/>
+  </g>
+</svg>
+
+<!-- ===== HUD ===== -->
+<div class="nav-bar">
+  <button class="nav-item nav-item--live">Inventory</button>
+  <button class="nav-item nav-item--live">Army</button>
+  <button class="nav-item nav-item--live">Commander</button>
+  <button class="nav-item nav-item--live">Save</button>
+  <button class="nav-item nav-item--live">Title</button>
+  <span class="nav-item nav-item--inert">Journal</span>
+  <span class="nav-item nav-item--inert">Encyclopedia</span>
+</div>
+
+<div class="time-box">
+  <svg class="ico ico--sm ico--gold"><use href="#i-sun"/></svg>
+  <span class="time-box__clock">Day 1 · 1st Watch</span>
+  <span class="text-dim small">08:10</span>
+  <span class="time-button time-button--active"><svg class="ico ico--sm"><use href="#i-pause"/></svg></span>
+  <span class="time-button"><svg class="ico ico--sm"><use href="#i-play"/></svg></span>
+  <span class="time-button"><svg class="ico ico--sm"><use href="#i-fast"/></svg></span>
+</div>
+
+<div class="objective panel">
+  <div class="eyebrow">Objective</div>
+  <div class="body" style="margin-top:4px">Gather what is left of the Century.</div>
+  <div class="objective__marker"><span class="objective__diamond">◆</span><span class="objective__text">Gather more survivors</span><span class="objective__count">6 / 12</span></div>
+  <div class="objective__marker"><span class="objective__diamond text-dim">◆</span><span class="objective__text text-dim">Find a safe place and camp</span></div>
+  <div class="objective__marker"><span class="objective__diamond text-faint">◆</span><span class="objective__text text-faint">Make your way to the passage</span></div>
+</div>
+
+<div class="events panel">
+  <div class="row between"><span class="eyebrow">Events</span><span class="micro text-faint">Day 1</span></div>
+  <div class="rule"></div>
+  <div class="event event--critical"><span class="event__glyph">!</span><span class="event__text">Looters are on the field. Unseen men move among the dead.</span><span class="event__time">08:10</span></div>
+  <div class="event event--warning"><span class="event__glyph">◆</span><span class="event__text">Titus Valerius and four men found alive by the stream.</span><span class="event__time">Dawn</span></div>
+  <div class="event"><span class="event__glyph">·</span><span class="event__text">The column forms: six men, two of them walking wounded.</span><span class="event__time">Dawn</span></div>
+</div>
+
+<div class="bottom-bar bottom-bar--compact">
+  <div class="bottom-bar__section bottom-bar__section--first identity">
+    <div class="identity__legion">LEG · XVII</div>
+    <div class="identity__name">Centuria Valeria</div>
+  </div>
+  <div class="bottom-bar__section" style="flex:1">
+    <div class="resource-strip">
+      <div class="resource"><svg class="ico resource__icon"><use href="#i-helmet"/></svg><div><div class="resource__label">Men</div><div class="resource__value">6</div></div></div>
+      <div class="resource"><svg class="ico resource__icon"><use href="#i-wheat"/></svg><div><div class="resource__label">Food</div><div class="resource__value resource__value--danger">1 day</div></div></div>
+      <div class="resource"><svg class="ico resource__icon"><use href="#i-fire"/></svg><div><div class="resource__label">Firewood</div><div class="resource__value">2</div></div></div>
+      <div class="resource"><svg class="ico resource__icon"><use href="#i-shield"/></svg><div><div class="resource__label">Equipment</div><div class="resource__value resource__value--low">Worn</div></div></div>
+      <div class="resource"><svg class="ico resource__icon"><use href="#i-bandage"/></svg><div><div class="resource__label">Medicine</div><div class="resource__value resource__value--danger">0 doses</div></div></div>
+      <div class="resource"><svg class="ico resource__icon"><use href="#i-coin"/></svg><div><div class="resource__label">Coin</div><div class="resource__value">0</div></div></div>
+      <div class="resource"><svg class="ico resource__icon"><use href="#i-denarii"/></svg><div><div class="resource__label">Denarii</div><div class="resource__value">3</div></div></div>
+    </div>
+  </div>
+  <div class="bottom-bar__section" style="min-width:220px">
+    <div class="row between"><span class="metric-label">Morale</span><span class="text-amber caps small">Wavering</span></div>
+    <div class="bar bar--thick"><div class="bar__fill" style="width:34%; background:var(--amber)"></div></div>
+  </div>
+  <div class="bottom-bar__section">
+    <div class="metric-cols">
+      <div class="metric-col"><span class="metric-label">Pace</span><span class="metric-val">Slow</span></div>
+      <div class="metric-col"><span class="metric-label">Wounded</span><span class="metric-val text-amber">2</span></div>
+    </div>
+  </div>
+  <div class="bottom-bar__section bottom-bar__actions">
+    <button class="pill" disabled><svg class="ico ico--sm"><use href="#i-tent"/></svg>Camp</button>
+    <button class="pill"><svg class="ico ico--sm"><use href="#i-stealth"/></svg>Stealth</button>
+  </div>
+</div>
+
+<!-- ===== narration modal ===== -->
+<div class="modal">
+  <div class="modal__sheet narration">
+    <div class="narration__head">
+      <div class="portrait-slot"><svg class="ico ico--xl ico--gold"><use href="#i-helmet"/></svg><span class="tier-disc tier-disc--veteranus tier-disc--lg"></span></div>
+      <div>
+        <div class="narration__speaker">T. Valerius · Decanus</div>
+        <div class="narration__title">The Aftermath</div>
+        <div class="modal__subtitle" style="margin-top:2px">Day 1 · clock paused</div>
+      </div>
+    </div>
+    <div class="rule" style="margin-top:14px"></div>
+    <p class="narration__p">The Seventeenth, the Eighteenth, the Nineteenth. Three eagles, Centurion, and I watched all three go under. Whatever is left of Varus's army is lying in that mud behind us.</p>
+    <p class="narration__p">The bulk of them have moved on. Arminius has bigger game than a handful of us: they are hunting the other columns that broke east, toward the river, and they will not turn back for six men.</p>
+    <p class="narration__p">Which leaves the looters. They are already in among the dead, stripping mail and cutting throats where they find breath, and they will pick off stragglers one at a time. There are men alive in these woods, sir. Let us go and find them before the looters do.</p>
+    <div class="narration__foot">
+      <span class="micro text-faint caps">Valerius · 1 of 1</span>
+      <button class="button-primary is-hover">Continue</button>
+    </div>
+  </div>
+</div>
+
+<!-- the next beat, ghosted -->
+<div class="tut" style="left:1390px; top:600px">
+  <div class="eyebrow">Overmap</div>
+  <div class="tut__title" style="margin-top:4px">Right click to continue</div>
+  <div class="row gap-tight" style="margin-top:8px">
+    <svg class="mouse" viewBox="0 0 16 24" xmlns="http://www.w3.org/2000/svg"><rect x="1" y="1" width="14" height="22" rx="7" fill="none" stroke="#6b5230"/><path d="M8 1a7 7 0 0 1 7 7v3H8z" fill="#9a7b3a"/></svg>
+    <span class="micro text-dim caps">on the ground · the column walks</span>
+  </div>
+</div>
+
+<!-- ===== design notes (press N) ===== -->
+<div class="mock-note" style="left:1420px; top:300px">Undiscovered story POI here (BATTLE SITE · The Stream Bank): no marker until the column comes within sight. Survivors 7 to 12 are spread across the three sites.</div>
+<div class="mock-note" style="left:1130px; top:958px">Leash: the move marker refuses beyond the dashed edge and the column halts on it with an event line. Lifted once "Find a safe place and camp" completes.</div>
+<div class="mock-note" style="left:1350px; top:330px">Narration pauses the clock and cannot be clicked away: CONTINUE only, Esc does nothing. Re-readable later in the Journal. The right-click sheet appears after CONTINUE (ghosted here).</div>
+<div class="mock-note" style="left:330px; top:60px">6 / 12 is a count of men, so it may be shown. CAMP is disabled until the survivors objective completes; it pulses once the camp objective is active.</div>
+</div>
+</div>
+<div class="mock-tag"><a href="index.html">&larr; index</a><span>mockup 04 · The Aftermath</span><span class="text-faint">N = notes</span></div>
+<script>
+(function(){var s=document.getElementById('stage');function fit(){var w=innerWidth,h=innerHeight,k=Math.min(w/1920,h/1080);
+s.style.transform='translate(-50%,-50%) scale('+k+')';s.style.transformOrigin='50% 50%';}
+addEventListener('resize',fit);fit();setTimeout(fit,50);setTimeout(fit,400);setTimeout(fit,1500);
+if(window.ResizeObserver){new ResizeObserver(fit).observe(document.documentElement);}
+addEventListener('keydown',function(e){if(e.key==='n'||e.key==='N')document.body.classList.toggle('notes');});
+document.querySelectorAll('[data-tabs]').forEach(function(g){var tabs=g.querySelectorAll('[data-tab]');
+tabs.forEach(function(t){t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('pill--active','nav-item--active','tab--active');});
+t.classList.add(t.classList.contains('nav-item')?'nav-item--active':(t.classList.contains('tab')?'tab--active':'pill--active'));
+var id=t.getAttribute('data-tab');document.querySelectorAll('[data-page]').forEach(function(p){p.hidden=p.getAttribute('data-page')!==id;});});});});
+})();
+</script>
+</body>
+</html>

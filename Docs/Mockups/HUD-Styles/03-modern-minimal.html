@@ -1,0 +1,415 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>CENTURY — HUD style: Modern Minimal</title>
+<style>
+  /* ============ FIELD COMMAND / MODERN MINIMAL ============ */
+  :root {
+    --ground:   #0e1114;
+    --smoke:    rgba(16,18,20,.55);
+    --smoke-hi: rgba(28,32,36,.62);
+    --text:     #aeb6bd;
+    --text-hi:  #d5dade;
+    --dim:      #5c666e;
+    --faint:    rgba(92,102,110,.25);
+    --crimson:  #e0453a;
+    --gold:     #e8b64c;
+    --slate-good: #97a3ac;
+    --slate-mid:  #7f8b94;
+    --font: "Segoe UI", Inter, Helvetica, Arial, sans-serif;
+    --mono: Consolas, "SF Mono", "Cascadia Mono", monospace;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { height: 100%; background: #0a0c0e; overflow: hidden; }
+  body { font-family: var(--font); color: var(--text); font-size: 13px; -webkit-font-smoothing: antialiased; }
+  button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+  #stage { position: absolute; left: 50%; top: 50%; width: 1920px; height: 1080px; transform-origin: center; overflow: hidden; background: var(--ground); }
+
+  .style-label { position: fixed; left: 12px; top: 10px; z-index: 99; font-size: 10px; letter-spacing: .22em;
+                 text-transform: uppercase; color: var(--dim); }
+  .style-label b { color: var(--gold); font-weight: 600; }
+
+  .field { position: absolute; inset: 0; }
+
+  /* type */
+  .micro { font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: var(--dim); font-weight: 600; }
+  .micro--gold { color: var(--gold); }
+  .micro--hi { color: var(--text); }
+  .micro--danger { color: var(--crimson); }
+  .key { font-family: var(--mono); font-size: 10px; color: var(--dim); letter-spacing: 0; text-transform: none; }
+  .key--gold { color: var(--gold); }
+
+  /* panels: barely-there smoke, single left accent edge */
+  .panel { background: var(--smoke); border-left: 2px solid var(--gold); padding: 16px; }
+  .row { display: flex; align-items: center; }
+  .between { justify-content: space-between; }
+  .grow { flex: 1 1 0; }
+
+  /* hairline bars */
+  .bar { position: relative; height: 2px; background: var(--faint); margin-top: 4px; }
+  .bar i { position: absolute; left: 0; top: 0; bottom: 0; display: block; }
+  .bar--health i { background: var(--crimson); }
+  .bar--stamina i { background: var(--slate-mid); }
+  .bar--morale i { background: var(--slate-good); }
+
+  /* ===== timer ===== */
+  .timer { position: absolute; top: 16px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column;
+           align-items: center; gap: 8px; background: var(--smoke); padding: 10px 32px 12px; }
+  .timer__clock { font-size: 30px; font-weight: 200; letter-spacing: .14em; color: var(--text-hi); font-variant-numeric: tabular-nums; }
+  .timer__controls { display: flex; gap: 16px; }
+  .tbtn { position: relative; width: 26px; height: 22px; display: flex; align-items: center; justify-content: center; color: var(--dim); }
+  .tbtn svg { stroke: currentColor; fill: none; stroke-width: 1.5; }
+  .tbtn--active { color: var(--gold); }
+  .tbtn--active::after { content: ""; position: absolute; left: 4px; right: 4px; bottom: -4px; height: 2px; background: var(--gold); }
+  .timer__hint { display: flex; align-items: center; gap: 8px; }
+
+  /* ===== left column ===== */
+  .battle-left { position: absolute; left: 24px; top: 56px; bottom: 168px; width: 264px; display: flex; flex-direction: column; gap: 16px; }
+  .battle-left .panel { flex: 0 0 auto; }
+  .battle-left__grow { flex: 1 1 auto !important; min-height: 120px; overflow: hidden; }
+  .lede { margin-top: 10px; font-size: 13px; font-weight: 300; color: var(--text-hi); line-height: 1.45; }
+  .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 16px; margin-top: 14px; }
+  .stat__value { font-size: 26px; font-weight: 200; color: var(--text-hi); line-height: 1.15; font-variant-numeric: tabular-nums; }
+  .stat__value--dim { color: var(--dim); }
+  .stat__value--danger { color: var(--crimson); }
+
+  .officer { display: flex; align-items: center; gap: 10px; margin-top: 12px; }
+  .officer__icon { width: 18px; height: 18px; flex: 0 0 auto; color: var(--slate-mid); }
+  .officer__icon svg { stroke: currentColor; fill: none; stroke-width: 1.4; }
+  .officer--commander .officer__icon { color: var(--gold); }
+  .officer--wounded .officer__icon { color: var(--crimson); }
+  .officer__name { font-size: 13px; font-weight: 400; color: var(--text-hi); }
+  .officer__role { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--dim); margin-top: 1px; }
+  .officer__role--wounded { color: var(--crimson); }
+
+  .event { display: flex; align-items: flex-start; gap: 8px; margin-top: 10px; }
+  .event__glyph { width: 10px; text-align: center; font-size: 11px; line-height: 1.4; color: var(--dim); flex: 0 0 auto; }
+  .event__text { flex: 1; font-size: 11px; font-weight: 300; color: var(--slate-mid); line-height: 1.4; }
+  .event__time { font-family: var(--mono); font-size: 10px; color: var(--dim); white-space: nowrap; }
+  .event--good .event__glyph { color: var(--gold); } .event--good .event__text { color: var(--text); }
+  .event--warning .event__glyph { color: var(--gold); } .event--warning .event__text { color: var(--text-hi); }
+  .event--critical .event__glyph, .event--critical .event__text { color: var(--crimson); }
+
+  /* ===== roster ===== */
+  .roster { position: absolute; right: 24px; top: 56px; width: 264px; }
+  .contub { margin-top: 12px; padding: 10px 12px; background: rgba(28,32,36,.35); border-left: 2px solid transparent; }
+  .contub--selected { background: var(--smoke-hi); border-left-color: var(--gold); }
+  .contub--withdrawn { opacity: .4; }
+  .contub__name { font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--text-hi); font-weight: 600; }
+  .contub--selected .contub__name { color: var(--gold); }
+  .contub__order { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--slate-mid); font-weight: 600; }
+  .contub__order--danger { color: var(--crimson); }
+  .dots { display: flex; gap: 4px; margin-top: 8px; align-items: center; }
+  .dot { width: 8px; height: 8px; border-radius: 1px; background: var(--slate-good); }
+  .dot--wounded { background: var(--crimson); animation: blink 1s steps(2) infinite; }
+  .dot--dead { background: transparent; position: relative; }
+  .dot--dead::after { content: "×"; position: absolute; inset: -3px 0 0 0; color: var(--crimson); font-size: 11px; line-height: 11px; text-align: center; }
+  .dot--empty { background: var(--faint); }
+  .flag { margin-left: auto; font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--dim); font-weight: 600; }
+  .flag--danger { color: var(--crimson); }
+  .cohesion { display: flex; gap: 3px; margin-top: 8px; }
+  .cohesion span { flex: 1; height: 2px; background: var(--slate-good); }
+  .cohesion span.off { background: var(--faint); }
+  .cohesion--amber span:not(.off) { background: var(--dim); }
+  .cohesion--red span:not(.off) { background: var(--crimson); animation: blink .6s steps(2) infinite; }
+  @keyframes blink { 50% { opacity: .3; } }
+
+  /* ===== squad inspect (hover) ===== */
+  .inspect { position: absolute; left: 1180px; top: 430px; width: 232px; background: rgba(16,18,20,.72); }
+  .inspect__row { display: flex; justify-content: space-between; align-items: baseline; margin-top: 12px; }
+  .inspect__word { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; font-weight: 600; color: var(--slate-good); }
+
+  /* ===== centurion ===== */
+  .centurion { position: absolute; left: 24px; bottom: 24px; width: 264px; }
+  .centurion__row { display: flex; justify-content: space-between; align-items: baseline; margin-top: 12px; }
+  .pila { display: flex; gap: 4px; }
+  .pila span { width: 3px; height: 14px; background: var(--gold); }
+  .pila span.spent { background: var(--faint); }
+  .cent-keys { display: flex; align-items: center; gap: 6px; margin-top: 14px; }
+  .cent-keys .micro { letter-spacing: .14em; }
+
+  /* ===== commands: flat, icon-first, underline state ===== */
+  .selection-hint { position: absolute; left: 50%; bottom: 158px; transform: translateX(-50%); display: flex; gap: 8px;
+                    align-items: baseline; font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: var(--dim); }
+  .selection-hint b { color: var(--gold); font-weight: 600; }
+
+  .formation-menu { position: absolute; left: 50%; bottom: 106px; transform: translateX(-50%); display: flex; gap: 8px;
+                    background: var(--smoke); border-left: 2px solid var(--gold); padding: 8px 12px 4px; }
+  .formation-menu::before { content: "Choose formation"; position: absolute; top: -18px; left: 0; font-size: 10px;
+                            letter-spacing: .2em; text-transform: uppercase; color: var(--gold); font-weight: 600; }
+  .form-diagram { width: 32px; height: 18px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; align-content: center; justify-items: center; }
+  .form-diagram i { display: block; background: currentColor; width: 4px; height: 4px; border-radius: 1px; }
+
+  .command-bar { position: absolute; left: 50%; bottom: 20px; transform: translateX(-50%); display: flex; gap: 8px; align-items: flex-end; }
+  .cmd { position: relative; width: 88px; padding: 8px 4px 12px; display: flex; flex-direction: column; align-items: center; gap: 5px; color: var(--slate-mid); }
+  .cmd::after { content: ""; position: absolute; left: 20px; right: 20px; bottom: 4px; height: 2px; background: transparent; }
+  .cmd svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+  .cmd__label { font-size: 10px; letter-spacing: .12em; text-transform: uppercase; font-weight: 600; text-align: center; line-height: 1.2; }
+  .cmd--active { color: var(--gold); }
+  .cmd--active::after { background: var(--gold); }
+  .cmd--hover { color: var(--text-hi); }
+  .cmd--hover::after { background: rgba(174,182,189,.35); }
+  .cmd--summon { color: var(--gold); width: 104px; }
+  .cmd--summon::after { background: var(--gold); left: 12px; right: 12px; }
+  .fmt { width: 76px; padding-bottom: 10px; }
+</style>
+</head>
+<body>
+<div id="stage">
+
+  <!-- ===== the field: flat, diagrammatic ===== -->
+  <svg class="field" viewBox="0 0 1920 1080" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <radialGradient id="glow" cx="50%" cy="55%" r="60%">
+        <stop offset="0%" stop-color="#161b20"/><stop offset="100%" stop-color="#0e1114"/>
+      </radialGradient>
+    </defs>
+    <rect width="1920" height="1080" fill="url(#glow)"/>
+
+    <!-- river to the north, ford -->
+    <path d="M-20 300 C 300 260, 600 340, 960 300 S 1600 260, 1940 320" fill="none" stroke="#222b32" stroke-width="44"/>
+    <path d="M-20 300 C 300 260, 600 340, 960 300 S 1600 260, 1940 320" fill="none" stroke="#2c3841" stroke-width="4" opacity=".5"/>
+    <rect x="880" y="268" width="160" height="72" rx="4" fill="#1d2429"/>
+
+    <!-- forest, flat darker shapes -->
+    <g fill="#0a0d10"><ellipse cx="180" cy="700" rx="220" ry="180"/><ellipse cx="1760" cy="160" rx="200" ry="120"/></g>
+
+    <!-- field boundary -->
+    <rect x="120" y="80" width="1680" height="940" fill="none" stroke="rgba(174,182,189,.07)" stroke-dasharray="2 10"/>
+
+    <!-- enemy warband: loose knots of crimson chips -->
+    <g fill="#e0453a">
+      <g transform="translate(700,380)"><rect x="0" y="0" width="7" height="7" rx="1"/><rect x="12" y="4" width="7" height="7" rx="1"/><rect x="24" y="-2" width="7" height="7" rx="1"/><rect x="6" y="14" width="7" height="7" rx="1"/><rect x="20" y="12" width="7" height="7" rx="1"/><rect x="34" y="8" width="7" height="7" rx="1"/><rect x="-8" y="10" width="7" height="7" rx="1"/></g>
+      <g transform="translate(900,360)"><rect x="0" y="0" width="7" height="7" rx="1"/><rect x="12" y="4" width="7" height="7" rx="1"/><rect x="24" y="-2" width="7" height="7" rx="1"/><rect x="6" y="14" width="7" height="7" rx="1"/><rect x="20" y="12" width="7" height="7" rx="1"/><rect x="34" y="8" width="7" height="7" rx="1"/><rect x="-8" y="10" width="7" height="7" rx="1"/><rect x="40" y="-6" width="7" height="7" rx="1"/></g>
+      <g transform="translate(1110,400)"><rect x="0" y="0" width="7" height="7" rx="1"/><rect x="12" y="4" width="7" height="7" rx="1"/><rect x="24" y="-2" width="7" height="7" rx="1"/><rect x="6" y="14" width="7" height="7" rx="1"/><rect x="20" y="12" width="7" height="7" rx="1"/></g>
+      <!-- routing men -->
+      <g opacity=".45"><rect x="1300" y="250" width="7" height="7" rx="1"/><rect x="1340" y="230" width="7" height="7" rx="1"/><rect x="1370" y="205" width="7" height="7" rx="1"/></g>
+    </g>
+
+    <!-- corpses -->
+    <g fill="#1a1f24"><ellipse cx="830" cy="470" rx="9" ry="4"/><ellipse cx="960" cy="455" rx="9" ry="4"/><ellipse cx="1010" cy="480" rx="9" ry="4"/><ellipse cx="760" cy="500" rx="9" ry="4"/></g>
+
+    <!-- our line: four gold unit chips in LINE, per-man pips inside -->
+    <!-- I : 8 men, one wounded -->
+    <g transform="translate(640,556)">
+      <rect width="58" height="28" rx="3" fill="#e8b64c"/>
+      <text x="10" y="19" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="600" fill="#0e1114">I</text>
+      <g fill="#0e1114"><rect x="24" y="7" width="5" height="5" rx="1"/><rect x="32" y="7" width="5" height="5" rx="1"/><rect x="40" y="7" width="5" height="5" rx="1"/><rect x="48" y="7" width="5" height="5" rx="1"/><rect x="24" y="16" width="5" height="5" rx="1"/><rect x="32" y="16" width="5" height="5" rx="1"/><rect x="40" y="16" width="5" height="5" rx="1"/><rect x="48" y="16" width="5" height="5" rx="1"/></g>
+    </g>
+    <!-- II : 7 men -->
+    <g transform="translate(790,556)">
+      <rect width="58" height="28" rx="3" fill="#e8b64c"/>
+      <text x="8" y="19" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="600" fill="#0e1114">II</text>
+      <g fill="#0e1114"><rect x="24" y="7" width="5" height="5" rx="1"/><rect x="32" y="7" width="5" height="5" rx="1"/><rect x="40" y="7" width="5" height="5" rx="1"/><rect x="48" y="7" width="5" height="5" rx="1"/><rect x="24" y="16" width="5" height="5" rx="1"/><rect x="32" y="16" width="5" height="5" rx="1"/><rect x="40" y="16" width="5" height="5" rx="1"/></g>
+    </g>
+    <!-- III (selected) : 8 men -->
+    <g transform="translate(940,552)">
+      <rect width="58" height="28" rx="3" fill="#e8b64c"/>
+      <text x="7" y="19" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="600" fill="#0e1114">III</text>
+      <g fill="#0e1114"><rect x="24" y="7" width="5" height="5" rx="1"/><rect x="32" y="7" width="5" height="5" rx="1"/><rect x="40" y="7" width="5" height="5" rx="1"/><rect x="48" y="7" width="5" height="5" rx="1"/><rect x="24" y="16" width="5" height="5" rx="1"/><rect x="32" y="16" width="5" height="5" rx="1"/><rect x="40" y="16" width="5" height="5" rx="1"/><rect x="48" y="16" width="5" height="5" rx="1"/></g>
+    </g>
+    <!-- IV : 6 men -->
+    <g transform="translate(1090,558)">
+      <rect width="58" height="28" rx="3" fill="#e8b64c"/>
+      <text x="6" y="19" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="600" fill="#0e1114">IV</text>
+      <g fill="#0e1114"><rect x="26" y="7" width="5" height="5" rx="1"/><rect x="34" y="7" width="5" height="5" rx="1"/><rect x="42" y="7" width="5" height="5" rx="1"/><rect x="26" y="16" width="5" height="5" rx="1"/><rect x="34" y="16" width="5" height="5" rx="1"/><rect x="42" y="16" width="5" height="5" rx="1"/></g>
+    </g>
+
+    <!-- selection: thin gold circle under III -->
+    <ellipse cx="969" cy="568" rx="48" ry="20" fill="none" stroke="#e8b64c" stroke-width="1"/>
+
+    <!-- the Centurion, behind the line -->
+    <g transform="translate(962,640)">
+      <circle r="9" fill="none" stroke="#e8b64c" stroke-width="1"/>
+      <circle r="4" fill="#e8b64c"/>
+      <path d="M0 -16 l4 5 h-8z" fill="#e8b64c"/>
+    </g>
+    <!-- the signum, carried -->
+    <g transform="translate(1000,600)"><rect x="-1" y="-22" width="2" height="22" fill="#e8b64c"/><path d="M1 -22 h10 v8 h-10z" fill="none" stroke="#e8b64c" stroke-width="1.2"/></g>
+
+    <!-- squad tags: numeral + three hairline bars (health / stamina / morale) -->
+    <g font-family="Segoe UI, Arial, sans-serif" font-size="11" font-weight="600" letter-spacing="1">
+      <g transform="translate(646,516)"><text x="0" y="12" fill="#7f8b94">I</text><rect x="14" y="2" width="26" height="2" fill="#e0453a"/><rect x="14" y="7" width="22" height="2" fill="#7f8b94"/><rect x="14" y="12" width="24" height="2" fill="#97a3ac"/></g>
+      <g transform="translate(796,516)"><text x="0" y="12" fill="#7f8b94">II</text><rect x="16" y="2" width="18" height="2" fill="#e0453a"/><rect x="16" y="7" width="14" height="2" fill="#7f8b94"/><rect x="16" y="12" width="12" height="2" fill="#5c666e"/></g>
+      <g transform="translate(946,512)"><text x="0" y="12" fill="#e8b64c">III</text><rect x="20" y="2" width="24" height="2" fill="#e0453a"/><rect x="20" y="7" width="20" height="2" fill="#7f8b94"/><rect x="20" y="12" width="24" height="2" fill="#97a3ac"/></g>
+      <g transform="translate(1096,518)"><text x="0" y="12" fill="#7f8b94">IV</text><rect x="18" y="2" width="16" height="2" fill="#e0453a"/><rect x="18" y="7" width="20" height="2" fill="#7f8b94"/><rect x="18" y="12" width="18" height="2" fill="#97a3ac"/></g>
+    </g>
+
+    <!-- cursor reticle over III: fine crosshair -->
+    <g transform="translate(1000,590)">
+      <circle r="24" fill="none" stroke="#e8b64c" stroke-width="1"/>
+      <g stroke="#e8b64c" stroke-width="1"><line x1="0" y1="-30" x2="0" y2="-20"/><line x1="0" y1="20" x2="0" y2="30"/><line x1="-30" y1="0" x2="-20" y2="0"/><line x1="20" y1="0" x2="30" y2="0"/></g>
+      <circle r="1.5" fill="#e8b64c"/>
+      <text x="36" y="-4" font-family="Segoe UI, Arial, sans-serif" font-size="10" font-weight="600" letter-spacing="2" fill="#e8b64c">III · HOLD</text>
+      <text x="36" y="12" font-family="Segoe UI, Arial, sans-serif" font-size="10" font-weight="600" letter-spacing="2" fill="#5c666e">TAB · SELECT</text>
+    </g>
+
+    <!-- pila in flight -->
+    <g stroke="rgba(232,182,76,.45)" stroke-width="1" fill="none"><path d="M700 545 q40 -60 80 -110"/><path d="M712 548 q40 -60 84 -114"/><path d="M960 540 q30 -70 60 -120"/></g>
+    <!-- order ping ring -->
+    <ellipse cx="800" cy="470" rx="30" ry="12" fill="none" stroke="#e8b64c" stroke-width="1" opacity=".4"/>
+  </svg>
+
+  <!-- ===== timer ===== -->
+  <div class="timer">
+    <div class="timer__clock">1:42</div>
+    <div class="timer__controls">
+      <span class="tbtn"><svg width="12" height="12" viewBox="0 0 12 12"><line x1="4" y1="2" x2="4" y2="10"/><line x1="8" y1="2" x2="8" y2="10"/></svg></span>
+      <span class="tbtn tbtn--active"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M3 2 L10 6 L3 10 Z"/></svg></span>
+      <span class="tbtn"><svg width="14" height="12" viewBox="0 0 14 12"><path d="M2 2 L7 6 L2 10 Z"/><path d="M8 2 L13 6 L8 10 Z"/></svg></span>
+    </div>
+    <div class="timer__hint"><span class="key">[Space]</span><span class="micro">Tactical time</span></div>
+  </div>
+
+  <!-- ===== left column ===== -->
+  <div class="battle-left">
+    <div class="panel">
+      <div class="row between"><span class="micro micro--gold">Engagement</span><span class="micro">The Signum · carried</span></div>
+      <div class="lede">The warband closes on the ford.</div>
+      <div class="stat-grid">
+        <div><div class="micro">Survivors</div><div class="stat__value">33</div></div>
+        <div><div class="micro">Enemies killed</div><div class="stat__value">11</div></div>
+        <div><div class="micro">In reserve</div><div class="stat__value stat__value--dim">8</div></div>
+        <div><div class="micro">Enemy standing</div><div class="stat__value stat__value--danger">29</div></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="micro micro--gold">Officers</div>
+      <div class="officer officer--commander">
+        <span class="officer__icon"><svg viewBox="0 0 18 18"><path d="M4 13 C4 8 6 4 9 4 C12 4 14 8 14 13 Z"/><path d="M9 4 V1.5"/><line x1="3" y1="15" x2="15" y2="15"/></svg></span>
+        <div class="grow"><div class="officer__name">M. Cornelius</div><div class="officer__role">Centurion</div><div class="bar bar--health"><i style="width:78%"></i></div></div>
+      </div>
+      <div class="officer">
+        <span class="officer__icon"><svg viewBox="0 0 18 18"><path d="M3 9 C3 5 6 3 9 3 C12 3 15 5 15 9"/><line x1="9" y1="3" x2="9" y2="15"/><line x1="4" y1="15" x2="14" y2="15"/></svg></span>
+        <div class="grow"><div class="officer__name">G. Aurelius</div><div class="officer__role">Optio · II</div><div class="bar bar--health"><i style="width:92%"></i></div></div>
+      </div>
+      <div class="officer officer--wounded">
+        <span class="officer__icon"><svg viewBox="0 0 18 18"><rect x="4" y="3" width="10" height="12" rx="1"/><line x1="6.5" y1="6.5" x2="11.5" y2="6.5"/><line x1="6.5" y1="9.5" x2="11.5" y2="9.5"/></svg></span>
+        <div class="grow"><div class="officer__name">L. Pedo</div><div class="officer__role officer__role--wounded">Tesserarius · wounded</div><div class="bar bar--health"><i style="width:31%"></i></div></div>
+      </div>
+      <div class="officer">
+        <span class="officer__icon"><svg viewBox="0 0 18 18"><line x1="9" y1="3" x2="9" y2="15"/><line x1="3" y1="9" x2="15" y2="9"/></svg></span>
+        <div class="grow"><div class="officer__name">Q. Fabius</div><div class="officer__role">Medicus · rear</div><div class="bar bar--health"><i style="width:100%"></i></div></div>
+      </div>
+    </div>
+    <div class="panel battle-left__grow">
+      <div class="micro micro--gold">Combat log</div>
+      <div style="margin-top:2px">
+        <div class="event event--good"><span class="event__glyph">+</span><span class="event__text">Contubernium I loose their pila. Four fall.</span><span class="event__time">1:38</span></div>
+        <div class="event event--warning"><span class="event__glyph">◆</span><span class="event__text">II is wavering — the Optio steadies them.</span><span class="event__time">1:31</span></div>
+        <div class="event event--critical"><span class="event__glyph">!</span><span class="event__text">Lucius Pedo is down, wounded.</span><span class="event__time">1:20</span></div>
+        <div class="event"><span class="event__glyph">·</span><span class="event__text">The line holds at the ford.</span><span class="event__time">1:04</span></div>
+        <div class="event"><span class="event__glyph">·</span><span class="event__text">Enemy skirmishers pull back beyond the river.</span><span class="event__time">0:52</span></div>
+        <div class="event event--good"><span class="event__glyph">+</span><span class="event__text">Three of the enemy break and run.</span><span class="event__time">0:40</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== roster ===== -->
+  <div class="roster panel">
+    <div class="row between"><span class="micro micro--gold">The Century</span><span class="micro">33 standing</span></div>
+    <div class="contub">
+      <div class="row between"><span class="contub__name">I · Valerius</span><span class="contub__order">Hold</span></div>
+      <div class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot dot--wounded"></span><span class="dot"></span><span class="dot"></span></div>
+      <div class="cohesion"><span></span><span></span><span></span><span></span><span class="off"></span></div>
+    </div>
+    <div class="contub">
+      <div class="row between"><span class="contub__name">II · Rufus</span><span class="contub__order contub__order--danger">Hold</span></div>
+      <div class="dots"><span class="dot"></span><span class="dot dot--wounded"></span><span class="dot"></span><span class="dot dot--dead"></span><span class="dot"></span><span class="dot dot--wounded"></span><span class="dot"></span><span class="dot dot--dead"></span><span class="flag flag--danger">Wavering</span></div>
+      <div class="cohesion cohesion--amber"><span></span><span></span><span class="off"></span><span class="off"></span><span class="off"></span></div>
+    </div>
+    <div class="contub contub--selected">
+      <div class="row between"><span class="contub__name">III · Silo</span><span class="contub__order">Hold · Line</span></div>
+      <div class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+      <div class="cohesion"><span></span><span></span><span></span><span></span><span></span></div>
+    </div>
+    <div class="contub">
+      <div class="row between"><span class="contub__name">IV · Cotta</span><span class="contub__order">Advance</span></div>
+      <div class="dots"><span class="dot"></span><span class="dot"></span><span class="dot dot--dead"></span><span class="dot"></span><span class="dot"></span><span class="dot dot--dead"></span><span class="dot"></span><span class="dot dot--empty"></span></div>
+      <div class="cohesion"><span></span><span></span><span></span><span class="off"></span><span class="off"></span></div>
+    </div>
+    <div class="contub contub--withdrawn">
+      <div class="row between"><span class="contub__name">V · Piso</span><span class="contub__order">Reserve</span></div>
+      <div class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot dot--empty"></span><span class="dot dot--empty"></span><span class="dot dot--empty"></span><span class="dot dot--empty"></span><span class="flag">Off field</span></div>
+    </div>
+  </div>
+
+  <!-- ===== squad inspect (hover) ===== -->
+  <div class="inspect panel">
+    <div class="row between"><span class="micro micro--hi">Contubernium III</span><span class="micro micro--gold">Hold · Line</span></div>
+    <div class="inspect__row"><span class="micro">Health</span><span class="inspect__word">Steady</span></div>
+    <div class="bar bar--health"><i style="width:88%"></i></div>
+    <div class="inspect__row"><span class="micro">Stamina</span><span class="inspect__word" style="color:var(--slate-mid)">Fresh</span></div>
+    <div class="bar bar--stamina"><i style="width:74%"></i></div>
+    <div class="inspect__row"><span class="micro">Morale</span><span class="inspect__word">Confident</span></div>
+    <div class="bar bar--morale"><i style="width:70%"></i></div>
+    <div class="micro" style="margin-top:14px; letter-spacing:.12em">Decanus Decimus Silo · 8 of 8 · shields up</div>
+  </div>
+
+  <!-- ===== centurion ===== -->
+  <div class="centurion panel">
+    <div class="row between"><span class="micro micro--gold" style="font-size:11px">Centurion</span><span class="micro">M. Cornelius</span></div>
+    <div class="centurion__row"><span class="micro">Health</span><span class="micro micro--hi">Bloodied</span></div>
+    <div class="bar bar--health"><i style="width:78%"></i></div>
+    <div class="centurion__row"><span class="micro">Stamina</span><span class="micro">Winded</span></div>
+    <div class="bar bar--stamina"><i style="width:46%"></i></div>
+    <div class="centurion__row"><span class="micro">Pila</span><div class="pila"><span></span><span></span><span></span><span class="spent"></span></div></div>
+    <div class="cent-keys">
+      <span class="key">[R]</span><span class="micro">Rally</span>
+      <span class="key" style="margin-left:10px">[Ctrl]</span><span class="micro">Shield</span>
+      <span class="key" style="margin-left:10px">[RMB]</span><span class="micro">Pilum</span>
+    </div>
+  </div>
+
+  <!-- ===== selection hint + formation picker + order bar ===== -->
+  <div class="selection-hint"><b>Contubernium III selected</b> · <span class="key">[Tab]</span> toggle · <span class="key">[0]</span> all</div>
+
+  <div class="formation-menu">
+    <button class="cmd cmd--active fmt"><span class="form-diagram"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><span class="cmd__label">Line</span></button>
+    <button class="cmd fmt"><span class="form-diagram" style="grid-template-columns:repeat(3,1fr);width:24px"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><span class="cmd__label">Testudo</span></button>
+    <button class="cmd fmt"><span class="form-diagram" style="gap:2px 5px"><i></i><i></i><i></i><i></i><i style="margin-left:3px"></i><i></i><i></i><i></i></span><span class="cmd__label">Double line</span></button>
+    <button class="cmd fmt"><span class="form-diagram" style="gap:5px 8px;width:42px"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><span class="cmd__label">Loose</span></button>
+    <button class="cmd fmt"><span class="form-diagram" style="grid-template-columns:repeat(2,1fr);width:12px;height:26px;gap:2px"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><span class="cmd__label">Column</span></button>
+  </div>
+
+  <div class="command-bar">
+    <button class="cmd cmd--active">
+      <svg viewBox="0 0 20 20"><path d="M10 2 L17 4.5 V10 C17 14.5 14 17 10 18.5 C6 17 3 14.5 3 10 V4.5 Z"/></svg>
+      <span class="cmd__label">Line</span><span class="key">[1]</span>
+    </button>
+    <button class="cmd cmd--hover">
+      <svg viewBox="0 0 20 20"><line x1="10" y1="17" x2="10" y2="4"/><path d="M5 9 L10 3.5 L15 9"/></svg>
+      <span class="cmd__label">Advance</span><span class="key">[2]</span>
+    </button>
+    <button class="cmd cmd--active">
+      <svg viewBox="0 0 20 20"><path d="M10 2 L17 4.5 V10 C17 14.5 14 17 10 18.5 C6 17 3 14.5 3 10 V4.5 Z"/><line x1="6.5" y1="10" x2="13.5" y2="10"/></svg>
+      <span class="cmd__label">Hold</span><span class="key">[3]</span>
+    </button>
+    <button class="cmd">
+      <svg viewBox="0 0 20 20"><path d="M5 13 C5 8 7 5 10 5 C13 5 15 8 15 13 Z"/><path d="M10 5 V2.5"/><line x1="4" y1="15.5" x2="16" y2="15.5"/></svg>
+      <span class="cmd__label">Follow me</span><span class="key">[4]</span>
+    </button>
+    <button class="cmd">
+      <svg viewBox="0 0 20 20"><line x1="4" y1="16" x2="15" y2="5"/><path d="M15 5 L15.5 2.5 L13 3"/><line x1="7" y1="16" x2="17" y2="8"/></svg>
+      <span class="cmd__label">Skirmish</span><span class="key">[5]</span>
+    </button>
+    <button class="cmd">
+      <svg viewBox="0 0 20 20"><line x1="10" y1="3" x2="10" y2="16"/><path d="M5 11 L10 16.5 L15 11"/></svg>
+      <span class="cmd__label">Fall back</span><span class="key">[6]</span>
+    </button>
+    <button class="cmd">
+      <svg viewBox="0 0 20 20"><path d="M12 3 H4 V17 H12"/><line x1="8" y1="10" x2="18" y2="10"/><path d="M14.5 6.5 L18 10 L14.5 13.5"/></svg>
+      <span class="cmd__label">Retreat</span><span class="key">[7]</span>
+    </button>
+    <button class="cmd cmd--summon">
+      <svg viewBox="0 0 20 20"><line x1="5" y1="2.5" x2="5" y2="17.5"/><path d="M5 3.5 H16 L13 7 L16 10.5 H5"/></svg>
+      <span class="cmd__label">Summon reserves</span><span class="key key--gold">[8]</span>
+    </button>
+  </div>
+
+</div>
+<div class="style-label">Century · HUD style <b>03 — Modern Minimal</b></div>
+<script>const s=document.getElementById('stage');function f(){const k=Math.min(innerWidth/1920,innerHeight/1080);s.style.transform=`translate(-50%,-50%) scale(${k})`;}addEventListener('resize',f);f();</script>
+</body>
+</html>

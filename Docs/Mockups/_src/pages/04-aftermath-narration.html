@@ -1,0 +1,194 @@
+<!-- title: The Aftermath -->
+<!-- desc: The guided first overmap area: Valerius's narration modal over the leashed battle ground, linear objectives, story POI markers and six men in a compact bottom bar. -->
+<!-- world: overmap -->
+<style>
+  .map { position: absolute; inset: 0; }
+  .poi-label { font-family: var(--font-body); font-size: 12px; letter-spacing: 2px; fill: var(--parchment); text-transform: uppercase; }
+  .poi-kind { font-size: 9px; letter-spacing: 2px; fill: var(--parchment-dim); }
+  .poi-tag { font-size: 9px; letter-spacing: 2px; fill: var(--gold); }
+  .poi-obj { fill: var(--gold-bright); }
+  .leash { fill: none; stroke: rgba(142,47,34,.55); stroke-width: 1.5; stroke-dasharray: 10 8; }
+  .leash-label { font-size: 9px; letter-spacing: 2px; fill: rgba(142,47,34,.85); text-transform: uppercase; }
+  .objective__count { margin-left: auto; font-size: var(--fs-small); color: var(--gold-bright); letter-spacing: 1px; }
+  .events { position: absolute; right: 16px; bottom: 104px; width: 340px; }
+  .bottom-bar--compact { height: 84px; }
+  .bottom-bar--compact .bottom-bar__section { padding: 8px 18px; }
+  .identity { min-width: 230px; }
+  .metric-val { font-size: var(--fs-body); color: var(--parchment); }
+  /* narration modal: narrower sheet, speaker head */
+  .modal__sheet.narration { width: 760px; padding: 22px 26px 20px; }
+  .narration__head { display: flex; flex-direction: row; align-items: center; gap: 16px; }
+  .portrait-slot { width: 64px; height: 64px; border: var(--rule) solid var(--gold-dim); background: rgba(250,244,226,.35); display: flex; align-items: center;
+    justify-content: center; position: relative; flex: 0 0 auto; }
+  .portrait-slot .tier-disc { position: absolute; right: -6px; bottom: -6px; border: 1px solid var(--ink-solid); }
+  .narration__speaker { font-size: var(--fs-small); color: var(--gold); letter-spacing: 3px; font-weight: 700; text-transform: uppercase; }
+  .narration__title { font-family: var(--font-display); font-size: 22px; color: var(--gold-bright); letter-spacing: 4px; font-weight: 700; text-transform: uppercase; margin-top: 2px; }
+  .narration__p { font-size: 15px; line-height: 1.55; color: var(--parchment); margin: 12px 0 0; }
+  .narration__foot { display: flex; align-items: center; justify-content: space-between; margin-top: 20px; }
+  .button-primary.is-hover { background: var(--ink-hover); }
+  /* ghosted tutorial pop-up (the next beat) */
+  .tut { position: absolute; width: 250px; background: var(--ink-deep); border: var(--rule) solid var(--gold-dim); padding: 10px 14px; opacity: .38; }
+  .tut__title { font-family: var(--font-display); font-size: var(--fs-large); color: var(--gold-bright); letter-spacing: 4px; font-weight: 700; text-transform: uppercase; }
+  .mouse { width: 16px; height: 24px; flex: 0 0 auto; }
+</style>
+
+<!-- ===== the world: the battle ground the morning after ===== -->
+<svg class="map" viewBox="0 0 1920 1080" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="beam" cx="50%" cy="100%" r="100%"><stop offset="0" stop-color="rgb(176,132,48)" stop-opacity=".35"/><stop offset="1" stop-color="rgb(176,132,48)" stop-opacity="0"/></radialGradient>
+    <radialGradient id="beamdim" cx="50%" cy="100%" r="100%"><stop offset="0" stop-color="rgb(107,82,48)" stop-opacity=".16"/><stop offset="1" stop-color="rgb(107,82,48)" stop-opacity="0"/></radialGradient>
+  </defs>
+  <!-- forests hemming the ground: ink-hatched tan -->
+  <g fill="#a89c6e" stroke="#4a3e28" stroke-width="2" opacity=".85">
+    <ellipse cx="260" cy="220" rx="300" ry="170"/><ellipse cx="1700" cy="260" rx="320" ry="190"/><ellipse cx="1560" cy="920" rx="340" ry="150"/>
+    <ellipse cx="420" cy="900" rx="280" ry="130"/><ellipse cx="1000" cy="110" rx="260" ry="90"/><ellipse cx="110" cy="560" rx="160" ry="200"/>
+  </g>
+  <!-- churned ground where the column died -->
+  <ellipse cx="740" cy="460" rx="270" ry="130" fill="rgb(92,74,50)" opacity=".35"/>
+  <!-- the stream -->
+  <path d="M-20 780 C 300 740, 520 820, 820 760 S 1300 700, 1940 790" fill="none" stroke="#7f8b94" stroke-width="14" stroke-linecap="round" opacity=".55"/>
+  <!-- the dead, scattered along the line of march -->
+  <g fill="#5c4a32" opacity=".85">
+    <ellipse cx="640" cy="440" rx="7" ry="3"/><ellipse cx="672" cy="468" rx="7" ry="3"/><ellipse cx="700" cy="426" rx="6" ry="3"/><ellipse cx="742" cy="492" rx="7" ry="3"/>
+    <ellipse cx="776" cy="452" rx="7" ry="3"/><ellipse cx="812" cy="486" rx="6" ry="3"/><ellipse cx="840" cy="430" rx="7" ry="3"/><ellipse cx="884" cy="470" rx="7" ry="3"/>
+    <ellipse cx="920" cy="440" rx="6" ry="3"/><ellipse cx="610" cy="500" rx="6" ry="3"/><ellipse cx="960" cy="500" rx="7" ry="3"/><ellipse cx="1240" cy="660" rx="6" ry="3"/>
+    <ellipse cx="1280" cy="690" rx="7" ry="3"/><ellipse cx="1320" cy="660" rx="6" ry="3"/><ellipse cx="1350" cy="700" rx="7" ry="3"/>
+  </g>
+  <!-- the leash: outside is darker, the edge is a faint red dashed line -->
+  <path d="M0 0 H1920 V1080 H0 Z M380 200 L1100 130 L1520 240 L1640 560 L1460 900 L560 960 L300 640 Z" fill="rgba(40,28,14,.38)" fill-rule="evenodd"/>
+  <path class="leash" d="M380 200 L1100 130 L1520 240 L1640 560 L1460 900 L560 960 L300 640 Z"/>
+  <text x="1010" y="952" text-anchor="middle" class="leash-label">The column will not leave the Aftermath yet</text>
+
+  <!-- story POI: the objective -->
+  <g transform="translate(700,440)">
+    <rect x="-16" y="-110" width="32" height="110" fill="url(#beam)"/>
+    <ellipse rx="26" ry="10" fill="none" stroke="#9a7b3a" stroke-width="2"/>
+    <path d="M0 -70 l10 10 -10 10 -10 -10z" class="poi-obj"/>
+    <text y="-88" text-anchor="middle" class="poi-label" style="fill:#6e5215">A Wasteland of Corpses</text>
+    <text y="-106" text-anchor="middle" class="poi-kind">Battle site</text>
+    <text y="-122" text-anchor="middle" class="poi-tag">◆ OBJECTIVE</text>
+  </g>
+  <!-- story POI: discovered, not the objective -->
+  <g transform="translate(1290,700)">
+    <rect x="-16" y="-110" width="32" height="110" fill="url(#beamdim)"/>
+    <ellipse rx="26" ry="10" fill="none" stroke="#9a7b3a" stroke-width="1.5"/>
+    <path d="M0 -70 l10 10 -10 10 -10 -10z" fill="#9a7b3a"/>
+    <text y="-88" text-anchor="middle" class="poi-label">The Hounds' Ground</text>
+    <text y="-106" text-anchor="middle" class="poi-kind">Battle site</text>
+  </g>
+  <!-- the column: six men -->
+  <g transform="translate(960,600)">
+    <ellipse rx="26" ry="11" fill="rgba(154,123,58,.12)" stroke="#9a7b3a" stroke-width="1.5"/>
+    <g fill="#8a6a34">
+      <rect x="-13" y="-6" width="6" height="6"/><rect x="-4" y="-6" width="6" height="6"/><rect x="5" y="-6" width="6" height="6"/>
+      <rect x="-13" y="2" width="6" height="6"/><rect x="-4" y="2" width="6" height="6"/><rect x="5" y="2" width="6" height="6"/>
+    </g>
+    <path d="M0 -28 l6 -8 -6 -6 -6 6z" fill="#9a7b3a"/>
+  </g>
+</svg>
+
+<!-- ===== HUD ===== -->
+<div class="nav-bar">
+  <button class="nav-item nav-item--live">Inventory</button>
+  <button class="nav-item nav-item--live">Army</button>
+  <button class="nav-item nav-item--live">Commander</button>
+  <button class="nav-item nav-item--live">Save</button>
+  <button class="nav-item nav-item--live">Title</button>
+  <span class="nav-item nav-item--inert">Journal</span>
+  <span class="nav-item nav-item--inert">Encyclopedia</span>
+</div>
+
+<div class="time-box">
+  <svg class="ico ico--sm ico--gold"><use href="#i-sun"/></svg>
+  <span class="time-box__clock">Day 1 · 1st Watch</span>
+  <span class="text-dim small">08:10</span>
+  <span class="time-button time-button--active"><svg class="ico ico--sm"><use href="#i-pause"/></svg></span>
+  <span class="time-button"><svg class="ico ico--sm"><use href="#i-play"/></svg></span>
+  <span class="time-button"><svg class="ico ico--sm"><use href="#i-fast"/></svg></span>
+</div>
+
+<div class="objective panel">
+  <div class="eyebrow">Objective</div>
+  <div class="body" style="margin-top:4px">Gather what is left of the Century.</div>
+  <div class="objective__marker"><span class="objective__diamond">◆</span><span class="objective__text">Gather more survivors</span><span class="objective__count">6 / 12</span></div>
+  <div class="objective__marker"><span class="objective__diamond text-dim">◆</span><span class="objective__text text-dim">Find a safe place and camp</span></div>
+  <div class="objective__marker"><span class="objective__diamond text-faint">◆</span><span class="objective__text text-faint">Make your way to the passage</span></div>
+</div>
+
+<div class="events panel">
+  <div class="row between"><span class="eyebrow">Events</span><span class="micro text-faint">Day 1</span></div>
+  <div class="rule"></div>
+  <div class="event event--critical"><span class="event__glyph">!</span><span class="event__text">Looters are on the field. Unseen men move among the dead.</span><span class="event__time">08:10</span></div>
+  <div class="event event--warning"><span class="event__glyph">◆</span><span class="event__text">Titus Valerius and four men found alive by the stream.</span><span class="event__time">Dawn</span></div>
+  <div class="event"><span class="event__glyph">·</span><span class="event__text">The column forms: six men, two of them walking wounded.</span><span class="event__time">Dawn</span></div>
+</div>
+
+<div class="bottom-bar bottom-bar--compact">
+  <div class="bottom-bar__section bottom-bar__section--first identity">
+    <div class="identity__legion">LEG · XVII</div>
+    <div class="identity__name">Centuria Valeria</div>
+  </div>
+  <div class="bottom-bar__section" style="flex:1">
+    <div class="resource-strip">
+      <div class="resource"><svg class="ico resource__icon"><use href="#i-helmet"/></svg><div><div class="resource__label">Men</div><div class="resource__value">6</div></div></div>
+      <div class="resource"><svg class="ico resource__icon"><use href="#i-wheat"/></svg><div><div class="resource__label">Food</div><div class="resource__value resource__value--danger">1 day</div></div></div>
+      <div class="resource"><svg class="ico resource__icon"><use href="#i-fire"/></svg><div><div class="resource__label">Firewood</div><div class="resource__value">2</div></div></div>
+      <div class="resource"><svg class="ico resource__icon"><use href="#i-shield"/></svg><div><div class="resource__label">Equipment</div><div class="resource__value resource__value--low">Worn</div></div></div>
+      <div class="resource"><svg class="ico resource__icon"><use href="#i-bandage"/></svg><div><div class="resource__label">Medicine</div><div class="resource__value resource__value--danger">0 doses</div></div></div>
+      <div class="resource"><svg class="ico resource__icon"><use href="#i-coin"/></svg><div><div class="resource__label">Coin</div><div class="resource__value">0</div></div></div>
+      <div class="resource"><svg class="ico resource__icon"><use href="#i-denarii"/></svg><div><div class="resource__label">Denarii</div><div class="resource__value">3</div></div></div>
+    </div>
+  </div>
+  <div class="bottom-bar__section" style="min-width:220px">
+    <div class="row between"><span class="metric-label">Morale</span><span class="text-amber caps small">Wavering</span></div>
+    <div class="bar bar--thick"><div class="bar__fill" style="width:34%; background:var(--amber)"></div></div>
+  </div>
+  <div class="bottom-bar__section">
+    <div class="metric-cols">
+      <div class="metric-col"><span class="metric-label">Pace</span><span class="metric-val">Slow</span></div>
+      <div class="metric-col"><span class="metric-label">Wounded</span><span class="metric-val text-amber">2</span></div>
+    </div>
+  </div>
+  <div class="bottom-bar__section bottom-bar__actions">
+    <button class="pill" disabled><svg class="ico ico--sm"><use href="#i-tent"/></svg>Camp</button>
+    <button class="pill"><svg class="ico ico--sm"><use href="#i-stealth"/></svg>Stealth</button>
+  </div>
+</div>
+
+<!-- ===== narration modal ===== -->
+<div class="modal">
+  <div class="modal__sheet narration">
+    <div class="narration__head">
+      <div class="portrait-slot"><svg class="ico ico--xl ico--gold"><use href="#i-helmet"/></svg><span class="tier-disc tier-disc--veteranus tier-disc--lg"></span></div>
+      <div>
+        <div class="narration__speaker">T. Valerius · Decanus</div>
+        <div class="narration__title">The Aftermath</div>
+        <div class="modal__subtitle" style="margin-top:2px">Day 1 · clock paused</div>
+      </div>
+    </div>
+    <div class="rule" style="margin-top:14px"></div>
+    <p class="narration__p">The Seventeenth, the Eighteenth, the Nineteenth. Three eagles, Centurion, and I watched all three go under. Whatever is left of Varus's army is lying in that mud behind us.</p>
+    <p class="narration__p">The bulk of them have moved on. Arminius has bigger game than a handful of us: they are hunting the other columns that broke east, toward the river, and they will not turn back for six men.</p>
+    <p class="narration__p">Which leaves the looters. They are already in among the dead, stripping mail and cutting throats where they find breath, and they will pick off stragglers one at a time. There are men alive in these woods, sir. Let us go and find them before the looters do.</p>
+    <div class="narration__foot">
+      <span class="micro text-faint caps">Valerius · 1 of 1</span>
+      <button class="button-primary is-hover">Continue</button>
+    </div>
+  </div>
+</div>
+
+<!-- the next beat, ghosted -->
+<div class="tut" style="left:1390px; top:600px">
+  <div class="eyebrow">Overmap</div>
+  <div class="tut__title" style="margin-top:4px">Right click to continue</div>
+  <div class="row gap-tight" style="margin-top:8px">
+    <svg class="mouse" viewBox="0 0 16 24" xmlns="http://www.w3.org/2000/svg"><rect x="1" y="1" width="14" height="22" rx="7" fill="none" stroke="#6b5230"/><path d="M8 1a7 7 0 0 1 7 7v3H8z" fill="#9a7b3a"/></svg>
+    <span class="micro text-dim caps">on the ground · the column walks</span>
+  </div>
+</div>
+
+<!-- ===== design notes (press N) ===== -->
+<div class="mock-note" style="left:1420px; top:300px">Undiscovered story POI here (BATTLE SITE · The Stream Bank): no marker until the column comes within sight. Survivors 7 to 12 are spread across the three sites.</div>
+<div class="mock-note" style="left:1130px; top:958px">Leash: the move marker refuses beyond the dashed edge and the column halts on it with an event line. Lifted once "Find a safe place and camp" completes.</div>
+<div class="mock-note" style="left:1350px; top:330px">Narration pauses the clock and cannot be clicked away: CONTINUE only, Esc does nothing. Re-readable later in the Journal. The right-click sheet appears after CONTINUE (ghosted here).</div>
+<div class="mock-note" style="left:330px; top:60px">6 / 12 is a count of men, so it may be shown. CAMP is disabled until the survivors objective completes; it pulses once the camp objective is active.</div>

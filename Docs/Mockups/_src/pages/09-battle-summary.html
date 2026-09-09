@@ -1,0 +1,146 @@
+<!-- title: Battle Summary -->
+<!-- desc: The post-battle sheet over the darkened field: the fallen, the spoils, and what the Centurion, the offices and the men took from the fight. -->
+<!-- world: battle -->
+<style>
+  .field { position: absolute; inset: 0; }
+  .sheet.summary { width: 900px; padding: 26px 30px 22px; }
+  .summary__shape { display: flex; justify-content: center; gap: 14px; margin: -6px 0 6px; font-size: var(--fs-micro); color: var(--parchment-dim); letter-spacing: 2px; text-transform: uppercase; }
+  .summary__shape b { color: var(--parchment); font-weight: 400; }
+  .sub-eyebrow { font-size: var(--fs-micro); color: var(--parchment-faint); letter-spacing: 2px; text-transform: uppercase; margin: 10px 0 4px; }
+
+  .fallen-row { display: flex; flex-direction: row; align-items: center; gap: 8px; padding: 5px 0; border-bottom: var(--rule) solid var(--gold-faint); }
+  .fallen-row__mark { width: 16px; text-align: center; color: var(--blood); font-size: 18px; line-height: 1; }
+  .fallen-row__num { width: 22px; font-size: var(--fs-micro); color: var(--parchment-dim); letter-spacing: 1px; }
+  .fallen-row__name { flex: 1; font-size: var(--fs-body); color: var(--parchment); }
+  .fallen-row__age { font-size: var(--fs-micro); color: var(--parchment-faint); letter-spacing: 1px; text-transform: uppercase; }
+  .carried { display: flex; align-items: center; gap: 8px; padding: 5px 0; font-size: var(--fs-small); color: var(--gold-bright); border-bottom: var(--rule) solid var(--gold-faint); }
+  .carried__mark { width: 16px; text-align: center; color: var(--amber); }
+
+  .spoil-row { display: flex; flex-direction: row; align-items: center; gap: 8px; padding: 5px 2px; border-bottom: var(--rule) solid var(--gold-faint);
+               font-size: var(--fs-small); color: var(--parchment); letter-spacing: 1px; text-transform: uppercase; }
+  .spoil-row__count { margin-left: auto; color: var(--parchment-dim); }
+  .spoil-row--prize { margin-top: 8px; border: var(--rule) solid var(--gold); background: rgba(154,123,58,.22); padding: 7px 8px; color: var(--gold-bright); }
+  .spoil-row--prize .spoil-row__count { color: var(--gold); }
+  .tally-row--tight .tally__value { font-size: 20px; }
+  .tally__unit { font-size: var(--fs-micro); color: var(--parchment-dim); letter-spacing: 1px; text-transform: uppercase; margin-left: 2px; }
+
+  .xp { display: flex; align-items: baseline; justify-content: space-between; }
+  .xp__gain { font-size: var(--fs-small); color: var(--gold-bright); letter-spacing: 2px; font-weight: 700; text-transform: uppercase; }
+  .promo { display: flex; align-items: center; gap: 8px; padding: 4px 0; font-size: var(--fs-small); color: var(--parchment); }
+  .promo__arrow { color: var(--gold); }
+  .beat { display: flex; align-items: flex-start; gap: 8px; padding: 4px 0; font-size: var(--fs-small); line-height: 1.35; }
+  .beat__glyph { width: 12px; text-align: center; flex: 0 0 auto; }
+  .summary__foot { display: flex; flex-direction: column; align-items: center; gap: 6px; margin-top: 14px; }
+
+  /* the live HUD stays up beneath the banner; the banner's dim does the greying */
+  .hud-remnant { position: absolute; left: 16px; right: 16px; bottom: 16px; display: flex; flex-direction: row; align-items: flex-end; gap: 16px; }
+  .hud-remnant__identity { width: 250px; }
+  .hud-remnant__squads { display: flex; flex-direction: row; gap: 8px; }
+  .hud-remnant__squads .card { flex-direction: column; align-items: flex-start; gap: 5px; width: 150px; margin: 0; padding: 8px 10px; }
+</style>
+
+<!-- ===== the darkened field behind ===== -->
+<svg class="field" viewBox="0 0 1920 1080" xmlns="http://www.w3.org/2000/svg">
+  <g fill="#a89c6e" stroke="#4a3e28" stroke-width="2" opacity=".6"><ellipse cx="160" cy="540" rx="240" ry="440"/><ellipse cx="1780" cy="500" rx="220" ry="460"/><ellipse cx="960" cy="40" rx="900" ry="110"/></g>
+  <path d="M760 -20 C 700 300, 820 600, 720 1100" fill="none" stroke="#7f8b94" stroke-width="70" stroke-linecap="round" opacity=".55"/>
+  <rect x="690" y="470" width="130" height="120" fill="#c2b184" opacity=".8"/>
+  <!-- what the fight left on the ground -->
+  <g fill="#43392c" opacity=".55"><rect x="640" y="430" width="8" height="5"/><rect x="662" y="452" width="8" height="5"/><rect x="618" y="486" width="8" height="5"/><rect x="600" y="520" width="8" height="5"/><rect x="655" y="540" width="8" height="5"/><rect x="590" y="470" width="8" height="5"/><rect x="560" y="500" width="8" height="5"/><rect x="630" y="570" width="8" height="5"/><rect x="580" y="590" width="8" height="5"/><rect x="540" y="450" width="8" height="5"/><rect x="520" y="560" width="8" height="5"/></g>
+  <g fill="#8a6a34" opacity=".6"><rect x="820" y="480" width="8" height="5"/><rect x="842" y="520" width="8" height="5"/><rect x="900" y="600" width="8" height="5"/></g>
+  <!-- the line, still standing -->
+  <g fill="#8a6a34" opacity=".9"><rect x="880" y="420" width="6" height="44"/><rect x="880" y="480" width="6" height="44"/><rect x="880" y="540" width="6" height="44"/><rect x="880" y="600" width="6" height="44"/></g>
+</svg>
+
+<!-- the live battle HUD, still up under the banner (post-battle state) -->
+<div class="hud-remnant">
+  <div class="panel hud-remnant__identity">
+    <div class="identity__legion">LEG · XVII</div>
+    <div class="identity__name">Centuria Valeria</div>
+    <div class="row gap" style="margin-top:8px">
+      <div class="grow"><div class="metric-label">Health</div><div class="bar"><div class="bar__fill bar__fill--health" style="width:71%"></div></div></div>
+      <div class="grow"><div class="metric-label">Stamina</div><div class="bar"><div class="bar__fill bar__fill--stamina" style="width:34%"></div></div></div>
+    </div>
+  </div>
+  <div class="hud-remnant__squads">
+    <div class="card"><span class="numeral">I</span><div class="pips"><span class="pip pip--fit"></span><span class="pip pip--fit"></span><span class="pip pip--fit"></span><span class="pip pip--fit"></span><span class="pip pip--fit"></span><span class="pip pip--fit"></span><span class="pip pip--fit"></span><span class="pip pip--wounded"></span></div><span class="card__sub">Line · Confident</span></div>
+    <div class="card card--wounded"><span class="numeral">II</span><div class="pips"><span class="pip pip--fit"></span><span class="pip pip--fit"></span><span class="pip pip--fit"></span><span class="pip pip--fit"></span><span class="pip pip--wounded"></span><span class="pip pip--wounded"></span><span class="pip pip--dead"></span><span class="pip pip--dead"></span></div><span class="card__sub text-amber">Line · Wavering</span></div>
+    <div class="card"><span class="numeral">III</span><div class="pips"><span class="pip pip--fit"></span><span class="pip pip--fit"></span><span class="pip pip--fit"></span><span class="pip pip--fit"></span><span class="pip pip--fit"></span><span class="pip pip--fit"></span><span class="pip pip--fit"></span><span class="pip pip--fit"></span></div><span class="card__sub">Line · Fearless</span></div>
+    <div class="card"><span class="numeral">IV</span><div class="pips"><span class="pip pip--fit"></span><span class="pip pip--fit"></span><span class="pip pip--fit"></span><span class="pip pip--fit"></span><span class="pip pip--fit"></span><span class="pip pip--fit"></span><span class="pip pip--wounded"></span><span class="pip pip--dead"></span></div><span class="card__sub">Line · Confident</span></div>
+  </div>
+</div>
+
+<!-- ===== THE SUMMARY ===== -->
+<div class="stage-banner">
+  <div class="sheet summary">
+    <div class="eyebrow center">Day 3 · dusk · a ford on the Weser</div>
+    <div class="sheet__title">The field is ours</div>
+    <div class="sheet__subtitle">Victory · the enemy broke and fled · 2 min 40 s</div>
+    <div class="summary__shape"><span><b>33</b> men engaged</span><span>·</span><span><b>≈ 40</b> spears against</span><span>·</span><span><b>11</b> enemy dead</span><span>·</span><span>the rest fled west</span></div>
+    <div class="rule"></div>
+
+    <div class="sheet__columns">
+      <!-- ---------- THE FALLEN ---------- -->
+      <div class="sheet__column">
+        <div class="heading">The fallen</div>
+        <div class="fallen-row"><span class="fallen-row__mark">×</span><span class="fallen-row__num">II</span><span class="fallen-row__name">Spurius Macer</span><span class="fallen-row__age">Miles</span></div>
+        <div class="fallen-row"><span class="fallen-row__mark">×</span><span class="fallen-row__num">II</span><span class="fallen-row__name">Numerius Longus</span><span class="fallen-row__age">Tiro</span></div>
+        <div class="fallen-row"><span class="fallen-row__mark">×</span><span class="fallen-row__num">IV</span><span class="fallen-row__name">Cnaeus Dento</span><span class="fallen-row__age">Veteranus</span></div>
+        <div class="carried"><span class="carried__mark">◆</span><span>Hostus Rullus — wounded, carried off</span></div>
+        <div class="carried"><span class="carried__mark">◆</span><span>Lucius Sabinus — wounded, carried off</span></div>
+        <div class="sub-eyebrow">What it costs</div>
+        <div class="small text-dim" style="line-height:1.4">Three bunks stand empty. Contubernium II marches at six and holds the line less long. The wounded are out until the medicus clears them.</div>
+        <div class="sub-eyebrow">Burial</div>
+        <div class="small text-dim" style="line-height:1.4">Buried by the ford — a watch spent. Morale held one step.</div>
+      </div>
+
+      <!-- ---------- SPOILS ---------- -->
+      <div class="sheet__column">
+        <div class="heading">Spoils</div>
+        <div class="tally-row tally-row--tight">
+          <div class="tally"><div class="tally__label">Food</div><div class="tally__value">+9<span class="tally__unit">days</span></div></div>
+          <div class="tally"><div class="tally__label">Coin</div><div class="tally__value">+64</div></div>
+          <div class="tally"><div class="tally__label">Prisoners</div><div class="tally__value">2</div></div>
+        </div>
+        <div class="spoil-row"><svg class="ico ico--sm ico--gold"><use href="#i-spear"/></svg><span>Frameae</span><span class="spoil-row__count">× 4</span></div>
+        <div class="spoil-row"><svg class="ico ico--sm ico--gold"><use href="#i-shield"/></svg><span>Round shields</span><span class="spoil-row__count">× 3</span></div>
+        <div class="spoil-row"><svg class="ico ico--sm ico--gold"><use href="#i-hound"/></svg><span>Pelts</span><span class="spoil-row__count">× 2</span></div>
+        <div class="spoil-row"><svg class="ico ico--sm ico--gold"><use href="#i-chain"/></svg><span>Prisoners</span><span class="spoil-row__count">× 2 · eat rations</span></div>
+        <div class="spoil-row spoil-row--prize"><svg class="ico ico--sm"><use href="#i-banner"/></svg><span>Banner of the Cherusci</span><span class="spoil-row__count">trophy</span></div>
+        <div class="sub-eyebrow">Into store</div>
+        <div class="small text-dim" style="line-height:1.4">Taken into the wagon. Storage 64 → 75 of 110 loads. Frameae and round shields are barbarian kit: sellable, or issued to men who have lost their own.</div>
+      </div>
+
+      <!-- ---------- EXPERIENCE ---------- -->
+      <div class="sheet__column">
+        <div class="heading">Experience</div>
+        <div class="xp" style="margin-top:6px"><span class="xp__gain"><svg class="ico ico--sm ico--gold" style="vertical-align:-3px"><use href="#i-star"/></svg> Centurion +38 experience</span></div>
+        <div class="row between" style="margin-top:6px"><span class="metric-label">Level 3</span><span class="micro text-dim">TO LEVEL 4</span></div>
+        <div class="bar bar--thick"><div class="bar__fill bar__fill--gold" style="width:58%"></div></div>
+
+        <div class="sub-eyebrow">Promotions</div>
+        <div class="promo"><span class="tier-disc tier-disc--miles"></span><span>Aulus Rufus</span><span class="promo__arrow">›</span><span class="text-dim">Miles (Trained)</span></div>
+        <div class="promo"><span class="tier-disc tier-disc--veteranus"></span><span>Publius Naso</span><span class="promo__arrow">›</span><span class="text-dim">Veteranus (Veteran)</span></div>
+
+        <div class="sub-eyebrow">Offices</div>
+        <div class="beat"><span class="beat__glyph text-gold">+</span><span><span class="text-gold-bright">Optio +1</span> <span class="text-dim">— a tradition point waits</span></span></div>
+        <div class="beat"><span class="beat__glyph text-danger">×</span><span class="text-danger">Signifer — an empty office learns nothing</span></div>
+
+        <div class="sub-eyebrow">The men</div>
+        <div class="beat"><span class="beat__glyph text-amber">◆</span><span class="text-amber">Contubernium II mutters (mauled)</span></div>
+        <div class="beat"><span class="beat__glyph text-good">◆</span><span class="text-good">I and III stood the line together</span></div>
+        <div class="beat"><span class="beat__glyph text-dim">·</span><span class="text-dim">Hostus Rullus remembers who carried him: Gaius Mallius</span></div>
+      </div>
+    </div>
+
+    <div class="rule" style="margin-top:14px"></div>
+    <div class="summary__foot">
+      <button class="button-primary" style="padding:9px 34px">Continue the march</button>
+      <span class="micro text-faint">OR PRESS <span class="keycap">Enter</span> · THE OVERMAP RESUMES PAUSED</span>
+    </div>
+  </div>
+</div>
+
+<div class="mock-note" style="left:1420px;top:250px">DEFEAT variant: title "THE LINE IS BROKEN" in --blood, subtitle "Defeat · the century fled the field · 1 min 55 s". SPOILS becomes LOST (kit dropped, wounded left behind in red). EXPERIENCE still pays out, smaller.</div>
+<div class="mock-note" style="left:1420px;top:370px">WITHDRAWAL variant (the Centurion fell): title "THE OPTIO PULLS THE CENTURY OUT" in --gold-dim. No spoils. The Optio's tradition earns the fight; the fallen are still listed.</div>
+<div class="mock-note" style="left:1150px;top:470px">No numbers on the level bar. "+38" is shown only because experience is a count the player earns, not a hidden score. Morale changes are always a ladder word.</div>
+<div class="mock-note" style="left:300px;top:480px">Names of the fallen click through to a read-only soldier sheet with a FALLEN band, so the bonds they leave behind are legible.</div>

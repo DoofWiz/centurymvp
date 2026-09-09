@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+  <!-- helmet: dome + crest + cheek guards -->
+  <symbol id="i-helmet" viewBox="0 0 24 24"><path d="M12 3c-4.4 0-7 3.2-7 7v3h2v-3c0-2.9 2-5 5-5s5 2.1 5 5v3h2v-3c0-3.8-2.6-7-7-7z"/><path d="M4 13h16v2H4z"/><path d="M5 15h4v6H6.5L5 18z"/><path d="M15 15h4l-1.5 3v3H15z"/><path d="M11 2h2v2h-2z"/><path d="M9 4h6l-1 2H10z"/></symbol>
+  <!-- crested helmet (optio) -->
+  <symbol id="i-crest" viewBox="0 0 24 24"><path d="M4 8c2-3 5-4 8-4s6 1 8 4l-2 1c-1.5-2-3.5-3-6-3S7.5 7 6 9z"/><path d="M12 6c-4 0-6 3-6 6v3h12v-3c0-3-2-6-6-6z"/><path d="M5 16h14v2H5z"/><path d="M6 18h4v4H7l-1-2z"/><path d="M14 18h4v2l-1 2h-3z"/></symbol>
+  <!-- vertical banner / signum -->
+  <symbol id="i-banner" viewBox="0 0 24 24"><path d="M11 2h2v20h-2z"/><path d="M7 4h10v2H7z"/><path d="M8 6h8v9l-4-2-4 2z"/><path d="M10 1h4v2h-4z"/></symbol>
+  <!-- scroll and quill (tesserarius) -->
+  <symbol id="i-scroll" viewBox="0 0 24 24"><path d="M5 5h12a2 2 0 0 1 2 2v1H7v9a2 2 0 0 1-4 0V7a2 2 0 0 1 2-2z"/><path d="M8 9h11v8a2 2 0 0 1-2 2H8z"/><path d="M10 11h7v1h-7zm0 3h7v1h-7z" fill="#000" opacity=".5"/></symbol>
+  <!-- healing cross (medicus) -->
+  <symbol id="i-cross" viewBox="0 0 24 24"><path d="M9 3h6v6h6v6h-6v6H9v-6H3V9h6z"/></symbol>
+  <!-- gladius -->
+  <symbol id="i-sword" viewBox="0 0 24 24"><path d="M12 1l2.5 12h-5z"/><path d="M11 13h2v3h-2z"/><path d="M7 16h10v2H7z"/><path d="M11 18h2v5h-2z"/></symbol>
+  <!-- scutum -->
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M7 2h10a1 1 0 0 1 1 1v14c0 2.5-3 5-6 5s-6-2.5-6-5V3a1 1 0 0 1 1-1z"/><circle cx="12" cy="10" r="2" fill="#000" opacity=".5"/></symbol>
+  <!-- wheat / food -->
+  <symbol id="i-wheat" viewBox="0 0 24 24"><path d="M11 22h2V9h-2z"/><path d="M12 2c-2 1.5-3 3.5-3 6 2-.5 3-2.5 3-6zm0 0c2 1.5 3 3.5 3 6-2-.5-3-2.5-3-6z"/><path d="M8 8c-2 1-3 3-3 5.5 2.5-.5 3.5-2.5 3-5.5zm8 0c2 1 3 3 3 5.5-2.5-.5-3.5-2.5-3-5.5z"/><path d="M8 13c-2 1-3 3-3 5.5 2.5-.5 3.5-2.5 3-5.5zm8 0c2 1 3 3 3 5.5-2.5-.5-3.5-2.5-3-5.5z"/></symbol>
+  <!-- fire / firewood -->
+  <symbol id="i-fire" viewBox="0 0 24 24"><path d="M12 2c1 4 5 5 5 11a5 5 0 0 1-10 0c0-2 1-3.5 2-4.5 0 2 1 3 2 3 0-4 1-6 1-9.5z"/><path d="M3 21h18v1.5H3z"/></symbol>
+  <!-- coin -->
+  <symbol id="i-coin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="6" fill="#000" opacity=".45"/><path d="M11 8h2v8h-2z"/></symbol>
+  <!-- denarius (stacked) -->
+  <symbol id="i-denarii" viewBox="0 0 24 24"><ellipse cx="12" cy="7" rx="8" ry="3"/><path d="M4 9c0 1.7 3.6 3 8 3s8-1.3 8-3v3c0 1.7-3.6 3-8 3s-8-1.3-8-3z"/><path d="M4 14c0 1.7 3.6 3 8 3s8-1.3 8-3v3c0 1.7-3.6 3-8 3s-8-1.3-8-3z"/></symbol>
+  <!-- boot / pace -->
+  <symbol id="i-boot" viewBox="0 0 24 24"><path d="M7 3h6v9l6 4v3H5v-4l2-1z"/></symbol>
+  <!-- eye / scout -->
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M12 5C6 5 2 12 2 12s4 7 10 7 10-7 10-7-4-7-10-7zm0 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8z"/><circle cx="12" cy="12" r="2"/></symbol>
+  <!-- tent -->
+  <symbol id="i-tent" viewBox="0 0 24 24"><path d="M12 3L1 20h22zM12 8l6 10h-4l-2-4-2 4H6z"/></symbol>
+  <!-- spear / framea -->
+  <symbol id="i-spear" viewBox="0 0 24 24"><path d="M20 2l-3 7-2-2zM16 8l-1-1L3 19l2 2z"/></symbol>
+  <!-- horse -->
+  <symbol id="i-horse" viewBox="0 0 24 24"><path d="M5 21v-7l3-4 1-5 3 1 2-3 3 3-1 4 4 2v9h-2v-6l-3-1v7h-2v-6H9v6z"/></symbol>
+  <!-- map -->
+  <symbol id="i-map" viewBox="0 0 24 24"><path d="M3 5l6-2 6 2 6-2v16l-6 2-6-2-6 2zM9 5v14M15 5v14" stroke="#000" stroke-width="1.5" stroke-opacity=".45"/></symbol>
+  <!-- sun -->
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M11 2h2v3h-2zm0 17h2v3h-2zM2 11h3v2H2zm17 0h3v2h-3zM4.9 6.3l1.4-1.4 2.1 2.1-1.4 1.4zm10.7 10.7l1.4-1.4 2.1 2.1-1.4 1.4zM4.9 17.7L7 15.6l1.4 1.4-2.1 2.1zm10.7-10.7L17.7 4.9l1.4 1.4-2.1 2.1z"/></symbol>
+  <!-- moon -->
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M14 2a9 9 0 1 0 8 13 8 8 0 0 1-8-13z"/></symbol>
+  <!-- diamond objective -->
+  <symbol id="i-diamond" viewBox="0 0 24 24"><path d="M12 2l10 10-10 10L2 12z"/></symbol>
+  <!-- skull -->
+  <symbol id="i-skull" viewBox="0 0 24 24"><path d="M12 2a8 8 0 0 0-8 8c0 3 1.5 5 3 6v4h10v-4c1.5-1 3-3 3-6a8 8 0 0 0-8-8zm-3 11a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm6 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm-4 3h2v3h-2z"/></symbol>
+  <!-- anvil (fabrica) -->
+  <symbol id="i-anvil" viewBox="0 0 24 24"><path d="M3 7h18v3h-8l-2 4h4v2H9v-2l2-4H8c-2 0-4-1-5-3z"/><path d="M6 18h12v3H6z"/></symbol>
+  <!-- cauldron (culina) -->
+  <symbol id="i-cauldron" viewBox="0 0 24 24"><path d="M4 8h16v2c0 5-3.6 9-8 9s-8-4-8-9zm-2-2h20v2H2z"/><path d="M8 3h2v3H8zm6 0h2v3h-2z"/></symbol>
+  <!-- watchtower -->
+  <symbol id="i-tower" viewBox="0 0 24 24"><path d="M6 3h12v4H6zM8 7h8v13h-3v-5h-2v5H8z"/><path d="M5 20h14v2H5z"/></symbol>
+  <!-- hammer / tools -->
+  <symbol id="i-hammer" viewBox="0 0 24 24"><path d="M14 2l6 6-2 2-1-1-9 9-2-2 9-9-1-1zM4 20l2-2 2 2-2 2z"/></symbol>
+  <!-- crossed swords (training) -->
+  <symbol id="i-swords" viewBox="0 0 24 24"><path d="M3 3l6 6-1.5 1.5L2 5zM21 3l-6 6 1.5 1.5L22 5zM9 9l1.5 1.5L5 16l2 2-1.5 1.5-2-2L2 17l1.5-1.5-1-1zM15 9l-1.5 1.5L19 16l-2 2 1.5 1.5 2-2L22 17l-1.5-1.5 1-1z"/></symbol>
+  <!-- play / pause / fast -->
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M6 3l14 9-14 9z"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><path d="M5 3h5v18H5zm9 0h5v18h-5z"/></symbol>
+  <symbol id="i-fast" viewBox="0 0 24 24"><path d="M3 3l9 9-9 9zm9 0l9 9-9 9z"/></symbol>
+  <!-- bandage / medicine -->
+  <symbol id="i-bandage" viewBox="0 0 24 24"><path d="M4 8h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2z"/><path d="M10 10h4v4h-4z" fill="#000" opacity=".5"/></symbol>
+  <!-- wagon / transport -->
+  <symbol id="i-wagon" viewBox="0 0 24 24"><path d="M2 6h14l2 6h4v3h-2a3 3 0 0 1-6 0H9a3 3 0 0 1-6 0H2zm4 11a1 1 0 1 0 0 2 1 1 0 0 0 0-2zm11 0a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"/></symbol>
+  <!-- footprints / stealth -->
+  <symbol id="i-stealth" viewBox="0 0 24 24"><path d="M8 3c2 0 3 2 3 5s-1 5-3 5-3-2-3-5 1-5 3-5zm0 11c1.5 0 2.5 1 2.5 2.5S9.5 19 8 19s-2.5-1-2.5-2.5S6.5 14 8 14zm8-7c2 0 3 2 3 5s-1 5-3 5-3-2-3-5 1-5 3-5zm0 11c1.5 0 2.5 1 2.5 2.5S17.5 23 16 23s-2.5-1-2.5-2.5S14.5 18 16 18z"/></symbol>
+  <!-- book / journal -->
+  <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 3h7a2 2 0 0 1 1 .5A2 2 0 0 1 13 3h7v16h-7a2 2 0 0 0-1 .5 2 2 0 0 0-1-.5H4zm2 2v12h5V5zm7 0v12h5V5z"/></symbol>
+  <!-- toolbox (immunis) -->
+  <symbol id="i-toolbox" viewBox="0 0 24 24"><path d="M9 4h6v3h6v13H3V7h6zm2 2v1h2V6zM3 12h18v2H3z"/></symbol>
+  <!-- pilum bundle -->
+  <symbol id="i-pila" viewBox="0 0 24 24"><path d="M7 2l1 4-2 16H4L6 6zm5 0l1 4-1 16h-2l1-16zm5 0l1 4 2 16h-2L15 6z"/></symbol>
+  <!-- hound -->
+  <symbol id="i-hound" viewBox="0 0 24 24"><path d="M3 8l4-3 3 3h6l3-2 2 2-2 3v4l-2 6h-2v-4h-5v4H8v-6l-3-1z"/></symbol>
+  <!-- chain / prisoners -->
+  <symbol id="i-chain" viewBox="0 0 24 24"><path d="M7 7a4 4 0 0 1 4 4v2H9v-2a2 2 0 0 0-4 0v2a2 2 0 0 0 2 2h2v2H7a4 4 0 0 1-4-4v-2a4 4 0 0 1 4-4zm10 10a4 4 0 0 1-4-4v-2h2v2a2 2 0 0 0 4 0v-2a2 2 0 0 0-2-2h-2V7h2a4 4 0 0 1 4 4v2a4 4 0 0 1-4 4z"/></symbol>
+  <!-- star / experience -->
+  <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 2l3 7 7 .6-5.3 4.7L18.5 22 12 18l-6.5 4 1.8-7.7L2 9.6 9 9z"/></symbol>
+  <!-- ravine / passage -->
+  <symbol id="i-passage" viewBox="0 0 24 24"><path d="M2 22L8 4h3l-3 18zm20 0L16 4h-3l3 18z"/></symbol>
+</svg>

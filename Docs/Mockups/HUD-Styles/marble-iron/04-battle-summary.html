@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>CENTURY — Marble &amp; Iron: Battle Summary</title>
+<style>
+/* ============ CENTURY · Marble & Iron — 04 BATTLE SUMMARY (display-type showcase) ============ */
+:root {
+  --marble-hi:   #e4e1da;
+  --marble:      #d9d6cf;
+  --marble-lo:   #b9b5ab;
+  --marble-deep: #a6a297;
+  --groove:      #8f8b80;
+  --slate:       #3b3a36;
+  --slate-dim:   #6b6960;
+  --slate-faint: #8d8a80;
+  --purple:      #5c2a4d;
+  --purple-soft: rgba(92,42,77,.28);
+  --bronze:      #a8842c;
+  --bronze-deep: #7c6120;
+  --oxblood:     #7e2a20;
+  --laurel:      #6d7a5c;
+  --sienna:      #8c531d;
+  --engrave: 0 1px 0 rgba(255,255,255,.6);
+  --font-head: Impact, "Arial Narrow", "Franklin Gothic Medium", sans-serif;
+  --font-body: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --meander: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='8'><path d='M1 7 V1 H9 V5 H5 V3 H13 V7' fill='none' stroke='%236b6960' stroke-width='1' opacity='.6'/></svg>");
+  --meander-big: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='22' height='12'><path d='M1 11 V1 H15 V7 H8 V4 H21 V11' fill='none' stroke='%236b6960' stroke-width='1.5' opacity='.6'/></svg>");
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; background: #7f7b71; overflow: hidden; }
+body { font-family: var(--font-body); font-size: 13px; color: var(--slate); }
+button { font: inherit; color: inherit; cursor: pointer; }
+#stage { position: absolute; left: 50%; top: 50%; width: 1920px; height: 1080px;
+         transform-origin: center; overflow: hidden; background: #c9c4b8; }
+/* stone ground: faint veining + weathering + vignette */
+#stage::before { content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 0;
+  background:
+    repeating-linear-gradient(113deg, transparent 0 26px, rgba(120,114,102,.10) 26px 28px, transparent 28px 74px),
+    repeating-linear-gradient(67deg, transparent 0 41px, rgba(255,255,255,.10) 41px 42px, transparent 42px 90px),
+    radial-gradient(ellipse 90% 80% at 50% 45%, transparent 55%, rgba(72,68,60,.30) 100%); }
+.style-label { position: fixed; left: 10px; top: 8px; z-index: 999; font-family: var(--font-head);
+  font-weight: 400; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: #efece5;
+  background: rgba(59,58,54,.75); padding: 4px 10px; border: 1px solid rgba(255,255,255,.25); }
+
+/* ---- carved type (Iron & Blood letterforms, cut into stone) ---- */
+.head { font-family: var(--font-head); font-weight: 400; text-transform: uppercase; text-shadow: var(--engrave); }
+.micro { font-size: 9px; letter-spacing: 1px; text-shadow: var(--engrave); }
+.caps { text-transform: uppercase; letter-spacing: 2px; }
+.text-good { color: var(--laurel); } .text-danger { color: var(--oxblood); }
+.text-bronze { color: var(--bronze-deep); } .text-dim { color: var(--slate-dim); }
+.text-faint { color: var(--slate-faint); } .text-sienna { color: var(--sienna); }
+.row { display: flex; align-items: center; } .between { justify-content: space-between; }
+.grow { flex: 1 1 0; }
+
+/* ---- marble slab ---- */
+.slab { position: relative;
+  background:
+    repeating-linear-gradient(112deg, transparent 0 18px, rgba(122,116,104,.10) 18px 19px, transparent 19px 47px),
+    repeating-linear-gradient(64deg, transparent 0 30px, rgba(255,255,255,.14) 30px 31px, transparent 31px 66px),
+    linear-gradient(160deg, var(--marble-hi) 0%, var(--marble) 45%, var(--marble-lo) 100%);
+  border-top: 1px solid #efede7; border-left: 1px solid #eae7e0;
+  border-bottom: 2px solid var(--groove); border-right: 1px solid #9c988d;
+  box-shadow: 0 6px 14px rgba(40,37,31,.35); padding: 12px; }
+.slab::before { content: ""; position: absolute; inset: 4px; pointer-events: none;
+  border: 1px solid rgba(59,58,54,.28); box-shadow: inset 0 1px 0 rgba(255,255,255,.45); }
+.slab > * { position: relative; }
+
+/* ---- inlaid stone bars ---- */
+.bar { height: 5px; margin-top: 3px; background: linear-gradient(#a29d91, #b4afa3);
+  border: 1px solid var(--groove); border-bottom-color: #d9d6cf;
+  box-shadow: inset 0 1px 2px rgba(40,37,31,.45); overflow: hidden; }
+.bar--thick { height: 8px; }
+.bar__fill { height: 100%; box-shadow: inset 0 1px 0 rgba(255,255,255,.30), inset 0 -1px 0 rgba(0,0,0,.25); }
+.bar__fill--health { background: linear-gradient(var(--oxblood), #64211a); }
+.bar__fill--stamina { background: linear-gradient(#b8933c, var(--bronze-deep)); }
+.bar__fill--xp { background: linear-gradient(#c19a3f, var(--bronze-deep)); }
+
+/* ---- carved key tablets ---- */
+.keycap { display: inline-flex; align-items: center; justify-content: center; min-width: 22px; height: 20px;
+  padding: 0 5px; font-family: var(--font-head); font-weight: 400; font-size: 9px; letter-spacing: 1.5px;
+  text-transform: uppercase; color: var(--slate); text-shadow: var(--engrave);
+  background: linear-gradient(170deg, var(--marble-hi), var(--marble-lo));
+  border: 1px solid var(--groove); border-top-color: #f0eee8; border-bottom-width: 3px; border-radius: 3px; }
+
+/* ---- icon bosses: recessed square stone mounts ---- */
+.boss { width: 26px; height: 26px; flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center;
+  background: linear-gradient(#c6c2b8, #aeaa9f); border: 1px solid var(--groove);
+  box-shadow: inset 0 1px 2px rgba(40,37,31,.30); }
+.boss .ico { color: var(--bronze-deep); width: 16px; height: 16px; }
+.boss--sm { width: 22px; height: 22px; } .boss--sm .ico { width: 13px; height: 13px; }
+.ico { fill: currentColor; flex: 0 0 auto; }
+
+/* ================= the darkened field + pall ================= */
+.field { position: absolute; inset: 0; z-index: 1; }
+.pall { position: absolute; inset: 0; z-index: 3; pointer-events: none;
+  background: radial-gradient(ellipse 70% 60% at 50% 46%, rgba(43,39,33,.42) 0%, rgba(43,39,33,.56) 100%); }
+
+/* ================= HUD remnant beneath the banner ================= */
+.hud-remnant { position: absolute; left: 16px; right: 16px; bottom: 16px; z-index: 2;
+  display: flex; flex-direction: row; align-items: flex-end; gap: 16px; }
+.hud-remnant__identity { width: 250px; }
+.identity__legion { font-family: var(--font-head); font-weight: 400; font-size: 10px; letter-spacing: 3px;
+  text-transform: uppercase; color: var(--bronze-deep); text-shadow: var(--engrave); }
+.identity__name { font-family: var(--font-head); font-weight: 400; font-size: 17px; letter-spacing: 2.5px;
+  text-transform: uppercase; color: var(--slate); text-shadow: var(--engrave); margin-top: 2px; }
+.metric-label { font-family: var(--font-head); font-weight: 400; font-size: 10px; color: var(--slate-dim);
+  letter-spacing: 1.5px; text-transform: uppercase; text-shadow: var(--engrave); }
+.gap { gap: 10px; }
+.hud-remnant__squads { display: flex; flex-direction: row; gap: 8px; }
+.card { display: flex; flex-direction: column; align-items: flex-start; gap: 5px; width: 150px; padding: 8px 10px; }
+.card__numeral { font-family: var(--font-head); font-weight: 400; font-size: 15px; letter-spacing: 2px;
+  color: var(--slate); text-shadow: var(--engrave); }
+.card__sub { font-family: var(--font-head); font-weight: 400; font-size: 9px; letter-spacing: 1.5px;
+  text-transform: uppercase; color: var(--slate-dim); text-shadow: var(--engrave); }
+.card--wounded { border-color: var(--sienna); }
+.pips { display: flex; gap: 4px; }
+.pip { width: 10px; height: 10px; background: linear-gradient(var(--laurel), #59654a);
+  border: 1px solid var(--groove); box-shadow: inset 0 1px 0 rgba(255,255,255,.3); }
+.pip--wounded { background: linear-gradient(#a5661f, var(--sienna)); }
+.pip--dead { background: linear-gradient(#93382c, var(--oxblood)); position: relative; }
+.pip--dead::after { content: "×"; position: absolute; inset: -4px 0 0 0; color: #efe9e2;
+  font-size: 11px; line-height: 11px; text-align: center; }
+
+/* ================= THE STELE ================= */
+.stele { position: absolute; left: 50%; top: 47%; transform: translate(-50%,-50%); z-index: 4;
+  width: 1020px; padding: 26px 34px 24px; box-shadow: 0 10px 26px rgba(20,18,14,.55); }
+.stele__eyebrow { font-family: var(--font-head); font-weight: 400; font-size: 11px; letter-spacing: 4px;
+  text-transform: uppercase; color: var(--slate-dim); text-shadow: var(--engrave); text-align: center; }
+.stele__motif { display: flex; align-items: flex-end; justify-content: center; gap: 18px; margin: 8px 0 2px;
+  color: var(--slate-dim); opacity: .6; }
+.stele__title { font-family: var(--font-head); font-weight: 400; font-size: 42px; letter-spacing: 6px;
+  text-transform: uppercase; color: var(--slate); text-shadow: var(--engrave); text-align: center;
+  line-height: 1.1; margin-top: 4px; }
+.stele__band { height: 12px; width: 396px; margin: 10px auto 0; background: var(--meander-big) center repeat-x; }
+.stele__subtitle { font-family: var(--font-head); font-weight: 400; font-size: 14px; letter-spacing: 3px;
+  text-transform: uppercase; color: var(--laurel); text-shadow: var(--engrave); text-align: center; margin-top: 10px; }
+.stele__shape { display: flex; justify-content: center; gap: 14px; margin-top: 8px;
+  font-family: var(--font-head); font-weight: 400; font-size: 10px; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--slate-dim); text-shadow: var(--engrave); }
+.stele__shape b { color: var(--slate); font-weight: 400; }
+.rule { height: 1px; margin-top: 12px; background: var(--groove); box-shadow: 0 1px 0 rgba(255,255,255,.5); }
+
+/* ---- columns ---- */
+.columns { display: flex; gap: 26px; margin-top: 14px; }
+.column { flex: 1 1 0; min-width: 0; }
+.heading { display: inline-block; font-family: var(--font-head); font-weight: 400; font-size: 15px;
+  letter-spacing: 3.5px; text-transform: uppercase; color: var(--slate); text-shadow: var(--engrave);
+  padding-bottom: 7px; background: var(--meander) left bottom repeat-x; margin-bottom: 4px; }
+.sub-eyebrow { font-family: var(--font-head); font-weight: 400; font-size: 9px; color: var(--slate-faint);
+  letter-spacing: 2.5px; text-transform: uppercase; text-shadow: var(--engrave); margin: 11px 0 4px; }
+.small { font-size: 12px; text-shadow: var(--engrave); }
+.prose { font-family: var(--font-body); font-size: 12px; line-height: 1.4; color: var(--slate-dim); text-shadow: var(--engrave); }
+
+/* the fallen */
+.fallen-row { display: flex; align-items: center; gap: 8px; padding: 5px 0; border-bottom: 1px solid rgba(107,105,96,.35); }
+.fallen-row__mark { width: 16px; text-align: center; color: var(--oxblood); font-size: 18px; line-height: 1; text-shadow: var(--engrave); }
+.fallen-row__num { width: 22px; font-family: var(--font-head); font-weight: 400; font-size: 10px;
+  color: var(--slate-dim); letter-spacing: 1.5px; text-shadow: var(--engrave); }
+.fallen-row__name { flex: 1; font-family: var(--font-head); font-weight: 400; font-size: 13px;
+  letter-spacing: 1.5px; text-transform: uppercase; color: var(--slate); text-shadow: var(--engrave); }
+.fallen-row__age { font-family: var(--font-head); font-weight: 400; font-size: 9px; color: var(--slate-faint);
+  letter-spacing: 1.5px; text-transform: uppercase; text-shadow: var(--engrave); }
+.carried { display: flex; align-items: center; gap: 8px; padding: 5px 0; font-size: 12px;
+  color: var(--bronze-deep); text-shadow: var(--engrave); border-bottom: 1px solid rgba(107,105,96,.35); }
+.carried__mark { width: 16px; text-align: center; color: var(--sienna); }
+
+/* spoils */
+.tally-row { display: flex; gap: 14px; margin: 6px 0 8px; }
+.tally { flex: 1 1 0; display: flex; align-items: center; gap: 7px; }
+.tally__label { font-family: var(--font-head); font-weight: 400; font-size: 9px; color: var(--slate-dim);
+  letter-spacing: 1.5px; text-transform: uppercase; text-shadow: var(--engrave); }
+.tally__value { font-family: var(--font-head); font-weight: 400; font-size: 19px; color: var(--slate);
+  letter-spacing: 1px; text-shadow: var(--engrave); line-height: 1; }
+.tally__unit { font-family: var(--font-head); font-weight: 400; font-size: 9px; color: var(--slate-dim);
+  letter-spacing: 1px; text-transform: uppercase; margin-left: 2px; }
+.spoil-row { display: flex; align-items: center; gap: 8px; padding: 4px 2px; border-bottom: 1px solid rgba(107,105,96,.35);
+  font-family: var(--font-head); font-weight: 400; font-size: 11px; letter-spacing: 1.5px;
+  text-transform: uppercase; color: var(--slate); text-shadow: var(--engrave); }
+.spoil-row__count { margin-left: auto; color: var(--slate-dim); }
+.spoil-row--prize { margin-top: 8px; border: 1px solid var(--bronze-deep); border-top-color: #cfa94c;
+  border-bottom: 3px solid var(--bronze-deep);
+  background: linear-gradient(165deg, #e0d3ad, #c2ae79); padding: 6px 8px; color: var(--bronze-deep); }
+.spoil-row--prize .spoil-row__count { color: var(--bronze-deep); }
+.spoil-row--prize .boss { border-color: var(--bronze-deep); }
+
+/* experience */
+.xp { display: flex; align-items: baseline; justify-content: space-between; margin-top: 6px; }
+.xp__gain { display: inline-flex; align-items: center; gap: 7px; font-family: var(--font-head); font-weight: 400;
+  font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: var(--bronze-deep); text-shadow: var(--engrave); }
+.promo { display: flex; align-items: center; gap: 8px; padding: 4px 0; font-size: 12px; text-shadow: var(--engrave); }
+.promo__name { font-family: var(--font-head); font-weight: 400; font-size: 12px; letter-spacing: 1.5px;
+  text-transform: uppercase; color: var(--slate); }
+.promo__arrow { color: var(--bronze-deep); }
+.tier-disc { width: 10px; height: 10px; flex: 0 0 auto; border-radius: 50%;
+  border: 1px solid var(--groove); box-shadow: inset 0 1px 0 rgba(255,255,255,.35); }
+.tier-disc--miles { background: linear-gradient(#c19a3f, var(--bronze)); }
+.tier-disc--veteranus { background: linear-gradient(var(--bronze), var(--bronze-deep)); border-color: var(--bronze-deep); }
+.beat { display: flex; align-items: flex-start; gap: 8px; padding: 4px 0; font-size: 12px; line-height: 1.35; text-shadow: var(--engrave); }
+.beat__glyph { width: 12px; text-align: center; flex: 0 0 auto; }
+
+/* footer */
+.stele__foot { display: flex; flex-direction: column; align-items: center; gap: 7px; margin-top: 14px; }
+.button-primary { display: inline-flex; align-items: center; gap: 10px; padding: 10px 36px;
+  font-family: var(--font-head); font-weight: 400; font-size: 15px; letter-spacing: 3.5px;
+  text-transform: uppercase; color: var(--bronze-deep); text-shadow: var(--engrave);
+  background: linear-gradient(165deg, #e0d3ad, #c2ae79);
+  border: 1px solid var(--bronze-deep); border-top-color: #cfa94c; border-bottom-width: 3px;
+  box-shadow: 0 4px 10px rgba(40,37,31,.35); }
+.button-primary:hover { border-top-color: #e2c064; }
+.foot-hint { font-family: var(--font-head); font-weight: 400; font-size: 9px; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--slate-faint); text-shadow: var(--engrave);
+  display: inline-flex; align-items: center; gap: 6px; }
+
+.mock-note { display: none; }
+</style>
+</head>
+<body>
+<div class="style-label">Marble &amp; Iron · 04 Battle Summary</div>
+<div id="stage">
+
+<!-- ===== icon glyphs: solid blocky silhouettes (functional) + incised line motifs (decorative) ===== -->
+<svg style="display:none" xmlns="http://www.w3.org/2000/svg">
+  <!-- functional: solid, 24×24, 1–2 cuts max -->
+  <symbol id="i-banner" viewBox="0 0 24 24"><path d="M11 2h2v20h-2z"/><path d="M13 3h8l-3 4 3 4h-8z"/><circle cx="12" cy="2.5" r="2"/></symbol>
+  <symbol id="i-wheat" viewBox="0 0 24 24"><rect x="11" y="8" width="2" height="14"/><path d="M12 2l3 4-3 4-3-4z"/><path d="M5 9l5 2v4l-5-2z"/><path d="M19 9l-5 2v4l5-2z"/><path d="M5 14l5 2v4l-5-2z"/><path d="M19 14l-5 2v4l5-2z"/></symbol>
+  <symbol id="i-coin" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 2a10 10 0 1 1 0 20 10 10 0 0 1 0-20zm-5 9h10v2H7z"/></symbol>
+  <symbol id="i-spear" viewBox="0 0 24 24"><path d="M4 20 L18 6 l2-4-4 2L2 18z"/><path d="M14 20 L21 13 l1 3-5 5z"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 2a10 10 0 1 1 0 20 10 10 0 0 1 0-20zm0 7a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/></symbol>
+  <symbol id="i-pelt" viewBox="0 0 24 24"><path d="M6 3h3v3h6V3h3v4l2 3-2 3v4h-3v4h-2v-4h-2v4H9v-4H6v-4l-2-3 2-3z"/></symbol>
+  <symbol id="i-chain" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M8 3a5 5 0 0 1 5 5v3h-3V8a2 2 0 1 0-4 0v3a2 2 0 0 0 2 2v3a5 5 0 0 1-5-5V8a5 5 0 0 1 5-5z"/><path fill-rule="evenodd" d="M16 8a5 5 0 0 1 5 5v3a5 5 0 0 1-5 5 5 5 0 0 1-5-5v-3h3v3a2 2 0 1 0 4 0v-3a2 2 0 0 0-2-2z"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 2l2.5 5 5.5.8-4 3.9.9 5.5L12 14.6 7.1 17.2 8 11.7 4 7.8 9.5 7z"/></symbol>
+  <!-- decorative: incised line work only -->
+  <symbol id="d-laurel" viewBox="0 0 40 60">
+    <path d="M32 56 C14 46 8 28 14 6" fill="none" stroke="currentColor" stroke-width="1.6"/>
+    <g fill="none" stroke="currentColor" stroke-width="1.3">
+      <ellipse cx="12" cy="10" rx="7" ry="2.6" transform="rotate(-62 12 10)"/>
+      <ellipse cx="10.5" cy="20" rx="7" ry="2.6" transform="rotate(-40 10.5 20)"/>
+      <ellipse cx="12.5" cy="30" rx="7" ry="2.6" transform="rotate(-22 12.5 30)"/>
+      <ellipse cx="17" cy="40" rx="7" ry="2.6" transform="rotate(-4 17 40)"/>
+      <ellipse cx="24" cy="49" rx="7" ry="2.6" transform="rotate(16 24 49)"/>
+      <ellipse cx="20" cy="8" rx="6" ry="2.4" transform="rotate(-88 20 8)"/>
+      <ellipse cx="19" cy="19" rx="6" ry="2.4" transform="rotate(-70 19 19)"/>
+      <ellipse cx="21.5" cy="30" rx="6" ry="2.4" transform="rotate(-52 21.5 30)"/>
+      <ellipse cx="26" cy="41" rx="6" ry="2.4" transform="rotate(-34 26 41)"/>
+    </g>
+  </symbol>
+  <symbol id="d-eagle" viewBox="0 0 120 56">
+    <g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+      <!-- perch bar -->
+      <path d="M28 52 H92"/>
+      <!-- legs -->
+      <path d="M55 52 L58 42 M65 52 L62 42"/>
+      <!-- body -->
+      <path d="M60 42 C52 40 50 30 54 22 C56 17 64 17 66 22 C70 30 68 40 60 42 Z"/>
+      <!-- head + beak, turned left -->
+      <path d="M56 18 C55 12 60 8 64 10 C67 11 67 16 64 18 M56 14 l-5 2 5 2"/>
+      <!-- left wing, three stepped feathers -->
+      <path d="M52 26 C40 24 28 18 16 6 M52 30 C42 30 32 26 22 18 M52 34 C44 35 36 33 28 28"/>
+      <!-- right wing -->
+      <path d="M68 26 C80 24 92 18 104 6 M68 30 C78 30 88 26 98 18 M68 34 C76 35 84 33 92 28"/>
+      <!-- tail fan -->
+      <path d="M56 42 L54 50 M60 43 L60 50 M64 42 L66 50"/>
+    </g>
+  </symbol>
+</svg>
+
+<!-- ===== the field the fight left behind: incised marble relief, post-battle ===== -->
+<svg class="field" viewBox="0 0 1920 1080" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <pattern id="stipple" width="9" height="9" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1.1" fill="#7b766b"/><circle cx="6.5" cy="6" r="1.1" fill="#87816f"/>
+    </pattern>
+  </defs>
+  <!-- the river: a polished darker groove; the ford -->
+  <path d="M-20 300 C 300 260, 600 340, 960 300 S 1600 260, 1940 320" fill="none" stroke="#8f8a7d" stroke-width="44" opacity=".9"/>
+  <path d="M-20 300 C 300 260, 600 340, 960 300 S 1600 260, 1940 320" fill="none" stroke="#726d61" stroke-width="30"/>
+  <path d="M-20 297 C 300 257, 600 337, 960 297 S 1600 257, 1940 317" fill="none" stroke="#e6e3db" stroke-width="2" opacity=".7"/>
+  <rect x="880" y="270" width="160" height="70" fill="#b4ad9c" opacity=".85"/>
+  <rect x="880" y="270" width="160" height="70" fill="none" stroke="#6b6960" stroke-dasharray="4 4" opacity=".5"/>
+  <!-- forests: stippled incisions -->
+  <g><ellipse cx="180" cy="700" rx="220" ry="180" fill="#bcb7aa"/><ellipse cx="180" cy="700" rx="220" ry="180" fill="url(#stipple)"/><ellipse cx="180" cy="700" rx="220" ry="180" fill="none" stroke="#7b766b" stroke-width="1.5" opacity=".6"/>
+     <ellipse cx="1760" cy="160" rx="200" ry="120" fill="#bcb7aa"/><ellipse cx="1760" cy="160" rx="200" ry="120" fill="url(#stipple)"/><ellipse cx="1760" cy="160" rx="200" ry="120" fill="none" stroke="#7b766b" stroke-width="1.5" opacity=".6"/></g>
+  <!-- field boundary: incised dashed line -->
+  <rect x="120" y="80" width="1680" height="940" fill="none" stroke="#6b6960" stroke-dasharray="6 10" opacity=".5"/>
+  <rect x="121" y="81" width="1680" height="940" fill="none" stroke="#efede7" stroke-dasharray="6 10" opacity=".5"/>
+  <!-- what the fight left on the ground: oxblood inlay chips + worn hollows -->
+  <g fill="#7e2a20" opacity=".55"><rect x="640" y="430" width="8" height="5"/><rect x="662" y="452" width="8" height="5"/><rect x="618" y="486" width="8" height="5"/><rect x="600" y="520" width="8" height="5"/><rect x="655" y="540" width="8" height="5"/><rect x="590" y="470" width="8" height="5"/><rect x="560" y="500" width="8" height="5"/><rect x="630" y="570" width="8" height="5"/><rect x="580" y="590" width="8" height="5"/><rect x="540" y="450" width="8" height="5"/><rect x="520" y="560" width="8" height="5"/></g>
+  <g fill="#a8842c" opacity=".6"><rect x="820" y="480" width="8" height="5"/><rect x="842" y="520" width="8" height="5"/><rect x="900" y="600" width="8" height="5"/></g>
+  <g fill="#8a8477" stroke="#6b6960" stroke-width=".6"><ellipse cx="830" cy="470" rx="9" ry="4"/><ellipse cx="960" cy="455" rx="9" ry="4"/><ellipse cx="1010" cy="480" rx="9" ry="4"/><ellipse cx="760" cy="500" rx="9" ry="4"/></g>
+  <!-- the routed: oxblood chips scattering north-west -->
+  <g fill="#7e2a20" opacity=".45"><rect x="1300" y="250" width="7" height="7"/><rect x="1340" y="230" width="7" height="7"/><rect x="1370" y="205" width="7" height="7"/><rect x="1420" y="180" width="7" height="7"/></g>
+  <!-- the line, still standing: gilded bronze inlay columns -->
+  <g fill="#a8842c" stroke="#6e5518" stroke-width=".6">
+    <rect x="880" y="420" width="8" height="46"/><rect x="880" y="480" width="8" height="46"/>
+    <rect x="880" y="540" width="8" height="46"/><rect x="880" y="600" width="8" height="46"/>
+  </g>
+</svg>
+
+<!-- ===== the live battle HUD, still up under the banner (post-battle state) ===== -->
+<div class="hud-remnant">
+  <div class="slab hud-remnant__identity">
+    <div class="identity__legion">LEG · XVII</div>
+    <div class="identity__name">Centuria Valeria</div>
+    <div class="row gap" style="margin-top:8px">
+      <div class="grow"><div class="metric-label">Health</div><div class="bar"><div class="bar__fill bar__fill--health" style="width:71%"></div></div></div>
+      <div class="grow"><div class="metric-label">Stamina</div><div class="bar"><div class="bar__fill bar__fill--stamina" style="width:34%"></div></div></div>
+    </div>
+  </div>
+  <div class="hud-remnant__squads">
+    <div class="slab card"><span class="card__numeral">I</span><div class="pips"><span class="pip"></span><span class="pip"></span><span class="pip"></span><span class="pip"></span><span class="pip"></span><span class="pip"></span><span class="pip"></span><span class="pip pip--wounded"></span></div><span class="card__sub">Line · Confident</span></div>
+    <div class="slab card card--wounded"><span class="card__numeral">II</span><div class="pips"><span class="pip"></span><span class="pip"></span><span class="pip"></span><span class="pip"></span><span class="pip pip--wounded"></span><span class="pip pip--wounded"></span><span class="pip pip--dead"></span><span class="pip pip--dead"></span></div><span class="card__sub text-sienna">Line · Wavering</span></div>
+    <div class="slab card"><span class="card__numeral">III</span><div class="pips"><span class="pip"></span><span class="pip"></span><span class="pip"></span><span class="pip"></span><span class="pip"></span><span class="pip"></span><span class="pip"></span><span class="pip"></span></div><span class="card__sub">Line · Fearless</span></div>
+    <div class="slab card"><span class="card__numeral">IV</span><div class="pips"><span class="pip"></span><span class="pip"></span><span class="pip"></span><span class="pip"></span><span class="pip"></span><span class="pip"></span><span class="pip pip--wounded"></span><span class="pip pip--dead"></span></div><span class="card__sub">Line · Confident</span></div>
+  </div>
+</div>
+
+<!-- the pall: the banner's dim does the greying -->
+<div class="pall"></div>
+
+<!-- ===== THE STELE ===== -->
+<div class="stele slab">
+  <div class="stele__eyebrow">Day 3 · dusk · a ford on the Weser</div>
+  <div class="stele__motif">
+    <svg width="30" height="46" viewBox="0 0 40 60"><use href="#d-laurel"/></svg>
+    <svg width="106" height="50" viewBox="0 0 120 56"><use href="#d-eagle"/></svg>
+    <svg width="30" height="46" viewBox="0 0 40 60" style="transform:scaleX(-1)"><use href="#d-laurel"/></svg>
+  </div>
+  <div class="stele__title">The field is ours</div>
+  <div class="stele__band"></div>
+  <div class="stele__subtitle">Victory · the enemy broke and fled · 2 min 40 s</div>
+  <div class="stele__shape"><span><b>33</b> men engaged</span><span>·</span><span><b>≈ 40</b> spears against</span><span>·</span><span><b>11</b> enemy dead</span><span>·</span><span>the rest fled west</span></div>
+  <div class="rule"></div>
+
+  <div class="columns">
+    <!-- ---------- THE FALLEN ---------- -->
+    <div class="column">
+      <div class="heading">The fallen</div>
+      <div class="fallen-row"><span class="fallen-row__mark">×</span><span class="fallen-row__num">II</span><span class="fallen-row__name">Spurius Macer</span><span class="fallen-row__age">Miles</span></div>
+      <div class="fallen-row"><span class="fallen-row__mark">×</span><span class="fallen-row__num">II</span><span class="fallen-row__name">Numerius Longus</span><span class="fallen-row__age">Tiro</span></div>
+      <div class="fallen-row"><span class="fallen-row__mark">×</span><span class="fallen-row__num">IV</span><span class="fallen-row__name">Cnaeus Dento</span><span class="fallen-row__age">Veteranus</span></div>
+      <div class="carried"><span class="carried__mark">◆</span><span>Hostus Rullus — wounded, carried off</span></div>
+      <div class="carried"><span class="carried__mark">◆</span><span>Lucius Sabinus — wounded, carried off</span></div>
+      <div class="sub-eyebrow">What it costs</div>
+      <div class="prose">Three bunks stand empty. Contubernium II marches at six and holds the line less long. The wounded are out until the medicus clears them.</div>
+      <div class="sub-eyebrow">Burial</div>
+      <div class="prose">Buried by the ford — a watch spent. Morale held one step.</div>
+    </div>
+
+    <!-- ---------- SPOILS ---------- -->
+    <div class="column">
+      <div class="heading">Spoils</div>
+      <div class="tally-row">
+        <div class="tally"><span class="boss boss--sm"><svg class="ico"><use href="#i-wheat"/></svg></span><div><div class="tally__label">Food</div><div class="tally__value">+9<span class="tally__unit">days</span></div></div></div>
+        <div class="tally"><span class="boss boss--sm"><svg class="ico"><use href="#i-coin"/></svg></span><div><div class="tally__label">Coin</div><div class="tally__value">+64</div></div></div>
+        <div class="tally"><span class="boss boss--sm"><svg class="ico"><use href="#i-chain"/></svg></span><div><div class="tally__label">Prisoners</div><div class="tally__value">2</div></div></div>
+      </div>
+      <div class="spoil-row"><span class="boss boss--sm"><svg class="ico"><use href="#i-spear"/></svg></span><span>Frameae</span><span class="spoil-row__count">× 4</span></div>
+      <div class="spoil-row"><span class="boss boss--sm"><svg class="ico"><use href="#i-shield"/></svg></span><span>Round shields</span><span class="spoil-row__count">× 3</span></div>
+      <div class="spoil-row"><span class="boss boss--sm"><svg class="ico"><use href="#i-pelt"/></svg></span><span>Pelts</span><span class="spoil-row__count">× 2</span></div>
+      <div class="spoil-row"><span class="boss boss--sm"><svg class="ico"><use href="#i-chain"/></svg></span><span>Prisoners</span><span class="spoil-row__count">× 2 · eat rations</span></div>
+      <div class="spoil-row spoil-row--prize"><span class="boss boss--sm"><svg class="ico"><use href="#i-banner"/></svg></span><span>Banner of the Cherusci</span><span class="spoil-row__count">trophy</span></div>
+      <div class="sub-eyebrow">Into store</div>
+      <div class="prose">Taken into the wagon. Storage 64 → 75 of 110 loads. Frameae and round shields are barbarian kit: sellable, or issued to men who have lost their own.</div>
+    </div>
+
+    <!-- ---------- EXPERIENCE ---------- -->
+    <div class="column">
+      <div class="heading">Experience</div>
+      <div class="xp"><span class="xp__gain"><span class="boss boss--sm"><svg class="ico"><use href="#i-star"/></svg></span> Centurion +38 experience</span></div>
+      <div class="row between" style="margin-top:7px"><span class="metric-label">Level 3</span><span class="micro text-dim caps" style="font-family:var(--font-head)">TO LEVEL 4</span></div>
+      <div class="bar bar--thick"><div class="bar__fill bar__fill--xp" style="width:58%"></div></div>
+
+      <div class="sub-eyebrow">Promotions</div>
+      <div class="promo"><span class="tier-disc tier-disc--miles"></span><span class="promo__name">Aulus Rufus</span><span class="promo__arrow">›</span><span class="text-dim">Miles (Trained)</span></div>
+      <div class="promo"><span class="tier-disc tier-disc--veteranus"></span><span class="promo__name">Publius Naso</span><span class="promo__arrow">›</span><span class="text-dim">Veteranus (Veteran)</span></div>
+
+      <div class="sub-eyebrow">Offices</div>
+      <div class="beat"><span class="beat__glyph text-bronze">+</span><span><span class="text-bronze">Optio +1</span> <span class="text-dim">— a tradition point waits</span></span></div>
+      <div class="beat"><span class="beat__glyph text-danger">×</span><span class="text-danger">Signifer — an empty office learns nothing</span></div>
+
+      <div class="sub-eyebrow">The men</div>
+      <div class="beat"><span class="beat__glyph text-sienna">◆</span><span class="text-sienna">Contubernium II mutters (mauled)</span></div>
+      <div class="beat"><span class="beat__glyph text-good">◆</span><span class="text-good">I and III stood the line together</span></div>
+      <div class="beat"><span class="beat__glyph text-dim">·</span><span class="text-dim">Hostus Rullus remembers who carried him: Gaius Mallius</span></div>
+    </div>
+  </div>
+
+  <div class="rule" style="margin-top:14px"></div>
+  <div class="stele__foot">
+    <button class="button-primary">Continue the march</button>
+    <span class="foot-hint">OR PRESS <span class="keycap">Enter</span> · THE OVERMAP RESUMES PAUSED</span>
+  </div>
+</div>
+
+<div class="mock-note" style="left:1420px;top:250px">DEFEAT variant: title "THE LINE IS BROKEN" in --oxblood, subtitle "Defeat · the century fled the field · 1 min 55 s". SPOILS becomes LOST (kit dropped, wounded left behind in red). EXPERIENCE still pays out, smaller.</div>
+<div class="mock-note" style="left:1420px;top:370px">WITHDRAWAL variant (the Centurion fell): title "THE OPTIO PULLS THE CENTURY OUT" in --bronze. No spoils. The Optio's tradition earns the fight; the fallen are still listed.</div>
+<div class="mock-note" style="left:1150px;top:470px">No numbers on the level bar. "+38" is shown only because experience is a count the player earns, not a hidden score. Morale changes are always a ladder word.</div>
+<div class="mock-note" style="left:300px;top:480px">Names of the fallen click through to a read-only soldier sheet with a FALLEN band, so the bonds they leave behind are legible.</div>
+
+</div>
+<script>const s=document.getElementById('stage');function f(){const k=Math.min(innerWidth/1920,innerHeight/1080);s.style.transform=`translate(-50%,-50%) scale(${k})`;}addEventListener('resize',f);f();</script>
+</body>
+</html>

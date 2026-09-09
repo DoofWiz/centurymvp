@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>CENTURY — Marble & Iron: Overmap HUD</title>
+<style>
+/* ============ CENTURY · Marble & Iron 02 — OVERMAP HUD (Imperial Marble chrome + Iron & Blood type) ============ */
+:root {
+  --marble-hi:   #e4e1da;
+  --marble:      #d9d6cf;
+  --marble-lo:   #b9b5ab;
+  --marble-deep: #a6a297;
+  --groove:      #8f8b80;
+  --slate:       #3b3a36;
+  --slate-dim:   #6b6960;
+  --slate-faint: #8d8a80;
+  --purple:      #5c2a4d;
+  --purple-soft: rgba(92,42,77,.28);
+  --bronze:      #a8842c;
+  --bronze-deep: #7c6120;
+  --oxblood:     #7e2a20;
+  --laurel:      #6d7a5c;
+  --sienna:      #8c531d;
+  --engrave: 0 1px 0 rgba(255,255,255,.6);
+  --font-head: Impact, "Arial Narrow", "Franklin Gothic Medium", sans-serif;
+  --font-body: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --meander: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='8'><path d='M1 7 V1 H9 V5 H5 V3 H13 V7' fill='none' stroke='%236b6960' stroke-width='1' opacity='.6'/></svg>");
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; background: #12140e; overflow: hidden; }
+body { font-family: var(--font-body); font-size: 13px; color: var(--slate); }
+button { font: inherit; color: inherit; cursor: pointer; }
+#stage { position: absolute; left: 50%; top: 50%; width: 1920px; height: 1080px;
+         transform-origin: center; overflow: hidden; background: #171a12; }
+
+.style-label { position: fixed; left: 10px; top: 8px; z-index: 999; font-family: var(--font-head);
+  font-size: 11px; letter-spacing: 3px; text-transform: uppercase; font-weight: 400; color: #efece5;
+  background: rgba(59,58,54,.78); padding: 4px 10px; border: 1px solid rgba(255,255,255,.25); }
+
+/* ---- the dark overmap world (stand-in for the real 3D scene) ---- */
+.world { position: absolute; inset: 0; z-index: 0;
+  background:
+    radial-gradient(ellipse 60% 45% at 62% 40%, rgba(70,84,44,.55), transparent 70%),
+    radial-gradient(ellipse 40% 35% at 20% 70%, rgba(58,64,38,.5), transparent 70%),
+    radial-gradient(ellipse 35% 30% at 80% 78%, rgba(48,52,34,.55), transparent 70%),
+    linear-gradient(180deg, #23281a 0%, #1c2016 45%, #171a12 100%); }
+.world::after { /* line-of-sight veil: clear hole around the column, dark to the corners */
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(circle 300px at 50% 52%, transparent 62%, rgba(2,2,1,.62) 100%); }
+.map { position: absolute; inset: 0; z-index: 1; }
+
+/* ---- carved type ---- */
+.head { font-family: var(--font-head); font-weight: 400; text-transform: uppercase; }
+.eyebrow { font-family: var(--font-head); font-weight: 400; font-size: 11px; color: var(--slate);
+  letter-spacing: 3px; text-transform: uppercase; text-shadow: var(--engrave);
+  padding-bottom: 5px; background: var(--meander) left bottom repeat-x; display: inline-block; }
+.micro { font-size: 9px; letter-spacing: 1px; text-shadow: var(--engrave); }
+.small { font-size: 11px; }
+.caps { font-family: var(--font-head); font-weight: 400; text-transform: uppercase; letter-spacing: 2px; }
+.body { font-size: 13px; line-height: 1.45; text-shadow: var(--engrave); }
+.text-good { color: var(--laurel); } .text-danger { color: var(--oxblood); }
+.text-bronze { color: var(--bronze-deep); } .text-dim { color: var(--slate-dim); }
+.text-faint { color: var(--slate-faint); } .text-sienna { color: var(--sienna); }
+.text-amber { color: var(--sienna); }
+.row { display: flex; align-items: center; } .between { justify-content: space-between; }
+.rule { height: 1px; background: var(--groove); margin: 8px 0; opacity: .55;
+  box-shadow: 0 1px 0 rgba(255,255,255,.4); }
+
+/* ---- marble slab panels (float over the dark world: stronger shadow) ---- */
+.slab { position: relative;
+  background:
+    repeating-linear-gradient(112deg, transparent 0 18px, rgba(122,116,104,.10) 18px 19px, transparent 19px 47px),
+    repeating-linear-gradient(64deg, transparent 0 30px, rgba(255,255,255,.14) 30px 31px, transparent 31px 66px),
+    linear-gradient(160deg, var(--marble-hi) 0%, var(--marble) 45%, var(--marble-lo) 100%);
+  border-top: 1px solid #efede7; border-left: 1px solid #eae7e0;
+  border-bottom: 2px solid var(--groove); border-right: 1px solid #9c988d;
+  box-shadow: 0 10px 26px rgba(20,18,14,.55); padding: 12px; }
+.slab::before { content: ""; position: absolute; inset: 4px; pointer-events: none;
+  border: 1px solid rgba(59,58,54,.28); box-shadow: inset 0 1px 0 rgba(255,255,255,.45); }
+.slab > * { position: relative; }
+
+/* ---- recessed stone icon bosses ---- */
+.boss { width: 26px; height: 26px; flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center;
+  color: var(--bronze-deep); background: linear-gradient(#c6c2b8, #aeaa9f);
+  border: 1px solid var(--groove); box-shadow: inset 0 1px 2px rgba(40,37,31,.30); }
+.ico { fill: currentColor; flex: 0 0 auto; width: 16px; height: 16px; }
+.ico--sm { width: 14px; height: 14px; }
+
+/* ---- inlaid stone bars ---- */
+.bar { height: 5px; margin-top: 3px; background: linear-gradient(#a29d91, #b4afa3);
+  border: 1px solid var(--groove); border-bottom-color: #d9d6cf;
+  box-shadow: inset 0 1px 2px rgba(40,37,31,.45); overflow: hidden; }
+.bar--thick { height: 8px; }
+.bar__fill { height: 100%; box-shadow: inset 0 1px 0 rgba(255,255,255,.30), inset 0 -1px 0 rgba(0,0,0,.25); }
+.bar__fill--morale { background: linear-gradient(#7c8a6a, #5c684d); }
+
+/* ---- nav architrave ---- */
+.nav-bar { position: absolute; top: 0; left: 0; right: 0; height: 44px; z-index: 8;
+  display: flex; justify-content: center; align-items: center;
+  background:
+    repeating-linear-gradient(112deg, transparent 0 22px, rgba(122,116,104,.10) 22px 23px, transparent 23px 55px),
+    var(--meander) center calc(100% - 3px) repeat-x,
+    linear-gradient(180deg, var(--marble-hi) 0%, var(--marble) 55%, var(--marble-lo) 100%);
+  border-bottom: 2px solid var(--groove); box-shadow: 0 6px 18px rgba(20,18,14,.55); padding-bottom: 6px; }
+.nav-item { margin: 0 22px; font-family: var(--font-head); font-weight: 400; font-size: 14px;
+  color: var(--slate); letter-spacing: 2.5px; text-transform: uppercase; text-shadow: var(--engrave);
+  background: none; border: 0; padding: 0 0 2px; border-bottom: 2px solid transparent; }
+.nav-item--inert { color: var(--slate-faint); }
+.nav-item--live:hover, .nav-item--hover { color: var(--bronze-deep); border-bottom-color: var(--bronze-deep); }
+.nav-item--active { color: var(--purple); border-bottom-color: var(--purple); }
+
+/* ---- time box ---- */
+.time-box { position: absolute; top: 56px; left: 50%; transform: translateX(-50%); z-index: 7;
+  display: flex; align-items: center; gap: 10px; padding: 6px 12px;
+  background: linear-gradient(165deg, var(--marble-hi), var(--marble) 55%, var(--marble-lo));
+  border: 1px solid var(--groove); border-top-color: #efede7; border-bottom-width: 3px;
+  box-shadow: 0 8px 20px rgba(20,18,14,.55); }
+.time-box__clock { font-family: var(--font-head); font-weight: 400; font-size: 19px; color: var(--slate);
+  letter-spacing: 3px; text-transform: uppercase; text-shadow: var(--engrave); }
+.time-box__hour { font-family: var(--font-head); font-weight: 400; font-size: 12px; color: var(--slate-dim);
+  letter-spacing: 2px; text-shadow: var(--engrave); }
+.time-button { width: 28px; height: 24px; display: inline-flex; align-items: center; justify-content: center;
+  background: linear-gradient(170deg, var(--marble-hi), var(--marble-lo)); color: var(--slate-dim);
+  border: 1px solid var(--groove); border-top-color: #efede7; border-bottom-width: 2px; }
+.time-button:hover { border-color: var(--bronze-deep); color: var(--bronze-deep); }
+.time-button--active { color: var(--bronze-deep); border-color: var(--bronze-deep);
+  background: linear-gradient(170deg, #ded4b6, #c2b48b); box-shadow: inset 0 1px 3px rgba(60,45,10,.35); }
+
+/* ---- panels ---- */
+.objective { position: absolute; left: 16px; top: 60px; width: 300px; z-index: 6; }
+.objective__marker { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+.objective__diamond { color: var(--bronze-deep); font-size: 13px; text-shadow: var(--engrave); }
+.objective__text { font-size: 13px; color: var(--slate); text-shadow: var(--engrave); }
+.objective__done { color: var(--slate-faint); text-decoration: line-through; }
+
+.contact { position: absolute; right: 16px; bottom: 524px; width: 200px; z-index: 6; }
+.events { position: absolute; right: 16px; bottom: 150px; width: 360px; max-height: 360px; z-index: 6; overflow: hidden; }
+
+.event { display: flex; align-items: flex-start; gap: 6px; margin-top: 6px; }
+.event__glyph { width: 12px; color: var(--bronze-deep); font-size: 13px; line-height: 1.2; text-align: center; text-shadow: var(--engrave); }
+.event__text { flex: 1; font-size: 11px; color: var(--slate-dim); line-height: 1.35; text-shadow: var(--engrave); }
+.event__time { font-family: var(--font-head); font-weight: 400; font-size: 9px; color: var(--slate-faint);
+  letter-spacing: 1.5px; white-space: nowrap; text-transform: uppercase; text-shadow: var(--engrave); }
+.event--good .event__glyph, .event--good .event__text { color: #55613f; }
+.event--warning .event__glyph { color: var(--sienna); } .event--warning .event__text { color: var(--slate); }
+.event--critical .event__glyph, .event--critical .event__text { color: var(--oxblood); }
+
+/* ---- hover tip: small marble tablet ---- */
+.hover-tip { position: absolute; z-index: 7; pointer-events: none; padding: 6px 10px;
+  background: linear-gradient(165deg, var(--marble-hi), var(--marble-lo));
+  border: 1px solid var(--groove); border-top-color: #efede7; border-bottom-width: 3px;
+  box-shadow: 0 8px 20px rgba(20,18,14,.55); }
+.hover-tip__title { font-family: var(--font-head); font-weight: 400; font-size: 12px; color: var(--slate);
+  letter-spacing: 2px; text-transform: uppercase; text-shadow: var(--engrave); }
+.hover-tip__detail { font-size: 10px; color: var(--slate-dim); letter-spacing: 1px; margin-top: 2px;
+  text-transform: uppercase; text-shadow: var(--engrave); }
+
+/* ---- bottom architrave ---- */
+.bottom-bar { position: absolute; left: 0; right: 0; bottom: 0; height: 110px; z-index: 8;
+  display: flex; align-items: stretch;
+  background:
+    repeating-linear-gradient(112deg, transparent 0 24px, rgba(122,116,104,.10) 24px 25px, transparent 25px 58px),
+    repeating-linear-gradient(64deg, transparent 0 34px, rgba(255,255,255,.12) 34px 35px, transparent 35px 74px),
+    linear-gradient(180deg, var(--marble-hi) 0%, var(--marble) 50%, var(--marble-lo) 100%);
+  border-top: 2px solid #efede7; box-shadow: 0 -8px 24px rgba(20,18,14,.6); }
+.bottom-bar__section { display: flex; flex-direction: column; justify-content: center; padding: 10px 18px;
+  border-left: 1px solid var(--groove); box-shadow: inset 1px 0 0 rgba(255,255,255,.4); }
+.bottom-bar__section--first { border-left: 0; box-shadow: none; }
+.bottom-bar__actions { justify-content: center; gap: 8px; margin-left: auto; flex-direction: column; display: flex; }
+
+.identity { min-width: 250px; }
+.identity__legion { font-family: var(--font-head); font-weight: 400; font-size: 10px; color: var(--bronze-deep);
+  letter-spacing: 3px; text-transform: uppercase; text-shadow: var(--engrave); }
+.identity__name { font-family: var(--font-head); font-weight: 400; font-size: 20px; color: var(--slate);
+  letter-spacing: 3px; text-transform: uppercase; text-shadow: var(--engrave); margin-top: 2px; }
+.portraits { display: flex; gap: 6px; margin-top: 8px; }
+.portrait { width: 30px; height: 30px; position: relative; display: flex; align-items: center; justify-content: center;
+  color: var(--bronze-deep); background: linear-gradient(#c6c2b8, #aeaa9f);
+  border: 1px solid var(--groove); box-shadow: inset 0 1px 2px rgba(40,37,31,.30); }
+.portrait--vacant { border-style: dashed; color: var(--slate-faint); background: linear-gradient(#bdb9ae, #aba79b); }
+.portrait .tier-disc { position: absolute; right: -4px; bottom: -4px; width: 8px; height: 8px; border-radius: 50%;
+  border: 1px solid #efede7; box-shadow: 0 1px 2px rgba(40,37,31,.4); }
+.tier-disc--officer  { background: var(--purple); }
+.tier-disc--evocatus { background: var(--bronze); }
+.tier-disc--veteranus{ background: var(--sienna); }
+.tier-disc--miles    { background: var(--slate-dim); }
+.tier-disc--vacant   { background: transparent; border-color: var(--oxblood); border-style: dashed; }
+
+.resource-strip { display: flex; align-items: center; gap: 22px; }
+.resource { display: flex; align-items: center; gap: 8px; min-width: 62px; }
+.resource__label { font-size: 9px; color: var(--slate-dim); letter-spacing: 1px; text-transform: uppercase; text-shadow: var(--engrave); }
+.resource__value { font-family: var(--font-head); font-weight: 400; font-size: 15px; color: var(--slate);
+  letter-spacing: 1.5px; text-transform: uppercase; margin-top: 1px; text-shadow: var(--engrave); }
+.resource__value--low { color: var(--sienna); }
+.morale-row { display: flex; justify-content: space-between; align-items: baseline; margin-top: 10px; }
+.metric-label { font-size: 10px; color: var(--slate-dim); letter-spacing: 1px; text-transform: uppercase; text-shadow: var(--engrave); }
+
+.metric-cols { display: grid; grid-template-columns: auto auto; column-gap: 28px; row-gap: 6px; }
+.metric-col { display: flex; flex-direction: column; }
+.metric-col .metric-label { margin-top: 0; }
+.metric-val { font-family: var(--font-head); font-weight: 400; font-size: 15px; color: var(--slate);
+  letter-spacing: 1.5px; text-transform: uppercase; text-shadow: var(--engrave); }
+
+/* ---- pills: carved marble tablets ---- */
+.pill { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-width: 118px;
+  padding: 6px 14px; font-family: var(--font-head); font-weight: 400; font-size: 12px; color: var(--slate);
+  letter-spacing: 2.5px; text-transform: uppercase; text-shadow: var(--engrave);
+  background: linear-gradient(165deg, var(--marble-hi), var(--marble) 55%, var(--marble-lo));
+  border: 1px solid var(--groove); border-top-color: #efede7; border-bottom-width: 3px;
+  transition: border-color .12s; }
+.pill .ico { color: var(--bronze-deep); }
+.pill:hover { border-color: var(--bronze-deep); border-top-color: #cfa94c; color: var(--bronze-deep); }
+.pill:active { border-color: var(--purple); border-bottom-width: 1px; transform: translateY(2px);
+  box-shadow: inset 0 2px 6px rgba(40,30,38,.45); color: var(--purple); }
+.pill--pulse { animation: pillPulse 1.4s ease-in-out infinite; }
+@keyframes pillPulse { 0%,100% { border-color: var(--groove); border-top-color: #efede7; }
+                       50% { border-color: var(--bronze-deep); border-top-color: #cfa94c; } }
+
+/* ---- map lettering (carved condensed caps, light on the dark world) ---- */
+.m-name { font-family: var(--font-head); font-size: 14px; letter-spacing: 2px; fill: var(--slate); text-transform: uppercase; }
+.m-kind { font-family: var(--font-head); font-size: 9px; letter-spacing: 2px; fill: var(--slate-dim); text-transform: uppercase; }
+.m-kind--bronze { fill: var(--bronze-deep); }
+.marker-ring { fill: none; stroke: var(--bronze); stroke-width: 2; }
+.marker-ring--red { stroke: var(--oxblood); }
+.pulse { transform-origin: center; transform-box: fill-box; animation: ringPulse 1.6s ease-out infinite; }
+@keyframes ringPulse { 0% { transform: scale(.6); opacity: .9; } 100% { transform: scale(1.4); opacity: 0; } }
+
+.mock-note { display: none; }
+</style>
+</head>
+<body>
+<div class="style-label">Marble &amp; Iron · 02 Overmap</div>
+<div id="stage">
+
+<!-- ===== icon glyphs: solid blocky silhouettes, 24×24 ===== -->
+<svg style="display:none" xmlns="http://www.w3.org/2000/svg">
+  <symbol id="i-pause" viewBox="0 0 16 16"><rect x="3" y="2" width="4" height="12"/><rect x="9" y="2" width="4" height="12"/></symbol>
+  <symbol id="i-play" viewBox="0 0 16 16"><path d="M4 2 L13 8 L4 14 Z"/></symbol>
+  <symbol id="i-fast" viewBox="0 0 16 16"><path d="M1 2 L8 8 L1 14 Z"/><path d="M8 2 L15 8 L8 14 Z"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><rect x="11" y="1" width="2" height="4"/><rect x="11" y="19" width="2" height="4"/><rect x="1" y="11" width="4" height="2"/><rect x="19" y="11" width="4" height="2"/><rect x="4" y="4" width="3" height="2" transform="rotate(45 5.5 5)"/><rect x="17" y="4" width="3" height="2" transform="rotate(-45 18.5 5)"/><rect x="4" y="18" width="3" height="2" transform="rotate(-45 5.5 19)"/><rect x="17" y="18" width="3" height="2" transform="rotate(45 18.5 19)"/></symbol>
+  <symbol id="i-helmet" viewBox="0 0 24 24"><path d="M12 3c-4 0-7 3-7 7v6h3v-6h8v6h3v-6c0-4-3-7-7-7z"/><path d="M8 2c2 -1.6 6 -1.6 8 0l-1 2c-1.6-1.2-4.4-1.2-6 0z"/><rect x="10.5" y="16" width="3" height="5"/></symbol>
+  <symbol id="i-crest" viewBox="0 0 24 24"><path d="M12 2l2.5 5 5.5.8-4 3.9.9 5.5L12 14.6 7.1 17.2 8 11.7 4 7.8 9.5 7z"/></symbol>
+  <symbol id="i-scroll" viewBox="0 0 24 24"><path d="M5 4h12v3h3v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2zM8 8h8v2H8zm0 4h8v2H8z"/></symbol>
+  <symbol id="i-cross" viewBox="0 0 24 24"><path d="M10 3h4v7h7v4h-7v7h-4v-7H3v-4h7z"/></symbol>
+  <symbol id="i-banner" viewBox="0 0 24 24"><path d="M11 2h2v20h-2z"/><path d="M13 3h8l-3 4 3 4h-8z"/><circle cx="12" cy="2.5" r="2"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 5c-6 0-10 7-10 7s4 7 10 7 10-7 10-7-4-7-10-7zm0 10.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z"/></symbol>
+  <symbol id="i-stealth" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 5c-6 0-10 7-10 7s4 7 10 7 10-7 10-7-4-7-10-7zm0 10.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z"/><rect x="1" y="11" width="22" height="2.4" transform="rotate(-22 12 12)"/></symbol>
+  <symbol id="i-wheat" viewBox="0 0 24 24"><rect x="11" y="4" width="2" height="18"/><path d="M12 2l3 4h-6z"/><path d="M11 8 C7 8 5 6 5 6 s1 5 6 5z"/><path d="M13 8 C17 8 19 6 19 6 s-1 5-6 5z"/><path d="M11 13 C7 13 5 11 5 11 s1 5 6 5z"/><path d="M13 13 C17 13 19 11 19 11 s-1 5-6 5z"/></symbol>
+  <symbol id="i-fire" viewBox="0 0 24 24"><path d="M12 2c1 4-4 6-4 11a4 4 0 0 0 8 0c0-2-1-3-1-5 3 2 4 4 4 6a7 7 0 0 1-14 0c0-6 6-8 7-12z"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 2l8 3v6c0 5-3.4 9.3-8 11-4.6-1.7-8-6-8-11V5z"/></symbol>
+  <symbol id="i-bandage" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M4 6h16v14H4zm7 3v3H8v2h3v3h2v-3h3v-2h-3V9z"/><rect x="8" y="2" width="8" height="3"/></symbol>
+  <symbol id="i-coin" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 3a7 7 0 1 1 0 14 7 7 0 0 1 0-14z"/><circle cx="12" cy="12" r="3.4"/></symbol>
+  <symbol id="i-denarii" viewBox="0 0 24 24"><rect x="4" y="16" width="16" height="4"/><rect x="6" y="10" width="16" height="4"/><rect x="3" y="4" width="16" height="4"/></symbol>
+  <symbol id="i-tent" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 3L1 21h22zm0 10l4 8H8z"/></symbol>
+  <symbol id="i-diamond" viewBox="0 0 24 24"><path d="M12 2l10 10-10 10L2 12z"/></symbol>
+  <symbol id="i-boot" viewBox="0 0 24 24"><path d="M7 3h6v9l6 4v5H7z"/></symbol>
+</svg>
+
+<!-- ===== the dark world behind the HUD ===== -->
+<div class="world"></div>
+
+<!-- ===== the overmap: terrain + marble-tablet markers ===== -->
+<svg class="map" viewBox="0 0 1920 1080" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="tab" x1="0" y1="0" x2=".55" y2="1">
+      <stop offset="0" stop-color="#e4e1da"/><stop offset=".45" stop-color="#d9d6cf"/><stop offset="1" stop-color="#b9b5ab"/>
+    </linearGradient>
+    <linearGradient id="tabdim" x1="0" y1="0" x2=".55" y2="1">
+      <stop offset="0" stop-color="#c7c4bc"/><stop offset="1" stop-color="#a5a196"/>
+    </linearGradient>
+    <radialGradient id="beam" cx="50%" cy="100%" r="100%"><stop offset="0" stop-color="rgb(168,132,44)" stop-opacity=".32"/><stop offset="1" stop-color="rgb(168,132,44)" stop-opacity="0"/></radialGradient>
+    <radialGradient id="beamdim" cx="50%" cy="100%" r="100%"><stop offset="0" stop-color="rgb(200,196,184)" stop-opacity=".15"/><stop offset="1" stop-color="rgb(200,196,184)" stop-opacity="0"/></radialGradient>
+  </defs>
+
+  <!-- forests -->
+  <g fill="rgb(26,38,22)" opacity=".85">
+    <ellipse cx="300" cy="260" rx="260" ry="150"/><ellipse cx="1650" cy="220" rx="300" ry="170"/><ellipse cx="1500" cy="900" rx="330" ry="150"/>
+    <ellipse cx="520" cy="880" rx="240" ry="120"/><ellipse cx="1120" cy="180" rx="180" ry="90"/>
+  </g>
+  <!-- hills -->
+  <g fill="rgb(78,84,52)" opacity=".35"><ellipse cx="760" cy="420" rx="140" ry="80"/><ellipse cx="1350" cy="640" rx="160" ry="90"/></g>
+  <!-- river -->
+  <path d="M1180 -20 C 1120 200, 1300 360, 1220 520 S 1080 820, 1180 1100" fill="none" stroke="rgb(56,72,84)" stroke-width="26" stroke-linecap="round" opacity=".95"/>
+  <path d="M1180 -20 C 1120 200, 1300 360, 1220 520 S 1080 820, 1180 1100" fill="none" stroke="rgb(86,108,122)" stroke-width="6" opacity=".5"/>
+  <!-- track -->
+  <path d="M120 720 C 400 640, 700 700, 960 560 S 1400 380, 1800 440" fill="none" stroke="rgb(96,84,60)" stroke-width="4" stroke-dasharray="14 10" opacity=".55"/>
+
+  <!-- POI: shrine (discovered, in sight) — marble tablet, bronze inlay -->
+  <g transform="translate(700,470)">
+    <rect x="-16" y="-76" width="32" height="76" fill="url(#beam)"/>
+    <ellipse rx="26" ry="10" fill="none" stroke="#a8842c" stroke-width="1.5"/>
+    <path d="M0 -68 l9 9 -9 9 -9 -9z" fill="#a8842c" stroke="#6e5518" stroke-width=".6"/>
+    <rect x="-77" y="-125" width="154" height="46" fill="rgba(20,18,14,.45)" transform="translate(0,4)"/>
+    <rect x="-77" y="-125" width="154" height="46" fill="url(#tab)" stroke="#8f8b80"/>
+    <rect x="-73" y="-121" width="146" height="38" fill="none" stroke="rgba(59,58,54,.28)"/>
+    <text y="-110" text-anchor="middle" class="m-kind">SHRINE</text>
+    <text y="-90" text-anchor="middle" class="m-name">Wayside Shrine</text>
+  </g>
+
+  <!-- POI: opportunity (always visible) — bronze-bound tablet -->
+  <g transform="translate(1560,560)">
+    <rect x="-16" y="-76" width="32" height="76" fill="url(#beam)"/>
+    <ellipse rx="26" ry="10" fill="none" stroke="#a8842c" stroke-width="2"/>
+    <path d="M0 -68 l9 9 -9 9 -9 -9z" fill="#a8842c" stroke="#6e5518" stroke-width=".6"/>
+    <rect x="-100" y="-125" width="200" height="46" fill="rgba(20,18,14,.45)" transform="translate(0,4)"/>
+    <rect x="-100" y="-125" width="200" height="46" fill="url(#tab)" stroke="#7c6120" stroke-width="1.5"/>
+    <rect x="-96" y="-121" width="192" height="38" fill="none" stroke="rgba(124,97,32,.35)"/>
+    <text y="-110" text-anchor="middle" class="m-kind m-kind--bronze">◆ OPPORTUNITY</text>
+    <text y="-90" text-anchor="middle" class="m-name">Chieftain's Steading</text>
+  </g>
+
+  <!-- POI: remembered, out of sight — weathered grey tablet -->
+  <g transform="translate(330,640)" opacity=".4">
+    <rect x="-16" y="-76" width="32" height="76" fill="url(#beamdim)"/>
+    <ellipse rx="26" ry="10" fill="none" stroke="rgb(150,144,130)" stroke-width="1.5"/>
+    <rect x="-88" y="-125" width="176" height="46" fill="url(#tabdim)" stroke="#8f8b80"/>
+    <text y="-110" text-anchor="middle" class="m-kind">WATCHTOWER</text>
+    <text y="-90" text-anchor="middle" class="m-name">Burnt Watchtower</text>
+  </g>
+
+  <!-- move marker (bronze destination ring) -->
+  <g transform="translate(1100,470)">
+    <ellipse rx="22" ry="9" class="marker-ring pulse"/>
+    <ellipse rx="10" ry="4" class="marker-ring"/>
+  </g>
+  <!-- the column: bronze inlay -->
+  <g transform="translate(960,560)">
+    <ellipse rx="34" ry="14" fill="rgba(168,132,44,.14)" stroke="#a8842c" stroke-width="1.5"/>
+    <g fill="#a8842c" stroke="#6e5518" stroke-width=".5">
+      <rect x="-22" y="-6" width="6" height="6"/><rect x="-13" y="-6" width="6" height="6"/><rect x="-4" y="-6" width="6" height="6"/><rect x="5" y="-6" width="6" height="6"/><rect x="14" y="-6" width="6" height="6"/>
+      <rect x="-18" y="2" width="6" height="6"/><rect x="-9" y="2" width="6" height="6"/><rect x="0" y="2" width="6" height="6"/><rect x="9" y="2" width="6" height="6"/>
+    </g>
+    <path d="M0 -30 l6 -8 -6 -6 -6 6z" fill="#a8842c" stroke="#6e5518" stroke-width=".6"/>
+  </g>
+  <!-- hostile warband in sight, pursuing: oxblood inlay -->
+  <g transform="translate(1236,406)">
+    <ellipse rx="30" ry="12" class="marker-ring marker-ring--red pulse"/>
+    <ellipse rx="22" ry="9" fill="rgba(126,42,32,.14)" stroke="#7e2a20" stroke-width="1.5"/>
+    <g fill="#7e2a20" stroke="#5a1d15" stroke-width=".5"><rect x="-14" y="-5" width="5" height="5"/><rect x="-6" y="-5" width="5" height="5"/><rect x="2" y="-5" width="5" height="5"/><rect x="10" y="-5" width="5" height="5"/><rect x="-10" y="2" width="5" height="5"/><rect x="-2" y="2" width="5" height="5"/><rect x="6" y="2" width="5" height="5"/></g>
+  </g>
+  <!-- distant warband, fading at the edge of sight -->
+  <g transform="translate(560,300)" opacity=".28">
+    <ellipse rx="22" ry="9" fill="none" stroke="#7e2a20" stroke-width="1.5"/>
+    <g fill="#7e2a20"><rect x="-10" y="-4" width="5" height="5"/><rect x="-2" y="-4" width="5" height="5"/><rect x="6" y="-4" width="5" height="5"/></g>
+  </g>
+</svg>
+
+<!-- ===== HUD ===== -->
+<div class="nav-bar">
+  <button class="nav-item nav-item--live nav-item--hover">Inventory</button>
+  <button class="nav-item nav-item--live">Army</button>
+  <button class="nav-item nav-item--live">Commander</button>
+  <button class="nav-item nav-item--live">Save</button>
+  <button class="nav-item nav-item--live">Title</button>
+  <span class="nav-item nav-item--inert">Journal</span>
+  <span class="nav-item nav-item--inert">Encyclopedia</span>
+</div>
+
+<div class="time-box">
+  <span class="boss"><svg class="ico" viewBox="0 0 24 24"><use href="#i-sun"/></svg></span>
+  <span class="time-box__clock">Day 4 · 2nd Watch</span>
+  <span class="time-box__hour">14:20</span>
+  <span class="time-button"><svg class="ico ico--sm" viewBox="0 0 16 16"><use href="#i-pause"/></svg></span>
+  <span class="time-button time-button--active"><svg class="ico ico--sm" viewBox="0 0 16 16"><use href="#i-play"/></svg></span>
+  <span class="time-button"><svg class="ico ico--sm" viewBox="0 0 16 16"><use href="#i-fast"/></svg></span>
+</div>
+
+<div class="objective slab">
+  <div class="eyebrow">Objective</div>
+  <div class="body" style="margin-top:4px">Make your way out of Germania and return to Italia.</div>
+  <div class="objective__marker"><span class="objective__diamond">◆</span><span class="objective__text">Reach the Rhine crossing</span></div>
+  <div class="objective__marker"><span class="objective__diamond" style="color:var(--slate-faint)">◆</span><span class="objective__text objective__done">Find a safe place and camp</span></div>
+</div>
+
+<div class="contact slab">
+  <div class="eyebrow" style="color:var(--oxblood)">Contact</div>
+  <div class="row between" style="margin-top:4px"><span class="body">Wolf Brothers</span><span class="text-danger caps" style="font-size:11px">Pursuing</span></div>
+</div>
+
+<div class="hover-tip" style="left:1262px; top:352px">
+  <div class="hover-tip__title">Wolf Brothers</div>
+  <div class="hover-tip__detail">Raiders · 12 men · <span class="text-danger">Hostile</span></div>
+</div>
+
+<div class="events slab">
+  <div class="row between"><span class="eyebrow">Events</span><span class="micro text-faint">Day 4</span></div>
+  <div class="rule"></div>
+  <div class="event event--critical"><span class="event__glyph">!</span><span class="event__text">Sighted: Wolf Brothers. They turn toward the column.</span><span class="event__time">14:12</span></div>
+  <div class="event event--warning"><span class="event__glyph">◆</span><span class="event__text">The scout marks a chieftain's steading to the east.</span><span class="event__time">Dawn</span></div>
+  <div class="event event--good"><span class="event__glyph">+</span><span class="event__text">Aulus Rufus reaches Miles (Trained) after the ford.</span><span class="event__time">Dawn</span></div>
+  <div class="event"><span class="event__glyph">·</span><span class="event__text">The column rests through the night. Firewood burned: 3.</span><span class="event__time">Day 3</span></div>
+  <div class="event"><span class="event__glyph">·</span><span class="event__text">Discovered: Wayside Shrine.</span><span class="event__time">Day 3</span></div>
+  <div class="event event--warning"><span class="event__glyph">◆</span><span class="event__text">Food for six days. Rations will thin after that.</span><span class="event__time">Day 3</span></div>
+</div>
+
+<div class="bottom-bar">
+  <div class="bottom-bar__section bottom-bar__section--first identity">
+    <div class="identity__legion">LEG · XVII</div>
+    <div class="identity__name">Centuria Valeria</div>
+    <div class="portraits">
+      <div class="portrait" title="Centurion"><svg class="ico" viewBox="0 0 24 24"><use href="#i-helmet"/></svg><span class="tier-disc tier-disc--officer"></span></div>
+      <div class="portrait" title="Optio"><svg class="ico" viewBox="0 0 24 24"><use href="#i-crest"/></svg><span class="tier-disc tier-disc--evocatus"></span></div>
+      <div class="portrait" title="Tesserarius"><svg class="ico" viewBox="0 0 24 24"><use href="#i-scroll"/></svg><span class="tier-disc tier-disc--veteranus"></span></div>
+      <div class="portrait" title="Medicus"><svg class="ico" viewBox="0 0 24 24"><use href="#i-cross"/></svg><span class="tier-disc tier-disc--miles"></span></div>
+      <div class="portrait portrait--vacant" title="Signifer — vacant"><svg class="ico" viewBox="0 0 24 24"><use href="#i-banner"/></svg><span class="tier-disc tier-disc--vacant"></span></div>
+      <div class="portrait" title="Speculator"><svg class="ico" viewBox="0 0 24 24"><use href="#i-eye"/></svg><span class="tier-disc tier-disc--veteranus"></span></div>
+    </div>
+  </div>
+
+  <div class="bottom-bar__section" style="flex:1">
+    <div class="resource-strip">
+      <div class="resource"><span class="boss"><svg class="ico" viewBox="0 0 24 24"><use href="#i-helmet"/></svg></span><div><div class="resource__label">Men</div><div class="resource__value">41</div></div></div>
+      <div class="resource"><span class="boss"><svg class="ico" viewBox="0 0 24 24"><use href="#i-wheat"/></svg></span><div><div class="resource__label">Food</div><div class="resource__value resource__value--low">6 days</div></div></div>
+      <div class="resource"><span class="boss"><svg class="ico" viewBox="0 0 24 24"><use href="#i-fire"/></svg></span><div><div class="resource__label">Firewood</div><div class="resource__value">14</div></div></div>
+      <div class="resource"><span class="boss"><svg class="ico" viewBox="0 0 24 24"><use href="#i-shield"/></svg></span><div><div class="resource__label">Equipment</div><div class="resource__value">Serviceable</div></div></div>
+      <div class="resource"><span class="boss"><svg class="ico" viewBox="0 0 24 24"><use href="#i-bandage"/></svg></span><div><div class="resource__label">Medicine</div><div class="resource__value">3 doses</div></div></div>
+      <div class="resource"><span class="boss"><svg class="ico" viewBox="0 0 24 24"><use href="#i-coin"/></svg></span><div><div class="resource__label">Coin</div><div class="resource__value">212</div></div></div>
+      <div class="resource"><span class="boss"><svg class="ico" viewBox="0 0 24 24"><use href="#i-denarii"/></svg></span><div><div class="resource__label">Denarii</div><div class="resource__value">38</div></div></div>
+    </div>
+    <div class="morale-row"><span class="metric-label">Morale</span><span class="text-good caps" style="font-size:11px">Confident</span></div>
+    <div class="bar bar--thick"><div class="bar__fill bar__fill--morale" style="width:62%"></div></div>
+  </div>
+
+  <div class="bottom-bar__section">
+    <div class="metric-cols">
+      <div class="metric-col"><span class="metric-label">Pace</span><span class="metric-val">Normal</span></div>
+      <div class="metric-col"><span class="metric-label">Orders</span><span class="metric-val text-dim">Marching</span></div>
+      <div class="metric-col"><span class="metric-label">Wounded</span><span class="metric-val text-amber">5</span></div>
+      <div class="metric-col"><span class="metric-label">Veterans</span><span class="metric-val">9</span></div>
+    </div>
+  </div>
+
+  <div class="bottom-bar__section bottom-bar__actions">
+    <button class="pill pill--pulse"><svg class="ico ico--sm" viewBox="0 0 24 24"><use href="#i-tent"/></svg>Camp</button>
+    <button class="pill"><svg class="ico ico--sm" viewBox="0 0 24 24"><use href="#i-stealth"/></svg>Stealth</button>
+  </div>
+</div>
+
+<div class="mock-note" style="left:1290px;top:300px">Hover tip only appears when the party's visibility is above 0.85. Between 0.05 and 0.85 it reads "A WARBAND ON THE MOVE".</div>
+<div class="mock-note" style="left:1760px;top:940px">CAMP pulses during the walkthrough beat only.</div>
+
+</div>
+<script>const s=document.getElementById('stage');function f(){const k=Math.min(innerWidth/1920,innerHeight/1080);s.style.transform=`translate(-50%,-50%) scale(${k})`;}addEventListener('resize',f);f();</script>
+</body>
+</html>
