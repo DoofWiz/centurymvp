@@ -153,6 +153,9 @@ namespace Century.App
             RainEffect.Create(stage, _cameraRig != null ? _cameraRig : stage, sunDimming: 0.8f);
             RenderSettings.fogStartDistance = 26f;
             RenderSettings.fogEndDistance = 120f;
+
+            // On the web, Polytope's shaders fail pink: the same sweep the battle scene runs.
+            WebGlShaderFallback.Sweep();
         }
 
         /// <summary>A gently rolling runtime terrain, dressed in the overmap's mossy earth so the
@@ -193,10 +196,26 @@ namespace Century.App
             _ground = terrainGo.GetComponent<Terrain>();
 
             // A terrain made at runtime carries no material: give it the render pipeline's own,
-            // or it draws in the built-in fallback, which is pink under URP.
-            UnityEngine.Rendering.RenderPipelineAsset pipeline = UnityEngine.Rendering.GraphicsSettings.currentRenderPipeline;
-            if (_ground != null && pipeline != null && pipeline.defaultTerrainMaterial != null)
-                _ground.materialTemplate = pipeline.defaultTerrainMaterial;
+            // or it draws in the built-in fallback, which is pink under URP. The pipeline's
+            // defaultTerrainMaterial is an EDITOR-ONLY convenience — in a player build it returns
+            // null, which is exactly how the whole clearing shipped magenta on the web. In builds,
+            // make the material from the terrain shader by name instead: the overmap and battle
+            // scenes' own saved terrains guarantee that shader into every build.
+            if (_ground != null)
+            {
+                UnityEngine.Rendering.RenderPipelineAsset pipeline =
+                    UnityEngine.Rendering.GraphicsSettings.currentRenderPipeline;
+
+                if (pipeline != null && pipeline.defaultTerrainMaterial != null)
+                {
+                    _ground.materialTemplate = pipeline.defaultTerrainMaterial;
+                }
+                else
+                {
+                    Shader terrainLit = Shader.Find("Universal Render Pipeline/Terrain/Lit");
+                    if (terrainLit != null) _ground.materialTemplate = new Material(terrainLit);
+                }
+            }
 
             // The same mossy Germania the overmap wears, a shade lighter for a screen that is a picture.
             TerrainDressing.Apply(
