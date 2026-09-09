@@ -1379,11 +1379,11 @@ namespace Century.Campaign.View
         {
             switch (fillClass)
             {
-                case "bar__fill--morale": return new Color(0.52f, 0.63f, 0.35f); // --olive
-                case "bar__fill--stamina": return new Color(0.75f, 0.57f, 0.29f); // --brass
+                case "bar__fill--morale": return new Color(0.427f, 0.478f, 0.235f); // --olive
+                case "bar__fill--stamina": return new Color(0.604f, 0.482f, 0.227f); // --brass
                 case "bar__fill--danger":
-                case "bar__fill--health": return new Color(0.77f, 0.27f, 0.23f); // --blood
-                default: return new Color(0.79f, 0.64f, 0.15f); // --gold
+                case "bar__fill--health": return new Color(0.557f, 0.184f, 0.133f); // --blood
+                default: return new Color(0.541f, 0.416f, 0.165f); // --gold (bronze ink)
             }
         }
 

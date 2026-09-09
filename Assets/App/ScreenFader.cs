@@ -38,7 +38,7 @@ namespace Century.App
             imageGo.transform.SetParent(canvasGo.transform, false);
 
             _veil = imageGo.AddComponent<Image>();
-            _veil.color = new Color(0f, 0f, 0f, 0f);
+            _veil.color = new Color(0.09f, 0.071f, 0.043f, 0f);
             _veil.raycastTarget = false;
 
             RectTransform rect = _veil.rectTransform;
@@ -52,7 +52,7 @@ namespace Century.App
         public void SnapToBlack()
         {
             if (_fade != null) StopCoroutine(_fade);
-            if (_veil != null) _veil.color = Color.black;
+            if (_veil != null) _veil.color = new Color(0.09f, 0.071f, 0.043f, 1f);
         }
 
         /// <summary>Ease the new scene in.</summary>
@@ -69,11 +69,11 @@ namespace Century.App
             while (t < FadeInSeconds)
             {
                 t += Time.unscaledDeltaTime;
-                _veil.color = new Color(0f, 0f, 0f, Mathf.Lerp(1f, 0f, t / FadeInSeconds));
+                _veil.color = new Color(0.09f, 0.071f, 0.043f, Mathf.Lerp(1f, 0f, t / FadeInSeconds));
                 yield return null;
             }
 
-            _veil.color = new Color(0f, 0f, 0f, 0f);
+            _veil.color = new Color(0.09f, 0.071f, 0.043f, 0f);
             _fade = null;
         }
     }

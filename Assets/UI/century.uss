@@ -4,32 +4,45 @@
  * Every colour, spacing and type decision lives here as a variable. Panels reference the variables
  * rather than literal values, so the whole game's look can be retuned from this block.
  *
- * Aesthetic target: bronze and parchment on near-black. Thin gold rules, generous letter spacing on
- * headers, translucent panels that let the map read through. Nothing pure white and nothing pure
- * black — the mock-ups are entirely built from warm desaturated tones.
+ * Aesthetic target: PARCHMENT & WAX — a campaign ledger. Aged-parchment panels, iron-gall ink
+ * text, umber/bronze edges, wax-seal red for danger and emphasis. Nothing pure white and nothing
+ * pure black. The canonical reference is Docs/Mockups (HUD-Styles/01-parchment-wax.html).
+ *
+ * LEGACY NAMES, INVERTED VALUES: the --ink* variables are now the light parchment SURFACES and
+ * the --parchment* variables are now the dark INK text colours, so every existing selector keeps
+ * working. Anything that floats over the 3D world with no panel behind it (title menu, floaters,
+ * the deployment tacmap) is pinned to light literals instead — the world itself is still dark.
  *
  * NOTE: USS has no text-transform. Uppercase text is written literally in the UXML.
  */
 
 :root {
     /* --- Palette ------------------------------------------------------------------------ */
-    --ink:              rgba(8, 8, 7, 0.86);      /* panel fill */
-    --ink-solid:        rgb(12, 11, 10);
-    --ink-deep:         rgba(4, 4, 3, 0.92);      /* bars, wells */
+    --ink:              rgba(226, 214, 182, 0.93); /* panel parchment */
+    --ink-solid:        rgb(236, 226, 201);        /* modal / sheet parchment */
+    --ink-deep:         rgba(211, 196, 156, 0.95); /* recessed parchment */
 
-    --gold:             rgb(201, 162, 39);
-    --gold-bright:      rgb(224, 192, 104);
-    --gold-dim:         rgba(201, 162, 39, 0.34);
-    --gold-faint:       rgba(201, 162, 39, 0.14);
+    --gold:             rgb(138, 106, 42);         /* bronze ink: headings, icons, accents */
+    --gold-bright:      rgb(110, 82, 21);          /* emphasis bronze (darker = stronger on parchment) */
+    --gold-dim:         rgba(138, 113, 71, 0.9);   /* panel edge */
+    --gold-faint:       rgba(74, 54, 32, 0.3);     /* faint ink hairline */
 
-    --parchment:        rgb(216, 210, 196);       /* primary text */
-    --parchment-dim:    rgb(150, 144, 130);       /* secondary text */
-    --parchment-faint:  rgb(104, 99, 89);         /* disabled / tertiary */
+    --parchment:        rgb(58, 44, 26);           /* primary text: body ink */
+    --parchment-dim:    rgb(107, 82, 48);          /* secondary ink */
+    --parchment-faint:  rgb(133, 112, 78);         /* disabled / faded ink */
 
-    --blood:            rgb(196, 70, 58);         /* danger, health */
-    --blood-dim:        rgba(196, 70, 58, 0.5);
-    --olive:            rgb(133, 160, 90);        /* good, morale */
-    --brass:            rgb(190, 145, 74);        /* stamina */
+    --blood:            rgb(142, 47, 34);          /* wax red — danger, health */
+    --blood-dim:        rgba(142, 47, 34, 0.45);
+    --olive:            rgb(109, 122, 60);         /* good, morale */
+    --brass:            rgb(154, 123, 58);         /* stamina, bronze accents */
+
+    /* Parchment-native extras (new; referenced by the newer rules below). */
+    --umber:            rgb(74, 54, 32);           /* heading umber */
+    --amber:            rgb(176, 132, 48);         /* wounded / low stock */
+    --paper-raise:      rgba(250, 244, 226, 0.35); /* light inset wells and rows */
+    --paper-lift:       rgba(255, 250, 232, 0.7);  /* hovered / selected raise */
+    --ink-wash:         rgba(74, 54, 32, 0.16);    /* recessed wash (bar troughs) */
+    --ink-line:         rgba(74, 54, 32, 0.45);    /* trough / chip borders */
 
     /* --- Type ---------------------------------------------------------------------------
      * Drop a serif TTF into the project, make a Font Asset, and point --font at it to shift
@@ -174,9 +187,9 @@
 
 .bar {
     height: 4px;
-    background-color: var(--ink-deep);
+    background-color: var(--ink-wash);
     border-width: 1px;
-    border-color: rgba(0, 0, 0, 0.6);
+    border-color: var(--ink-line);
     margin-top: 2px;
     overflow: hidden;
 }
@@ -329,7 +342,7 @@
 .card__portrait {
     width: 34px;
     height: 40px;
-    background-color: rgba(46, 42, 36, 0.9);
+    background-color: var(--paper-raise);
     border-width: var(--rule);
     border-color: var(--gold-faint);
     align-items: center;
@@ -421,7 +434,7 @@
 .chip--pending {
     color: var(--parchment-dim);
     border-color: var(--parchment-faint);
-    background-color: rgba(0, 0, 0, 0.3);
+    background-color: var(--paper-raise);
 }
 
 /* =======================================================================================
@@ -454,25 +467,25 @@
 
 .command:hover {
     border-color: var(--gold-bright);
-    background-color: rgba(30, 26, 20, 0.92);
+    background-color: rgba(240, 231, 207, 0.95);
 }
 
 .command--active {
-    border-color: var(--gold-bright);
-    background-color: rgba(50, 42, 26, 0.94);
+    border-color: var(--umber);
+    background-color: rgba(255, 250, 232, 0.96);
 }
 
 /* Brief pulse when the order goes out, keyboard or click alike. Added and removed in code;
    the .command transition eases it back out. */
 .command--flash {
-    border-color: var(--gold-bright);
-    background-color: rgba(94, 76, 38, 0.96);
+    border-color: var(--umber);
+    background-color: rgba(238, 224, 187, 0.98);
 }
 
 /* The summon button stands apart from the ordinary orders: gold-edged, one use, and gone. */
 .command--summon {
-    border-color: var(--gold);
-    background-color: rgba(60, 48, 22, 0.94);
+    border-color: var(--brass);
+    background-color: rgba(228, 208, 150, 0.95);
 }
 
 /* The formation picker: a second rank of command buttons that appears above the order bar
@@ -654,20 +667,20 @@
 }
 
 .inv-tile:hover {
-    border-color: var(--gold-bright);
-    background-color: rgba(30, 26, 20, 0.95);
+    border-color: var(--brass);
+    background-color: rgba(240, 231, 207, 0.95);
 }
 
 .inv-tile--selected {
-    border-color: var(--gold-bright);
-    background-color: rgba(50, 42, 26, 0.95);
+    border-color: var(--brass);
+    background-color: rgba(255, 250, 232, 0.96);
 }
 
 .inv-tile--ledger { border-color: var(--gold-dim); }
 
 .inv-tile--empty {
-    background-color: rgba(4, 4, 3, 0.6);
-    border-color: rgba(201, 162, 39, 0.10);
+    background-color: rgba(74, 54, 32, 0.08);
+    border-color: rgba(74, 54, 32, 0.18);
 }
 
 .inv-tile__badge {
@@ -925,17 +938,17 @@
 }
 
 .skill-card:hover {
-    background-color: rgba(30, 26, 20, 0.96);
+    background-color: rgba(240, 231, 207, 0.97);
     scale: 1.02 1.02;
 }
 
-.skill-card--roman { border-color: rgba(224, 192, 104, 0.55); }
-.skill-card--survivor { border-color: rgba(133, 160, 90, 0.6); }
-.skill-card--barbarian { border-color: rgba(196, 70, 58, 0.6); }
+.skill-card--roman { border-color: rgba(154, 123, 58, 0.6); }
+.skill-card--survivor { border-color: rgba(109, 122, 60, 0.65); }
+.skill-card--barbarian { border-color: rgba(142, 47, 34, 0.6); }
 
-.skill-card--roman:hover { border-color: rgb(224, 192, 104); }
-.skill-card--survivor:hover { border-color: rgb(133, 160, 90); }
-.skill-card--barbarian:hover { border-color: rgb(196, 70, 58); }
+.skill-card--roman:hover { border-color: rgb(154, 123, 58); }
+.skill-card--survivor:hover { border-color: rgb(109, 122, 60); }
+.skill-card--barbarian:hover { border-color: rgb(142, 47, 34); }
 
 .skill-card__philosophy {
     font-size: var(--font-size-micro);
@@ -1045,8 +1058,8 @@
 .time-button:hover { border-color: var(--gold-bright); }
 
 .time-button--active {
-    border-color: var(--gold-bright);
-    background-color: rgba(50, 42, 26, 0.94);
+    border-color: var(--umber);
+    background-color: rgba(255, 250, 232, 0.96);
 }
 
 .time-button__glyph {
@@ -1134,7 +1147,7 @@
 .portrait {
     width: 38px;
     height: 46px;
-    background-color: rgba(46, 42, 36, 0.9);
+    background-color: var(--paper-raise);
     border-width: var(--rule);
     border-color: var(--gold-faint);
     margin-right: 4px;
@@ -1179,8 +1192,8 @@
 .pill:hover { border-color: var(--gold-bright); }
 
 .pill--active {
-    border-color: var(--gold-bright);
-    background-color: rgba(50, 42, 26, 0.94);
+    border-color: var(--umber);
+    background-color: rgba(255, 250, 232, 0.96);
 }
 
 .pill__label {
@@ -1241,14 +1254,14 @@
 .floater {
     position: absolute;
     font-size: var(--font-size-body);
-    color: var(--parchment);
+    color: rgb(240, 231, 207);
     letter-spacing: 2px;
     -unity-font-style: bold;
 }
 
-.floater--good { color: var(--olive); }
-.floater--gold { color: var(--gold-bright); }
-.floater--bad  { color: var(--blood); }
+.floater--good { color: rgb(150, 175, 100); }
+.floater--gold { color: rgb(224, 192, 104); }
+.floater--bad  { color: rgb(210, 90, 70); }
 
 /* --- Full-screen overlay -------------------------------------------------------------- */
 
@@ -1258,7 +1271,7 @@
     top: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(4, 4, 3, 0.72);
+    background-color: rgba(43, 32, 18, 0.55);
     align-items: center;
     justify-content: center;
 }
@@ -1315,7 +1328,7 @@
 }
 
 .deploy-row {
-    background-color: rgba(0, 0, 0, 0.35);
+    background-color: var(--paper-raise);
     border-width: var(--rule);
     border-color: var(--gold-faint);
     border-left-width: 3px;
@@ -1366,7 +1379,7 @@
 .deploy-tally__block { align-items: center; flex-grow: 1; }
 
 .button-primary {
-    background-color: rgba(50, 42, 26, 0.94);
+    background-color: rgba(238, 224, 187, 0.96);
     border-width: var(--rule);
     border-color: var(--gold);
     padding-top: var(--pad-tight);
@@ -1377,7 +1390,7 @@
     transition-duration: 0.12s;
 }
 
-.button-primary:hover { background-color: rgba(74, 62, 34, 0.96); }
+.button-primary:hover { background-color: rgba(244, 232, 198, 0.98); }
 
 .button-primary__label {
     font-size: var(--font-size-small);
@@ -1465,7 +1478,7 @@
     top: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(3, 3, 2, 0.88);
+    background-color: rgba(38, 28, 15, 0.72);
     align-items: center;
     justify-content: center;
 }
@@ -1510,7 +1523,7 @@
 .tally {
     flex-grow: 1;
     align-items: center;
-    background-color: rgba(0, 0, 0, 0.4);
+    background-color: var(--paper-raise);
     border-width: var(--rule);
     border-color: var(--gold-faint);
     padding-top: var(--pad-tight);
@@ -1536,7 +1549,7 @@
 .squad-pick {
     flex-direction: row;
     align-items: center;
-    background-color: rgba(0, 0, 0, 0.34);
+    background-color: var(--paper-raise);
     border-width: var(--rule);
     border-color: var(--gold-faint);
     border-left-width: 3px;
@@ -1547,7 +1560,7 @@
 
 .squad-pick--reserve {
     border-left-color: var(--parchment-faint);
-    background-color: rgba(0, 0, 0, 0.22);
+    background-color: rgba(74, 54, 32, 0.1);
 }
 
 .squad-pick__info { flex-grow: 1; }
@@ -1575,14 +1588,14 @@
     align-items: center;
     padding-top: 5px;
     padding-bottom: 5px;
-    background-color: rgba(0, 0, 0, 0.45);
+    background-color: rgba(74, 54, 32, 0.14);
     transition-property: background-color;
     transition-duration: 0.1s;
 }
 
-.switch__option:hover { background-color: rgba(40, 34, 22, 0.9); }
+.switch__option:hover { background-color: rgba(240, 231, 207, 0.9); }
 
-.switch__option--on { background-color: rgba(62, 52, 28, 0.96); }
+.switch__option--on { background-color: rgba(255, 250, 232, 0.97); }
 
 .switch__label {
     font-size: var(--font-size-micro);
@@ -1612,13 +1625,13 @@
     left: 0;
     right: 0;
     height: 1px;
-    background-color: var(--gold-faint);
+    background-color: rgba(201, 162, 39, 0.2);
 }
 
 .tacmap__zone {
     position: absolute;
     border-width: var(--rule);
-    border-color: var(--gold);
+    border-color: rgb(201, 162, 39);
     background-color: rgba(201, 162, 39, 0.09);
 }
 
@@ -1626,7 +1639,7 @@
     position: absolute;
     background-color: rgba(133, 160, 90, 0.1);
     border-width: var(--rule);
-    border-color: rgba(133, 160, 90, 0.4);
+    border-color: rgb(133, 160, 90);
 }
 
 .tacmap__marker {
@@ -1636,16 +1649,16 @@
     border-radius: 4px;
 }
 
-.tacmap__marker--enemy { background-color: var(--blood); }
-.tacmap__marker--ours { background-color: var(--gold-bright); }
-.tacmap__marker--reserve { background-color: var(--parchment-faint); }
+.tacmap__marker--enemy { background-color: rgb(196, 70, 58); }
+.tacmap__marker--ours { background-color: rgb(224, 192, 104); }
+.tacmap__marker--reserve { background-color: rgb(200, 190, 168); }
 
 .tacmap__commander {
     position: absolute;
     width: 13px;
     height: 13px;
     border-width: 2px;
-    border-color: var(--gold-bright);
+    border-color: rgb(224, 192, 104);
     border-radius: 8px;
     background-color: rgba(0, 0, 0, 0.6);
 }
@@ -1655,7 +1668,7 @@
     width: 20px;
     height: 20px;
     border-width: 2px;
-    border-color: var(--olive);
+    border-color: rgb(133, 160, 90);
     border-radius: 12px;
     background-color: rgba(133, 160, 90, 0.22);
 }
@@ -1663,7 +1676,7 @@
 .tacmap__label {
     position: absolute;
     font-size: var(--font-size-micro);
-    color: var(--parchment-faint);
+    color: rgb(216, 206, 180);
     letter-spacing: 2px;
 }
 
@@ -1675,7 +1688,7 @@
     flex-grow: 1;
     flex-direction: row;
     align-items: center;
-    background-color: rgba(0, 0, 0, 0.4);
+    background-color: rgba(250, 244, 226, 0.3);
     border-width: var(--rule);
     border-color: var(--gold-faint);
     padding: var(--pad-tight);
@@ -1687,8 +1700,8 @@
 .step:hover { border-color: var(--gold-dim); }
 
 .step--active {
-    border-color: var(--gold-bright);
-    background-color: rgba(52, 44, 24, 0.94);
+    border-color: var(--brass);
+    background-color: rgba(255, 250, 232, 0.96);
 }
 
 .step__index {
@@ -1749,7 +1762,7 @@
 }
 
 .button-start {
-    background-color: rgba(62, 52, 28, 0.96);
+    background-color: rgba(238, 224, 187, 0.97);
     border-width: 2px;
     border-color: var(--gold);
     padding-left: 46px;
@@ -1762,7 +1775,7 @@
 }
 
 .button-start:hover {
-    background-color: rgba(92, 76, 38, 0.98);
+    background-color: rgba(246, 236, 204, 0.98);
     border-color: var(--gold-bright);
 }
 
@@ -1774,7 +1787,7 @@
 }
 
 .button-ghost {
-    background-color: rgba(0, 0, 0, 0.4);
+    background-color: var(--paper-raise);
     border-width: var(--rule);
     border-color: var(--gold-faint);
     padding-left: var(--pad-loose);
@@ -2037,7 +2050,7 @@
 /* --- Camp stations --------------------------------------------------------------------- */
 
 .station-row {
-    background-color: rgba(0, 0, 0, 0.3);
+    background-color: var(--paper-raise);
     border-width: var(--rule);
     border-color: var(--gold-faint);
     padding: var(--pad-tight);
@@ -2083,7 +2096,7 @@
 }
 
 .station-build {
-    background-color: rgba(50, 42, 26, 0.7);
+    background-color: rgba(238, 224, 187, 0.9);
     border-width: var(--rule);
     border-color: var(--gold-dim);
     color: var(--gold-bright);
@@ -2098,7 +2111,7 @@
 }
 
 .station-build:hover {
-    background-color: rgba(74, 62, 34, 0.9);
+    background-color: rgba(246, 236, 204, 0.95);
     border-color: var(--gold-bright);
 }
 
@@ -2119,7 +2132,7 @@
     flex-grow: 1;
     flex-basis: 0;
     align-items: center;
-    background-color: rgba(0, 0, 0, 0.35);
+    background-color: var(--paper-raise);
     border-width: var(--rule);
     border-color: var(--gold-faint);
     padding-top: 5px;
@@ -2191,7 +2204,7 @@
 .pick-row {
     flex-direction: row;
     align-items: center;
-    background-color: rgba(0, 0, 0, 0.34);
+    background-color: var(--paper-raise);
     border-width: var(--rule);
     border-color: var(--gold-faint);
     border-left-width: 3px;
@@ -2208,8 +2221,8 @@
 .pick-row:hover { border-color: var(--gold-bright); }
 
 .pick-row--current {
-    border-left-color: var(--gold-bright);
-    background-color: rgba(62, 52, 28, 0.6);
+    border-left-color: var(--brass);
+    background-color: var(--paper-lift);
 }
 
 .pick-row__name {
@@ -2336,15 +2349,15 @@
 }
 
 .soldier-card:hover {
-    border-color: var(--gold-bright);
-    background-color: rgba(30, 26, 20, 0.92);
+    border-color: var(--brass);
+    background-color: rgba(240, 231, 207, 0.95);
 }
 
 .soldier-card--decanus { border-left-color: var(--gold); }
 
 .soldier-card--officer {
     border-left-color: var(--gold-bright);
-    background-color: rgba(50, 42, 26, 0.55);
+    background-color: rgba(154, 123, 58, 0.18);
 }
 
 .soldier-card__avatar {
@@ -2382,7 +2395,7 @@
     flex-direction: row;
     align-items: center;
     width: 280px;
-    background-color: rgba(50, 42, 26, 0.55);
+    background-color: rgba(154, 123, 58, 0.18);
     border-width: var(--rule);
     border-color: var(--gold-dim);
     border-left-width: 4px;
@@ -2394,8 +2407,8 @@
 }
 
 .officer-slot:hover {
-    border-color: var(--gold-bright);
-    background-color: rgba(66, 55, 32, 0.7);
+    border-color: var(--brass);
+    background-color: rgba(154, 123, 58, 0.28);
 }
 
 .officer-slot--vacant {
@@ -2463,7 +2476,7 @@
 .badge--posted {
     color: var(--parchment-dim);
     border-color: var(--parchment-faint);
-    background-color: rgba(0, 0, 0, 0.3);
+    background-color: var(--paper-raise);
 }
 
 .badge--veteran {
@@ -2579,7 +2592,7 @@
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    background-color: rgba(0, 0, 0, 0.35);
+    background-color: var(--paper-raise);
     border-width: var(--rule);
     border-color: var(--gold-faint);
     border-left-width: 3px;
@@ -2594,8 +2607,8 @@
 }
 
 .poi-choice:hover {
-    border-color: var(--gold-bright);
-    background-color: rgba(40, 34, 22, 0.9);
+    border-color: var(--brass);
+    background-color: var(--paper-lift);
 }
 
 .poi-choice__label {
@@ -2688,12 +2701,12 @@
     margin-top: 3px;
 }
 
-.card--wounded { border-color: rgb(214, 140, 46); }
-.card--wounded .card__glyph { color: rgb(214, 140, 46); }
+.card--wounded { border-color: var(--amber); }
+.card--wounded .card__glyph { color: var(--amber); }
 
 .card--dead {
     border-color: var(--blood);
-    background-color: rgba(40, 12, 10, 0.85);
+    background-color: rgba(142, 47, 34, 0.15);
 }
 
 .card--dead .card__name { color: var(--blood); }
@@ -2745,10 +2758,10 @@
     margin-bottom: 5px;
     background-color: var(--olive);
     border-width: 1px;
-    border-color: rgba(0, 0, 0, 0.5);
+    border-color: rgba(58, 44, 26, 0.6);
 }
 
-.dot--wounded { background-color: rgb(214, 140, 46); }
+.dot--wounded { background-color: var(--amber); }
 .dot--dead { background-color: var(--blood); }
 
 .dot__cross {
@@ -2769,7 +2782,7 @@
     height: 5px;
     background-color: rgb(236, 232, 224);
     border-width: 1px;
-    border-color: rgba(0, 0, 0, 0.5);
+    border-color: rgba(58, 44, 26, 0.6);
 }
 
 /* === GENERATED ICON CLASSES (game-icons.net) === */
@@ -2880,8 +2893,8 @@
 
 /* =======================================================================================
  *  KEY CAPS (Kenney Input Prompts)
- *  Real keyboard icons wherever the UI names a key. The fantasy-frame theme layer that
- *  briefly lived here was reverted: the game'''s face is the clean dark ink + gold hairline.
+ *  Real keyboard icons wherever the UI names a key. Tinted umber so they read as ink
+ *  on the parchment chrome.
  * ======================================================================================= */
 
 /* --- Key caps: real keyboard icons where the UI names a key ----------------------------- */
@@ -2891,7 +2904,7 @@
     height: 22px;
     font-size: 0;
     opacity: 0.9;
-    -unity-background-image-tint-color: rgb(224, 206, 160);
+    -unity-background-image-tint-color: rgb(74, 54, 32);
 }
 
 .keycap--1 { background-image: url("KenneyInputIcons/Keyboard & Mouse/Double/keyboard_1_outline.png"); }
@@ -2915,7 +2928,7 @@
     height: 26px;
     margin-right: 5px;
     opacity: 0.8;
-    -unity-background-image-tint-color: rgb(224, 206, 160);
+    -unity-background-image-tint-color: rgb(74, 54, 32);
 }
 
 /* =======================================================================================
@@ -3014,8 +3027,8 @@
 
 .office-card__points--none {
     color: var(--parchment-faint);
-    background-color: rgba(0, 0, 0, 0.25);
-    border-color: rgba(104, 99, 89, 0.35);
+    background-color: rgba(74, 54, 32, 0.1);
+    border-color: rgba(74, 54, 32, 0.3);
 }
 
 .office-track { margin-top: var(--pad); }
@@ -3041,7 +3054,7 @@
     border-radius: 0;
 }
 
-Button.trad-node:hover { background-color: var(--gold-faint); }
+Button.trad-node:hover { background-color: rgba(154, 123, 58, 0.18); }
 
 .trad-node__marker {
     width: 15px;
@@ -3172,9 +3185,9 @@ Button.trad-node:hover { background-color: var(--gold-faint); }
 .pip--wounded { background-color: var(--brass); }
 
 .pip--empty {
-    background-color: rgba(0, 0, 0, 0.3);
+    background-color: rgba(74, 54, 32, 0.12);
     border-width: var(--rule);
-    border-color: rgba(104, 99, 89, 0.5);
+    border-color: rgba(74, 54, 32, 0.35);
 }
 
 .squad-card__decanus {
@@ -3207,11 +3220,11 @@ Button.trad-node:hover { background-color: var(--gold-faint); }
     flex-shrink: 0;
     align-self: center;
     background-color: var(--parchment-dim);
-    border-color: rgba(104, 99, 89, 0.6);
+    border-color: rgba(58, 44, 26, 0.6);
 }
 
 .tier-disc--tiro {
-    background-color: rgba(0, 0, 0, 0.25);
+    background-color: rgba(74, 54, 32, 0.14);
     border-color: var(--parchment-faint);
 }
 
@@ -3231,13 +3244,13 @@ Button.trad-node:hover { background-color: var(--gold-faint); }
 }
 
 .tier-disc--officer {
-    background-color: var(--gold-bright);
-    border-color: var(--gold-bright);
+    background-color: var(--blood);
+    border-color: rgb(94, 29, 20);
 }
 
 .tier-disc--vacant {
-    background-color: rgba(0, 0, 0, 0.2);
-    border-color: var(--parchment-faint);
+    background-color: rgba(74, 54, 32, 0.08);
+    border-color: var(--blood-dim);
 }
 
 .tier-disc--card {
@@ -3307,7 +3320,7 @@ Button.trad-node:hover { background-color: var(--gold-faint); }
     align-self: flex-start;
     margin-bottom: var(--pad-tight);
     padding: 4px 12px;
-    background-color: rgba(0, 0, 0, 0.3);
+    background-color: var(--paper-raise);
     border-width: var(--rule);
     border-color: var(--gold-dim);
     border-radius: 0;
@@ -3317,8 +3330,8 @@ Button.trad-node:hover { background-color: var(--gold-faint); }
 }
 
 .army-back:hover {
-    background-color: var(--gold-faint);
-    border-color: var(--gold-bright);
+    background-color: rgba(154, 123, 58, 0.2);
+    border-color: var(--brass);
 }
 
 .army-man__head {
@@ -3363,7 +3376,7 @@ Button.tie-row--link {
     border-radius: 0;
 }
 
-Button.tie-row--link:hover { background-color: var(--gold-faint); }
+Button.tie-row--link:hover { background-color: rgba(154, 123, 58, 0.18); }
 
 /* Squad cards double as buttons on the ARMY screen. */
 Button.squad-card {
@@ -3391,14 +3404,14 @@ Button.squad-card:hover { border-color: var(--gold); }
     padding: 1px 6px;
     margin-right: 4px;
     border-width: var(--rule);
-    border-color: rgba(104, 99, 89, 0.35);
-    background-color: rgba(0, 0, 0, 0.25);
+    border-color: rgba(74, 54, 32, 0.3);
+    background-color: rgba(74, 54, 32, 0.1);
 }
 
 .tier-strip__step--past {
     color: var(--parchment-dim);
     border-color: var(--gold-dim);
-    background-color: rgba(201, 162, 39, 0.08);
+    background-color: rgba(154, 123, 58, 0.12);
 }
 
 .tier-strip__step--current {
@@ -3499,13 +3512,13 @@ Button.squad-card:hover { border-color: var(--gold); }
     transition-duration: 0.12s;
 }
 
-.title-link:hover .title-link__label { color: var(--gold-bright); }
+.title-link:hover .title-link__label { color: rgb(224, 192, 104); }
 
 .title-link__underline {
     width: 100%;
     height: 2px;
     margin-top: 6px;
-    background-color: var(--gold-bright);
+    background-color: rgb(224, 192, 104);
     scale: 0 1;
     transition-property: scale;
     transition-duration: 0.16s;
@@ -3533,7 +3546,7 @@ Button.squad-card:hover { border-color: var(--gold); }
 }
 
 .save-close {
-    background-color: rgba(0, 0, 0, 0.4);
+    background-color: var(--paper-raise);
     border-width: var(--rule);
     border-color: var(--gold-dim);
     width: 34px;
@@ -3557,7 +3570,7 @@ Button.squad-card:hover { border-color: var(--gold); }
 .save-slot {
     flex-direction: row;
     align-items: center;
-    background-color: rgba(0, 0, 0, 0.35);
+    background-color: var(--paper-raise);
     border-width: var(--rule);
     border-color: var(--gold-dim);
     border-left-width: 3px;
@@ -3574,8 +3587,8 @@ Button.squad-card:hover { border-color: var(--gold); }
 .save-slot:hover { border-color: var(--gold-bright); }
 
 .save-slot--selected {
-    background-color: rgba(50, 42, 26, 0.94);
-    border-color: var(--gold-bright);
+    background-color: rgba(255, 250, 232, 0.96);
+    border-color: var(--brass);
 }
 
 .save-slot--empty { border-left-color: var(--parchment-faint); }
@@ -3676,8 +3689,8 @@ Button.squad-card:hover { border-color: var(--gold); }
 
 .coach-target {
     border-width: 2px;
-    border-color: var(--gold-bright);
-    background-color: rgba(70, 58, 30, 0.55);
+    border-color: var(--brass);
+    background-color: rgba(154, 123, 58, 0.3);
 }
 
 /* --- The opening sequence (battle scene, scripted) ------------------------------------- */
@@ -3695,7 +3708,7 @@ Button.squad-card:hover { border-color: var(--gold); }
     font-size: var(--font-size-title);
     color: var(--parchment);
     letter-spacing: 2px;
-    background-color: rgba(3, 3, 2, 0.55);
+    background-color: rgba(240, 231, 207, 0.85);
     padding-left: 22px;
     padding-right: 22px;
     padding-top: 8px;
@@ -3760,7 +3773,7 @@ Button.squad-card:hover { border-color: var(--gold); }
     position: absolute;
     left: 0;
     right: 0;
-    background-color: rgb(0, 0, 0);
+    background-color: rgb(23, 18, 11);
 }
 
 .opening-eyelid--top { top: 0; height: 0; }
@@ -3780,7 +3793,7 @@ Button.squad-card:hover { border-color: var(--gold); }
     color: var(--gold-bright);
     letter-spacing: 5px;
     -unity-font-style: bold;
-    background-color: rgba(3, 3, 2, 0.6);
+    background-color: rgba(240, 231, 207, 0.85);
     padding-left: 14px;
     padding-right: 14px;
     padding-top: 4px;

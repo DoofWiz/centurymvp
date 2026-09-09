@@ -455,7 +455,7 @@ namespace Century.Battle.View
                 {
                     float strength = (block.FlashUntil - now) / 1.4f;
                     block.Root.style.backgroundColor =
-                        new Color(0.62f, 0.12f, 0.09f, 0.55f * strength);
+                        new Color(0.557f, 0.184f, 0.133f, 0.5f * strength);
                 }
             }
         }
@@ -549,7 +549,7 @@ namespace Century.Battle.View
             if (_state.CommandDevolved)
             {
                 SetText(_battleTimer, $"OPTIO  {FormatClock(_state.SuccessionSecondsLeft)}");
-                if (_battleTimer != null) _battleTimer.style.color = new Color(0.85f, 0.3f, 0.24f);
+                if (_battleTimer != null) _battleTimer.style.color = new Color(0.557f, 0.184f, 0.133f);
             }
             else
             {
@@ -604,7 +604,7 @@ namespace Century.Battle.View
 
                 bool selected = _commands != null && _commands.IsSelected(i);
                 block.Root.style.backgroundColor = selected
-                    ? new StyleColor(new Color(0.20f, 0.16f, 0.10f, 0.5f))
+                    ? new StyleColor(new Color(0.604f, 0.482f, 0.227f, 0.28f))
                     : new StyleColor(Color.clear);
 
                 string order = squad.IsDestroyed

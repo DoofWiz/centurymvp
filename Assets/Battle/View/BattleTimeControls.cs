@@ -101,8 +101,8 @@ namespace Century.Battle.View
             // the world stands still — no glancing at buttons to know what the battle is doing.
             if (_timer != null)
             {
-                _timer.style.color = _mode == Mode.Paused ? (StyleColor)new Color(0.77f, 0.27f, 0.23f)
-                    : TacticalHeld ? (StyleColor)new Color(0.94f, 0.79f, 0.41f)
+                _timer.style.color = _mode == Mode.Paused ? (StyleColor)new Color(0.557f, 0.184f, 0.133f)
+                    : TacticalHeld ? (StyleColor)new Color(0.541f, 0.416f, 0.165f)
                     : new StyleColor(StyleKeyword.Null);
             }
         }

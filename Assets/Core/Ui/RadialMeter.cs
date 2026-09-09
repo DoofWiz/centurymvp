@@ -17,8 +17,8 @@ namespace Century.Core.Ui
     public sealed class RadialMeter : VisualElement
     {
         private float _value01;
-        private Color _trackColor = new Color(0f, 0f, 0f, 0.55f);
-        private Color _fillColor = new Color(0.79f, 0.64f, 0.15f); // --gold
+        private Color _trackColor = new Color(0.29f, 0.212f, 0.125f, 0.3f);
+        private Color _fillColor = new Color(0.541f, 0.416f, 0.165f); // --gold (bronze ink)
         private float _thickness = 5f;
 
         public RadialMeter()
