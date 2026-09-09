@@ -27,11 +27,15 @@ mergeInto(LibraryManager.library, {
       }
     }, { capture: true });
 
-    // Fullscreen: lock the whole keyboard so even Ctrl+W stays in the game. Holding Esc
-    // still exits — the browser's own failsafe, by design.
+    // Fullscreen is where the tab's untouchables (Ctrl+W / Ctrl+T / Ctrl+N) become
+    // blockable: the Keyboard Lock API takes JUST those three letter codes, so their combos
+    // stay in the game. Escape is deliberately NOT locked — a no-argument lock() captures it
+    // too, silently replacing "tap Esc to leave fullscreen" with Chrome's press-AND-HOLD-Esc
+    // gesture, which players read as being trapped in the window.
     var syncLock = function () {
       if (!navigator.keyboard || !navigator.keyboard.lock) return;
-      if (document.fullscreenElement) navigator.keyboard.lock()['catch'](function () {});
+      if (document.fullscreenElement)
+        navigator.keyboard.lock(['KeyW', 'KeyT', 'KeyN'])['catch'](function () {});
       else if (navigator.keyboard.unlock) navigator.keyboard.unlock();
     };
     document.addEventListener('fullscreenchange', syncLock);
