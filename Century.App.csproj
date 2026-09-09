@@ -56,10 +56,10 @@
     <Compile Include="Assets\App\SaveService.cs" />
     <Compile Include="Assets\App\EncounterCoordinator.cs" />
     <Compile Include="Assets\App\TitleController.cs" />
-    <Compile Include="Assets\App\BrowserKeyGuard.cs" />
     <Compile Include="Assets\App\DebugCampaignHud.cs" />
     <Compile Include="Assets\App\SceneNames.cs" />
     <Compile Include="Assets\App\ScreenFader.cs" />
+    <Compile Include="Assets\App\BrowserKeyGuard.cs" />
     <Compile Include="Assets\App\GameDirector.cs" />
     <Compile Include="Assets\App\CampaignTicker.cs" />
   </ItemGroup>
