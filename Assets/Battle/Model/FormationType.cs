@@ -68,24 +68,6 @@ namespace Century.Battle.Model
             }
         }
 
-        /// <summary>
-        /// Chance a frontal blow is turned aside by the shield wall, before facing and stamina scale
-        /// it. This is what makes a Roman line hard to *hit*, not merely hard to hurt: a scutum stops
-        /// the blow landing at all. Worthless from the flank, like the damage reduction it sits beside.
-        /// </summary>
-        public static float FrontalBlockChance(this FormationType formation)
-        {
-            switch (formation)
-            {
-                case FormationType.Testudo: return 0.60f;
-                case FormationType.Line: return 0.40f;
-                case FormationType.DoubleLine: return 0.40f;
-                case FormationType.Wedge: return 0.28f;
-                case FormationType.Loose: return 0.10f;
-                default: return 0.15f;
-            }
-        }
-
         /// <summary>Display name — enum ToString would render "DOUBLELINE" on the HUD.</summary>
         public static string Word(this FormationType formation) =>
             formation == FormationType.DoubleLine ? "DOUBLE LINE" : formation.ToString().ToUpperInvariant();

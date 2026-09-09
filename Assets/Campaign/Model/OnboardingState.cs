@@ -73,6 +73,9 @@ namespace Century.Campaign.Model
         public bool OvermapTutorialTold;
         public bool StrangersTutorialTold;
 
+        /// <summary>The objectives screen shown straight after the arrival briefing, clock held.</summary>
+        public bool ObjectivesIntroTold;
+
         public bool IsActive => Chapter == OnboardingChapter.Opening || Chapter == OnboardingChapter.Aftermath;
         public bool IsAftermath => Chapter == OnboardingChapter.Aftermath;
 

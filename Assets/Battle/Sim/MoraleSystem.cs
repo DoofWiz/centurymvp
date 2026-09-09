@@ -375,14 +375,17 @@ namespace Century.Battle.Sim
         }
 
         /// <summary>
-        /// Called while the player holds the rally input. Progress accumulates only while he is close
-        /// and stops the moment he leaves, so rallying costs him his own position in the line.
+        /// Runs while the rally BURST is active (R fires it; the simulation owns its clock).
+        /// Broken squads near the Centurion accumulate progress for as long as the burst lasts and
+        /// he stays close, so saving a routed squad still costs him his position in the line — he
+        /// has eight seconds to spend them where they matter.
         /// </summary>
-        public void TickRally(float deltaSeconds, bool rallyHeld)
+        public void TickRally(float deltaSeconds)
         {
             BattleCombatant player = _state.PlayerCharacter;
             if (player == null || !player.IsAlive) return;
 
+            bool surging = _state.RallyActive;
             float radiusSqr = _settings.RallyRadius * _settings.RallyRadius;
 
             for (int i = 0; i < _state.PlayerSquads.Count; i++)
@@ -392,7 +395,7 @@ namespace Century.Battle.Sim
 
                 bool inRange = (player.WorldPosition - squad.CentreOfMass()).sqrMagnitude <= radiusSqr;
 
-                if (!rallyHeld || !inRange)
+                if (!surging || !inRange)
                 {
                     squad.RallyProgress01 = Mathf.Max(0f, squad.RallyProgress01 - deltaSeconds * 0.5f);
                     continue;

@@ -43,7 +43,7 @@
     <UnityVersion>6000.3.20f1</UnityVersion>
   </PropertyGroup>
   <ItemGroup>
-    <Analyzer Include="C:\Users\tomsc\.vscode\extensions\visualstudiotoolsforunity.vstuc-1.2.2\Analyzers\Microsoft.Unity.Analyzers.dll" />
+    <Analyzer Include="C:\Users\tomsc\.vscode\extensions\visualstudiotoolsforunity.vstuc-1.3.1\Analyzers\Microsoft.Unity.Analyzers.dll" />
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.3.20f1\Editor\Data\Tools\BuildPipeline\Unity.SourceGenerators\Unity.SourceGenerators.dll" />
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.3.20f1\Editor\Data\Tools\BuildPipeline\Unity.SourceGenerators\Unity.Properties.SourceGenerator.dll" />
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.3.20f1\Editor\Data\Tools\BuildPipeline\Unity.SourceGenerators\Unity.UIToolkit.SourceGenerator.dll" />
@@ -51,6 +51,7 @@
   <ItemGroup>
     <Compile Include="Assets\Battle\View\BattleCameraRig.cs" />
     <Compile Include="Assets\Battle\View\BattleAimIndicator.cs" />
+    <Compile Include="Assets\Battle\View\RallyFx.cs" />
     <Compile Include="Assets\Battle\View\BattleBootstrap.cs" />
     <Compile Include="Assets\Battle\Sim\FormationAssignment.cs" />
     <Compile Include="Assets\Battle\Sim\FollowFormation.cs" />
@@ -60,6 +61,10 @@
     <Compile Include="Assets\Battle\Sim\BattleEvent.cs" />
     <Compile Include="Assets\Battle\Model\BattleSquad.cs" />
     <Compile Include="Assets\Battle\View\PilaProjectile.cs" />
+    <Compile Include="Assets\Battle\View\ExecutionDirector.cs" />
+    <Compile Include="Assets\Battle\View\OpeningPostFx.cs" />
+    <Compile Include="Assets\Battle\View\OpeningDirector.cs" />
+    <Compile Include="Assets\Battle\View\DeathTopple.cs" />
     <Compile Include="Assets\Battle\Model\MeleeState.cs" />
     <Compile Include="Assets\Battle\View\HitEffects.cs" />
     <Compile Include="Assets\Battle\View\SquadLabels.cs" />
@@ -83,13 +88,16 @@
     <Compile Include="Assets\Battle\View\BattleGroundFx.cs" />
     <Compile Include="Assets\Battle\Sim\GroupFormation.cs" />
     <Compile Include="Assets\Battle\Model\SquadOrder.cs" />
+    <Compile Include="Assets\Battle\View\BattleTutorial.cs" />
     <Compile Include="Assets\Battle\View\SignumView.cs" />
     <Compile Include="Assets\Battle\View\BattleSummaryController.cs" />
     <Compile Include="Assets\Battle\View\SoldierRig.cs" />
     <Compile Include="Assets\Battle\Sim\BattleFactory.cs" />
+    <Compile Include="Assets\Battle\View\OpeningGuideArrow.cs" />
     <Compile Include="Assets\Battle\View\DebugBattleHud.cs" />
     <Compile Include="Assets\Battle\Sim\BattleSettings.cs" />
     <Compile Include="Assets\Battle\Sim\AutoResolveCalculator.cs" />
+    <Compile Include="Assets\Battle\View\OpeningExtra.cs" />
     <Compile Include="Assets\Battle\Model\StaminaClass.cs" />
     <Compile Include="Assets\Battle\Sim\CasualtyFate.cs" />
     <Compile Include="Assets\Battle\Sim\SignumSystem.cs" />
@@ -98,6 +106,7 @@
     <Compile Include="Assets\Battle\Sim\SquadTactics.cs" />
     <Compile Include="Assets\Battle\View\SquadView.cs" />
     <Compile Include="Assets\Battle\Model\BattleCombatant.cs" />
+    <Compile Include="Assets\Battle\Model\MissileClass.cs" />
     <Compile Include="Assets\Battle\Sim\BattleOutcomeEvaluator.cs" />
     <Compile Include="Assets\Battle\Model\OfficerRole.cs" />
     <Compile Include="Assets\Battle\View\CombatantGear.cs" />
@@ -1190,6 +1199,14 @@
     </Reference>
     <Reference Include="Unity.AI.Navigation">
       <HintPath>Library\ScriptAssemblies\Unity.AI.Navigation.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Unity.RenderPipelines.Universal.Runtime">
+      <HintPath>Library\ScriptAssemblies\Unity.RenderPipelines.Universal.Runtime.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Unity.RenderPipelines.Core.Runtime">
+      <HintPath>Library\ScriptAssemblies\Unity.RenderPipelines.Core.Runtime.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEditor.UI">

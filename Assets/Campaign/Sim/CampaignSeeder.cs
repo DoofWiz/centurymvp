@@ -30,9 +30,10 @@ namespace Century.Campaign.Sim
         // --- The open world -----------------------------------------------------------------------
 
         /// <summary>
-        /// The sandbox: a mixed opposition (quick opportunists, middling warbands, one host you should
-        /// think hard about meeting) and the opening points of interest. Seeded at a sandbox start,
-        /// or the moment the guided start's passage is taken. Idempotent per campaign.
+        /// The sandbox: a mixed opposition — quick opportunists, middling warbands, one host you
+        /// should think hard about meeting, and the looter bands that work the old killing grounds —
+        /// plus the opening points of interest. Seeded at a sandbox start, or the moment the guided
+        /// start's passage is taken. Idempotent per campaign.
         /// </summary>
         public static void SeedOpenWorld(CampaignState state, CampaignSettings settings)
         {
@@ -42,12 +43,31 @@ namespace Century.Campaign.Sim
             Random.State previous = Random.state;
             Random.InitState(state.RandomSeed ^ 0x51ED);
 
-            state.AddParty(CreateWarband(state, 0, settings, PartyKind.Raiders));
-            state.AddParty(CreateWarband(state, 1, settings, PartyKind.Raiders));
-            state.AddParty(CreateWarband(state, 2, settings, PartyKind.Warband));
-            state.AddParty(CreateWarband(state, 3, settings, PartyKind.Warband));
-            state.AddParty(CreateWarband(state, 4, settings, PartyKind.Warband));
-            state.AddParty(CreateWarband(state, 5, settings, PartyKind.WarHost));
+            // Nine roaming threats, spread around the compass: three packs of opportunists, five
+            // proper warbands, and the one host on the horizon.
+            const int roaming = 9;
+            state.AddParty(CreateWarband(state, 0, roaming, settings, PartyKind.Raiders));
+            state.AddParty(CreateWarband(state, 1, roaming, settings, PartyKind.Raiders));
+            state.AddParty(CreateWarband(state, 2, roaming, settings, PartyKind.Raiders));
+            state.AddParty(CreateWarband(state, 3, roaming, settings, PartyKind.Warband));
+            state.AddParty(CreateWarband(state, 4, roaming, settings, PartyKind.Warband));
+            state.AddParty(CreateWarband(state, 5, roaming, settings, PartyKind.Warband));
+            state.AddParty(CreateWarband(state, 6, roaming, settings, PartyKind.Warband));
+            state.AddParty(CreateWarband(state, 7, roaming, settings, PartyKind.Warband));
+            state.AddParty(CreateWarband(state, 8, roaming, settings, PartyKind.WarHost));
+
+            // The Aftermath's enemy in the wider world: looter bands leashed to the ground they
+            // strip — the old battlefield in the north, the dead convoy's district, and the road
+            // that feeds the slave fair. Stones and knives, and no stomach for a fair fight.
+            state.AddParty(MakeLooters(state, settings, "Field-strippers",
+                new Vector3(-50f, 0f, 250f), 9,
+                new Vector2(-160f, 140f), new Vector2(60f, 340f)));
+            state.AddParty(MakeLooters(state, settings, "Carrion Crows",
+                new Vector3(-250f, 0f, -290f), 11,
+                new Vector2(-370f, -400f), new Vector2(-160f, -200f)));
+            state.AddParty(MakeLooters(state, settings, "Slave-takers",
+                new Vector3(135f, 0f, -330f), 13,
+                new Vector2(20f, -430f), new Vector2(220f, -260f)));
 
             SeedPointsOfInterest(state, settings);
 
@@ -55,9 +75,9 @@ namespace Century.Campaign.Sim
         }
 
         private static PartyState CreateWarband(
-            CampaignState state, int index, CampaignSettings settings, PartyKind kind)
+            CampaignState state, int index, int total, CampaignSettings settings, PartyKind kind)
         {
-            float angle = index / 6f * Mathf.PI * 2f + Random.Range(-0.4f, 0.4f);
+            float angle = index / (float)total * Mathf.PI * 2f + Random.Range(-0.3f, 0.3f);
 
             // The host starts far out: a storm on the horizon, not a doorstep surprise.
             float radius = kind == PartyKind.WarHost ? Random.Range(380f, 520f) : Random.Range(180f, 420f);
@@ -89,17 +109,31 @@ namespace Century.Campaign.Sim
 
         /// <summary>
         /// Scatters the sandbox's opening points of interest. A couple sit inside the column's
-        /// starting sight so the player sees the mechanic at once; the rest reward marching out.
+        /// starting sight so the player sees the mechanic at once; the rest reward marching out —
+        /// and the far corners hold the places worth mounting an expedition for.
         /// </summary>
         private static void SeedPointsOfInterest(CampaignState state, CampaignSettings settings)
         {
+            // Near the start: the mechanic in sight at once.
             AddPoi(state, settings, PoiKind.Settlement, "shrine", "A roadside shrine", new Vector3(70f, 0f, 45f));
             AddPoi(state, settings, PoiKind.Grove, "grove", "A druid's grove", new Vector3(165f, 0f, 130f));
+
+            // The middle distance: a march, not an expedition.
             AddPoi(state, settings, PoiKind.Refugees, "refugees", "A refugee column", new Vector3(-185f, 0f, 95f));
             AddPoi(state, settings, PoiKind.Settlement, "merchant", "A travelling merchant", new Vector3(75f, 0f, -195f));
             AddPoi(state, settings, PoiKind.Ruin, "watchtower", "An abandoned watchtower", new Vector3(-150f, 0f, -155f));
             AddPoi(state, settings, PoiKind.RaiderCamp, "raiders", "A raider camp", new Vector3(255f, 0f, -70f));
             AddPoi(state, settings, PoiKind.Battlefield, "battlefield", "An old battlefield", new Vector3(-60f, 0f, 235f));
+            AddPoi(state, settings, PoiKind.Ruin, "deserters", "A broken tower", new Vector3(215f, 0f, 165f));
+
+            // The far marches: worth an expedition, and defended accordingly. Each looter band's
+            // home ground holds a place that explains what they are doing there.
+            AddPoi(state, settings, PoiKind.RaiderCamp, "raiders", "A raider camp", new Vector3(-310f, 0f, 245f));
+            AddPoi(state, settings, PoiKind.RaiderCamp, "raider_warcamp", "A raider war-camp", new Vector3(335f, 0f, 320f));
+            AddPoi(state, settings, PoiKind.Battlefield, "battlefield", "A silent battlefield", new Vector3(-265f, 0f, -305f));
+            AddPoi(state, settings, PoiKind.Settlement, "hunters_camp", "A hunters' camp", new Vector3(-95f, 0f, 330f));
+            AddPoi(state, settings, PoiKind.Ruin, "wrecked_convoy", "A wrecked convoy", new Vector3(-365f, 0f, -70f));
+            AddPoi(state, settings, PoiKind.SlavePens, "slave_pens", "A slave fair", new Vector3(120f, 0f, -345f));
         }
 
         // --- The Aftermath ------------------------------------------------------------------------
@@ -150,28 +184,38 @@ namespace Century.Campaign.Sim
             Random.State previous = Random.state;
             Random.InitState(state.RandomSeed ^ 0x100E);
 
-            state.AddParty(MakeLooters(state, settings, 0, new Vector3(395f, 0f, -395f), 6));
-            state.AddParty(MakeLooters(state, settings, 1, new Vector3(205f, 0f, -405f), 8));
-            state.AddParty(MakeLooters(state, settings, 2, new Vector3(400f, 0f, -190f), 7));
+            state.AddParty(MakeLooters(state, settings, LooterNames[0],
+                new Vector3(395f, 0f, -395f), 6, AftermathMin, AftermathMax));
+            state.AddParty(MakeLooters(state, settings, LooterNames[1],
+                new Vector3(205f, 0f, -405f), 8, AftermathMin, AftermathMax));
+            state.AddParty(MakeLooters(state, settings, LooterNames[2],
+                new Vector3(400f, 0f, -190f), 7, AftermathMin, AftermathMax));
 
             Random.state = previous;
         }
 
+        /// <summary>A looter band: the Aftermath's enemy, leashed to whatever ground it strips.</summary>
         private static PartyState MakeLooters(
-            CampaignState state, CampaignSettings settings, int index, Vector3 spawn, int strength)
+            CampaignState state, CampaignSettings settings, string displayName, Vector3 spawn,
+            int strength, Vector2 zoneMin, Vector2 zoneMax)
         {
             PartyState party = MakeGermanicParty(state, settings,
-                LooterNames[index % LooterNames.Length], PartyKind.Warband, spawn, strength,
+                displayName, PartyKind.Warband, spawn, strength,
                 CommanderBehaviour.Skirmisher);
+
+            // Scavengers, not warriors: no war-kit worth the name, so what they throw is whatever
+            // the field offers — stones. The battle factory reads the archetype.
+            for (int i = 0; i < party.Roster.Soldiers.Count; i++)
+                party.Roster.Soldiers[i].ArchetypeId = "germanic_looter";
 
             // Looters see less far than a warband on the hunt, and never leave the killing ground.
             party.DetectionRadius = 58f;
             party.SpeedModifier = 0.95f;
             party.HasHomeZone = true;
-            party.HomeMinX = AftermathMin.x;
-            party.HomeMinZ = AftermathMin.y;
-            party.HomeMaxX = AftermathMax.x;
-            party.HomeMaxZ = AftermathMax.y;
+            party.HomeMinX = zoneMin.x;
+            party.HomeMinZ = zoneMin.y;
+            party.HomeMaxX = zoneMax.x;
+            party.HomeMaxZ = zoneMax.y;
             return party;
         }
 

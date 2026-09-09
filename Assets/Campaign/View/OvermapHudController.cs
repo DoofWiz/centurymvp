@@ -90,6 +90,12 @@ namespace Century.Campaign.View
         private readonly Queue<OnboardingDirector.Narration> _narrations = new Queue<OnboardingDirector.Narration>();
         private bool _narrationOpen;
         private TimeControl _controlBeforeNarration = TimeControl.Normal;
+
+        // The objectives screen rides the narration chain (same pause, same gates): while it is up,
+        // _narrationOpen stays true, so every "a story modal owns the screen" check already holds.
+        private VisualElement _objectivesModal;
+        private Label _objectivesModalText, _objectivesModalTracked;
+        private bool _objectivesOpen;
         private StageBanner _banner;
         private bool _leavingForOpenWorld;
         private float _campPulse;
@@ -902,6 +908,13 @@ namespace Century.Campaign.View
             if (dismiss != null) dismiss.clicked += DismissNarration;
             if (_narrationModal != null) _narrationModal.style.display = DisplayStyle.None;
 
+            _objectivesModal = Find<VisualElement>(root, "objectives-modal");
+            _objectivesModalText = Find<Label>(root, "objectives-modal-text");
+            _objectivesModalTracked = Find<Label>(root, "objectives-modal-tracked");
+            Button objectivesDismiss = Find<Button>(root, "objectives-dismiss");
+            if (objectivesDismiss != null) objectivesDismiss.clicked += DismissObjectives;
+            if (_objectivesModal != null) _objectivesModal.style.display = DisplayStyle.None;
+
             OvermapDirectorRunner.Narrated -= OnNarrated;
             OvermapDirectorRunner.Narrated += OnNarrated;
             OvermapDirectorRunner.ObjectiveChanged -= RefreshObjective;
@@ -963,8 +976,50 @@ namespace Century.Campaign.View
 
         private void DismissNarration()
         {
-            if (!_narrationOpen) return;
+            if (!_narrationOpen || _objectivesOpen) return;
 
+            if (_narrations.Count > 0)
+            {
+                ShowNextNarration();
+                return;
+            }
+
+            if (_narrationModal != null) _narrationModal.style.display = DisplayStyle.None;
+
+            // The arrival briefing hands straight to the objectives screen, the clock still held,
+            // so the player meets the task list before the world starts moving under it.
+            OnboardingState onboarding = _state?.Onboarding;
+            if (onboarding != null && onboarding.IsAftermath && !onboarding.ObjectivesIntroTold
+                && _objectivesModal != null)
+            {
+                ShowObjectivesScreen();
+                return;
+            }
+
+            _narrationOpen = false;
+            _lastPopupClosedAt = Time.unscaledTime;
+            if (_ticker != null && !_leavingForOpenWorld) _ticker.SetTimeControl(_controlBeforeNarration);
+        }
+
+        private void ShowObjectivesScreen()
+        {
+            _objectivesOpen = true;
+            SetText(_objectivesModalText, OnboardingDirector.ObjectiveText(_state)
+                ?? "Make your way out of Germania and return to Italia.");
+            SetText(_objectivesModalTracked, OnboardingDirector.ObjectiveTracked(_state)
+                ?? "Reach the Rhine crossing");
+            _objectivesModal.style.display = DisplayStyle.Flex;
+        }
+
+        private void DismissObjectives()
+        {
+            if (!_objectivesOpen) return;
+
+            _objectivesOpen = false;
+            if (_state?.Onboarding != null) _state.Onboarding.ObjectivesIntroTold = true;
+            if (_objectivesModal != null) _objectivesModal.style.display = DisplayStyle.None;
+
+            // A beat that arrived while the objectives held the screen speaks now.
             if (_narrations.Count > 0)
             {
                 ShowNextNarration();
@@ -973,7 +1028,6 @@ namespace Century.Campaign.View
 
             _narrationOpen = false;
             _lastPopupClosedAt = Time.unscaledTime;
-            if (_narrationModal != null) _narrationModal.style.display = DisplayStyle.None;
             if (_ticker != null && !_leavingForOpenWorld) _ticker.SetTimeControl(_controlBeforeNarration);
         }
 

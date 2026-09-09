@@ -4,7 +4,7 @@
 
     <!--
       Title screen. The word CENTURY itself is 3D text in the scene behind this document; the
-      document carries only the two actions and the save overlay. The actions are free-floating
+      document carries only the actions and the save overlay. The actions are free-floating
       text with no container: hovering lights them and grows an underline out from the centre.
       Element names are the contract with TitleController (App layer).
     -->
@@ -15,6 +15,10 @@
 
             <ui:Button name="title-start" class="title-link">
                 <ui:Label text="START PROTOTYPE" class="title-link__label" picking-mode="Ignore" />
+                <ui:VisualElement class="title-link__underline" picking-mode="Ignore" />
+            </ui:Button>
+            <ui:Button name="title-skip" class="title-link">
+                <ui:Label text="SKIP TUTORIAL" class="title-link__label" picking-mode="Ignore" />
                 <ui:VisualElement class="title-link__underline" picking-mode="Ignore" />
             </ui:Button>
             <ui:Button name="title-load" class="title-link">

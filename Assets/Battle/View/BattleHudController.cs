@@ -47,6 +47,8 @@ namespace Century.Battle.View
         private VisualElement _roster, _squadList, _logList;
         private Label _commanderName, _commanderStatus;
         private VisualElement _commanderHealth, _commanderStamina;
+        private VisualElement _rallyBox, _rallyFill;
+        private Label _rallyCount;
         private Label _cmdFormationLabel, _selectionText, _battleTimer;
 
         private readonly List<OfficerCard> _officerCards = new List<OfficerCard>();
@@ -112,6 +114,9 @@ namespace Century.Battle.View
             _commanderStatus = Find<Label>(root, "commander-status");
             _commanderHealth = Find<VisualElement>(root, "commander-health");
             _commanderStamina = Find<VisualElement>(root, "commander-stamina");
+            _rallyBox = Find<VisualElement>(root, "rally-box");
+            _rallyFill = Find<VisualElement>(root, "rally-fill");
+            _rallyCount = Find<Label>(root, "rally-count");
 
             _cmdFormationLabel = Find<Label>(root, "cmd-formation-label");
             _selectionText = Find<Label>(root, "selection-text");
@@ -659,11 +664,15 @@ namespace Century.Battle.View
             }
             else
             {
-                string core = _player != null && _player.IsRallying
-                    ? "RALLYING THE MEN"
-                    : player.IsInCombat
-                        ? "IN CONTACT"
-                        : $"{player.Kills} SLAIN";
+                string core = _player != null && _player.IsExecuting
+                    ? "THE KILLING BLOW"
+                    : _player != null && _player.IsRallying
+                        ? "RALLYING THE MEN"
+                        : _state.RallyActive
+                            ? "THE CENTURY SURGES"
+                            : player.IsInCombat
+                                ? "IN CONTACT"
+                                : $"{player.Kills} SLAIN";
 
                 // Pila remaining rides alongside the status so the player can throw without hunting for it.
                 status = _player != null ? $"{core}   ·   {_player.PilaRemaining} PILA" : core;
@@ -671,6 +680,37 @@ namespace Century.Battle.View
 
             SetText(_commanderStatus, status);
             _commanderStatus?.EnableInClassList("text-danger", !player.IsAlive);
+
+            RefreshRally();
+        }
+
+        /// <summary>
+        /// The rally ability box: full gold while the burst runs (counting its seconds down), a
+        /// draining faint sweep while the 60s cooldown counts down over the ability itself, READY
+        /// when the horn can sound again.
+        /// </summary>
+        private void RefreshRally()
+        {
+            if (_rallyBox == null || _settings == null) return;
+
+            bool active = _state.RallyActive;
+            _rallyBox.EnableInClassList("rally-box--active", active);
+
+            if (active)
+            {
+                SetWidth(_rallyFill, _state.RallySecondsLeft / Mathf.Max(0.1f, _settings.RallyBurstSeconds));
+                SetText(_rallyCount, Mathf.CeilToInt(_state.RallySecondsLeft).ToString());
+            }
+            else if (_state.RallyCooldownLeft > 0f)
+            {
+                SetWidth(_rallyFill, _state.RallyCooldownLeft / Mathf.Max(1f, _settings.RallyCooldownSeconds));
+                SetText(_rallyCount, Mathf.CeilToInt(_state.RallyCooldownLeft).ToString());
+            }
+            else
+            {
+                SetWidth(_rallyFill, 0f);
+                SetText(_rallyCount, "READY");
+            }
         }
 
         private void RefreshLog()

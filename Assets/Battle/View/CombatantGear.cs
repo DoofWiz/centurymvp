@@ -150,6 +150,140 @@ namespace Century.Battle.View
             rig?.SetHands(_weapon.localPosition, shieldHand);
         }
 
+        /// <summary>
+        /// The rally call, replacing <see cref="Pose"/> for its couple of seconds: the blade thrust
+        /// skyward with the hand circling overhead, the body sweeping side to side as the Centurion
+        /// turns to the line he is calling. <paramref name="callSeconds"/> is time since the call began.
+        /// </summary>
+        public void PoseRallyWave(BattleCombatant man, float callSeconds, float dt, SoldierRig rig = null)
+        {
+            // Keep the stance tracker honest so Pose resumes cleanly when the call ends.
+            _seenStance = man.Stance;
+            _stanceStart = Time.time;
+
+            // The hand rides a circle above the helmet; the blade points up and out of it.
+            float wave = callSeconds * 6.5f;
+            Vector3 circle = new Vector3(Mathf.Cos(wave), 0f, Mathf.Sin(wave));
+            Vector3 hand = new Vector3(0.14f, 1.94f, 0.02f) + circle * 0.17f;
+            Quaternion aloft = Quaternion.LookRotation((Vector3.up + circle * 0.45f).normalized);
+            Smooth(_weapon, hand, aloft, 14f, dt);
+
+            // Looking around him, gathering the men: the torso sweeps the line.
+            float k = 1f - Mathf.Exp(-10f * dt);
+            _twist = Mathf.Lerp(_twist, Mathf.Sin(callSeconds * 2.6f) * 30f, k);
+            _lean = Mathf.Lerp(_lean, -6f, k);
+            rig?.SetCombatPose(_twist, _lean);
+
+            PoseShield(man, dt);
+            Vector3? shieldHand = _shield != null
+                ? _shield.localPosition + _shield.localRotation * ShieldGrip
+                : (Vector3?)null;
+            rig?.SetHands(_weapon.localPosition, shieldHand);
+        }
+
+        /// <summary>
+        /// One frame of the execution, replacing <see cref="Pose"/> while it runs. Phases: 0 the
+        /// seize (board shoved into him, blade coiled), 1 the plunge, 2 held in, 3 the yank out.
+        /// <paramref name="t01"/> runs 0..1 within the phase; <paramref name="victimChest"/> is the
+        /// victim's chest in this fighter's body-root space.
+        /// </summary>
+        public void PoseExecution(int phase, float t01, float dt, SoldierRig rig, Vector3 victimChest)
+        {
+            _seenStance = MeleeStance.Idle;
+            _stanceStart = Time.time;
+
+            Vector3 coil = new Vector3(0.30f, 1.04f, -0.30f);
+            Vector3 buried = new Vector3(0.05f, Mathf.Min(victimChest.y, 1.12f), 0.52f);
+            float twist, lean;
+
+            switch (phase)
+            {
+                case 0:   // the seize: blade drawn back along the line it will travel
+                    Smooth(_weapon, coil, Quaternion.identity, 12f, dt);
+                    twist = -14f * t01;
+                    lean = 4f * t01;
+                    break;
+
+                case 1:   // the plunge: point-first, everything behind it
+                    float drive = EaseOutCubic(t01);
+                    _weapon.localPosition = Vector3.Lerp(coil, buried, drive);
+                    _weapon.localRotation = Quaternion.identity;
+                    twist = Mathf.Lerp(-14f, 16f, drive);
+                    lean = Mathf.Lerp(4f, 12f, drive);
+                    break;
+
+                case 2:   // held in: the beat where the whole field can read what happened
+                    _weapon.localPosition = buried + new Vector3(0f, Mathf.Sin(Time.time * 30f) * 0.008f, 0f);
+                    _weapon.localRotation = Quaternion.identity;
+                    twist = 16f;
+                    lean = 12f;
+                    break;
+
+                default:  // the yank: torn out and past the hip, the body wrenching with it
+                    float rip = EaseOutCubic(t01);
+                    _weapon.localPosition = Vector3.Lerp(buried, new Vector3(0.44f, 0.88f, -0.34f), rip);
+                    _weapon.localRotation = Quaternion.Slerp(
+                        Quaternion.identity, Quaternion.Euler(26f, 32f, 0f), rip);
+                    twist = Mathf.Lerp(16f, -26f, rip);
+                    lean = Mathf.Lerp(12f, -6f, rip);
+                    break;
+            }
+
+            float k = 1f - Mathf.Exp(-14f * dt);
+            _twist = Mathf.Lerp(_twist, twist, k);
+            _lean = Mathf.Lerp(_lean, lean, k);
+            rig?.SetCombatPose(_twist, _lean);
+
+            // The off hand seizes him: the board shoved into his chest — or the bare hand at his
+            // collar — released with the yank.
+            Vector3 grip = victimChest + new Vector3(-0.10f, 0.12f, -0.28f);
+            if (_shield != null)
+            {
+                if (phase <= 2) Smooth(_shield, grip + new Vector3(0f, -0.22f, -0.06f), Quaternion.identity, 12f, dt);
+                else Smooth(_shield, new Vector3(-0.40f, 0.98f, 0.06f), Quaternion.Euler(0f, 78f, 0f), 8f, dt);
+
+                Vector3 shieldHand = _shield.localPosition + _shield.localRotation * ShieldGrip;
+                rig?.SetHands(_weapon.localPosition, shieldHand);
+            }
+            else
+            {
+                rig?.SetHands(_weapon.localPosition, phase <= 2 ? grip : (Vector3?)null);
+            }
+        }
+
+        /// <summary>
+        /// The dead man's grip opens: weapon and shield leave his hands and lie flat on the ground a
+        /// step from where he fell, no longer riding the corpse's fall. Call once, at death.
+        /// </summary>
+        public void DropOnDeath(Vector3 fallPoint, int seed)
+        {
+            var random = new System.Random(seed);
+            float Spread(float min, float max) => min + (float)random.NextDouble() * (max - min);
+
+            Vector3 Scattered(float reach, float lift)
+            {
+                Vector3 spot = fallPoint
+                               + Quaternion.Euler(0f, Spread(0f, 360f), 0f) * Vector3.forward * reach;
+                spot.y = BattleTerrainBuilder.GroundHeight(spot) + lift;
+                return spot;
+            }
+
+            if (_weapon != null)
+            {
+                _weapon.SetParent(null, true);
+                _weapon.SetPositionAndRotation(
+                    Scattered(Spread(0.25f, 0.6f), 0.03f), Quaternion.Euler(0f, Spread(0f, 360f), 0f));
+            }
+
+            if (_shield != null)
+            {
+                _shield.SetParent(null, true);
+                // Face up, boss showing: -90 about X turns the board's face to the sky.
+                _shield.SetPositionAndRotation(
+                    Scattered(Spread(0.3f, 0.7f), 0.06f), Quaternion.Euler(-90f, Spread(0f, 360f), 0f));
+            }
+        }
+
         private void PoseShield(BattleCombatant man, float dt)
         {
             if (_shield == null) return;

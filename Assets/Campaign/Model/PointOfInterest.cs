@@ -25,7 +25,10 @@ namespace Century.Campaign.Model
         /// <summary>Ground fit to camp on.</summary>
         SafePlace = 10,
         /// <summary>The ravine out of the Aftermath: the way into the open world.</summary>
-        Passage = 11
+        Passage = 11,
+
+        /// <summary>Chained Romans awaiting sale — where the looters' wagons end up.</summary>
+        SlavePens = 12
     }
 
     /// <summary>

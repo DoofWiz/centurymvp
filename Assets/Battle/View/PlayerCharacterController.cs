@@ -38,15 +38,31 @@ namespace Century.Battle.View
 
         private CharacterController _controller;
         private BattleSettings _settings;
+        private BattleState _state;
         private BattleCameraRig _cameraRig;
         private BattleCombatant _combatant;
         private float _verticalVelocity;
+        private float _rallyCallLeft;
+        private float _rallyCallTime;
 
         public BattleCombatant Combatant => _combatant;
         public Vector3 Facing { get; private set; } = Vector3.forward;
 
-        /// <summary>True while the player is calling men back to the standard.</summary>
+        /// <summary>Set for one frame when R is pressed. The bootstrap asks the simulation to fire
+        /// the rally burst; whether it takes depends on the cooldown, not on this.</summary>
+        public bool RallyRequested { get; private set; }
+
+        /// <summary>True while the rally CALL animation plays — the couple of seconds of arm over
+        /// head in which the Centurion neither moves nor fights. The burst outlives it.</summary>
         public bool IsRallying { get; private set; }
+
+        /// <summary>True while the ExecutionDirector owns the body for the killing scene.</summary>
+        public bool IsExecuting { get; private set; }
+
+        /// <summary>For the ExecutionDirector and RallyFx, which pose and read the figure directly.</summary>
+        public Transform BodyRoot => _bodyRoot;
+        public SoldierRig Rig => _rig;
+        public CombatantGear Gear => _gear;
 
         /// <summary>One-frame melee intents, consumed by the bootstrap and fed to MeleeCombat.</summary>
         public bool ChargeStarted { get; private set; }   // LMB pressed — begin the wind-up
@@ -113,11 +129,14 @@ namespace Century.Battle.View
             if (_bodyRoot == null) _bodyRoot = transform;
         }
 
-        public void Bind(BattleCombatant combatant, BattleSettings settings, BattleCameraRig cameraRig)
+        public void Bind(
+            BattleCombatant combatant, BattleSettings settings, BattleCameraRig cameraRig,
+            BattleState state = null)
         {
             _combatant = combatant;
             _settings = settings;
             _cameraRig = cameraRig;
+            _state = state;
             PilaRemaining = settings.PilaCount;
 
             name = $"Centurion [{combatant.DisplayName}]";
@@ -127,13 +146,52 @@ namespace Century.Battle.View
             _gear = new CombatantGear(_bodyRoot, combatant.Weapon, combatant.HasShield, emphasise: true);
         }
 
+        /// <summary>Starts the rally-call animation: arm over head, gathering the men. Movement and
+        /// weapons are locked while it plays — the burst's cost, paid up front.</summary>
+        public void BeginRallyCall(float seconds)
+        {
+            _rallyCallLeft = Mathf.Max(0.1f, seconds);
+            _rallyCallTime = 0f;
+            IsRallying = true;
+        }
+
+        /// <summary>The ExecutionDirector takes the body: input dead, controller parked, every pose
+        /// coming from the director until <see cref="EndExecution"/>.</summary>
+        public void BeginExecution()
+        {
+            IsExecuting = true;
+            IsRallying = false;
+            _rallyCallLeft = 0f;
+            RallyRequested = false;
+            ChargeStarted = SlashRequested = ThrustRequested = false;
+            ShieldHeld = false;
+            ThrowRequested = false;
+            IsAiming = false;
+            _lmbCharging = false;
+            if (_controller != null) _controller.enabled = false;
+        }
+
+        public void EndExecution()
+        {
+            IsExecuting = false;
+            if (_controller != null && _combatant != null && _combatant.IsAlive)
+                _controller.enabled = true;
+            if (_combatant != null) _combatant.WorldPosition = transform.position;
+        }
+
         private void Update()
         {
             if (_settings == null || _combatant == null) return;
 
+            // The ExecutionDirector owns the body for the moment: position, facing and pose all
+            // come from it, so nothing here may touch them.
+            if (IsExecuting) return;
+
             if (!IsControlEnabled)
             {
                 IsRallying = false;
+                RallyRequested = false;
+                _rallyCallLeft = 0f;
                 ChargeStarted = SlashRequested = ThrustRequested = false;
                 ShieldHeld = false;
                 ThrowRequested = false;
@@ -154,30 +212,38 @@ namespace Century.Battle.View
                 return;
             }
 
-            // A dead Centurion gives no orders and swings no blade; he lies where he fell while
-            // the Optio's window runs (Centurio in Waiting).
+            // A dead Centurion gives no orders and swings no blade; he goes over like any man and
+            // lies where he fell while the Optio's window runs (Centurio in Waiting).
             if (_combatant != null && !_combatant.IsAlive)
             {
                 if (!_playerDown)
                 {
                     _playerDown = true;
                     HitEffects.SpawnDeath(transform.position + Vector3.up * 0.9f);
-                    if (_bodyRoot != null)
-                    {
-                        _bodyRoot.rotation = Quaternion.Euler(90f, _bodyRoot.eulerAngles.y, 0f);
-                        _bodyRoot.localPosition += Vector3.up * 0.12f;
-                    }
                     if (_controller != null) _controller.enabled = false;
+
+                    int seed = name.GetHashCode();
+                    _gear?.DropOnDeath(BattleTerrainBuilder.Grounded(transform.position), seed);
+                    DeathTopple.Begin(gameObject, transform, _bodyRoot,
+                        _combatant.LastHitDirection, _rig, seed);
                 }
                 IsRallying = false;
+                RallyRequested = false;
                 ShieldHeld = false;
                 ThrowRequested = false;
                 IsAiming = false;
                 return;
             }
 
-            // Rallying is a commitment: you stand and shout instead of moving or fighting.
-            IsRallying = Input.GetKey(_rallyKey);
+            // R fires the rally burst (the bootstrap asks the simulation; the cooldown answers).
+            // The CALL itself — the couple of seconds of gathering arm — is what roots him.
+            RallyRequested = Input.GetKeyDown(_rallyKey);
+            if (_rallyCallLeft > 0f)
+            {
+                _rallyCallLeft -= Time.deltaTime;
+                _rallyCallTime += Time.deltaTime;
+            }
+            IsRallying = _rallyCallLeft > 0f;
 
             // Stealth toggles on C once the opening has taught it; a sprint stands him up.
             if (StealthAllowed && Input.GetKeyDown(_stealthKey)) IsStealthed = !IsStealthed;
@@ -202,7 +268,8 @@ namespace Century.Battle.View
             if (_combatant.WasHitThisTick) _rig?.NotifyHit();
             _rig?.Animate(_controller != null ? _controller.velocity.magnitude : 0f, Time.deltaTime);
 
-            _gear?.Pose(_combatant, Time.deltaTime, _rig);
+            if (IsRallying) _gear?.PoseRallyWave(_combatant, _rallyCallTime, Time.deltaTime, _rig);
+            else _gear?.Pose(_combatant, Time.deltaTime, _rig);
         }
 
         /// <summary>
@@ -289,6 +356,9 @@ namespace Century.Battle.View
                              && !IsAiming;
             float pace = sprinting ? 1f : _settings.NormalMoveFraction;
             if (IsStealthed) pace *= _stealthMoveFraction;
+
+            // The rally's surge carries the commander too.
+            if (_state != null && _state.RallyActive) pace *= _settings.RallyMoveSpeedFactor;
             if (sprinting)
                 _combatant.Stamina01 =
                     Mathf.Max(0f, _combatant.Stamina01 - _settings.SprintStaminaPerSecond * Time.deltaTime);

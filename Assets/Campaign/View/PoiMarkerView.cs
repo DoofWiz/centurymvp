@@ -178,6 +178,7 @@ namespace Century.Campaign.View
                 case PoiKind.Looters: return "LOOTERS' FIRE";
                 case PoiKind.SafePlace: return "CAMP GROUND";
                 case PoiKind.Passage: return "THE WAY OUT";
+                case PoiKind.SlavePens: return "SLAVE FAIR";
                 default: return "A PLACE";
             }
         }

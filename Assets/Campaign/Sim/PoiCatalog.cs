@@ -25,8 +25,17 @@ namespace Century.Campaign.Sim
         public float RecruitHealthMax = 1f;
         public int RecruitExperienceMax;
 
+        /// <summary>Loyalty the recruits arrive with. Deserters taken back into the standard come
+        /// in well below the 0.5 default — men who broke once, watched by the relationship layer.</summary>
+        public float RecruitLoyalty01 = 0.5f;
+
         public bool SpawnFight;
         public int FightStrength;
+
+        /// <summary>Archetype for the spawned fighters ("germanic_looter" throws stones, not
+        /// javelins); null keeps the raider default. And a name for the band, likewise.</summary>
+        public string FightArchetype;
+        public string FightName;
 
         /// <summary>The spawned warband carries the century's lost signum: beating it wins the
         /// standard back (army phase 3.5 — the speculator's lead closes phase 3's wound).</summary>
@@ -96,7 +105,8 @@ namespace Century.Campaign.Sim
 
             if (SpawnFight)
             {
-                PartyState raiders = PoiFightFactory.SpawnRaiders(state, position, FightStrength);
+                PartyState raiders = PoiFightFactory.SpawnRaiders(
+                    state, position, FightStrength, FightArchetype, FightName);
                 if (FightCarriesSignum)
                 {
                     raiders.CarriesPlayerSignum = true;
@@ -148,7 +158,7 @@ namespace Century.Campaign.Sim
                 Health01 = Random.Range(RecruitHealthMin, RecruitHealthMax),
                 Stamina01 = Random.Range(0.5f, 0.9f),
                 Morale01 = Random.Range(0.45f, 0.65f),
-                Loyalty01 = 0.5f,
+                Loyalty01 = RecruitLoyalty01,
                 Experience = RecruitExperienceMax > 0 ? Random.Range(0, RecruitExperienceMax + 1) : 0,
                 DayJoined = state != null ? state.Clock.Now.DayNumber : 0
             };
@@ -460,6 +470,180 @@ namespace Century.Campaign.Sim
 
             Add(new PoiEvent
             {
+                Id = "raider_warcamp",
+                Title = "A Raider War-Camp",
+                Subtitle = "A palisaded muster, banners on the stakes",
+                Body = "Not a band drunk on plunder — a muster. A rough palisade, sentries who walk their rounds, " +
+                       "and captured Roman kit stacked like firewood. Breaking a camp like this would be felt " +
+                       "across the whole district. So would failing to.",
+                OfficerRemark = "Speculator: \"Two dozen spears at least, sir, and they keep a proper watch. This one would cost us.\"",
+                Choices = new[]
+                {
+                    new PoiChoice("Storm the palisade", "a hard fight — a war-camp's worth of spoils",
+                        new PoiOutcome
+                        {
+                            Denarii = 120, SpawnFight = true, FightStrength = 26,
+                            FightName = "War-Camp Muster",
+                            Items = new[]
+                            {
+                                new PoiOutcome.ItemGrant("pila_bundle", 2),
+                                new PoiOutcome.ItemGrant("scutum_spare", 2),
+                                new PoiOutcome.ItemGrant("iron_ingots", 4),
+                                new PoiOutcome.ItemGrant("fur_pelts", 3),
+                                new PoiOutcome.ItemGrant("mead_jar", 3),
+                            },
+                            Reactions = new[] { new PoiOutcome.OfficerReaction(PostId.Signifer, 0.05f) },
+                            ResultText = "The century goes over the stakes with the dawn."
+                        }),
+                    new PoiChoice("Slip past in the dark", "no fight; the muster stands",
+                        new PoiOutcome { Morale = -0.03f, ResultText = "You thread the column past their fires. The camp stands at your back." }),
+                }
+            });
+
+            Add(new PoiEvent
+            {
+                Id = "deserters",
+                Title = "A Broken Tower",
+                Subtitle = "Roman voices behind a barred door",
+                Body = "Legionaries — a dozen days' beards, eyes that will not meet the crest. Deserters from the " +
+                       "massacre, holed up with what they carried off. They are done running, if you will have them; " +
+                       "men who broke once, carrying it with them.",
+                OfficerRemark = "Optio Aquilius: \"Runners, sir. Take them if we must — but the standard remembers who left it.\"",
+                Choices = new[]
+                {
+                    new PoiChoice("Take them back into the standard", "+3 seasoned recruits of doubtful loyalty",
+                        new PoiOutcome
+                        {
+                            Recruits = 3, RecruitExperienceMax = 400, RecruitLoyalty01 = 0.25f,
+                            Reactions = new[] { new PoiOutcome.OfficerReaction(PostId.Optio, -0.05f) },
+                            ResultText = "Three men fall in without a word. The ranks make room, slowly."
+                        }),
+                    new PoiChoice("Hang the ringleader, enlist the rest", "+2 recruits, discipline upheld",
+                        new PoiOutcome
+                        {
+                            Recruits = 2, RecruitExperienceMax = 400, RecruitLoyalty01 = 0.4f, Morale = -0.03f,
+                            Reactions = new[]
+                            {
+                                new PoiOutcome.OfficerReaction(PostId.Optio, 0.06f),
+                                new PoiOutcome.OfficerReaction(PostId.Medicus, -0.05f),
+                            },
+                            ResultText = "The rope does its work. Two men take the oath again over the grave."
+                        }),
+                    new PoiChoice("Leave them to their tower", "the century keeps its own counsel",
+                        new PoiOutcome { ResultText = "You leave them the tower and the shame of it." }),
+                }
+            });
+
+            Add(new PoiEvent
+            {
+                Id = "hunters_camp",
+                Title = "A Hunters' Camp",
+                Subtitle = "Chatti hunters, wary but not hostile",
+                Body = "Racks of drying meat, stretched hides, and hunters who set down their bows slowly when they " +
+                       "see the eagles. They have no love for Rome — but no appetite for dying over venison either. " +
+                       "They will trade.",
+                OfficerRemark = "Tesserarius Vorenus: \"Meat that doesn't march out of our stores, sir. I'd call that worth silver.\"",
+                Choices = new[]
+                {
+                    new PoiChoice("Trade for meat and pelts", "-35 denarii, +70 food and hides",
+                        new PoiOutcome
+                        {
+                            Denarii = -35, Food = 70,
+                            Items = new[]
+                            {
+                                new PoiOutcome.ItemGrant("raw_game", 3),
+                                new PoiOutcome.ItemGrant("fur_pelts", 2),
+                            },
+                            ResultText = "Silver for venison: both sides leave satisfied."
+                        }),
+                    new PoiChoice("Take it all", "a small fight; the district hears of it",
+                        new PoiOutcome
+                        {
+                            Food = 90, SpawnFight = true, FightStrength = 8, FightName = "Chatti Hunters",
+                            Items = new[] { new PoiOutcome.ItemGrant("fur_pelts", 4), new PoiOutcome.ItemGrant("raw_game", 4) },
+                            Morale = -0.04f,
+                            Reactions = new[] { new PoiOutcome.OfficerReaction(PostId.Medicus, -0.06f) },
+                            ResultText = "You take the camp. The hunters reach for their bows."
+                        }),
+                    new PoiChoice("March on", "leave them to the forest",
+                        new PoiOutcome { ResultText = "You leave the hunters to their racks and fires." }),
+                }
+            });
+
+            Add(new PoiEvent
+            {
+                Id = "wrecked_convoy",
+                Title = "A Wrecked Convoy",
+                Subtitle = "Roman wagons overturned in a defile",
+                Body = "A supply train died here: wagons on their sides, mules stripped to bone, grain sacks split " +
+                       "across the track. Figures pick through the wreck — looters, stooped under sacks already. " +
+                       "The kit they are carrying off is Roman.",
+                OfficerRemark = "Valerius: \"Corpse-pickers, sir — stones and knives, no stomach for a line of shields.\"",
+                Choices = new[]
+                {
+                    new PoiChoice("Drive them off the wagons", "a fight with looters; the convoy's stores",
+                        new PoiOutcome
+                        {
+                            Food = 60, SpawnFight = true, FightStrength = 10,
+                            FightArchetype = "germanic_looter", FightName = "Convoy Looters",
+                            Items = new[]
+                            {
+                                new PoiOutcome.ItemGrant("grain_sack", 3),
+                                new PoiOutcome.ItemGrant("pila_bundle", 2),
+                                new PoiOutcome.ItemGrant("linen_bandages", 2),
+                                new PoiOutcome.ItemGrant("scutum_spare", 1),
+                            },
+                            ResultText = "Shields forward down the defile: the looters drop their sacks and stand."
+                        }),
+                    new PoiChoice("Take what's nearest and go", "+40 food, no fight — the rest is theirs",
+                        new PoiOutcome
+                        {
+                            Food = 40, Morale = -0.02f,
+                            Reactions = new[] { new PoiOutcome.OfficerReaction(PostId.Signifer, -0.04f) },
+                            ResultText = "You shoulder what's nearest and leave Roman kit to the carrion trade."
+                        }),
+                }
+            });
+
+            Add(new PoiEvent
+            {
+                Id = "slave_pens",
+                Title = "A Slave Fair",
+                Subtitle = "Romans in chains, buyers on the road",
+                Body = "Pens of lashed hurdles, and in them Romans — soldiers, mule-drivers, a clerk still in his " +
+                       "stained tunic — waiting to be sold when the buyers come. The looter bands bring their wagons " +
+                       "here. The guards are many, but they are guards of chattel, not a line of spears.",
+                OfficerRemark = "Valerius: \"This is where the wagons were headed, sir. Every one of them.\"",
+                Choices = new[]
+                {
+                    new PoiChoice("Break the fair", "a fight with the guards; the pens come open",
+                        new PoiOutcome
+                        {
+                            SpawnFight = true, FightStrength = 14,
+                            FightArchetype = "germanic_looter", FightName = "Slave-Fair Guards",
+                            Recruits = 3, RecruitHealthMin = 0.2f, RecruitHealthMax = 0.35f, RecruitExperienceMax = 250,
+                            Reactions = new[] { new PoiOutcome.OfficerReaction(PostId.Signifer, 0.06f) },
+                            ResultText = "The century comes out of the treeline in line. The pens come open."
+                        }),
+                    new PoiChoice("Ransom them", "-120 denarii, the pens empty without blood",
+                        new PoiOutcome
+                        {
+                            Denarii = -120, Morale = 0.04f,
+                            Recruits = 3, RecruitHealthMin = 0.2f, RecruitHealthMax = 0.35f, RecruitExperienceMax = 250,
+                            ResultText = "Silver changes hands and the chains come off. The freed men fall in behind the standard."
+                        }),
+                    new PoiChoice("March on", "leave them to the buyers",
+                        new PoiOutcome
+                        {
+                            Morale = -0.05f,
+                            Reactions = new[] { new PoiOutcome.OfficerReaction(PostId.Signifer, -0.06f) },
+                            ResultText = "You march past the pens. The men keep their eyes on the road."
+                        }),
+                }
+            });
+
+            Add(new PoiEvent
+            {
                 Id = "opportunity",
                 Title = "The Prize Your Scout Marked",
                 Subtitle = "The Speculator's report bears fruit",
@@ -675,6 +859,7 @@ namespace Century.Campaign.Sim
                         new PoiOutcome
                         {
                             SpawnFight = true, FightStrength = 7,
+                            FightArchetype = "germanic_looter", FightName = "Looters from the Fire",
                             RecruitsToReach = 12, RecruitHealthMin = 0.15f, RecruitHealthMax = 0.24f, RecruitExperienceMax = 220,
                             Items = new[] { new PoiOutcome.ItemGrant("grain_sack", 2), new PoiOutcome.ItemGrant("wine_amphora", 1) },
                             ResultText = "You fall on the fire with a shout. The chains come off."

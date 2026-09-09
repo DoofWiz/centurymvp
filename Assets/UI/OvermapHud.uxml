@@ -384,6 +384,32 @@
             </ui:VisualElement>
         </ui:VisualElement>
 
+        <!-- ============================ THE OBJECTIVES SCREEN ============================ -->
+        <!-- Shown once, straight after the arrival briefing is dismissed, clock still held:
+             the current objective in full, and where to keep finding it. -->
+        <ui:VisualElement name="objectives-modal" class="modal" style="display: none;">
+            <ui:VisualElement class="modal__sheet narration-sheet">
+                <ui:VisualElement class="modal__header">
+                    <ui:Label text="OBJECTIVES" class="modal__title" />
+                    <ui:Label text="The road home is walked one task at a time." class="modal__subtitle" />
+                </ui:VisualElement>
+                <ui:Label text="CURRENT OBJECTIVE" class="heading" style="margin-top: 10px;" />
+                <ui:VisualElement class="rule rule--short" />
+                <ui:Label name="objectives-modal-text" text="—" class="body" />
+                <ui:VisualElement class="objective__marker">
+                    <ui:Label text="◆" class="objective__diamond" />
+                    <ui:Label name="objectives-modal-tracked" text="—" class="body body--dim" />
+                </ui:VisualElement>
+                <ui:Label text="Your current objective always stands at the top left of the map, and the ◆ line beneath it names the place or task it points to. Complete it and the next takes its place."
+                          class="body body--dim" style="margin-top: 12px;" />
+                <ui:VisualElement class="modal__footer detail-footer">
+                    <ui:Button name="objectives-dismiss" class="button-start">
+                        <ui:Label text="UNDERSTOOD" class="button-start__label" picking-mode="Ignore" />
+                    </ui:Button>
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
         <!-- ================================ QUIT PROMPT ================================ -->
         <ui:VisualElement name="quit-modal" class="modal" style="display: none;">
             <ui:VisualElement class="modal__sheet quit-sheet">

@@ -31,6 +31,7 @@ namespace Century.Battle.View
 
         private NavMeshAgent _agent;
         private BattleSettings _settings;
+        private BattleState _state;
         private BattleCombatant _combatant;
         private BattleSquad _squad;
         private CombatantGear _gear;
@@ -49,6 +50,11 @@ namespace Century.Battle.View
         /// <summary>True when the man is dressed in his slot rather than still moving up.</summary>
         public bool IsInStation { get; private set; }
 
+        /// <summary>For the ExecutionDirector, which poses the victim itself.</summary>
+        public Transform BodyRoot => _bodyRoot;
+        public SoldierRig Rig => _rig;
+        public CombatantGear Gear => _gear;
+
         private void Awake()
         {
             _agent = GetComponent<NavMeshAgent>();
@@ -65,11 +71,13 @@ namespace Century.Battle.View
         }
 
         public void Bind(
-            BattleCombatant combatant, BattleSquad squad, BattleSettings settings, Transform corpseRoot = null)
+            BattleCombatant combatant, BattleSquad squad, BattleSettings settings,
+            BattleState state, Transform corpseRoot = null)
         {
             _combatant = combatant;
             _squad = squad;
             _settings = settings;
+            _state = state;
             _corpseRoot = corpseRoot;
 
             name = $"{combatant.DisplayName} [{squad.DisplayName}]";
@@ -154,6 +162,19 @@ namespace Century.Battle.View
                 return;
             }
 
+            // Held in an execution: the ExecutionDirector owns the body until the blade comes out.
+            // The agent is parked for good — the only exit from this state is the corpse's fall.
+            if (_combatant.InExecution)
+            {
+                if (_agent.enabled)
+                {
+                    if (_agent.isOnNavMesh) _agent.ResetPath();
+                    _agent.enabled = false;
+                }
+                _combatant.WorldPosition = transform.position;
+                return;
+            }
+
             if (!_isPlaced || !_agent.isOnNavMesh)
             {
                 _combatant.WorldPosition = transform.position;
@@ -165,6 +186,11 @@ namespace Century.Battle.View
             else UpdateFormation();
 
             ApplyGroundDrag();
+
+            // The rally's surge: the Centurion's men move with borrowed legs while the burst holds.
+            // Not the routed — the call does not speed a man's flight.
+            if (_state != null && _state.RallyActive && _combatant.IsPlayerSide && !_squad.IsRouted)
+                _agent.speed *= _settings.RallyMoveSpeedFactor;
 
             _combatant.WorldPosition = transform.position;
             _combatant.Facing = _bodyRoot.forward;
@@ -408,20 +434,19 @@ namespace Century.Battle.View
             _agent.enabled = false;
 
             Vector3 restingPlace = transform.position;
-            float facingYaw = _bodyRoot.eulerAngles.y;
 
             transform.SetParent(_corpseRoot, worldPositionStays: true);
             transform.position = restingPlace;
 
-            // Tuned for the rig, whose pivot sits at the FEET: after the 90° fall the figure's
-            // thickness centres on the ground, so it needs a small LIFT to rest on it — the old
-            // capsule-era 0.35 drop buried every corpse and the dead simply vanished.
-            _bodyRoot.rotation = Quaternion.Euler(90f, facingYaw, 0f);
-            _bodyRoot.localPosition += Vector3.up * 0.12f;
-
             // Colliders on a corpse serve no purpose and confuse the living.
             Collider[] colliders = GetComponentsInChildren<Collider>();
             for (int i = 0; i < colliders.Length; i++) colliders[i].enabled = false;
+
+            // The grip opens and the body goes over — a light topple along the killing blow's line
+            // (see DeathTopple), which lands him in the same lying pose the old instant flip used.
+            int seed = (_combatant.SoldierId ?? name).GetHashCode();
+            _gear?.DropOnDeath(BattleTerrainBuilder.Grounded(restingPlace), seed);
+            DeathTopple.Begin(gameObject, transform, _bodyRoot, _combatant.LastHitDirection, _rig, seed);
 
             _combatant.WorldPosition = restingPlace;
             ApplyTint();

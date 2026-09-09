@@ -43,7 +43,7 @@
     <UnityVersion>6000.3.20f1</UnityVersion>
   </PropertyGroup>
   <ItemGroup>
-    <Analyzer Include="C:\Users\tomsc\.vscode\extensions\visualstudiotoolsforunity.vstuc-1.2.2\Analyzers\Microsoft.Unity.Analyzers.dll" />
+    <Analyzer Include="C:\Users\tomsc\.vscode\extensions\visualstudiotoolsforunity.vstuc-1.3.1\Analyzers\Microsoft.Unity.Analyzers.dll" />
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.3.20f1\Editor\Data\Tools\BuildPipeline\Unity.SourceGenerators\Unity.SourceGenerators.dll" />
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.3.20f1\Editor\Data\Tools\BuildPipeline\Unity.SourceGenerators\Unity.Properties.SourceGenerator.dll" />
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.3.20f1\Editor\Data\Tools\BuildPipeline\Unity.SourceGenerators\Unity.UIToolkit.SourceGenerator.dll" />
@@ -57,14 +57,17 @@
     <Compile Include="Assets\Campaign\Model\CommanderProgress.cs" />
     <Compile Include="Assets\Campaign\Model\CampFacilities.cs" />
     <Compile Include="Assets\Campaign\Sim\RelationshipLedger.cs" />
+    <Compile Include="Assets\Campaign\Sim\CampaignSerializer.cs" />
     <Compile Include="Assets\Campaign\View\InventoryScreen.cs" />
     <Compile Include="Assets\Campaign\Model\CampaignState.cs" />
     <Compile Include="Assets\Campaign\View\OvermapPursuitMarkers.cs" />
     <Compile Include="Assets\Campaign\Model\PartyFaction.cs" />
     <Compile Include="Assets\Campaign\Sim\SpeculatorInfluence.cs" />
+    <Compile Include="Assets\Campaign\View\CampWalkthrough.cs" />
     <Compile Include="Assets\Campaign\View\CampHudController.cs" />
     <Compile Include="Assets\Campaign\Sim\CampService.cs" />
     <Compile Include="Assets\Campaign\View\SurpriseIndicator.cs" />
+    <Compile Include="Assets\Campaign\Sim\CampaignSeeder.cs" />
     <Compile Include="Assets\Campaign\Sim\CampaignEventLog.cs" />
     <Compile Include="Assets\Campaign\Sim\CommanderSkillCatalog.cs" />
     <Compile Include="Assets\Campaign\Model\SoldierGrade.cs" />
@@ -82,14 +85,18 @@
     <Compile Include="Assets\Campaign\Sim\AmbushDirector.cs" />
     <Compile Include="Assets\Campaign\View\PlayerPartyController.cs" />
     <Compile Include="Assets\Campaign\Sim\PoiDirector.cs" />
+    <Compile Include="Assets\Campaign\View\SaveSlotsPanel.cs" />
     <Compile Include="Assets\Campaign\Sim\PostTreeCatalog.cs" />
     <Compile Include="Assets\Campaign\View\OfficeCards.cs" />
     <Compile Include="Assets\Campaign\Sim\PartySpeedCalculator.cs" />
     <Compile Include="Assets\Campaign\View\OvermapMoveMarker.cs" />
     <Compile Include="Assets\Campaign\Sim\LineOfSight.cs" />
+    <Compile Include="Assets\Campaign\Sim\OnboardingDirector.cs" />
+    <Compile Include="Assets\Campaign\Model\OnboardingState.cs" />
     <Compile Include="Assets\Campaign\Model\PostRoster.cs" />
     <Compile Include="Assets\Campaign\Model\SoldierRecord.cs" />
     <Compile Include="Assets\Campaign\Sim\ContuberniumLedger.cs" />
+    <Compile Include="Assets\Campaign\View\PoiMarkerView.cs" />
     <Compile Include="Assets\Campaign\View\PartyView.cs" />
     <Compile Include="Assets\Campaign\Model\PartyState.cs" />
     <Compile Include="Assets\Campaign\Model\Stores.cs" />

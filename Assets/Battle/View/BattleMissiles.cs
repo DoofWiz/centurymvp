@@ -38,13 +38,18 @@ namespace Century.Battle.View
         {
             if (_state == null) return;
 
-            Vector3 velocity = BallisticVelocity(from, targetPoint, _settings.PilaLaunchSpeed);
+            MissileClass missile = attacker != null ? attacker.Missile : MissileClass.Pila;
+            float launchSpeed = _settings.PilaLaunchSpeed * MissileProfile.For(missile).LaunchSpeedScale;
+
+            Vector3 velocity = BallisticVelocity(from, targetPoint, launchSpeed);
             Quaternion rotation = Quaternion.LookRotation(
                 velocity.sqrMagnitude > 0.01f ? velocity.normalized : Vector3.forward, Vector3.up);
 
-            PilaProjectile projectile = _prefab != null
-                ? Instantiate(_prefab, from, rotation, _root)
-                : CreateDefaultProjectile(from, rotation);
+            PilaProjectile projectile = missile == MissileClass.Rocks
+                ? CreateRock(from, rotation)
+                : _prefab != null
+                    ? Instantiate(_prefab, from, rotation, _root)
+                    : CreateDefaultProjectile(from, rotation);
 
             if (projectile == null) return;
             if (projectile.TryGetComponent(out Rigidbody body)) body.linearVelocity = velocity;
@@ -74,6 +79,35 @@ namespace Century.Battle.View
             body.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
 
             return shaft.AddComponent<PilaProjectile>();
+        }
+
+        /// <summary>A looter's stone: a fist-sized lump, not a shaft. Code-gen like the default pilum.</summary>
+        private PilaProjectile CreateRock(Vector3 position, Quaternion rotation)
+        {
+            GameObject rock = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            rock.name = "Rock";
+            rock.transform.SetParent(_root, false);
+            rock.transform.SetPositionAndRotation(position, rotation);
+            rock.transform.localScale = Vector3.one * 0.2f;
+
+            if (rock.TryGetComponent(out Renderer renderer)) renderer.sharedMaterial = RockMaterial();
+
+            Rigidbody body = rock.AddComponent<Rigidbody>();
+            body.mass = 0.8f;
+            body.useGravity = true;
+            body.isKinematic = false;
+            body.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
+
+            return rock.AddComponent<PilaProjectile>();
+        }
+
+        private Material _rockMaterial;
+
+        private Material RockMaterial()
+        {
+            if (_rockMaterial == null)
+                _rockMaterial = Century.Core.World.FxMaterials.Unlit(new Color(0.42f, 0.40f, 0.37f));
+            return _rockMaterial;
         }
 
         private Material ShaftMaterial()
@@ -120,9 +154,10 @@ namespace Century.Battle.View
 
         /// <summary>
         /// Resolves an in-flight missile against any opposing man within impact radius of
-        /// <paramref name="position"/>. Returns true if it struck someone.
+        /// <paramref name="position"/>. <paramref name="travelDir"/> is its direction of flight, so
+        /// the resolver can judge which quarter the throw arrives from. Returns true if it struck.
         /// </summary>
-        public bool TryImpact(Vector3 position, BattleCombatant attacker, bool attackerIsPlayerSide)
+        public bool TryImpact(Vector3 position, Vector3 travelDir, BattleCombatant attacker, bool attackerIsPlayerSide)
         {
             if (_state == null) return false;
 
@@ -163,7 +198,7 @@ namespace Century.Battle.View
 
             if (best == null) return false;
 
-            _resolver.ResolveHit(attacker, best);
+            _resolver.ResolveHit(attacker, best, travelDir);
             return true;
         }
 
@@ -189,6 +224,9 @@ namespace Century.Battle.View
             {
                 BattleSquad squad = squads[s];
                 if (!squad.IsEffective || squad.IsOffField) continue;
+
+                // A squad that has not marked an enemy (the opening's passing warband) throws nothing.
+                if (squad.Unaware) continue;
 
                 // Skirmishing squads (or a Skirmisher warband's, by doctrine) throw continuously;
                 // everyone else holds their pila for the single volley before contact.
@@ -267,7 +305,7 @@ namespace Century.Battle.View
                 for (int m = 0; m < members.Count; m++)
                 {
                     BattleCombatant man = members[m];
-                    if (!man.IsAlive) continue;
+                    if (!man.IsAlive || man.InExecution) continue;
                     float sqr = (man.WorldPosition - from).sqrMagnitude;
                     if (sqr > bestSqr) continue;
                     best = man;
@@ -278,7 +316,7 @@ namespace Century.Battle.View
             if (!attackerIsPlayerSide)
             {
                 BattleCombatant player = _state.PlayerCharacter;
-                if (player != null && player.IsAlive)
+                if (player != null && player.IsAlive && !player.InExecution)
                 {
                     float sqr = (player.WorldPosition - from).sqrMagnitude;
                     if (sqr <= bestSqr) best = player;

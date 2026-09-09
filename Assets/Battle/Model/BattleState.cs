@@ -72,6 +72,18 @@ namespace Century.Battle.Model
         /// <summary>Seconds since the battle began. Drives order propagation, not campaign time.</summary>
         public float ElapsedSeconds;
 
+        // --- The rally burst ---------------------------------------------------------------------
+
+        /// <summary>Seconds left of the active rally burst. Zero when no burst is running.</summary>
+        public float RallySecondsLeft;
+
+        /// <summary>Seconds until the rally can be called again. Starts when a burst ends.</summary>
+        public float RallyCooldownLeft;
+
+        /// <summary>True while the Centurion's rally burst is running: the whole side takes less
+        /// damage, moves faster and recovers wind. Ticked by the simulation.</summary>
+        public bool RallyActive => RallySecondsLeft > 0f;
+
         /// <summary>The Centurion is down and the Optio holds command: a degraded-control window
         /// with a closing clock, instead of an instant defeat (army brief, Centurio in Waiting).</summary>
         /// <summary>Resolved office effects from the campaign. Never null.</summary>

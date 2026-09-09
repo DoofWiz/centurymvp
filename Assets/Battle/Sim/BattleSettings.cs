@@ -130,9 +130,6 @@ namespace Century.Battle.Sim
         [Range(0f, 1f)] public float StaggerDamageFraction = 0.5f;
 
         [Header("Shields")]
-        [Tooltip("The Centurion's own scutum: chance a blow from his front is blocked, scaled by his stamina.")]
-        [Range(0f, 0.9f)] public float PlayerShieldBlockChance = 0.45f;
-
         [Tooltip("Damage multiplier for a blow landing on a man's flank.")]
         public float FlankDamageMultiplier = 1.5f;
 
@@ -232,6 +229,35 @@ namespace Century.Battle.Sim
         [Tooltip("Cohesion a rallied squad returns with.")]
         [Range(0.1f, 0.6f)] public float RalliedCohesion = 0.3f;
 
+        // --- The rally burst (R). CODE DEFAULTS: the asset only serializes fields through
+        // SquadFrontage, so these are tuned here, not in the Inspector.
+
+        /// <summary>Seconds the rally burst lasts once activated.</summary>
+        public float RallyBurstSeconds = 8f;
+
+        /// <summary>Seconds before the rally can be called again, counted from the burst's end.</summary>
+        public float RallyCooldownSeconds = 60f;
+
+        /// <summary>Multiplier on all damage the player's side takes while the burst runs.</summary>
+        public float RallyDamageTakenFactor = 0.45f;
+
+        /// <summary>Move speed multiplier for the player and his men while the burst runs.</summary>
+        public float RallyMoveSpeedFactor = 1.2f;
+
+        /// <summary>Stamina restored per second to the whole side during the burst — even mid-fight,
+        /// which is exactly what ordinary recovery never allows.</summary>
+        public float RallyStaminaPerSecond = 0.05f;
+
+        /// <summary>Seconds of the Centurion's arm-over-head rally call animation. He can neither
+        /// move nor fight while making it: the burst's cost is paid up front.</summary>
+        public float RallyCallSeconds = 2f;
+
+        // --- Executions. CODE DEFAULTS, as above.
+
+        /// <summary>The player's killing melee blow becomes a held execution rather than a plain
+        /// death, when the view has an ExecutionDirector installed to stage it.</summary>
+        public bool ExecutionsEnabled = true;
+
         [Header("Medicus")]
         [Tooltip("Health restored per second to a wounded man beside a medicus who is out of combat.")]
         public float MedicusHealPerSecond = 0.03f;
@@ -276,15 +302,13 @@ namespace Century.Battle.Sim
         [Tooltip("Launch speed of a thrown pilum, in metres per second. Higher is flatter and faster.")]
         public float PilaLaunchSpeed = 26f;
 
-        [Tooltip("Health fraction a pilum removes on a clean hit. Wounds more than it kills: the " +
-                 "volley softens and shakes a line for the charge, it does not delete it.")]
+        [Tooltip("Health fraction a pilum removes on a hit that reaches the BODY — a raised shield " +
+                 "covering the throw's quarter stops it outright (see MissileResolver). Javelins and " +
+                 "rocks scale off this value via MissileProfile.")]
         [Range(0.05f, 0.9f)] public float PilaDamage = 0.38f;
 
         [Tooltip("Radius within which a flying pilum counts as striking a man (measured at chest height).")]
         public float PilaImpactRadius = 0.85f;
-
-        [Tooltip("Fraction of a pilum's damage a raised shield stops from the front. Pila largely defeat shields.")]
-        [Range(0f, 0.8f)] public float PilaShieldBlock = 0.25f;
 
         [Tooltip("Multiplier on missile damage against the Centurion himself. His death ends the " +
                  "battle outright, so being quietly deleted by a stray volley at range is a story " +

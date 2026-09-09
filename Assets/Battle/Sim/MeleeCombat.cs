@@ -26,6 +26,14 @@ namespace Century.Battle.Sim
 
         private float _dt;
 
+        /// <summary>
+        /// View-installed hook, offered the player's killing melee blow BEFORE it lands. Returning
+        /// true holds the victim at death's door (the sim freezes him) while the view stages the
+        /// execution; the view then lands the death through <see cref="ResolveExecution"/>. With no
+        /// hook installed (the opening sequence, or a stripped scene) the blow kills normally.
+        /// </summary>
+        public System.Func<BattleCombatant, BattleCombatant, bool> ExecutionOffer;
+
         public MeleeCombat(BattleState state, BattleSettings settings)
         {
             _state = state;
@@ -120,6 +128,16 @@ namespace Century.Battle.Sim
             man.AttackCooldown -= _dt;
             if (man.StaggerTimer > 0f) man.StaggerTimer -= _dt;
 
+            // Held in the executioner's grip: no fight left to fight. The view owns him now.
+            if (man.InExecution)
+            {
+                man.Target = null;
+                man.Stance = MeleeStance.Idle;
+                man.ShieldRaised = false;
+                man.DesiredRange = 0f;
+                return;
+            }
+
             if (routed)
             {
                 man.Target = null;
@@ -162,7 +180,7 @@ namespace Century.Battle.Sim
         public void PlayerBeginCharge()
         {
             BattleCombatant p = _state.PlayerCharacter;
-            if (p == null || !p.IsAlive || p.IsStaggered) return;
+            if (p == null || !p.IsAlive || p.IsStaggered || p.InExecution) return;
             if (p.Stance == MeleeStance.Idle) { p.Stance = MeleeStance.Charging; p.Charge01 = 0f; }
         }
 
@@ -174,13 +192,14 @@ namespace Century.Battle.Sim
         {
             BattleCombatant p = _state.PlayerCharacter;
             if (p == null || !p.IsAlive) return;
-            p.ShieldRaised = raised && p.HasShield && !p.IsStaggered && p.Stance != MeleeStance.Striking;
+            p.ShieldRaised = raised && p.HasShield && !p.IsStaggered && !p.InExecution
+                             && p.Stance != MeleeStance.Striking;
         }
 
         private void BeginPlayerStrike(AttackForm form, float charge01)
         {
             BattleCombatant p = _state.PlayerCharacter;
-            if (p == null || !p.IsAlive || p.IsStaggered) return;
+            if (p == null || !p.IsAlive || p.IsStaggered || p.InExecution) return;
             if (p.Stance != MeleeStance.Idle && p.Stance != MeleeStance.Charging) return;
 
             p.Form = form;
@@ -404,6 +423,29 @@ namespace Century.Battle.Sim
             float damage = baseDamage * band * condition * facing * ground * man.DamageMultiplier
                            * _settings.MeleeDamageScale * damageScale * Range(0.85f, 1.15f);
 
+            // The rally's shelter: while the burst runs, the century takes its blows on braced arms.
+            if (victim.IsPlayerSide && _state.RallyActive) damage *= _settings.RallyDamageTakenFactor;
+
+            victim.LastHitDirection = FlatStrikeDirection(man);
+
+            // The player's killing blow becomes a SCENE, not a number: offer it to the view first.
+            // Accepted, the victim is held at death's door and the execution lands the death itself.
+            if (damage >= victim.Health01 && _settings.ExecutionsEnabled && ExecutionOffer != null
+                && man.IsPlayerControlled && !victim.IsPlayerSide && !victim.InExecution
+                && ExecutionOffer(man, victim))
+            {
+                victim.InExecution = true;
+                man.InExecution = true;
+                victim.Health01 = 0.01f;
+                victim.Morale01 = 0f;
+                victim.WasHitThisTick = true;
+                victim.Target = null;
+                victim.TimeSinceCombat = 0f;
+                victim.Stance = MeleeStance.Idle;
+                victim.ShieldRaised = false;
+                return;
+            }
+
             victim.Health01 = Mathf.Max(0f, victim.Health01 - damage);
             victim.WasHitThisTick = true;
             victim.Morale01 = Mathf.Clamp01(victim.Morale01 - damage * 0.4f);
@@ -422,6 +464,38 @@ namespace Century.Battle.Sim
             }
         }
 
+        private static Vector3 FlatStrikeDirection(BattleCombatant man)
+        {
+            Vector3 dir = man.StrikeDir;
+            dir.y = 0f;
+            return dir.sqrMagnitude > 0.0001f ? dir.normalized : Vector3.forward;
+        }
+
+        /// <summary>
+        /// The execution's cinematic blow lands: the held victim dies for real and both men are
+        /// released back to the sim. Called by the view when the animation reaches the kill — and
+        /// on any abort, because a man held at death's door does not walk away from it.
+        /// </summary>
+        public void ResolveExecution(BattleCombatant executioner, BattleCombatant victim)
+        {
+            if (executioner != null) executioner.InExecution = false;
+            if (victim == null) return;
+
+            victim.InExecution = false;
+            if (!victim.IsAlive) return;
+
+            victim.Health01 = 0f;
+            victim.IsWoundedOut = false;   // a blade through the chest leaves nothing to carry home
+            victim.Target = null;
+
+            if (executioner == null) return;
+            executioner.Kills++;
+            executioner.TimeSinceCombat = 0f;
+
+            if (executioner.IsPlayerSide && _state.HasSkill("blooded"))
+                executioner.Morale01 = Mathf.Clamp01(executioner.Morale01 + 0.05f);
+        }
+
         /// <summary>Nearest opposing man the blade actually reaches, within the frontal arc.</summary>
         private BattleCombatant FindVictim(
             BattleCombatant man, Vector3 pos, Vector3 dir, float reach, float arcDot)
@@ -438,7 +512,7 @@ namespace Century.Battle.Sim
                 for (int i = 0; i < members.Count; i++)
                 {
                     BattleCombatant e = members[i];
-                    if (!e.IsAlive) continue;
+                    if (!e.IsAlive || e.InExecution) continue;
                     if (Reaches(pos, dir, reach, arcDot, bodyRadius, e.WorldPosition, out float sqr) && sqr < bestSqr)
                     {
                         best = e;
@@ -450,7 +524,7 @@ namespace Century.Battle.Sim
             if (!man.IsPlayerSide)
             {
                 BattleCombatant player = _state.PlayerCharacter;
-                if (player != null && player.IsAlive
+                if (player != null && player.IsAlive && !player.InExecution
                     && Reaches(pos, dir, reach, arcDot, bodyRadius, player.WorldPosition, out float sqr) && sqr < bestSqr)
                     best = player;
             }
@@ -516,7 +590,7 @@ namespace Century.Battle.Sim
                 for (int i = 0; i < members.Count; i++)
                 {
                     BattleCombatant e = members[i];
-                    if (!e.IsAlive) continue;
+                    if (!e.IsAlive || e.InExecution) continue;
                     float sqr = FlatSqr(e.WorldPosition, tether);
                     if (sqr > bestSqr) continue;
                     best = e;
@@ -527,7 +601,7 @@ namespace Century.Battle.Sim
             if (!man.IsPlayerSide)
             {
                 BattleCombatant player = _state.PlayerCharacter;
-                if (player != null && player.IsAlive)
+                if (player != null && player.IsAlive && !player.InExecution)
                 {
                     float sqr = FlatSqr(player.WorldPosition, tether);
                     if (sqr <= bestSqr) best = player;

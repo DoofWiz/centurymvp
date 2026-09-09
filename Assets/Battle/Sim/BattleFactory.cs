@@ -136,6 +136,8 @@ namespace Century.Battle.Sim
                 StaminaClass staminaClass = StaminaProfile.FromStamina(spec.Stamina01);
                 float staminaCap = StaminaProfile.For(staminaClass).MaxStamina;
 
+                MissileClass missile = MissileFor(spec.Missile, spec.ArchetypeId, isLegionary);
+
                 men.Add(new BattleCombatant
                 {
                     SoldierId = spec.SoldierId,
@@ -151,7 +153,8 @@ namespace Century.Battle.Sim
                     Weapon = WeaponFor(spec.Loadout, isLegionary),
                     HasShield = ShieldFor(spec.Loadout),
                     Stamina = staminaClass,
-                    PilaRemaining = settings.PilaCount,
+                    Missile = missile,
+                    PilaRemaining = missile == MissileClass.None ? 0 : settings.PilaCount,
                     GroupIndex = spec.GroupIndex,
                     IsGroupLeader = spec.IsGroupLeader,
                     DamageMultiplier = spec.DamageMultiplier
@@ -189,6 +192,23 @@ namespace Century.Battle.Sim
                 case "longsword": return false;
                 default: return true;
             }
+        }
+
+        /// <summary>The spec's thrown arm, or the archetype's default when it names none: pila for
+        /// legionaries, javelins for warriors — and stones for the field's looters, who carry no
+        /// war-kit worth the name.</summary>
+        private static MissileClass MissileFor(string missile, string archetypeId, bool isLegionary)
+        {
+            switch (missile)
+            {
+                case "pila": return MissileClass.Pila;
+                case "javelins": return MissileClass.Javelins;
+                case "rocks": return MissileClass.Rocks;
+                case "none": return MissileClass.None;
+            }
+
+            if (archetypeId == "germanic_looter") return MissileClass.Rocks;
+            return isLegionary ? MissileClass.Pila : MissileClass.Javelins;
         }
 
         /// <summary>The Centurion fights as himself, outside the squad structure.</summary>

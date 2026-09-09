@@ -41,6 +41,15 @@ namespace Century.Battle.View
         private float _targetDistance;
         private Plane _groundPlane;
 
+        // The rally's dolly zoom: 0 = the natural lens, 1 = tightened. The boom compensates so the
+        // frame holds while the world's perspective compresses — the classic in-camera "surge".
+        private float _lens;
+        private float _lensTarget;
+        private float _baseFov = -1f;
+
+        /// <summary>Eases the dolly-zoom lens in while on, back out while off. Driven by RallyFx.</summary>
+        public void SetRallyLens(bool on) => _lensTarget = on ? 1f : 0f;
+
         private void Awake()
         {
             _camera = GetComponentInChildren<Camera>();
@@ -112,9 +121,17 @@ namespace Century.Battle.View
 
             if (_camera == null) return;
 
+            // The lens: unscaled time, like the eye — the rally reads through a tactical pause too.
+            if (_baseFov < 0f) _baseFov = _camera.fieldOfView;
+            _lens = Mathf.MoveTowards(_lens, _lensTarget, Time.unscaledDeltaTime / 0.6f);
+            float fov = Mathf.Lerp(_baseFov, _baseFov * 0.8f, _lens);
+            float compensate = Mathf.Tan(_baseFov * 0.5f * Mathf.Deg2Rad)
+                               / Mathf.Tan(fov * 0.5f * Mathf.Deg2Rad);
+            _camera.fieldOfView = fov;
+
             // As with the overmap rig, the camera's orientation is owned here rather than trusted
             // to whatever rotation the child transform happens to be carrying.
-            _camera.transform.localPosition = new Vector3(0f, 0f, -_distance);
+            _camera.transform.localPosition = new Vector3(0f, 0f, -_distance * compensate);
             _camera.transform.localRotation = Quaternion.identity;
         }
 

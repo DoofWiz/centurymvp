@@ -182,9 +182,6 @@ namespace Century.Battle.View
             if (_hud != null) _hud.Bind(_state, _settings, _commandInput, _eventFeed, _player);
             if (_debugHud != null) _debugHud.Bind(_state, _commandInput, _eventFeed, _player);
 
-            // First battle of the campaign: the how-to-fight explainer, over the deployment
-            // screen, before anything asks the player to act.
-            if (request.ShowIntro) ShowBattleIntro();
 
             // Command of the clock: HUD speed buttons plus held-Space tactical time.
             if (_hud != null)
@@ -196,6 +193,28 @@ namespace Century.Battle.View
 
             // The blood-fleck read on every landed blow, for both sides and the Centurion himself.
             HitEffects.Create(_spawnRoot);
+
+            // The rally burst's look (gold vignette, motes on the men, the dolly zoom) and the
+            // execution scenes. Neither belongs in the scripted opening.
+            if (!request.OpeningSequence)
+            {
+                var rallyFx = new GameObject("RallyFx").AddComponent<RallyFx>();
+                rallyFx.transform.SetParent(_spawnRoot, false);
+                rallyFx.Initialise(_state, _settings, _soldierViews, _player, _cameraRig);
+
+                var executions = new GameObject("ExecutionDirector").AddComponent<ExecutionDirector>();
+                executions.transform.SetParent(_spawnRoot, false);
+                executions.Initialise(_state, _settings, _player, _soldierViews, _simulation.Combat);
+
+                // First battle of the campaign: the guided command tutorial, post-deployment —
+                // select, hold, advance when they tire, rally — in place of the old explainer.
+                if (request.ShowIntro && _hud != null && _timeControls != null)
+                {
+                    var tutorial = new GameObject("BattleTutorial").AddComponent<BattleTutorial>();
+                    tutorial.transform.SetParent(_spawnRoot, false);
+                    tutorial.Initialise(_state, _hud.Root, _commandInput, _timeControls);
+                }
+            }
 
             // The signum in the world: pole, crossbar and cloth, tracking the sim's authority.
             var signumView = new GameObject("Signum").AddComponent<SignumView>();
@@ -315,7 +334,7 @@ namespace Century.Battle.View
                 _playerPrefab,
                 BattleTerrainBuilder.Grounded(_state.PlayerCharacter.WorldPosition) + Vector3.up * 1.2f,
                 Quaternion.identity, _spawnRoot);
-            _player.Bind(_state.PlayerCharacter, _settings, _cameraRig);
+            _player.Bind(_state.PlayerCharacter, _settings, _cameraRig, _state);
 
             if (_cameraRig != null) _cameraRig.SetTarget(_player.transform);
         }
@@ -340,7 +359,7 @@ namespace Century.Battle.View
                     man.WorldPosition = BattleTerrainBuilder.Grounded(man.WorldPosition);
                     SoldierView soldier = Instantiate(
                         soldierPrefab, man.WorldPosition, Quaternion.identity, _spawnRoot);
-                    soldier.Bind(man, squad, _settings, _corpseRoot);
+                    soldier.Bind(man, squad, _settings, _state, _corpseRoot);
                     _soldierViews.Add(soldier);
                 }
             }
@@ -437,10 +456,13 @@ namespace Century.Battle.View
             if (_state == null || _simulation == null || _submitted) return;
             if (_state.Phase != BattlePhase.Fighting) return;
 
-            bool rallyHeld = _player != null && _player.IsRallying;
-
             if (_player != null)
             {
+                // R fires the rally burst — an 8-second surge on a long cooldown. The call
+                // animation only plays when the simulation actually accepts the activation.
+                if (_player.RallyRequested && !_openingMode && _simulation.TryActivateRally())
+                    _player.BeginRallyCall(_settings.RallyCallSeconds);
+
                 // Melee: LMB slash / charged thrust, L-Ctrl shield, all resolved in MeleeCombat.
                 if (_player.ChargeStarted) _simulation.Combat.PlayerBeginCharge();
                 if (_player.SlashRequested) _simulation.Combat.PlayerSlash();
@@ -478,7 +500,7 @@ namespace Century.Battle.View
                         _player.transform.position.x, ground + 1.2f, _player.transform.position.z));
             }
 
-            _simulation.Tick(Time.deltaTime, rallyHeld);
+            _simulation.Tick(Time.deltaTime);
 
             // The Centurion bleeds, blocks and staggers visibly like anyone else; his combatant has
             // no SoldierView to speak for him.
@@ -730,20 +752,6 @@ namespace Century.Battle.View
                 navigator.LoadBattle(_request);
             else
                 Debug.LogError("[Battle] No ISceneNavigator registered; the opening cannot restart.", this);
-        }
-
-        private void ShowBattleIntro()
-        {
-            VisualElement root = _hud != null ? _hud.Root : null;
-            if (root == null) return;
-
-            VisualElement modal = root.Q<VisualElement>("battle-intro");
-            Button dismiss = root.Q<Button>("battle-intro-dismiss");
-            if (modal == null) return;
-
-            modal.style.display = DisplayStyle.Flex;
-            if (dismiss != null)
-                dismiss.clicked += () => modal.style.display = DisplayStyle.None;
         }
 
         private SignumStatus _lastSignumStatus = SignumStatus.Absent;

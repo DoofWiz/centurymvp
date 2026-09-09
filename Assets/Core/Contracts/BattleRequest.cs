@@ -108,5 +108,12 @@ namespace Century.Core.Contracts
         /// "sword", "sword_shield", "spear", "spear_shield", "longsword".
         /// </summary>
         public string Loadout;
+
+        /// <summary>
+        /// What he throws, overriding the archetype's default arm: legionaries carry pila, warriors
+        /// javelins, and the field's scavengers stones. Recognised values: "pila", "javelins",
+        /// "rocks", "none". Null or empty keeps the default.
+        /// </summary>
+        public string Missile;
     }
 }

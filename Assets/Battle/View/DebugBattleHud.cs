@@ -105,7 +105,7 @@ namespace Century.Battle.View
             for (int i = 0; i < _state.EnemySquads.Count; i++) DrawEnemyLine(_state.EnemySquads[i]);
 
             GUILayout.Space(8f);
-            GUILayout.Label("WASD move.  Mouse faces.  LMB strike.  R hold to rally.", _style);
+            GUILayout.Label("WASD move.  Mouse faces.  LMB strike.  R fires the rally burst.", _style);
             GUILayout.Label("Hover+Tab select squad.  0 all.  1 formation menu.  2 advance.  3 hold.  4 follow.  5 skirmish.  6 fall back.  7 retreat.", _style);
             GUILayout.EndArea();
         }

@@ -209,6 +209,56 @@
 .bar__fill--gold    { background-color: var(--gold); }
 .bar__fill--danger  { background-color: var(--blood); }
 
+/* The rally ability on the commander panel: the fill sweeps out the 60s cooldown (or the
+ * seconds left of an active burst), with the countdown printed over the box itself. */
+.rally-box {
+    height: 22px;
+    background-color: var(--ink-wash);
+    border-width: 1px;
+    border-color: var(--gold-dim);
+    margin-top: 2px;
+    overflow: hidden;
+}
+
+.rally-box--active { border-color: var(--gold-bright); }
+
+.rally-box__fill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 0;
+    background-color: var(--gold-faint);
+}
+
+.rally-box--active > .rally-box__fill { background-color: var(--gold); }
+
+.rally-box__key {
+    position: absolute;
+    left: 6px;
+    top: 0;
+    bottom: 0;
+    -unity-text-align: middle-left;
+    -unity-font-style: bold;
+    font-size: 12px;
+    color: var(--gold);
+}
+
+.rally-box--active > .rally-box__key { color: var(--parchment); }
+
+.rally-box__count {
+    position: absolute;
+    right: 6px;
+    top: 0;
+    bottom: 0;
+    -unity-text-align: middle-right;
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--gold-bright);
+}
+
+.rally-box--active > .rally-box__count { color: var(--parchment); }
+
 /* =======================================================================================
  *  Top resource strip (overmap)
  * ======================================================================================= */

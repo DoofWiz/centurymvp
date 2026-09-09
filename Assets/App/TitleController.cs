@@ -9,9 +9,10 @@ namespace Century.App
 {
     /// <summary>
     /// The title screen: the word CENTURY standing in three dimensions over a forest clearing in
-    /// the rain, and two things to do: START PROTOTYPE and LOAD SAVE. The clearing is built here in
-    /// code over the scene's camera and light: a runtime terrain dressed like the overmap's ground,
-    /// woods on every side, stone and undergrowth in the open.
+    /// the rain, and three things to do: START PROTOTYPE (the guided campaign), SKIP TUTORIAL
+    /// (straight to the sandbox) and LOAD SAVE. The clearing is built here in code over the scene's
+    /// camera and light: a runtime terrain dressed like the overmap's ground, woods on every side,
+    /// stone and undergrowth in the open.
     /// </summary>
     /// <remarks>
     /// The title letters are a legacy TextMesh in the world font, extruded by stacking darker
@@ -58,6 +59,9 @@ namespace Century.App
             Button start = root.Q<Button>("title-start");
             if (start != null) start.clicked += StartPrototype;
 
+            Button skip = root.Q<Button>("title-skip");
+            if (skip != null) skip.clicked += SkipToSandbox;
+
             Button load = root.Q<Button>("title-load");
             if (load != null) load.clicked += () => _saves?.Open(SaveSlotsPanel.Mode.Load);
 
@@ -83,6 +87,20 @@ namespace Century.App
             }
 
             director.StartNewCampaign();
+        }
+
+        /// <summary>Straight past the guided start: the sandbox campaign — the full century on the
+        /// open map, everything live, nothing taught.</summary>
+        private void SkipToSandbox()
+        {
+            GameDirector director = GameDirector.Instance;
+            if (director == null)
+            {
+                Debug.LogError("[Title] No GameDirector. Enter play mode from the Boot scene.", this);
+                return;
+            }
+
+            director.StartSandbox();
         }
 
         private void Update()

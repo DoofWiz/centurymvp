@@ -75,7 +75,8 @@ namespace Century.App
                 Health01 = health,
                 Stamina01 = 0.9f,
                 Morale01 = 0.85f,
-                GroupIndex = group
+                GroupIndex = group,
+                Missile = "none"   // the opening is taught blade to blade; nobody javelins the lesson
             };
         }
     }

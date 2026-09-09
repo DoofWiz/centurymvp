@@ -10,7 +10,9 @@ namespace Century.Campaign.Sim
     /// </summary>
     public static class PoiFightFactory
     {
-        public static PartyState SpawnRaiders(CampaignState state, Vector3 near, int strength)
+        public static PartyState SpawnRaiders(
+            CampaignState state, Vector3 near, int strength,
+            string archetypeId = null, string displayName = null)
         {
             strength = Mathf.Max(4, strength);
 
@@ -22,7 +24,7 @@ namespace Century.Campaign.Sim
             var party = new PartyState
             {
                 Id = state.MintId("party"),
-                DisplayName = "Cherusci Raiders",
+                DisplayName = displayName ?? "Cherusci Raiders",
                 Faction = PartyFaction.Germanic,
                 WorldPosition = spawn,
                 DetectionRadius = 90f,
@@ -42,7 +44,7 @@ namespace Century.Campaign.Sim
                     Id = System.Guid.NewGuid().ToString("N").Substring(0, 8),
                     DisplayName = $"Warrior {i + 1}",
                     RankId = "warrior",
-                    ArchetypeId = "cherusci_warrior",
+                    ArchetypeId = archetypeId ?? "cherusci_warrior",
                     Health01 = Random.Range(0.6f, 1f),
                     Stamina01 = Random.Range(0.6f, 1f),
                     Morale01 = Random.Range(0.6f, 0.9f)

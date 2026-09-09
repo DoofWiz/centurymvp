@@ -160,6 +160,7 @@ namespace Century.Campaign.View
                 case PoiKind.Looters: return new Color(0.85f, 0.32f, 0.22f);
                 case PoiKind.SafePlace: return new Color(0.45f, 0.78f, 0.58f);
                 case PoiKind.Passage: return new Color(1.00f, 0.85f, 0.20f);
+                case PoiKind.SlavePens: return new Color(0.82f, 0.30f, 0.38f);
                 default: return new Color(0.85f, 0.70f, 0.32f); // Settlement / fallback
             }
         }

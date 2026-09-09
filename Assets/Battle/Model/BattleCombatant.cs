@@ -57,7 +57,10 @@ namespace Century.Battle.Model
         /// <summary>How much wind he has; bounds his stamina bar and its refill. Set by the factory.</summary>
         public StaminaClass Stamina = StaminaClass.Fresh;
 
-        /// <summary>Pila (or framea) left on his back. Seeded by the factory; spent by BattleMissiles.</summary>
+        /// <summary>What he throws — pila, javelins, stones, or nothing. Set by the battle factory.</summary>
+        public MissileClass Missile = MissileClass.Javelins;
+
+        /// <summary>Throws left on his back. Seeded by the factory; spent by BattleMissiles.</summary>
         public int PilaRemaining;
 
         /// <summary>Seconds until this man may throw again, while his squad skirmishes.</summary>
@@ -116,6 +119,15 @@ namespace Century.Battle.Model
         /// <summary>Cut down but not killed: he is out of this battle exactly like a dead man, and
         /// found alive among the fallen when the field is cleared afterwards.</summary>
         public bool IsWoundedOut;
+
+        /// <summary>Flat direction the last blow travelled, kept so the view can drop a killed man
+        /// AWAY from the strike rather than folding him in place.</summary>
+        public Vector3 LastHitDirection = Vector3.forward;
+
+        /// <summary>Locked in an execution — the victim held at death's door, or the executioner
+        /// delivering it. The sim leaves both alone: no targets, no strikes, no stray wounds.
+        /// The view stages the scene and lands the kill through MeleeCombat.ResolveExecution.</summary>
+        public bool InExecution;
 
         /// <summary>Seconds since this man last struck or was struck. Drives "in combat" checks.</summary>
         public float TimeSinceCombat = 999f;

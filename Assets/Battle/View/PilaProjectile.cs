@@ -24,6 +24,10 @@ namespace Century.Battle.View
         private bool _stuck;
         private float _flightTime;
 
+        /// <summary>Direction of flight, kept from the last physics step — collision callbacks see a
+        /// post-impact velocity, so the pre-impact line is remembered for the shield-facing check.</summary>
+        private Vector3 _travelDir = Vector3.forward;
+
         private void Awake()
         {
             _rigidbody = GetComponent<Rigidbody>();
@@ -75,9 +79,12 @@ namespace Century.Battle.View
             // Point the shaft along its travel so it looks thrown rather than tumbling.
             Vector3 velocity = _rigidbody.linearVelocity;
             if (velocity.sqrMagnitude > 0.01f)
-                transform.rotation = Quaternion.LookRotation(velocity.normalized, Vector3.up);
+            {
+                _travelDir = velocity.normalized;
+                transform.rotation = Quaternion.LookRotation(_travelDir, Vector3.up);
+            }
 
-            if (_missiles != null && _missiles.TryImpact(transform.position, _attacker, _attackerIsPlayerSide))
+            if (_missiles != null && _missiles.TryImpact(transform.position, _travelDir, _attacker, _attackerIsPlayerSide))
             {
                 Stick();
                 return;
@@ -116,7 +123,7 @@ namespace Century.Battle.View
 
             // Give whoever we ran into a last chance to be counted as struck (a man the overlap just
             // missed), then plant in whatever we hit — ground, cover, or corpse.
-            _missiles?.TryImpact(transform.position, _attacker, _attackerIsPlayerSide);
+            _missiles?.TryImpact(transform.position, _travelDir, _attacker, _attackerIsPlayerSide);
             Stick();
         }
 

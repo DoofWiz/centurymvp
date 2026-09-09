@@ -63,14 +63,30 @@ namespace Century.Battle.Sim
         }
 
         /// <summary>
-        /// Advances the battle. <paramref name="rallyHeld"/> comes from input and is passed through
-        /// rather than read here, so the simulation stays free of any dependency on Unity's Input.
+        /// Fires the rally burst: for <see cref="BattleSettings.RallyBurstSeconds"/> the whole side
+        /// takes less damage, moves faster and recovers wind, and routed squads near the Centurion
+        /// come back without him standing rooted. False while the burst runs or the horn is spent.
+        /// Called from input by the bootstrap, so the simulation stays free of Unity's Input.
         /// </summary>
-        public void Tick(float deltaSeconds, bool rallyHeld)
+        public bool TryActivateRally()
+        {
+            BattleCombatant player = _state.PlayerCharacter;
+            if (player == null || !player.IsAlive) return false;
+            if (_state.RallyActive || _state.RallyCooldownLeft > 0f) return false;
+
+            _state.RallySecondsLeft = _settings.RallyBurstSeconds;
+            EventRaised?.Invoke(new BattleEvent(
+                BattleEventKind.Good, "The Centurion rallies the century!", _state.ElapsedSeconds));
+            return true;
+        }
+
+        /// <summary>Advances the battle.</summary>
+        public void Tick(float deltaSeconds)
         {
             if (IsConcluded) return;
 
             _state.ElapsedSeconds += deltaSeconds;
+            TickRallyBurst(deltaSeconds);
 
             _enemyAi.Tick(deltaSeconds);
 
@@ -90,7 +106,7 @@ namespace Century.Battle.Sim
             _signum.Tick(deltaSeconds);
 
             if (!SuppressOutcome) TickSuccession(deltaSeconds);
-            _morale.TickRally(deltaSeconds, rallyHeld);
+            _morale.TickRally(deltaSeconds);
             RecoverStamina(deltaSeconds);
             ClearFallen();
 
@@ -131,6 +147,42 @@ namespace Century.Battle.Sim
 
                 squad.Dressed01 = alive <= 0 ? 0f : inStation / (float)alive;
             }
+        }
+
+        /// <summary>
+        /// Runs the burst's clock and its cooldown, and pours wind back into the side while it
+        /// lasts — even mid-fight, which ordinary recovery never allows. That unconditional breath
+        /// is most of what "the whole line surges" feels like.
+        /// </summary>
+        private void TickRallyBurst(float deltaSeconds)
+        {
+            if (_state.RallySecondsLeft > 0f)
+            {
+                _state.RallySecondsLeft = Mathf.Max(0f, _state.RallySecondsLeft - deltaSeconds);
+                if (_state.RallySecondsLeft <= 0f)
+                    _state.RallyCooldownLeft = _settings.RallyCooldownSeconds;
+
+                float breath = _settings.RallyStaminaPerSecond * deltaSeconds;
+                for (int s = 0; s < _state.PlayerSquads.Count; s++)
+                {
+                    List<BattleCombatant> members = _state.PlayerSquads[s].Members;
+                    for (int m = 0; m < members.Count; m++)
+                        if (members[m].IsAlive) BreatheInto(members[m], breath);
+                }
+
+                BattleCombatant player = _state.PlayerCharacter;
+                if (player != null && player.IsAlive) BreatheInto(player, breath);
+            }
+            else if (_state.RallyCooldownLeft > 0f)
+            {
+                _state.RallyCooldownLeft = Mathf.Max(0f, _state.RallyCooldownLeft - deltaSeconds);
+            }
+        }
+
+        private static void BreatheInto(BattleCombatant man, float stamina)
+        {
+            man.Stamina01 = Mathf.Min(
+                StaminaProfile.For(man.Stamina).MaxStamina, man.Stamina01 + stamina);
         }
 
         private void RecoverStamina(float deltaSeconds)

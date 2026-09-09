@@ -289,6 +289,32 @@ namespace Century.Battle.View
         }
 
         /// <summary>
+        /// A dead man's slack: both arms drop their holds and everything hangs, with a scatter so
+        /// no two corpses land alike. Called once when the fall begins; nothing animates him after.
+        /// </summary>
+        public void SetLimp(int seed)
+        {
+            _armLeftHeld = _armRightHeld = false;
+            var random = new System.Random(seed);
+            float Spread(float min, float max) => min + (float)random.NextDouble() * (max - min);
+
+            if (_armLeft != null)
+                _armLeft.localRotation = Quaternion.Euler(Spread(-70f, -18f), Spread(-15f, 15f), Spread(14f, 52f));
+            if (_armRight != null)
+                _armRight.localRotation = Quaternion.Euler(Spread(-70f, -18f), Spread(-15f, 15f), Spread(-52f, -14f));
+            if (_elbowLeft != null) _elbowLeft.localRotation = Quaternion.Euler(Spread(-28f, 0f), 0f, 0f);
+            if (_elbowRight != null) _elbowRight.localRotation = Quaternion.Euler(Spread(-28f, 0f), 0f, 0f);
+            if (_legLeft != null) _legLeft.localRotation = Quaternion.Euler(Spread(-14f, 10f), 0f, Spread(-7f, 7f));
+            if (_legRight != null) _legRight.localRotation = Quaternion.Euler(Spread(-14f, 10f), 0f, Spread(-7f, 7f));
+            if (_kneeLeft != null) _kneeLeft.localRotation = Quaternion.Euler(Spread(0f, 32f), 0f, 0f);
+            if (_kneeRight != null) _kneeRight.localRotation = Quaternion.Euler(Spread(0f, 32f), 0f, 0f);
+
+            if (_figure == null) return;
+            _figure.localRotation = Quaternion.identity;   // no combat pose survives on a corpse
+            _figure.localPosition = Vector3.zero;
+        }
+
+        /// <summary>
         /// Aims the arms at what the hands hold. Positions are in BODY-ROOT space (the gear's
         /// frame, pivot at the feet); null leaves that arm swinging free. Call after
         /// <see cref="Animate"/>, which resets free arms, and after the gear has been posed.
