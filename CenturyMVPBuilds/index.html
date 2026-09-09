@@ -24,6 +24,38 @@
       </div>
     </div>
     <script>
+      // Keep the browser's shortcuts out of the fight: the game plays on WASD + L-Ctrl +
+      // Tab + Space, and Ctrl+W in a tab closes it. Swallows everything a page MAY swallow;
+      // in fullscreen the Keyboard Lock API swallows the rest (Ctrl+W included). The same
+      // guard ships inside the build (BrowserKeyGuard.jslib) — the flag keeps them single.
+      (function () {
+        if (window.__centuryKeyGuard) return;
+        window.__centuryKeyGuard = true;
+
+        var guarded = ['Space', 'Tab', 'Backspace', 'Quote', 'Slash',
+                       'F1', 'F3', 'F5', 'F6', 'F7', 'F10',
+                       'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
+
+        window.addEventListener('keydown', function (e) {
+          var t = e.target;
+          if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+
+          if (e.ctrlKey || e.metaKey
+              || (e.altKey && (e.code === 'ArrowLeft' || e.code === 'ArrowRight'))
+              || guarded.indexOf(e.code) !== -1) {
+            e.preventDefault();
+          }
+        }, { capture: true });
+
+        var syncLock = function () {
+          if (!navigator.keyboard || !navigator.keyboard.lock) return;
+          if (document.fullscreenElement) navigator.keyboard.lock()['catch'](function () {});
+          else if (navigator.keyboard.unlock) navigator.keyboard.unlock();
+        };
+        document.addEventListener('fullscreenchange', syncLock);
+        document.addEventListener('webkitfullscreenchange', syncLock);
+      })();
+
       var canvas = document.querySelector("#unity-canvas");
 
       // Shows a temporary message banner/ribbon for a few seconds, or

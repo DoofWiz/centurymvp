@@ -73,6 +73,9 @@ namespace Century.App
             Instance = this;
             DontDestroyOnLoad(gameObject);
 
+            // On the web, take the keyboard away from the browser before anyone fights on it.
+            BrowserKeyGuard.Install();
+
             if (_campaignSettings == null)
             {
                 Debug.LogError("[GameDirector] CampaignSettings is not assigned. Aborting boot.", this);

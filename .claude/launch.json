@@ -2,10 +2,10 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "mockups",
+      "name": "webgl-build",
       "runtimeExecutable": "py",
-      "runtimeArgs": ["-3", "-m", "http.server", "8797", "--directory", "D:/Unity/Century Prototype/Docs/Mockups"],
-      "port": 8797
+      "runtimeArgs": ["-m", "http.server", "8790", "--directory", "CenturyMVPBuilds"],
+      "port": 8790
     }
   ]
 }
